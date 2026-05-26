@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: ai-nexus
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/status
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DASHSCOPE_API_KEY
+        sync: false
+      - key: MOONSHOT_API_KEY
+        sync: false
+      - key: ZHIPU_API_KEY
+        sync: false
+      - key: YI_API_KEY
+        sync: false
+      - key: HUNYUAN_API_KEY
+        sync: false

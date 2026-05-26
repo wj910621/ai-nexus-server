@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Nexus - 大模型聚合平台</title>
+<style>
+/* ===== CSS Variables & Theme ===== */
+:root {
+  --bg: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-input: #f1f5f9;
+  --text: #0f172a;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-light: #eef2ff;
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.05);
+  --radius: 12px;
+  --transition: 0.2s ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-input: #334155;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: #334155;
+  --accent-light: #1e1b4b;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  transition: background var(--transition), color var(--transition);
+  min-height: 100vh;
+}
+
+a { color: var(--accent); text-decoration: none; }
+
+/* ===== Navigation ===== */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.nav-inner {
+  max-width: 1280px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; height: 64px;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 1.25rem; font-weight: 700; color: var(--text);
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.1rem;
+}
+
+.nav-links { display: flex; gap: 4px; align-items: center; }
+.nav-link {
+  padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
+  background: none; color: var(--text-secondary); font-size: 0.9rem;
+  font-weight: 500; transition: all var(--transition); font-family: inherit;
+}
+.nav-link:hover { background: var(--bg-input); color: var(--text); }
+.nav-link.active { background: var(--accent-light); color: var(--accent); }
+
+.theme-toggle {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--bg-card); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 1.1rem; transition: all var(--transition);
+  color: var(--text); margin-left: 8px;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Connection status */
+.conn-status {
+  display: flex; align-items: center; gap: 6px; margin-left: 12px;
+  font-size: 0.78rem; color: var(--text-secondary);
+}
+.conn-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.conn-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.conn-dot.offline { background: var(--red); }
+.conn-dot.checking { background: var(--orange); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ===== Admin Panel ===== */
+.admin-login {
+  max-width: 400px; margin: 80px auto; text-align: center;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 40px;
+}
+.admin-login h2 { margin-bottom: 8px; }
+.admin-login p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px; }
+.admin-pwd {
+  width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg-input); color: var(--text);
+  font-size: 1rem; font-family: inherit; outline: none; margin-bottom: 16px;
+  text-align: center;
+}
+.admin-pwd:focus { border-color: var(--accent); }
+
+.admin-dashboard { display: none; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.admin-header h2 { margin: 0; }
+.admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.admin-table th, .admin-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.admin-table th { font-weight: 600; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; }
+.admin-table tr:hover { background: var(--bg-input); }
+.admin-table .actions { display: flex; gap: 6px; }
+
+.btn-sm {
+  padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg-card); color: var(--text); cursor: pointer;
+  font-size: 0.8rem; font-family: inherit; transition: all var(--transition);
+}
+.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+.btn-sm.danger { color: var(--red); border-color: var(--red); }
+.btn-sm.danger:hover { background: #fef2f2; }
+.btn-sm.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
+  display: flex; align-items: center; justify-content: center; display: none;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--bg-card); border-radius: var(--radius); padding: 32px;
+  max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;
+}
+.modal h3 { margin-bottom: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg-input); color: var(--text);
+  font-size: 0.9rem; font-family: inherit; outline: none;
+}
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+.tags-input { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tag-chip {
+  padding: 4px 10px; border-radius: 12px; font-size: 0.78rem;
+  background: var(--accent-light); color: var(--accent); cursor: pointer;
+  border: 1px solid transparent; transition: all var(--transition);
+}
+.tag-chip.selected { background: var(--accent); color: #fff; }
+
+/* Loading spinner */
+.spinner {
+  display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite;
+  vertical-align: middle; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== Layout ===== */
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.page { display: none; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== Hero Section ===== */
+.hero {
+  text-align: center; padding: 80px 24px 60px;
+  background: linear-gradient(180deg, var(--accent-light) 0%, var(--bg) 100%);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 16px;
+}
+.hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto 32px; }
+.hero-stats { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+.stat { text-align: center; }
+.stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+.stat-label { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+
+/* ===== Section ===== */
+.section { padding: 60px 0; }
+.section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+.section-desc { color: var(--text-secondary); margin-bottom: 32px; }
+
+/* ===== Feature Cards ===== */
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.feature-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px; transition: all var(--transition);
+}
+.feature-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.feature-icon { font-size: 2rem; margin-bottom: 16px; }
+.feature-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.feature-card p { color: var(--text-secondary); font-size: 0.9rem; }
+
+/* ===== Filter Bar ===== */
+.filter-bar {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
+  align-items: center;
+}
+.search-input {
+  flex: 1; min-width: 200px; padding: 10px 16px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg-input); color: var(--text); font-size: 0.9rem;
+  font-family: inherit; outline: none; transition: border var(--transition);
+}
+.search-input:focus { border-color: var(--accent); }
+.filter-tag {
+  padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--bg-card); color: var(--text-secondary); cursor: pointer;
+  font-size: 0.85rem; font-family: inherit; transition: all var(--transition);
+  white-space: nowrap;
+}
+.filter-tag:hover { border-color: var(--accent); color: var(--accent); }
+.filter-tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* ===== Model Cards Grid ===== */
+.models-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+.model-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; transition: all var(--transition);
+  position: relative; overflow: hidden;
+}
+.model-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.model-card.featured::before {
+  content: '热门'; position: absolute; top: 12px; right: -28px;
+  background: var(--accent); color: #fff; font-size: 0.75rem; padding: 2px 32px;
+  transform: rotate(45deg); font-weight: 600;
+}
+.model-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.model-avatar {
+  width: 48px; height: 48px; border-radius: 12px; display: flex;
+  align-items: center; justify-content: center; font-size: 1.5rem;
+  font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.model-name { font-size: 1.05rem; font-weight: 700; }
+.model-provider { font-size: 0.8rem; color: var(--text-secondary); }
+.model-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
+.model-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.tag {
+  padding: 3px 10px; border-radius: 12px; font-size: 0.75rem;
+  font-weight: 500; background: var(--accent-light); color: var(--accent);
+}
+.tag.green { background: #ecfdf5; color: var(--green); }
+.tag.orange { background: #fffbeb; color: var(--orange); }
+.model-meta { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
+.model-price { font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+.model-context { font-size: 0.8rem; color: var(--text-secondary); }
+
+/* ===== Chat Interface ===== */
+.chat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; min-height: calc(100vh - 140px); }
+
+.chat-sidebar {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; height: fit-content;
+}
+.chat-sidebar h3 { font-size: 0.95rem; margin-bottom: 16px; }
+.model-checkbox {
+  display: flex; align-items: center; gap: 10px; padding: 10px;
+  border-radius: 8px; cursor: pointer; transition: background var(--transition);
+}
+.model-checkbox:hover { background: var(--bg-input); }
+.model-checkbox input[type="checkbox"] {
+  accent-color: var(--accent); width: 18px; height: 18px; cursor: pointer;
+}
+.model-checkbox-label { font-size: 0.85rem; font-weight: 500; }
+.model-checkbox-provider { font-size: 0.75rem; color: var(--text-secondary); }
+
+.chat-main { display: flex; flex-direction: column; }
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 16px;
+  max-height: 500px; min-height: 400px;
+}
+
+.chat-msg { margin-bottom: 20px; animation: fadeIn 0.3s ease; }
+.chat-msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.chat-msg-avatar {
+  width: 28px; height: 28px; border-radius: 8px; display: flex;
+  align-items: center; justify-content: center; font-size: 0.75rem;
+  color: #fff; font-weight: 700;
+}
+.chat-msg-model { font-size: 0.82rem; font-weight: 600; }
+.chat-msg-time { font-size: 0.7rem; color: var(--text-secondary); margin-left: auto; }
+.chat-msg-content {
+  padding: 12px 16px; border-radius: 0 12px 12px 12px;
+  background: var(--bg-input); font-size: 0.9rem; line-height: 1.6;
+}
+.chat-msg.user .chat-msg-content {
+  background: var(--accent-light); border-radius: 12px 0 12px 12px;
+  margin-left: auto; max-width: 80%;
+}
+.chat-msg.user { display: flex; flex-direction: column; align-items: flex-end; }
+
+.chat-input-area {
+  display: flex; gap: 12px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+}
+.chat-input {
+  flex: 1; padding: 12px 16px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg-input); color: var(--text);
+  font-size: 0.9rem; font-family: inherit; resize: none; outline: none;
+  min-height: 44px; max-height: 120px; transition: border var(--transition);
+}
+.chat-input:focus { border-color: var(--accent); }
+.btn-send {
+  padding: 10px 24px; border: none; border-radius: 8px;
+  background: var(--accent); color: #fff; font-weight: 600;
+  cursor: pointer; font-family: inherit; font-size: 0.9rem;
+  transition: all var(--transition); white-space: nowrap;
+}
+.btn-send:hover { background: var(--accent-hover); }
+.btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== Compare View ===== */
+.compare-grid {
+  display: grid; gap: 20px;
+}
+.compare-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.compare-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.compare-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+.compare-panel {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.compare-panel-header {
+  padding: 14px 16px; background: var(--bg-input);
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.compare-panel-avatar {
+  width: 32px; height: 32px; border-radius: 8px; display: flex;
+  align-items: center; justify-content: center; color: #fff;
+  font-size: 0.75rem; font-weight: 700;
+}
+.compare-panel-content {
+  padding: 16px; min-height: 200px; max-height: 400px; overflow-y: auto;
+  font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+.compare-panel-content.typing::after {
+  content: '▊'; animation: blink 1s infinite; color: var(--accent);
+}
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+.compare-controls {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.compare-prompt {
+  flex: 1; min-width: 300px; padding: 10px 16px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg-input); color: var(--text);
+  font-size: 0.9rem; font-family: inherit; outline: none;
+  transition: border var(--transition);
+}
+.compare-prompt:focus { border-color: var(--accent); }
+
+.col-select {
+  padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg-card); color: var(--text);
+  font-size: 0.85rem; font-family: inherit; cursor: pointer; outline: none;
+}
+
+/* ===== About Section ===== */
+.about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+  padding: 14px 24px; border-radius: 10px; background: var(--bg-card);
+  border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+  font-size: 0.9rem; animation: slideUp 0.3s ease;
+  display: none;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== Footer ===== */
+.footer {
+  text-align: center; padding: 32px 24px; border-top: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 0.85rem; margin-top: 60px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .chat-layout { grid-template-columns: 1fr; }
+  .nav-links { gap: 2px; }
+  .nav-link { padding: 6px 10px; font-size: 0.8rem; }
+  .compare-grid.cols-2,
+  .compare-grid.cols-3,
+  .compare-grid.cols-4 { grid-template-columns: 1fr; }
+  .hero-stats { gap: 24px; }
+  .filter-bar { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <span>AI Nexus</span>
+    </div>
+    <div class="nav-links">
+      <button class="nav-link active" data-page="home">首页</button>
+      <button class="nav-link" data-page="models">模型目录</button>
+      <button class="nav-link" data-page="chat">多模型聊天</button>
+      <button class="nav-link" data-page="compare">模型对比</button>
+      <button class="nav-link" data-page="about">关于</button>
+      <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
+      <span class="conn-status" id="connStatus" title="后端连接状态">
+        <span class="conn-dot checking"></span>
+        <span>检测中</span>
+      </span>
+    </div>
+  </div>
+</nav>
+
+<!-- Page: Home -->
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="container">
+      <h1>一站式 AI 大模型聚合平台</h1>
+      <p>汇聚全球顶尖大模型，一站式对比、聊天、评测。让你的每一次提问都能找到最佳答案。</p>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num" id="modelCount">24</div><div class="stat-label">收录模型</div></div>
+        <div class="stat"><div class="stat-num">8</div><div class="stat-label">供应商</div></div>
+        <div class="stat"><div class="stat-num">100%</div><div class="stat-label">免费使用</div></div>
+        <div class="stat"><div class="stat-num">实时</div><div class="stat-label">数据更新</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <h2 class="section-title">核心功能</h2>
+    <p class="section-desc">四大核心模块，满足你对 AI 大模型的一切需求</p>
+    <div class="features">
+      <div class="feature-card" onclick="switchPage('models')" style="cursor:pointer">
+        <div class="feature-icon">📋</div>
+        <h3>模型目录</h3>
+        <p>收录国内外 24+ 主流大模型，含详细参数、价格对比和能力标签，按分类快速筛选。</p>
+      </div>
+      <div class="feature-card" onclick="switchPage('chat')" style="cursor:pointer">
+        <div class="feature-icon">💬</div>
+        <h3>多模型聊天</h3>
+        <p>同时与多个模型对话，一键发送问题，实时查看各模型的回答，感受不同的 AI 风格。</p>
+      </div>
+      <div class="feature-card" onclick="switchPage('compare')" style="cursor:pointer">
+        <div class="feature-icon">⚖️</div>
+        <h3>模型对比</h3>
+        <p>并排对比 2-4 个模型的输出质量，快速评估哪个模型更适合你的使用场景。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>深度分析</h3>
+        <p>上下文窗口、多模态支持、推理速度等核心指标一目了然，帮你做出最优选择。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <h2 class="section-title">热门模型</h2>
+    <p class="section-desc">当前最受关注的大模型</p>
+    <div class="models-grid" id="featuredModels"></div>
+  </section>
+</div>
+
+<!-- Page: Models -->
+<div class="page" id="page-models">
+  <section class="section container">
+    <h2 class="section-title">模型目录</h2>
+    <p class="section-desc">浏览和筛选所有收录的大模型</p>
+    <div class="filter-bar">
+      <input type="text" class="search-input" id="modelSearch" placeholder="搜索模型名称、供应商或能力…">
+      <button class="filter-tag active" data-filter="all">全部</button>
+      <button class="filter-tag" data-filter="海外">海外</button>
+      <button class="filter-tag" data-filter="国内">国内</button>
+      <button class="filter-tag" data-filter="开源">开源</button>
+      <button class="filter-tag" data-filter="多模态">多模态</button>
+      <button class="filter-tag" data-filter="免费">免费</button>
+    </div>
+    <div class="models-grid" id="allModels"></div>
+    <div id="noResults" style="display:none;text-align:center;padding:60px;color:var(--text-secondary)">
+      <div style="font-size:3rem;margin-bottom:16px">🔍</div>
+      <p>没有找到匹配的模型，试试其他关键词</p>
+    </div>
+  </section>
+</div>
+
+<!-- Page: Chat -->
+<div class="page" id="page-chat">
+  <section class="section container">
+    <h2 class="section-title">多模型聊天</h2>
+    <p class="section-desc">选择你感兴趣的模型，发送问题并查看它们的回答</p>
+    <div class="chat-layout">
+      <div class="chat-sidebar">
+        <h3>选择模型</h3>
+        <div id="chatModelList"></div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-messages" id="chatMessages">
+          <div style="text-align:center;color:var(--text-secondary);padding:60px 20px">
+            <div style="font-size:3rem;margin-bottom:12px">💡</div>
+            <p>选择左侧模型，在下方输入问题开始对话</p>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <textarea class="chat-input" id="chatInput" placeholder="输入你的问题… (Enter 发送，Shift+Enter 换行)" rows="1"></textarea>
+          <button class="btn-send" id="btnSend" onclick="sendChatMessage()">发送</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Page: Compare -->
+<div class="page" id="page-compare">
+  <section class="section container">
+    <h2 class="section-title">模型对比</h2>
+    <p class="section-desc">同时向多个模型提问，并排对比回复质量</p>
+    <div class="compare-controls">
+      <select class="col-select" id="colSelect" onchange="updateCompareLayout()">
+        <option value="2">2 列对比</option>
+        <option value="3">3 列对比</option>
+        <option value="4">4 列对比</option>
+      </select>
+      <input type="text" class="compare-prompt" id="comparePrompt" placeholder="输入对比问题… (Enter 发送)">
+      <button class="btn-send" onclick="runCompare()">开始对比</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+      <span style="color:var(--text-secondary);font-size:0.85rem;line-height:2">快速提问：</span>
+      <button class="filter-tag" onclick="setComparePrompt('请用通俗的语言解释量子计算是什么')">量子计算解释</button>
+      <button class="filter-tag" onclick="setComparePrompt('写一首关于春天的七言绝句')">写诗创作</button>
+      <button class="filter-tag" onclick="setComparePrompt('用Python实现快速排序算法')">编程能力</button>
+      <button class="filter-tag" onclick="setComparePrompt('分析一下AI对未来教育的影响')">深度分析</button>
+    </div>
+    <div class="compare-grid cols-2" id="compareGrid"></div>
+  </section>
+</div>
+
+<!-- Page: About -->
+<div class="page" id="page-about">
+  <section class="section container">
+    <h2 class="section-title">关于 AI Nexus</h2>
+    <p class="section-desc">一个开放、全面的 AI 大模型信息聚合平台</p>
+    <div class="about-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>我们的目标</h3>
+        <p>打破信息壁垒，让每个人都能轻松了解和对比各类 AI 大模型，找到最适合自己需求的工具。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h3>数据来源</h3>
+        <p>模型信息来自官方文档和公开数据，持续跟踪更新，确保信息的准确性和时效性。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔓</div>
+        <h3>开放生态</h3>
+        <p>本平台为纯前端项目，不依赖后端服务。所有数据公开透明，欢迎贡献和反馈。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>未来规划</h3>
+        <p>API 对接、真实模型调用、性能基准测试、用户评价系统……更多功能持续开发中。</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Page: Admin -->
+<div class="page" id="page-admin">
+  <section class="section container">
+    <!-- Login -->
+    <div class="admin-login" id="adminLogin">
+      <div style="font-size:3rem;margin-bottom:12px">🔐</div>
+      <h2>管理后台</h2>
+      <p>输入管理密码进入</p>
+      <input type="password" class="admin-pwd" id="adminPwd" placeholder="管理密码" onkeydown="if(event.key==='Enter')adminLogin()">
+      <button class="btn-send" onclick="adminLogin()" style="width:100%">登 录</button>
+      <p style="margin-top:16px;font-size:0.8rem;color:var(--text-secondary)">默认密码: admin123（登录后可修改）</p>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="admin-dashboard" id="adminDashboard">
+      <div class="admin-header">
+        <h2>📊 模型管理</h2>
+        <div class="admin-actions">
+          <button class="btn-sm primary" onclick="openAddModel()">+ 添加模型</button>
+          <button class="btn-sm" onclick="exportData()">📥 导出数据</button>
+          <button class="btn-sm" onclick="document.getElementById('importFile').click()">📤 导入数据</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+          <button class="btn-sm" onclick="openApiSettings()">🔑 API 密钥</button>
+          <button class="btn-sm" onclick="openPasswordSettings()">⚙️ 改密码</button>
+          <button class="btn-sm danger" onclick="adminLogout()">退出</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="admin-table" id="adminModelTable">
+          <thead>
+            <tr>
+              <th>模型名称</th>
+              <th>供应商</th>
+              <th>标签</th>
+              <th>输入价格</th>
+              <th>输出价格</th>
+              <th>上下文</th>
+              <th>热门</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="adminModelTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Edit Model Modal -->
+<div class="modal-overlay" id="modelModal">
+  <div class="modal">
+    <h3 id="modalTitle">添加模型</h3>
+    <div class="form-group">
+      <label>模型 ID（英文，不可重复）</label>
+      <input type="text" id="editId" placeholder="如: gpt5">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>模型名称</label>
+        <input type="text" id="editName" placeholder="如: GPT-5">
+      </div>
+      <div class="form-group">
+        <label>供应商</label>
+        <input type="text" id="editProvider" placeholder="如: OpenAI">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>描述</label>
+      <textarea id="editDesc" placeholder="模型简介…"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>头像颜色</label>
+        <input type="color" id="editAvatar" value="#6366f1" style="height:42px;padding:4px">
+      </div>
+      <div class="form-group">
+        <label>上下文窗口</label>
+        <input type="text" id="editContext" placeholder="如: 128K">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>输入价格</label>
+        <input type="text" id="editInputPrice" placeholder="如: ¥18/M">
+      </div>
+      <div class="form-group">
+        <label>输出价格</label>
+        <input type="text" id="editOutputPrice" placeholder="如: ¥72/M">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>标签（点击选择/取消）</label>
+      <div class="tags-input" id="editTags">
+        <!-- filled by JS -->
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:16px">
+      <input type="checkbox" id="editFeatured"> 标记为热门模型
+    </label>
+    <div class="form-actions">
+      <button class="btn-sm danger" id="btnDeleteModel" style="display:none;margin-right:auto" onclick="deleteModel()">删除模型</button>
+      <button class="btn-sm" onclick="closeModal()">取消</button>
+      <button class="btn-sm primary" onclick="saveModel()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- API Settings Modal -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <h3>🔑 API 密钥配置</h3>
+    <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:16px">密钥保存在浏览器本地，用于前端直连 API（仅限支持 CORS 的平台）</p>
+    <div class="form-group"><label>API 基础 URL</label><input type="text" id="apiBaseInput" placeholder="http://localhost:3001"></div>
+    <div class="form-group"><label>OpenAI API Key</label><input type="password" id="apiOpenAIKey" placeholder="sk-..."></div>
+    <div class="form-group"><label>DeepSeek API Key</label><input type="password" id="apiDeepSeekKey" placeholder="sk-..."></div>
+    <div class="form-group"><label>Gemini API Key</label><input type="password" id="apiGeminiKey" placeholder="..."></div>
+    <div class="form-group"><label>通义千问 API Key</label><input type="password" id="apiQwenKey" placeholder="sk-..."></div>
+    <div class="form-group"><label>Kimi API Key</label><input type="password" id="apiKimiKey" placeholder="sk-..."></div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="closeApiModal()">取消</button>
+      <button class="btn-sm primary" onclick="saveApiKeys()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Password Modal -->
+<div class="modal-overlay" id="pwdModal">
+  <div class="modal">
+    <h3>⚙️ 修改管理密码</h3>
+    <div class="form-group"><label>当前密码</label><input type="password" id="pwdCurrent"></div>
+    <div class="form-group"><label>新密码</label><input type="password" id="pwdNew"></div>
+    <div class="form-group"><label>确认新密码</label><input type="password" id="pwdConfirm"></div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="closePwdModal()">取消</button>
+      <button class="btn-sm primary" onclick="changePassword()">保存</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <p>AI Nexus 大模型聚合平台 | 数据来源：各模型官方文档 | <a href="javascript:switchPage('admin')" style="color:var(--text-secondary)">管理后台</a></p>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== API 配置 =====
+// 自动检测：部署时用同源，本地开发时用 localhost:3001
+const API_BASE = (() => {
+  if (typeof window !== 'undefined' && window.location.hostname !== '' && window.location.hostname !== 'localhost') {
+    return window.location.origin;
+  }
+  const saved = localStorage.getItem('api_base');
+  return saved || 'http://localhost:3001';
+})();
+let apiOnline = false;
+
+// ===== Theme =====
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('theme', next);
+});
+
+// ===== Toast =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+
+// ===== Navigation =====
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const navLink = document.querySelector(`[data-page="${name}"]`);
+  if (navLink) navLink.classList.add('active');
+  if (name === 'models') initAllModels();
+  if (name === 'chat') initChatModels();
+  if (name === 'compare') initCompareModels();
+  if (name === 'admin') {
+    // 检查是否已登录
+    const saved = localStorage.getItem(ADMIN_STORAGE_KEY);
+    if (saved || DEFAULT_PASSWORD) {
+      // 不自动登录，用户需手动输入
+      document.getElementById('adminLogin').style.display = 'block';
+      document.getElementById('adminDashboard').style.display = 'none';
+    }
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.nav-link[data-page]').forEach(link => {
+  link.addEventListener('click', () => switchPage(link.dataset.page));
+});
+
+// ===== Model Data =====
+const models = [
+  { id:'gpt4o', name:'GPT-4o', provider:'OpenAI', desc:'OpenAI 最先进的多模态模型，支持文本、图像、音频输入输出，速度极快。', avatar:'#10a37f', tags:['多模态','推理','编程','海外'], context:'128K', inputPrice:'¥18/M', outputPrice:'¥72/M', featured:true, free:false },
+  { id:'gpt4turbo', name:'GPT-4 Turbo', provider:'OpenAI', desc:'GPT-4 的增强版本，知识截止日期更新，指令遵循能力更强。', avatar:'#10a37f', tags:['推理','编程','海外'], context:'128K', inputPrice:'¥72/M', outputPrice:'¥216/M', featured:false, free:false },
+  { id:'claude35', name:'Claude 3.5 Sonnet', provider:'Anthropic', desc:'当前最智能的 Claude 模型，在编程和推理方面表现卓越。', avatar:'#d97706', tags:['推理','编程','长文本','海外'], context:'200K', inputPrice:'¥21.6/M', outputPrice:'¥108/M', featured:true, free:false },
+  { id:'claude3opus', name:'Claude 3 Opus', provider:'Anthropic', desc:'Anthropic 的旗舰模型，强大的深度推理和复杂任务处理能力。', avatar:'#d97706', tags:['推理','深度分析','海外'], context:'200K', inputPrice:'¥108/M', outputPrice:'¥540/M', featured:false, free:false },
+  { id:'gemini15pro', name:'Gemini 1.5 Pro', provider:'Google', desc:'Google 最新旗舰模型，原生多模态，支持超长上下文处理。', avatar:'#4285f4', tags:['多模态','长文本','推理','海外'], context:'2M', inputPrice:'¥25/M', outputPrice:'¥75/M', featured:true, free:false },
+  { id:'gemini15flash', name:'Gemini 1.5 Flash', provider:'Google', desc:'轻量级快速模型，适合高吞吐场景，延迟极低。', avatar:'#4285f4', tags:['多模态','快速','海外'], context:'1M', inputPrice:'¥0.5/M', outputPrice:'¥2/M', featured:false, free:false },
+  { id:'deepseekv3', name:'DeepSeek-V3', provider:'DeepSeek', desc:'国产最强开源模型，671B MoE 架构，性能媲美 GPT-4o。', avatar:'#4f46e5', tags:['开源','推理','编程','国内'], context:'128K', inputPrice:'¥1/M', outputPrice:'¥4/M', featured:true, free:false },
+  { id:'deepseekr1', name:'DeepSeek-R1', provider:'DeepSeek', desc:'深度推理专用模型，思维链能力极强，擅长数学和逻辑推理。', avatar:'#4f46e5', tags:['推理','数学','开源','国内'], context:'128K', inputPrice:'¥4/M', outputPrice:'¥16/M', featured:true, free:false },
+  { id:'llama31', name:'Llama 3.1 405B', provider:'Meta', desc:'Meta 最大的开源模型，405B 参数，性能追赶闭源顶级模型。', avatar:'#0668e1', tags:['开源','通用','海外'], context:'128K', inputPrice:'免费', outputPrice:'免费', featured:false, free:true },
+  { id:'qwen25', name:'通义千问 2.5', provider:'阿里云', desc:'阿里最新旗舰，中文能力突出，多模态理解全面升级。', avatar:'#ff6a00', tags:['多模态','中文优化','开源','国内'], context:'128K', inputPrice:'¥2/M', outputPrice:'¥8/M', featured:true, free:false },
+  { id:'ernie40', name:'文心一言 4.0', provider:'百度', desc:'百度旗舰大模型，中文理解和生成能力业界领先。', avatar:'#2932e1', tags:['中文优化','知识增强','国内'], context:'128K', inputPrice:'¥90/M', outputPrice:'¥90/M', featured:false, free:false },
+  { id:'hunyuan', name:'混元大模型', provider:'腾讯', desc:'腾讯自研万亿参数大模型，多模态理解与生成能力出色。', avatar:'#00a4ff', tags:['多模态','中文优化','国内'], context:'256K', inputPrice:'¥1/M', outputPrice:'¥2/M', featured:false, free:false },
+  { id:'doubao', name:'豆包大模型', provider:'字节跳动', desc:'字节跳动旗下大模型，在对话和内容生成方面表现出色。', avatar:'#e8426e', tags:['中文优化','内容创作','国内'], context:'128K', inputPrice:'¥0.8/M', outputPrice:'¥2/M', featured:false, free:false },
+  { id:'kimi', name:'Kimi 智能助手', provider:'月之暗面', desc:'超长上下文处理能力，支持 200 万字无损理解。', avatar:'#6c5ce7', tags:['长文本','中文优化','国内'], context:'2M', inputPrice:'¥12/M', outputPrice:'¥12/M', featured:true, free:false },
+  { id:'glm4', name:'GLM-4', provider:'智谱 AI', desc:'智谱最新旗舰，All-Tools 智能体能力，中英双语双强。', avatar:'#3859ff', tags:['智能体','中文优化','开源','国内'], context:'128K', inputPrice:'¥0.5/M', outputPrice:'¥0.5/M', featured:false, free:false },
+  { id:'baichuan4', name:'Baichuan 4', provider:'百川智能', desc:'百川最新一代模型，中文医疗和知识问答领域表现突出。', avatar:'#00b894', tags:['中文优化','知识','国内'], context:'128K', inputPrice:'¥20/M', outputPrice:'¥20/M', featured:false, free:false },
+  { id:'minimax', name:'MiniMax-abab6.5', provider:'MiniMax', desc:'MiniMax 旗舰模型，万亿 MoE，多模态理解和语音能力卓越。', avatar:'#fd79a8', tags:['多模态','语音','国内'], context:'256K', inputPrice:'¥5/M', outputPrice:'¥15/M', featured:false, free:false },
+  { id:'yi', name:'Yi-Large', provider:'零一万物', desc:'零一万物旗舰模型，在推理和中文能力上表现出色。', avatar:'#e17055', tags:['推理','中文优化','国内'], context:'200K', inputPrice:'¥10/M', outputPrice:'¥10/M', featured:false, free:false },
+  { id:'mistral', name:'Mistral Large', provider:'Mistral AI', desc:'欧洲最强开源大模型，多语言能力和推理表现优异。', avatar:'#ff6b35', tags:['开源','多语言','推理','海外'], context:'128K', inputPrice:'¥29/M', outputPrice:'¥87/M', featured:false, free:false },
+  { id:'commandr', name:'Command R+', provider:'Cohere', desc:'企业级 RAG 优化模型，检索增强和多语言能力出色。', avatar:'#39594d', tags:['RAG','多语言','海外'], context:'128K', inputPrice:'¥22/M', outputPrice:'¥72/M', featured:false, free:false },
+  { id:'spark4', name:'讯飞星火 4.0', provider:'科大讯飞', desc:'讯飞最新旗舰，语音识别和理解能力领先，多模态全面。', avatar:'#2563eb', tags:['语音','多模态','国内'], context:'128K', inputPrice:'¥30/M', outputPrice:'¥30/M', featured:false, free:false },
+  { id:'step2', name:'Step-2', provider:'阶跃星辰', desc:'万亿参数 MoE 模型，多模态理解和推理能力强劲。', avatar:'#7c3aed', tags:['多模态','推理','国内'], context:'256K', inputPrice:'¥18/M', outputPrice:'¥36/M', featured:false, free:false },
+  { id:'sensechat', name:'日日新 5.0', provider:'商汤科技', desc:'商汤旗舰，原生多模态，端云协同，视觉理解能力强。', avatar:'#dc2626', tags:['多模态','视觉','国内'], context:'128K', inputPrice:'¥15/M', outputPrice:'¥15/M', featured:false, free:false },
+  { id:'phi3', name:'Phi-3.5', provider:'Microsoft', desc:'微软小型高性能模型，在移动端和边缘设备上表现极佳。', avatar:'#0078d4', tags:['轻量','开源','海外'], context:'128K', inputPrice:'免费', outputPrice:'免费', featured:false, free:true },
+];
+
+// ===== Render Model Card =====
+function renderModelCard(m) {
+  return `
+    <div class="model-card ${m.featured ? 'featured' : ''}" data-id="${m.id}">
+      <div class="model-header">
+        <div class="model-avatar" style="background:${m.avatar}">${m.name[0]}</div>
+        <div>
+          <div class="model-name">${m.name}</div>
+          <div class="model-provider">${m.provider}</div>
+        </div>
+      </div>
+      <div class="model-desc">${m.desc}</div>
+      <div class="model-tags">
+        ${m.tags.map(t => `<span class="tag${t==='免费'?' green':''}${t==='开源'?' orange':''}">${t}</span>`).join('')}
+      </div>
+      <div class="model-meta">
+        <span class="model-price">输入:${m.inputPrice} | 输出:${m.outputPrice}</span>
+        <span class="model-context">上下文: ${m.context}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ===== Featured Models =====
+function initFeaturedModels() {
+  const container = document.getElementById('featuredModels');
+  container.innerHTML = models.filter(m => m.featured).map(renderModelCard).join('');
+}
+initFeaturedModels();
+
+// ===== All Models with Filter =====
+function initAllModels() {
+  const container = document.getElementById('allModels');
+  const activeFilter = document.querySelector('#page-models .filter-tag.active')?.dataset?.filter || 'all';
+  const searchTerm = document.getElementById('modelSearch')?.value?.toLowerCase() || '';
+  let filtered = models;
+  if (activeFilter !== 'all') {
+    filtered = filtered.filter(m => m.tags.includes(activeFilter));
+  }
+  if (searchTerm) {
+    filtered = filtered.filter(m =>
+      m.name.toLowerCase().includes(searchTerm) ||
+      m.provider.toLowerCase().includes(searchTerm) ||
+      m.tags.some(t => t.toLowerCase().includes(searchTerm)) ||
+      m.desc.toLowerCase().includes(searchTerm)
+    );
+  }
+  container.innerHTML = filtered.map(renderModelCard).join('');
+  document.getElementById('noResults').style.display = filtered.length ? 'none' : 'block';
+  document.getElementById('modelCount').textContent = models.length;
+}
+
+document.getElementById('modelSearch').addEventListener('input', initAllModels);
+document.querySelectorAll('#page-models .filter-tag').forEach(tag => {
+  tag.addEventListener('click', () => {
+    document.querySelectorAll('#page-models .filter-tag').forEach(t => t.classList.remove('active'));
+    tag.classList.add('active');
+    initAllModels();
+  });
+});
+
+// ===== Chat =====
+function initChatModels() {
+  const container = document.getElementById('chatModelList');
+  container.innerHTML = models.map(m => `
+    <label class="model-checkbox">
+      <input type="checkbox" value="${m.id}" ${m.featured ? 'checked' : ''}>
+      <div>
+        <div class="model-checkbox-label">${m.name}</div>
+        <div class="model-checkbox-provider">${m.provider}</div>
+      </div>
+    </label>
+  `).join('');
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  const selected = [...document.querySelectorAll('#chatModelList input:checked')].map(cb => cb.value);
+  if (selected.length === 0) { showToast('请至少选择一个模型'); return; }
+
+  const messagesDiv = document.getElementById('chatMessages');
+  if (messagesDiv.querySelector('[data-placeholder]')) messagesDiv.innerHTML = '';
+
+  const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+  // 用户消息
+  messagesDiv.innerHTML += `
+    <div class="chat-msg user">
+      <div class="chat-msg-header">
+        <span class="chat-msg-model">你</span>
+        <span class="chat-msg-time">${time}</span>
+      </div>
+      <div class="chat-msg-content">${escapeHtml(msg)}</div>
+    </div>
+  `;
+  input.value = ''; input.style.height = 'auto';
+  const btn = document.getElementById('btnSend');
+  btn.disabled = true;
+
+  // 并发调用所有选中的模型
+  const promises = selected.map(async (id) => {
+    const m = models.find(x => x.id === id);
+    if (!m) return;
+
+    // 插入加载占位
+    const placeholderId = 'msg-' + id + '-' + Date.now();
+    messagesDiv.innerHTML += `
+      <div class="chat-msg" id="${placeholderId}">
+        <div class="chat-msg-header">
+          <div class="chat-msg-avatar" style="background:${m.avatar}">${m.name[0]}</div>
+          <span class="chat-msg-model">${m.name}</span>
+          <span class="chat-msg-time">${time}</span>
+        </div>
+        <div class="chat-msg-content"><span class="spinner"></span>思考中…</div>
+      </div>
+    `;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    try {
+      const response = await callModelAPI(id, msg);
+      const placeholder = document.getElementById(placeholderId);
+      if (placeholder) {
+        placeholder.querySelector('.chat-msg-content').innerHTML = escapeHtml(response.content);
+        if (response.simulated) {
+          placeholder.querySelector('.chat-msg-content').style.opacity = '0.7';
+        }
+      }
+    } catch (err) {
+      const placeholder = document.getElementById(placeholderId);
+      if (placeholder) {
+        placeholder.querySelector('.chat-msg-content').innerHTML =
+          `<span style="color:var(--red)">❌ 调用失败: ${escapeHtml(err.message)}</span>`;
+      }
+    }
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+
+  await Promise.all(promises);
+  btn.disabled = false;
+}
+
+// ===== API 调用 =====
+async function callModelAPI(modelId, question) {
+  try {
+    const res = await fetch(`${API_BASE}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: modelId,
+        messages: [{ role: 'user', content: question }],
+      }),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    // API 不可用时降级为模拟回复
+    const m = models.find(x => x.id === modelId);
+    return {
+      model: modelId,
+      content: `[${m?.name || modelId} 模拟回复]\n\n⚠️ 后端 API 未连接，当前为模拟回复。\n\n如需真实 AI 回复，请启动本地后端服务 (双击启动.bat) 或配置 API Key。\n\n---\n关于「${question}」这个问题：\n\n这是一个值得深入探讨的话题。从我的分析来看，建议从以下几个角度思考：\n\n1. 明确核心诉求和边界条件\n2. 收集相关信息辅助决策\n3. 小步迭代，在实践中优化\n\n接入真实 API 后，我会给出更精准的回答。`,
+      simulated: true,
+    };
+  }
+}
+
+// ===== Compare =====
+function initCompareModels() { updateCompareLayout(); }
+
+function updateCompareLayout() {
+  const cols = parseInt(document.getElementById('colSelect').value);
+  const grid = document.getElementById('compareGrid');
+  grid.className = 'compare-grid cols-' + cols;
+  grid.innerHTML = '';
+  const defaults = ['gpt4o', 'deepseekv3', 'qwen25', 'kimi'];
+  for (let i = 0; i < cols; i++) {
+    const defaultId = defaults[i];
+    const defaultModel = models.find(m => m.id === defaultId);
+    grid.innerHTML += `
+      <div class="compare-panel">
+        <div class="compare-panel-header">
+          <div class="compare-panel-avatar" style="background:${defaultModel.avatar}">${defaultModel.name[0]}</div>
+          <select class="col-select" style="flex:1" onchange="updateCompareModel(this, ${i})">
+            ${models.map(m => `<option value="${m.id}" ${m.id === defaultId ? 'selected' : ''}>${m.name} - ${m.provider}</option>`).join('')}
+          </select>
+        </div>
+        <div class="compare-panel-content" id="compareContent${i}">选择一个模型，输入问题后点击"开始对比"查看结果</div>
+      </div>
+    `;
+  }
+}
+
+function updateCompareModel(select, index) {
+  const m = models.find(x => x.id === select.value);
+  const header = select.parentElement;
+  const existingAvatar = header.querySelector('.compare-panel-avatar');
+  if (existingAvatar) {
+    existingAvatar.style.background = m.avatar;
+    existingAvatar.textContent = m.name[0];
+  }
+}
+
+async function runCompare() {
+  const prompt = document.getElementById('comparePrompt').value.trim();
+  if (!prompt) { showToast('请输入对比问题'); return; }
+
+  const cols = parseInt(document.getElementById('colSelect').value);
+  const promises = [];
+  for (let i = 0; i < cols; i++) {
+    const content = document.getElementById('compareContent' + i);
+    content.innerHTML = '<span class="spinner"></span>思考中…';
+    content.classList.add('typing');
+    const select = document.querySelectorAll('#compareGrid select')[i];
+    const modelId = select.value;
+    const m = models.find(x => x.id === modelId);
+
+    const p = callModelAPI(modelId, prompt).then(response => {
+      content.classList.remove('typing');
+      if (response.simulated) content.style.opacity = '0.7';
+      content.innerHTML = escapeHtml(response.content);
+    }).catch(err => {
+      content.classList.remove('typing');
+      content.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(err.message)}</span>`;
+    });
+    promises.push(p);
+  }
+  await Promise.all(promises);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ===== 连接状态检测 =====
+async function checkConnection() {
+  const dot = document.querySelector('#connStatus .conn-dot');
+  const label = document.querySelector('#connStatus span:last-child');
+  dot.className = 'conn-dot checking';
+  label.textContent = '检测中';
+  try {
+    const res = await fetch(`${API_BASE}/api/status`);
+    if (res.ok) {
+      apiOnline = true;
+      dot.className = 'conn-dot online';
+      const data = await res.json();
+      const configuredCount = Object.values(data.providers).filter(p => p.configured).length;
+      label.textContent = `已连接 (${configuredCount}个平台已配置)`;
+    } else {
+      throw new Error('Status check failed');
+    }
+  } catch {
+    apiOnline = false;
+    dot.className = 'conn-dot offline';
+    label.textContent = '未连接后端';
+  }
+}
+
+checkConnection();
+setInterval(checkConnection, 30000);
+
+// Chat input auto-resize & keyboard shortcut
+const chatInput = document.getElementById('chatInput');
+chatInput.addEventListener('input', () => {
+  chatInput.style.height = 'auto';
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+});
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+});
+
+// Compare prompt Enter key
+const comparePrompt = document.getElementById('comparePrompt');
+if (comparePrompt) {
+  comparePrompt.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      runCompare();
+    }
+  });
+}
+
+function setComparePrompt(text) {
+  document.getElementById('comparePrompt').value = text;
+  runCompare();
+}
+
+// 初始聊天室占位标记
+document.addEventListener('DOMContentLoaded', () => {
+  const msgDiv = document.getElementById('chatMessages');
+  if (msgDiv) msgDiv.setAttribute('data-placeholder', 'true');
+  initAdmin();
+});
+
+// ============================================================
+// 管理后台
+// ============================================================
+const DEFAULT_PASSWORD = 'admin123';
+const ADMIN_STORAGE_KEY = 'ai_nexus_admin';
+const MODELS_STORAGE_KEY = 'ai_nexus_models';
+const API_KEYS_KEY = 'ai_nexus_api_keys';
+const ALL_TAGS = ['推理','编程','多模态','开源','中文优化','长文本','深度分析','快速','通用','数学','知识增强','内容创作','语音','视觉','智能体','RAG','多语言','知识','轻量','免费','海外','国内'];
+
+let adminModels = [];
+let editingModelId = null;
+
+// ===== Admin Init =====
+function initAdmin() {
+  // 从 localStorage 加载模型数据（没有则用默认）
+  const saved = localStorage.getItem(MODELS_STORAGE_KEY);
+  if (saved) {
+    try { adminModels = JSON.parse(saved); } catch(e) {}
+  }
+  if (!adminModels.length) {
+    adminModels = JSON.parse(JSON.stringify(models));
+  }
+
+  // 加载 API keys
+  const savedKeys = localStorage.getItem(API_KEYS_KEY);
+  if (savedKeys) {
+    try {
+      const keys = JSON.parse(savedKeys);
+      if (keys.apiBase) document.getElementById('apiBaseInput').value = keys.apiBase;
+      if (keys.openai) document.getElementById('apiOpenAIKey').value = keys.openai;
+      if (keys.deepseek) document.getElementById('apiDeepSeekKey').value = keys.deepseek;
+      if (keys.gemini) document.getElementById('apiGeminiKey').value = keys.gemini;
+      if (keys.qwen) document.getElementById('apiQwenKey').value = keys.qwen;
+      if (keys.kimi) document.getElementById('apiKimiKey').value = keys.kimi;
+    } catch(e) {}
+  }
+}
+
+// ===== Admin Login =====
+function adminLogin() {
+  const pwd = document.getElementById('adminPwd').value;
+  const saved = localStorage.getItem(ADMIN_STORAGE_KEY);
+  const correctPwd = saved || DEFAULT_PASSWORD;
+
+  if (pwd === correctPwd) {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminDashboard').style.display = 'block';
+    renderAdminTable();
+    showToast('登录成功');
+  } else {
+    showToast('密码错误');
+  }
+}
+
+function adminLogout() {
+  document.getElementById('adminLogin').style.display = 'block';
+  document.getElementById('adminDashboard').style.display = 'none';
+  document.getElementById('adminPwd').value = '';
+}
+
+// ===== Admin Table =====
+function renderAdminTable() {
+  const tbody = document.getElementById('adminModelTbody');
+  tbody.innerHTML = adminModels.map((m, i) => `
+    <tr>
+      <td><strong>${escapeHtml(m.name)}</strong></td>
+      <td>${escapeHtml(m.provider)}</td>
+      <td>${m.tags.map(t => `<span class="tag">${t}</span>`).join(' ')}</td>
+      <td>${m.inputPrice}</td>
+      <td>${m.outputPrice}</td>
+      <td>${m.context}</td>
+      <td>${m.featured ? '⭐' : '-'}</td>
+      <td class="actions">
+        <button class="btn-sm" onclick="openEditModel('${m.id}')">编辑</button>
+        <button class="btn-sm" onclick="toggleFeatured('${m.id}')">${m.featured ? '取消热门' : '设热门'}</button>
+        <button class="btn-sm danger" onclick="deleteModelConfirm('${m.id}')">删除</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ===== Add / Edit Model =====
+function openAddModel() {
+  editingModelId = null;
+  document.getElementById('modalTitle').textContent = '添加模型';
+  document.getElementById('editId').value = '';
+  document.getElementById('editId').disabled = false;
+  document.getElementById('editName').value = '';
+  document.getElementById('editProvider').value = '';
+  document.getElementById('editDesc').value = '';
+  document.getElementById('editAvatar').value = '#6366f1';
+  document.getElementById('editContext').value = '128K';
+  document.getElementById('editInputPrice').value = '';
+  document.getElementById('editOutputPrice').value = '';
+  document.getElementById('editFeatured').checked = false;
+  document.getElementById('btnDeleteModel').style.display = 'none';
+  renderTagChips([]);
+  document.getElementById('modelModal').classList.add('show');
+}
+
+function openEditModel(id) {
+  const m = adminModels.find(x => x.id === id);
+  if (!m) return;
+  editingModelId = id;
+  document.getElementById('modalTitle').textContent = '编辑: ' + m.name;
+  document.getElementById('editId').value = m.id;
+  document.getElementById('editId').disabled = true;
+  document.getElementById('editName').value = m.name;
+  document.getElementById('editProvider').value = m.provider;
+  document.getElementById('editDesc').value = m.desc;
+  document.getElementById('editAvatar').value = m.avatar;
+  document.getElementById('editContext').value = m.context;
+  document.getElementById('editInputPrice').value = m.inputPrice;
+  document.getElementById('editOutputPrice').value = m.outputPrice;
+  document.getElementById('editFeatured').checked = m.featured;
+  document.getElementById('btnDeleteModel').style.display = 'inline-block';
+  renderTagChips(m.tags);
+  document.getElementById('modelModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modelModal').classList.remove('show');
+}
+
+function renderTagChips(selectedTags) {
+  const container = document.getElementById('editTags');
+  container.innerHTML = ALL_TAGS.map(t => `
+    <span class="tag-chip ${selectedTags.includes(t) ? 'selected' : ''}" onclick="toggleTag(this, '${t}')">${t}</span>
+  `).join('');
+}
+
+function toggleTag(el, tag) {
+  el.classList.toggle('selected');
+}
+
+function getSelectedTags() {
+  return [...document.querySelectorAll('#editTags .tag-chip.selected')].map(el => el.textContent);
+}
+
+function saveModel() {
+  const id = document.getElementById('editId').value.trim();
+  const name = document.getElementById('editName').value.trim();
+  const provider = document.getElementById('editProvider').value.trim();
+  if (!id || !name || !provider) { showToast('ID、名称、供应商为必填'); return; }
+
+  if (!editingModelId && adminModels.find(m => m.id === id)) {
+    showToast('模型 ID 已存在'); return;
+  }
+
+  const modelData = {
+    id,
+    name,
+    provider,
+    desc: document.getElementById('editDesc').value.trim(),
+    avatar: document.getElementById('editAvatar').value,
+    tags: getSelectedTags(),
+    context: document.getElementById('editContext').value.trim() || '128K',
+    inputPrice: document.getElementById('editInputPrice').value.trim() || '--',
+    outputPrice: document.getElementById('editOutputPrice').value.trim() || '--',
+    featured: document.getElementById('editFeatured').checked,
+    free: getSelectedTags().includes('免费'),
+  };
+
+  if (editingModelId) {
+    const idx = adminModels.findIndex(m => m.id === editingModelId);
+    if (idx >= 0) adminModels[idx] = modelData;
+  } else {
+    adminModels.push(modelData);
+  }
+
+  saveAndRefreshModels();
+  closeModal();
+  showToast(editingModelId ? '模型已更新' : '模型已添加');
+}
+
+function deleteModelConfirm(id) {
+  if (confirm('确定要删除该模型吗？此操作不可撤销。')) {
+    deleteModelById(id);
+  }
+}
+
+function deleteModelById(id) {
+  adminModels = adminModels.filter(m => m.id !== id);
+  saveAndRefreshModels();
+  closeModal();
+  showToast('模型已删除');
+}
+
+function toggleFeatured(id) {
+  const m = adminModels.find(x => x.id === id);
+  if (m) { m.featured = !m.featured; saveAndRefreshModels(); }
+}
+
+function saveAndRefreshModels() {
+  localStorage.setItem(MODELS_STORAGE_KEY, JSON.stringify(adminModels));
+  // 同步到全局 models 数组（前端页面会立即反映）
+  models.length = 0;
+  adminModels.forEach(m => models.push(m));
+  initFeaturedModels();
+  initAllModels();
+  renderAdminTable();
+}
+
+// ===== Export / Import =====
+function exportData() {
+  const data = JSON.stringify(adminModels, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ai-nexus-models-backup.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('数据已导出');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('格式错误');
+      if (confirm(`即将导入 ${data.length} 个模型，覆盖现有数据。确定？`)) {
+        adminModels = data;
+        saveAndRefreshModels();
+        showToast(`已导入 ${data.length} 个模型`);
+      }
+    } catch(err) {
+      showToast('导入失败：' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ===== API Key Settings =====
+function openApiSettings() {
+  document.getElementById('apiModal').classList.add('show');
+}
+
+function closeApiModal() {
+  document.getElementById('apiModal').classList.remove('show');
+}
+
+function saveApiKeys() {
+  const keys = {
+    apiBase: document.getElementById('apiBaseInput').value.trim(),
+    openai: document.getElementById('apiOpenAIKey').value.trim(),
+    deepseek: document.getElementById('apiDeepSeekKey').value.trim(),
+    gemini: document.getElementById('apiGeminiKey').value.trim(),
+    qwen: document.getElementById('apiQwenKey').value.trim(),
+    kimi: document.getElementById('apiKimiKey').value.trim(),
+  };
+  localStorage.setItem(API_KEYS_KEY, JSON.stringify(keys));
+  if (keys.apiBase) localStorage.setItem('api_base', keys.apiBase);
+  closeApiModal();
+  showToast('API 密钥已保存');
+}
+
+// ===== Password Settings =====
+function openPasswordSettings() {
+  document.getElementById('pwdModal').classList.add('show');
+}
+
+function closePwdModal() {
+  document.getElementById('pwdModal').classList.remove('show');
+  document.getElementById('pwdCurrent').value = '';
+  document.getElementById('pwdNew').value = '';
+  document.getElementById('pwdConfirm').value = '';
+}
+
+function changePassword() {
+  const current = document.getElementById('pwdCurrent').value;
+  const newPwd = document.getElementById('pwdNew').value;
+  const confirm = document.getElementById('pwdConfirm').value;
+  const saved = localStorage.getItem(ADMIN_STORAGE_KEY) || DEFAULT_PASSWORD;
+
+  if (current !== saved) { showToast('当前密码错误'); return; }
+  if (!newPwd || newPwd.length < 4) { showToast('新密码至少4位'); return; }
+  if (newPwd !== confirm) { showToast('两次密码不一致'); return; }
+
+  localStorage.setItem(ADMIN_STORAGE_KEY, newPwd);
+  closePwdModal();
+  showToast('密码已修改');
+}
+</script>
+</body>
+</html>

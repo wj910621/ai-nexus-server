@@ -1,0 +1,19 @@
+{
+  "name": "ai-nexus",
+  "version": "1.0.0",
+  "description": "AI Nexus 大模型聚合平台 - 一站式 AI 模型对比与聊天",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "@google/generative-ai": "^0.21.0"
+  }
+}
