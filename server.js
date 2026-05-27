@@ -36,35 +36,17 @@ const PORT = process.env.PORT || 3001;
 // 模型到 API 配置的映射
 // ============================================================
 const MODEL_CONFIG = {
-  // ---- OpenAI 系列 ----
   gpt4o:        { provider: 'openai',   model: 'gpt-4o',             baseUrl: process.env.OPENAI_BASE_URL },
-  gpt4turbo:    { provider: 'openai',   model: 'gpt-4-turbo',        baseUrl: process.env.OPENAI_BASE_URL },
   gpt4omini:    { provider: 'openai',   model: 'gpt-4o-mini',        baseUrl: process.env.OPENAI_BASE_URL },
-
-  // ---- DeepSeek 系列 (兼容 OpenAI 格式) ----
   deepseekv3:   { provider: 'openai',   model: 'deepseek-chat',      baseUrl: 'https://api.deepseek.com/v1' },
   deepseekr1:   { provider: 'openai',   model: 'deepseek-reasoner',  baseUrl: 'https://api.deepseek.com/v1' },
-
-  // ---- Gemini 系列 ----
-  gemini15pro:  { provider: 'gemini',   model: 'gemini-1.5-pro' },
-  gemini15flash:{ provider: 'gemini',   model: 'gemini-1.5-flash' },
-  gemini20flash:{ provider: 'gemini',   model: 'gemini-2.0-flash' },
-
-  // ---- 通义千问 (阿里云 DashScope, 兼容 OpenAI 格式) ----
-  qwen25:       { provider: 'openai',   model: 'qwen2.5-72b-instruct',  baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
-  qwenmax:      { provider: 'openai',   model: 'qwen-max',               baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
-
-  // ---- Kimi / Moonshot (兼容 OpenAI 格式) ----
-  kimi:         { provider: 'openai',   model: 'moonshot-v1-128k',   baseUrl: 'https://api.moonshot.cn/v1' },
-
-  // ---- 智谱 GLM (兼容 OpenAI 格式) ----
-  glm4:         { provider: 'openai',   model: 'glm-4',              baseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
-
-  // ---- 零一万物 Yi (兼容 OpenAI 格式) ----
-  yi:           { provider: 'openai',   model: 'yi-large',           baseUrl: 'https://api.lingyiwanwu.com/v1' },
-
-  // ---- 混元 (腾讯, 兼容 OpenAI 格式) ----
+  gemini25pro:  { provider: 'gemini',   model: 'gemini-2.5-pro-exp-03-25' },
+  gemini25flash:{ provider: 'gemini',   model: 'gemini-2.5-flash' },
+  qwen3:        { provider: 'openai',   model: 'qwen3-235b-a22b',    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+  kimi2:        { provider: 'openai',   model: 'moonshot-v1-128k',   baseUrl: 'https://api.moonshot.cn/v1' },
+  glm4plus:     { provider: 'openai',   model: 'glm-4-plus',         baseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
   hunyuan:      { provider: 'openai',   model: 'hunyuan-turbos-latest', baseUrl: 'https://api.hunyuan.cloud.tencent.com/v1' },
+  yi:           { provider: 'openai',   model: 'yi-lightning',       baseUrl: 'https://api.lingyiwanwu.com/v1' },
 };
 
 // 那些我们还没接入真实 API 但有模型的（Claude, Llama, Baichuan 等）
@@ -77,9 +59,9 @@ function getApiKey(provider, modelId) {
   // DeepSeek 使用自己的 key
   if (modelId.startsWith('deepseek')) return process.env.DEEPSEEK_API_KEY;
   if (modelId.startsWith('qwen'))     return process.env.DASHSCOPE_API_KEY;
-  if (modelId === 'kimi')             return process.env.MOONSHOT_API_KEY;
-  if (modelId === 'glm4')             return process.env.ZHIPU_API_KEY;
-  if (modelId === 'yi')               return process.env.YI_API_KEY;
+  if (modelId.startsWith('kimi'))     return process.env.MOONSHOT_API_KEY;
+  if (modelId.startsWith('glm'))      return process.env.ZHIPU_API_KEY;
+  if (modelId.startsWith('yi'))       return process.env.YI_API_KEY;
   if (modelId.startsWith('hunyuan'))  return process.env.HUNYUAN_API_KEY;
 
   switch (provider) {

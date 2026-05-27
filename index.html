@@ -2,512 +2,232 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Nexus - 大模型聚合平台</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="AI Nexus - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，24+顶尖模型免费体验。">
+<meta name="keywords" content="AI写作,AI写小说,AI漫画,大模型,AI聊天,DeepSeek,GPT-4,Claude">
+<title>AI Nexus - 智能创作平台</title>
 <style>
-/* ===== CSS Variables & Theme ===== */
-:root {
-  --bg: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-input: #f1f5f9;
-  --text: #0f172a;
-  --text-secondary: #64748b;
-  --border: #e2e8f0;
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-light: #eef2ff;
-  --green: #10b981;
-  --red: #ef4444;
-  --orange: #f59e0b;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.05);
-  --radius: 12px;
-  --transition: 0.2s ease;
+:root{
+  --bg:#f8f7ff;--bg-card:rgba(255,255,255,0.92);--bg-input:#f0edff;
+  --text:#1a1035;--text-secondary:#6b5b95;--border:rgba(124,92,252,0.15);
+  --accent:#6c4ef5;--accent-hover:#8b70ff;--accent-light:rgba(108,78,245,0.08);
+  --accent-glow:rgba(108,78,245,0.25);--cyan:#0098db;--cyan-light:rgba(0,152,219,0.08);
+  --green:#00a86b;--red:#e74c5e;--orange:#f08a24;
+  --shadow:0 2px 16px rgba(108,78,245,0.06);--shadow-lg:0 8px 32px rgba(108,78,245,0.1);
+  --radius:14px;--transition:0.25s cubic-bezier(0.4,0,0.2,1);
+  --glass:rgba(255,255,255,0.8);--glass-border:rgba(108,78,245,0.12);
 }
+[data-theme="dark"]{
+  --bg:#0a0a16;--bg-card:rgba(18,18,40,0.9);--bg-input:rgba(30,30,60,0.6);
+  --text:#e8e8f0;--text-secondary:#8888aa;--border:rgba(100,80,200,0.2);
+  --accent-light:rgba(124,92,252,0.15);--glass:rgba(18,18,40,0.7);
+  --shadow:0 2px 20px rgba(0,0,0,0.4);--shadow-lg:0 8px 40px rgba(0,0,0,0.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Noto Sans SC",sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;overflow-x:hidden;
+  transition:background var(--transition),color var(--transition);
+}
+body::before{
+  content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(ellipse at 30% 20%,rgba(108,78,245,0.04) 0%,transparent 50%),
+             radial-gradient(ellipse at 70% 60%,rgba(0,152,219,0.03) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+a{color:var(--accent);text-decoration:none}
+/* Nav */
+.nav{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border)}
+.nav-inner{max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:68px}
+.logo{display:flex;align-items:center;gap:12px;font-size:1.2rem;font-weight:700;color:var(--text)}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#7c5cfc,#00d4ff);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;box-shadow:0 0 20px rgba(124,92,252,0.4)}
+.nav-links{display:flex;gap:2px;align-items:center;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-link{padding:8px 15px;border-radius:10px;border:none;cursor:pointer;background:none;color:var(--text-secondary);font-size:0.85rem;font-weight:500;transition:all var(--transition);font-family:inherit;white-space:nowrap}
+.nav-link:hover{background:var(--bg-input);color:var(--text)}
+.nav-link.active,.nav-link.primary-link{background:var(--accent-light);color:var(--accent)}
+.nav-link.primary-link{background:linear-gradient(135deg,var(--accent-light),var(--cyan-light));border:1px solid var(--glass-border);font-weight:600}
+.theme-toggle{width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all var(--transition);color:var(--text);margin-left:6px}
+.theme-toggle:hover{border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow)}
+/* Layout */
+.container{max-width:1320px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
+.page{display:none;animation:fadeIn 0.4s cubic-bezier(0.4,0,0.2,1)}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+/* Hero */
+.hero{text-align:center;padding:90px 28px 70px;position:relative}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.2;background:linear-gradient(135deg,#c4b5fd,#7c5cfc,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px}
+.hero p{color:var(--text-secondary);font-size:1.1rem;max-width:650px;margin:0 auto 40px;line-height:1.7}
+.hero-stats{display:flex;justify-content:center;gap:56px;flex-wrap:wrap}
+.stat{text-align:center}.stat-num{font-size:2.2rem;font-weight:800;color:var(--accent)}.stat-label{font-size:0.85rem;color:var(--text-secondary);margin-top:6px}
+/* Section */
+.section{padding:60px 0}.section-title{font-size:1.6rem;font-weight:700;margin-bottom:8px}.section-desc{color:var(--text-secondary);margin-bottom:36px;font-size:0.95rem}
+/* Cards */
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.feature-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:28px;transition:all var(--transition);backdrop-filter:blur(10px);position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-glow),transparent);opacity:0;transition:opacity var(--transition)}
+.feature-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{font-size:2rem;margin-bottom:16px}.feature-card h3{font-size:1.1rem;margin-bottom:8px}.feature-card p{color:var(--text-secondary);font-size:0.9rem;line-height:1.6}
+/* Filter */
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;align-items:center}
+.search-input{flex:1;min-width:220px;padding:11px 18px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none;transition:border var(--transition)}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+.filter-tag{padding:8px 18px;border-radius:22px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;font-size:0.83rem;font-family:inherit;transition:all var(--transition);white-space:nowrap;backdrop-filter:blur(10px)}
+.filter-tag:hover{border-color:var(--accent);color:var(--accent)}
+.filter-tag.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 0 16px var(--accent-glow)}
+/* Model Grid */
+.models-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px}
+.model-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;transition:all var(--transition);position:relative;overflow:hidden;backdrop-filter:blur(10px)}
+.model-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px)}
+.model-card.featured::before{content:'HOT';position:absolute;top:14px;right:-26px;background:linear-gradient(135deg,var(--accent),var(--cyan));color:#fff;font-size:0.7rem;padding:3px 30px;transform:rotate(45deg);font-weight:700;box-shadow:0 0 20px rgba(124,92,252,0.4)}
+.model-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.model-avatar{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.model-name{font-size:1.05rem;font-weight:700}.model-provider{font-size:0.8rem;color:var(--text-secondary)}
+.model-desc{font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.5}
+.model-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tag{padding:3px 10px;border-radius:14px;font-size:0.73rem;font-weight:500;background:var(--accent-light);color:var(--accent)}
+.tag.green{background:rgba(0,227,150,0.15);color:var(--green)}.tag.orange{background:rgba(255,166,71,0.15);color:var(--orange)}
+.model-meta{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--border)}
+.model-price{font-size:0.85rem;font-weight:600;color:var(--accent)}.model-context{font-size:0.8rem;color:var(--text-secondary)}
+/* Chat */
+.chat-layout{display:grid;grid-template-columns:280px 1fr;gap:24px;min-height:calc(100vh - 140px)}
+.chat-sidebar{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;height:fit-content;backdrop-filter:blur(10px)}
+.chat-sidebar h3{font-size:0.95rem;margin-bottom:16px}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);margin-bottom:16px;max-height:500px;min-height:400px;backdrop-filter:blur(10px)}
+.chat-msg{margin-bottom:20px;animation:fadeIn 0.3s ease}
+.chat-msg-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.chat-msg-avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#fff;font-weight:700}
+.chat-msg-model{font-size:0.82rem;font-weight:600}
+.chat-msg-content{padding:12px 16px;border-radius:0 12px 12px 12px;background:var(--bg-input);font-size:0.9rem;line-height:1.6;white-space:pre-wrap}
+.chat-msg.user .chat-msg-content{background:var(--accent-light);border-radius:12px 0 12px 12px;max-width:80%}
+.chat-msg.user{display:flex;flex-direction:column;align-items:flex-end}
+.chat-input-area{display:flex;gap:12px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;backdrop-filter:blur(10px)}
+.chat-input{flex:1;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:none;outline:none;min-height:44px;max-height:120px;transition:border var(--transition)}
+.chat-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+.btn-send{padding:10px 28px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--accent),#9b7fff);color:#fff;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem;transition:all var(--transition);white-space:nowrap;box-shadow:0 4px 16px rgba(124,92,252,0.3)}
+.btn-send:hover{box-shadow:0 6px 24px rgba(124,92,252,0.5);transform:translateY(-1px)}
+.btn-send:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.model-checkbox{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;transition:background var(--transition)}
+.model-checkbox:hover{background:var(--bg-input)}
+.model-checkbox-label{font-size:0.85rem;font-weight:500}
+.model-checkbox-provider{font-size:0.75rem;color:var(--text-secondary)}
+/* Compare */
+.compare-grid{display:grid;gap:20px}.compare-grid.cols-2{grid-template-columns:1fr 1fr}.compare-grid.cols-3{grid-template-columns:1fr 1fr 1fr}.compare-grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.compare-panel{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;backdrop-filter:blur(10px)}
+.compare-panel-header{padding:14px 16px;background:var(--bg-input);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.compare-panel-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700}
+.compare-panel-content{padding:16px;min-height:200px;max-height:400px;overflow-y:auto;font-size:0.9rem;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap}
+.compare-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.compare-prompt{flex:1;min-width:300px;padding:10px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none;transition:border var(--transition)}
+.compare-prompt:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+.col-select{padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg-card);color:var(--text);font-size:0.85rem;font-family:inherit;cursor:pointer;outline:none}
+/* Toast/Status */
+.conn-status{display:flex;align-items:center;gap:6px;margin-left:8px;font-size:0.76rem;color:var(--text-secondary)}
+.conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.conn-dot.online{background:var(--green);box-shadow:0 0 8px var(--green)}
+.conn-dot.offline{background:var(--red)}.conn-dot.checking{background:var(--orange);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:28px;right:28px;z-index:1000;padding:14px 28px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--shadow-lg);font-size:0.9rem;animation:slideUp 0.3s ease;display:none;backdrop-filter:blur(10px)}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+/* Admin */
+.admin-login{max-width:400px;margin:80px auto;text-align:center;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:40px;backdrop-filter:blur(10px)}
+.admin-pwd{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:1rem;font-family:inherit;outline:none;margin-bottom:16px;text-align:center}
+.admin-pwd:focus{border-color:var(--accent)}
+.admin-dashboard{display:none}
+.admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+.admin-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+.admin-table th,.admin-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.admin-table th{font-weight:600;color:var(--text-secondary);font-size:0.8rem}
+.admin-table tr:hover{background:var(--bg-input)}
+.btn-sm{padding:5px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;font-size:0.8rem;font-family:inherit;transition:all var(--transition)}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm.danger{color:var(--red);border-color:var(--red)}.btn-sm.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg-card);border-radius:var(--radius);padding:32px;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;border:1px solid var(--glass-border);backdrop-filter:blur(20px)}
+.modal h3{margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:0.85rem;font-weight:600;margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.footer{text-align:center;padding:36px 28px;border-top:1px solid var(--border);color:var(--text-secondary);font-size:0.85rem;margin-top:60px}
+/* Wizard */
+.wizard-steps{display:flex;gap:0;margin-bottom:28px;flex-wrap:wrap}
+.wizard-step{flex:1;min-width:120px;text-align:center;padding:14px 12px;border-radius:12px;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all var(--transition);border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);position:relative}
+.wizard-step.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
+.wizard-step.done{background:rgba(0,227,150,0.1);color:var(--green);border-color:var(--green)}
+.wizard-num{display:block;font-size:1.4rem;font-weight:800;margin-bottom:4px}
+/* Guide */
+.guide-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;margin-bottom:16px;backdrop-filter:blur(10px)}
+.guide-card h4{margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.guide-card ol,.guide-card ul{padding-left:20px;color:var(--text-secondary);font-size:0.9rem;line-height:1.8}
 
-[data-theme="dark"] {
-  --bg: #0f172a;
-  --bg-card: #1e293b;
-  --bg-input: #334155;
-  --text: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --border: #334155;
-  --accent-light: #1e1b4b;
-  --shadow: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-lg: 0 10px 25px rgba(0,0,0,0.4);
-}
-
-/* ===== Reset & Base ===== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  transition: background var(--transition), color var(--transition);
-  min-height: 100vh;
-}
-
-a { color: var(--accent); text-decoration: none; }
-
-/* ===== Navigation ===== */
-.nav {
-  position: sticky; top: 0; z-index: 100;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.nav-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 24px; height: 64px;
-}
-
-.logo {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 1.25rem; font-weight: 700; color: var(--text);
-}
-.logo-icon {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 1.1rem;
-}
-
-.nav-links { display: flex; gap: 4px; align-items: center; }
-.nav-link {
-  padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
-  background: none; color: var(--text-secondary); font-size: 0.9rem;
-  font-weight: 500; transition: all var(--transition); font-family: inherit;
-}
-.nav-link:hover { background: var(--bg-input); color: var(--text); }
-.nav-link.active { background: var(--accent-light); color: var(--accent); }
-
-.theme-toggle {
-  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
-  background: var(--bg-card); cursor: pointer; display: flex; align-items: center;
-  justify-content: center; font-size: 1.1rem; transition: all var(--transition);
-  color: var(--text); margin-left: 8px;
-}
-.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-
-/* Connection status */
-.conn-status {
-  display: flex; align-items: center; gap: 6px; margin-left: 12px;
-  font-size: 0.78rem; color: var(--text-secondary);
-}
-.conn-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-}
-.conn-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
-.conn-dot.offline { background: var(--red); }
-.conn-dot.checking { background: var(--orange); animation: pulse 1s infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-/* ===== Admin Panel ===== */
-.admin-login {
-  max-width: 400px; margin: 80px auto; text-align: center;
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 40px;
-}
-.admin-login h2 { margin-bottom: 8px; }
-.admin-login p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px; }
-.admin-pwd {
-  width: 100%; padding: 12px 16px; border: 1px solid var(--border);
-  border-radius: 8px; background: var(--bg-input); color: var(--text);
-  font-size: 1rem; font-family: inherit; outline: none; margin-bottom: 16px;
-  text-align: center;
-}
-.admin-pwd:focus { border-color: var(--accent); }
-
-.admin-dashboard { display: none; }
-.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-.admin-header h2 { margin: 0; }
-.admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-.admin-table th, .admin-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-.admin-table th { font-weight: 600; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; }
-.admin-table tr:hover { background: var(--bg-input); }
-.admin-table .actions { display: flex; gap: 6px; }
-
-.btn-sm {
-  padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border);
-  background: var(--bg-card); color: var(--text); cursor: pointer;
-  font-size: 0.8rem; font-family: inherit; transition: all var(--transition);
-}
-.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
-.btn-sm.danger { color: var(--red); border-color: var(--red); }
-.btn-sm.danger:hover { background: #fef2f2; }
-.btn-sm.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
-  display: flex; align-items: center; justify-content: center; display: none;
-}
-.modal-overlay.show { display: flex; }
-.modal {
-  background: var(--bg-card); border-radius: var(--radius); padding: 32px;
-  max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;
-}
-.modal h3 { margin-bottom: 20px; }
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
-.form-group input, .form-group textarea, .form-group select {
-  width: 100%; padding: 10px 12px; border: 1px solid var(--border);
-  border-radius: 8px; background: var(--bg-input); color: var(--text);
-  font-size: 0.9rem; font-family: inherit; outline: none;
-}
-.form-group textarea { resize: vertical; min-height: 60px; }
-.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-.tags-input { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.tag-chip {
-  padding: 4px 10px; border-radius: 12px; font-size: 0.78rem;
-  background: var(--accent-light); color: var(--accent); cursor: pointer;
-  border: 1px solid transparent; transition: all var(--transition);
-}
-.tag-chip.selected { background: var(--accent); color: #fff; }
-
-/* Loading spinner */
-.spinner {
-  display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border);
-  border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite;
-  vertical-align: middle; margin-right: 6px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ===== Layout ===== */
-.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-.page { display: none; animation: fadeIn 0.3s ease; }
-.page.active { display: block; }
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ===== Hero Section ===== */
-.hero {
-  text-align: center; padding: 80px 24px 60px;
-  background: linear-gradient(180deg, var(--accent-light) 0%, var(--bg) 100%);
-}
-.hero h1 {
-  font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text; margin-bottom: 16px;
-}
-.hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto 32px; }
-.hero-stats { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
-.stat { text-align: center; }
-.stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
-.stat-label { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
-
-/* ===== Section ===== */
-.section { padding: 60px 0; }
-.section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
-.section-desc { color: var(--text-secondary); margin-bottom: 32px; }
-
-/* ===== Feature Cards ===== */
-.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
-.feature-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 28px; transition: all var(--transition);
-}
-.feature-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-.feature-icon { font-size: 2rem; margin-bottom: 16px; }
-.feature-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
-.feature-card p { color: var(--text-secondary); font-size: 0.9rem; }
-
-/* ===== Filter Bar ===== */
-.filter-bar {
-  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
-  align-items: center;
-}
-.search-input {
-  flex: 1; min-width: 200px; padding: 10px 16px;
-  border: 1px solid var(--border); border-radius: 8px;
-  background: var(--bg-input); color: var(--text); font-size: 0.9rem;
-  font-family: inherit; outline: none; transition: border var(--transition);
-}
-.search-input:focus { border-color: var(--accent); }
-.filter-tag {
-  padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
-  background: var(--bg-card); color: var(--text-secondary); cursor: pointer;
-  font-size: 0.85rem; font-family: inherit; transition: all var(--transition);
-  white-space: nowrap;
-}
-.filter-tag:hover { border-color: var(--accent); color: var(--accent); }
-.filter-tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-/* ===== Model Cards Grid ===== */
-.models-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-
-.model-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 24px; transition: all var(--transition);
-  position: relative; overflow: hidden;
-}
-.model-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-.model-card.featured::before {
-  content: '热门'; position: absolute; top: 12px; right: -28px;
-  background: var(--accent); color: #fff; font-size: 0.75rem; padding: 2px 32px;
-  transform: rotate(45deg); font-weight: 600;
-}
-.model-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.model-avatar {
-  width: 48px; height: 48px; border-radius: 12px; display: flex;
-  align-items: center; justify-content: center; font-size: 1.5rem;
-  font-weight: 700; color: #fff; flex-shrink: 0;
-}
-.model-name { font-size: 1.05rem; font-weight: 700; }
-.model-provider { font-size: 0.8rem; color: var(--text-secondary); }
-.model-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
-.model-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.tag {
-  padding: 3px 10px; border-radius: 12px; font-size: 0.75rem;
-  font-weight: 500; background: var(--accent-light); color: var(--accent);
-}
-.tag.green { background: #ecfdf5; color: var(--green); }
-.tag.orange { background: #fffbeb; color: var(--orange); }
-.model-meta { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
-.model-price { font-size: 0.85rem; font-weight: 600; color: var(--accent); }
-.model-context { font-size: 0.8rem; color: var(--text-secondary); }
-
-/* ===== Chat Interface ===== */
-.chat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; min-height: calc(100vh - 140px); }
-
-.chat-sidebar {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px; height: fit-content;
-}
-.chat-sidebar h3 { font-size: 0.95rem; margin-bottom: 16px; }
-.model-checkbox {
-  display: flex; align-items: center; gap: 10px; padding: 10px;
-  border-radius: 8px; cursor: pointer; transition: background var(--transition);
-}
-.model-checkbox:hover { background: var(--bg-input); }
-.model-checkbox input[type="checkbox"] {
-  accent-color: var(--accent); width: 18px; height: 18px; cursor: pointer;
-}
-.model-checkbox-label { font-size: 0.85rem; font-weight: 500; }
-.model-checkbox-provider { font-size: 0.75rem; color: var(--text-secondary); }
-
-.chat-main { display: flex; flex-direction: column; }
-
-.chat-messages {
-  flex: 1; overflow-y: auto; padding: 20px;
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); margin-bottom: 16px;
-  max-height: 500px; min-height: 400px;
-}
-
-.chat-msg { margin-bottom: 20px; animation: fadeIn 0.3s ease; }
-.chat-msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.chat-msg-avatar {
-  width: 28px; height: 28px; border-radius: 8px; display: flex;
-  align-items: center; justify-content: center; font-size: 0.75rem;
-  color: #fff; font-weight: 700;
-}
-.chat-msg-model { font-size: 0.82rem; font-weight: 600; }
-.chat-msg-time { font-size: 0.7rem; color: var(--text-secondary); margin-left: auto; }
-.chat-msg-content {
-  padding: 12px 16px; border-radius: 0 12px 12px 12px;
-  background: var(--bg-input); font-size: 0.9rem; line-height: 1.6;
-}
-.chat-msg.user .chat-msg-content {
-  background: var(--accent-light); border-radius: 12px 0 12px 12px;
-  margin-left: auto; max-width: 80%;
-}
-.chat-msg.user { display: flex; flex-direction: column; align-items: flex-end; }
-
-.chat-input-area {
-  display: flex; gap: 12px;
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px;
-}
-.chat-input {
-  flex: 1; padding: 12px 16px; border: 1px solid var(--border);
-  border-radius: 8px; background: var(--bg-input); color: var(--text);
-  font-size: 0.9rem; font-family: inherit; resize: none; outline: none;
-  min-height: 44px; max-height: 120px; transition: border var(--transition);
-}
-.chat-input:focus { border-color: var(--accent); }
-.btn-send {
-  padding: 10px 24px; border: none; border-radius: 8px;
-  background: var(--accent); color: #fff; font-weight: 600;
-  cursor: pointer; font-family: inherit; font-size: 0.9rem;
-  transition: all var(--transition); white-space: nowrap;
-}
-.btn-send:hover { background: var(--accent-hover); }
-.btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ===== Compare View ===== */
-.compare-grid {
-  display: grid; gap: 20px;
-}
-.compare-grid.cols-2 { grid-template-columns: 1fr 1fr; }
-.compare-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-.compare-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-
-.compare-panel {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
-}
-.compare-panel-header {
-  padding: 14px 16px; background: var(--bg-input);
-  display: flex; align-items: center; gap: 10px;
-  border-bottom: 1px solid var(--border);
-}
-.compare-panel-avatar {
-  width: 32px; height: 32px; border-radius: 8px; display: flex;
-  align-items: center; justify-content: center; color: #fff;
-  font-size: 0.75rem; font-weight: 700;
-}
-.compare-panel-content {
-  padding: 16px; min-height: 200px; max-height: 400px; overflow-y: auto;
-  font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);
-  white-space: pre-wrap;
-}
-.compare-panel-content.typing::after {
-  content: '▊'; animation: blink 1s infinite; color: var(--accent);
-}
-@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
-
-.compare-controls {
-  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-
-.compare-prompt {
-  flex: 1; min-width: 300px; padding: 10px 16px;
-  border: 1px solid var(--border); border-radius: 8px;
-  background: var(--bg-input); color: var(--text);
-  font-size: 0.9rem; font-family: inherit; outline: none;
-  transition: border var(--transition);
-}
-.compare-prompt:focus { border-color: var(--accent); }
-
-.col-select {
-  padding: 8px 12px; border: 1px solid var(--border);
-  border-radius: 8px; background: var(--bg-card); color: var(--text);
-  font-size: 0.85rem; font-family: inherit; cursor: pointer; outline: none;
-}
-
-/* ===== About Section ===== */
-.about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-
-/* ===== Toast ===== */
-.toast {
-  position: fixed; bottom: 24px; right: 24px; z-index: 1000;
-  padding: 14px 24px; border-radius: 10px; background: var(--bg-card);
-  border: 1px solid var(--border); box-shadow: var(--shadow-lg);
-  font-size: 0.9rem; animation: slideUp 0.3s ease;
-  display: none;
-}
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ===== Footer ===== */
-.footer {
-  text-align: center; padding: 32px 24px; border-top: 1px solid var(--border);
-  color: var(--text-secondary); font-size: 0.85rem; margin-top: 60px;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .chat-layout { grid-template-columns: 1fr; }
-  .nav-links { gap: 2px; }
-  .nav-link { padding: 6px 10px; font-size: 0.8rem; }
-  .compare-grid.cols-2,
-  .compare-grid.cols-3,
-  .compare-grid.cols-4 { grid-template-columns: 1fr; }
-  .hero-stats { gap: 24px; }
-  .filter-bar { flex-direction: column; }
+@media(max-width:768px){
+  .chat-layout{grid-template-columns:1fr}
+  .compare-grid.cols-2,.compare-grid.cols-3,.compare-grid.cols-4{grid-template-columns:1fr}
+  .hero-stats{gap:28px}.filter-bar{flex-direction:column}.nav-links{padding-bottom:4px}
 }
 </style>
 </head>
 <body>
-
-<!-- Navigation -->
-<nav class="nav">
-  <div class="nav-inner">
-    <div class="logo">
-      <div class="logo-icon">⚡</div>
-      <span>AI Nexus</span>
-    </div>
-    <div class="nav-links">
-      <button class="nav-link active" data-page="home">首页</button>
-      <button class="nav-link" data-page="models">模型目录</button>
-      <button class="nav-link" data-page="chat">多模型聊天</button>
-      <button class="nav-link" data-page="compare">模型对比</button>
-      <button class="nav-link" data-page="about">关于</button>
-      <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
-      <span class="conn-status" id="connStatus" title="后端连接状态">
-        <span class="conn-dot checking"></span>
-        <span>检测中</span>
-      </span>
-    </div>
+<nav class="nav"><div class="nav-inner">
+  <div class="logo"><div class="logo-icon">⚡</div><span>AI Nexus</span></div>
+  <div class="nav-links">
+    <button class="nav-link active" data-page="home">首页</button>
+    <button class="nav-link" data-page="models">模型</button>
+    <button class="nav-link" data-page="chat">聊天</button>
+    <button class="nav-link" data-page="compare">对比</button>
+    <button class="nav-link primary-link" data-page="novel">写小说</button>
+    <button class="nav-link" data-page="media">漫剧</button>
+    <button class="nav-link" data-page="pricing">充值</button>
+    <button class="nav-link" data-page="office">办公</button>
+    <button class="nav-link" data-page="brand">品牌</button>
+    <button class="nav-link" data-page="market">营销</button>
+    <button class="nav-link" data-page="art">绘画</button>
+    <span style="display:flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;background:var(--accent-light);font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="switchPage('pricing')" title="积分">💎<span id="creditDisplay">0</span></span>
+    <span id="userNav" style="display:flex;align-items:center;gap:6px;margin-left:4px"></span>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+    <span class="conn-status" id="connStatus"><span class="conn-dot checking"></span><span>检测</span></span>
   </div>
-</nav>
+</div></nav>
 
-<!-- Page: Home -->
 <div class="page active" id="page-home">
-  <section class="hero">
-    <div class="container">
-      <h1>一站式 AI 大模型聚合平台</h1>
-      <p>汇聚全球顶尖大模型，一站式对比、聊天、评测。让你的每一次提问都能找到最佳答案。</p>
-      <div class="hero-stats">
-        <div class="stat"><div class="stat-num" id="modelCount">24</div><div class="stat-label">收录模型</div></div>
-        <div class="stat"><div class="stat-num">8</div><div class="stat-label">供应商</div></div>
-        <div class="stat"><div class="stat-num">100%</div><div class="stat-label">免费使用</div></div>
-        <div class="stat"><div class="stat-num">实时</div><div class="stat-label">数据更新</div></div>
-      </div>
+  <section class="hero"><div class="container">
+    <h1>AI Nexus 智能创作平台</h1>
+    <p>汇聚全球 30+ 顶尖大模型。AI 写作、漫剧、聊天、对比——所见即所得，小白秒上手。</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num" id="modelCount">30</div><div class="stat-label">收录模型</div></div>
+      <div class="stat"><div class="stat-num">10</div><div class="stat-label">供应商</div></div>
+      <div class="stat"><div class="stat-num">免费</div><div class="stat-label">基础体验</div></div>
+      <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">在线服务</div></div>
     </div>
-  </section>
-
+  </div></section>
   <section class="section container">
-    <h2 class="section-title">核心功能</h2>
-    <p class="section-desc">四大核心模块，满足你对 AI 大模型的一切需求</p>
+    <h2 class="section-title">🚀 三步上手</h2>
     <div class="features">
-      <div class="feature-card" onclick="switchPage('models')" style="cursor:pointer">
-        <div class="feature-icon">📋</div>
-        <h3>模型目录</h3>
-        <p>收录国内外 24+ 主流大模型，含详细参数、价格对比和能力标签，按分类快速筛选。</p>
-      </div>
-      <div class="feature-card" onclick="switchPage('chat')" style="cursor:pointer">
-        <div class="feature-icon">💬</div>
-        <h3>多模型聊天</h3>
-        <p>同时与多个模型对话，一键发送问题，实时查看各模型的回答，感受不同的 AI 风格。</p>
-      </div>
-      <div class="feature-card" onclick="switchPage('compare')" style="cursor:pointer">
-        <div class="feature-icon">⚖️</div>
-        <h3>模型对比</h3>
-        <p>并排对比 2-4 个模型的输出质量，快速评估哪个模型更适合你的使用场景。</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <h3>深度分析</h3>
-        <p>上下文窗口、多模态支持、推理速度等核心指标一目了然，帮你做出最优选择。</p>
-      </div>
+      <div class="feature-card" onclick="switchPage('models')" style="cursor:pointer"><div class="feature-icon">1️⃣</div><h3>选模型</h3><p>浏览 30+ 大模型，按需筛选，找到最适合你的 AI。</p></div>
+      <div class="feature-card" onclick="switchPage('novel')" style="cursor:pointer"><div class="feature-icon">2️⃣</div><h3>开创作</h3><p>AI 写小说、漫剧分镜——输入想法，秒出成果。</p></div>
+      <div class="feature-card" onclick="switchPage('chat')" style="cursor:pointer"><div class="feature-icon">3️⃣</div><h3>聊起来</h3><p>多模型同时对话，对比不同 AI 的回答风格。</p></div>
     </div>
   </section>
-
   <section class="section container">
     <h2 class="section-title">热门模型</h2>
-    <p class="section-desc">当前最受关注的大模型</p>
     <div class="models-grid" id="featuredModels"></div>
   </section>
 </div>
 
-<!-- Page: Models -->
 <div class="page" id="page-models">
   <section class="section container">
     <h2 class="section-title">模型目录</h2>
-    <p class="section-desc">浏览和筛选所有收录的大模型</p>
     <div class="filter-bar">
-      <input type="text" class="search-input" id="modelSearch" placeholder="搜索模型名称、供应商或能力…">
+      <input class="search-input" id="modelSearch" placeholder="搜索模型...">
       <button class="filter-tag active" data-filter="all">全部</button>
       <button class="filter-tag" data-filter="海外">海外</button>
       <button class="filter-tag" data-filter="国内">国内</button>
@@ -516,32 +236,19 @@ a { color: var(--accent); text-decoration: none; }
       <button class="filter-tag" data-filter="免费">免费</button>
     </div>
     <div class="models-grid" id="allModels"></div>
-    <div id="noResults" style="display:none;text-align:center;padding:60px;color:var(--text-secondary)">
-      <div style="font-size:3rem;margin-bottom:16px">🔍</div>
-      <p>没有找到匹配的模型，试试其他关键词</p>
-    </div>
+    <div id="noResults" style="display:none;text-align:center;padding:60px;color:var(--text-secondary)"><div style="font-size:3rem">🔍</div><p>没找到，换关键词试试</p></div>
   </section>
 </div>
 
-<!-- Page: Chat -->
 <div class="page" id="page-chat">
   <section class="section container">
     <h2 class="section-title">多模型聊天</h2>
-    <p class="section-desc">选择你感兴趣的模型，发送问题并查看它们的回答</p>
     <div class="chat-layout">
-      <div class="chat-sidebar">
-        <h3>选择模型</h3>
-        <div id="chatModelList"></div>
-      </div>
+      <div class="chat-sidebar"><h3>选择模型</h3><div id="chatModelList"></div></div>
       <div class="chat-main">
-        <div class="chat-messages" id="chatMessages">
-          <div style="text-align:center;color:var(--text-secondary);padding:60px 20px">
-            <div style="font-size:3rem;margin-bottom:12px">💡</div>
-            <p>选择左侧模型，在下方输入问题开始对话</p>
-          </div>
-        </div>
+        <div class="chat-messages" id="chatMessages"><div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">💡</div><p>选模型 → 输入问题 → 看回复</p></div></div>
         <div class="chat-input-area">
-          <textarea class="chat-input" id="chatInput" placeholder="输入你的问题… (Enter 发送，Shift+Enter 换行)" rows="1"></textarea>
+          <textarea class="chat-input" id="chatInput" placeholder="输入问题 (Enter发送)" rows="1"></textarea>
           <button class="btn-send" id="btnSend" onclick="sendChatMessage()">发送</button>
         </div>
       </div>
@@ -549,880 +256,693 @@ a { color: var(--accent); text-decoration: none; }
   </section>
 </div>
 
-<!-- Page: Compare -->
 <div class="page" id="page-compare">
   <section class="section container">
     <h2 class="section-title">模型对比</h2>
-    <p class="section-desc">同时向多个模型提问，并排对比回复质量</p>
     <div class="compare-controls">
-      <select class="col-select" id="colSelect" onchange="updateCompareLayout()">
-        <option value="2">2 列对比</option>
-        <option value="3">3 列对比</option>
-        <option value="4">4 列对比</option>
-      </select>
-      <input type="text" class="compare-prompt" id="comparePrompt" placeholder="输入对比问题… (Enter 发送)">
-      <button class="btn-send" onclick="runCompare()">开始对比</button>
+      <select class="col-select" id="colSelect" onchange="updateCompareLayout()"><option value="2">2列</option><option value="3">3列</option><option value="4">4列</option></select>
+      <input class="compare-prompt" id="comparePrompt" placeholder="输入问题对比...">
+      <button class="btn-send" onclick="runCompare()">对比</button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
-      <span style="color:var(--text-secondary);font-size:0.85rem;line-height:2">快速提问：</span>
-      <button class="filter-tag" onclick="setComparePrompt('请用通俗的语言解释量子计算是什么')">量子计算解释</button>
-      <button class="filter-tag" onclick="setComparePrompt('写一首关于春天的七言绝句')">写诗创作</button>
-      <button class="filter-tag" onclick="setComparePrompt('用Python实现快速排序算法')">编程能力</button>
-      <button class="filter-tag" onclick="setComparePrompt('分析一下AI对未来教育的影响')">深度分析</button>
+      <button class="filter-tag" onclick="setComparePrompt('量子计算通俗解释')">量子计算</button>
+      <button class="filter-tag" onclick="setComparePrompt('写一首春天的诗')">写诗</button>
+      <button class="filter-tag" onclick="setComparePrompt('Python快速排序')">编程</button>
     </div>
     <div class="compare-grid cols-2" id="compareGrid"></div>
   </section>
 </div>
 
-<!-- Page: About -->
-<div class="page" id="page-about">
+<div class="page" id="page-novel">
   <section class="section container">
-    <h2 class="section-title">关于 AI Nexus</h2>
-    <p class="section-desc">一个开放、全面的 AI 大模型信息聚合平台</p>
-    <div class="about-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🎯</div>
-        <h3>我们的目标</h3>
-        <p>打破信息壁垒，让每个人都能轻松了解和对比各类 AI 大模型，找到最适合自己需求的工具。</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔄</div>
-        <h3>数据来源</h3>
-        <p>模型信息来自官方文档和公开数据，持续跟踪更新，确保信息的准确性和时效性。</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔓</div>
-        <h3>开放生态</h3>
-        <p>本平台为纯前端项目，不依赖后端服务。所有数据公开透明，欢迎贡献和反馈。</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🚀</div>
-        <h3>未来规划</h3>
-        <p>API 对接、真实模型调用、性能基准测试、用户评价系统……更多功能持续开发中。</p>
-      </div>
+    <h2 class="section-title">📖 AI 小说创作</h2>
+    <p class="section-desc">小白向导模式：选类型→定大纲→出人物→写正文，一路点下去就行</p>
+    <div class="wizard-steps" id="wizardSteps">
+      <div class="wizard-step active" data-wstep="type"><span class="wizard-num">1</span>选类型</div>
+      <div class="wizard-step" data-wstep="outline"><span class="wizard-num">2</span>定大纲</div>
+      <div class="wizard-step" data-wstep="chars"><span class="wizard-num">3</span>出人物</div>
+      <div class="wizard-step" data-wstep="world"><span class="wizard-num">4</span>世界观</div>
+      <div class="wizard-step" data-wstep="write"><span class="wizard-num">5</span>写正文</div>
     </div>
-  </section>
-</div>
-
-<!-- Page: Admin -->
-<div class="page" id="page-admin">
-  <section class="section container">
-    <!-- Login -->
-    <div class="admin-login" id="adminLogin">
-      <div style="font-size:3rem;margin-bottom:12px">🔐</div>
-      <h2>管理后台</h2>
-      <p>输入管理密码进入</p>
-      <input type="password" class="admin-pwd" id="adminPwd" placeholder="管理密码" onkeydown="if(event.key==='Enter')adminLogin()">
-      <button class="btn-send" onclick="adminLogin()" style="width:100%">登 录</button>
-      <p style="margin-top:16px;font-size:0.8rem;color:var(--text-secondary)">默认密码: admin123（登录后可修改）</p>
-    </div>
-
-    <!-- Dashboard -->
-    <div class="admin-dashboard" id="adminDashboard">
-      <div class="admin-header">
-        <h2>📊 模型管理</h2>
-        <div class="admin-actions">
-          <button class="btn-sm primary" onclick="openAddModel()">+ 添加模型</button>
-          <button class="btn-sm" onclick="exportData()">📥 导出数据</button>
-          <button class="btn-sm" onclick="document.getElementById('importFile').click()">📤 导入数据</button>
-          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-          <button class="btn-sm" onclick="openApiSettings()">🔑 API 密钥</button>
-          <button class="btn-sm" onclick="openPasswordSettings()">⚙️ 改密码</button>
-          <button class="btn-sm danger" onclick="adminLogout()">退出</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div id="wizardPanel"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn-send" id="wizardActionBtn" onclick="wizardAction()">下一步 →</button>
         </div>
       </div>
-      <div style="overflow-x:auto">
-        <table class="admin-table" id="adminModelTable">
-          <thead>
-            <tr>
-              <th>模型名称</th>
-              <th>供应商</th>
-              <th>标签</th>
-              <th>输入价格</th>
-              <th>输出价格</th>
-              <th>上下文</th>
-              <th>热门</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="adminModelTbody"></tbody>
-        </table>
+      <div>
+        <div class="feature-card" style="min-height:420px;max-height:620px;overflow-y:auto;white-space:pre-wrap;font-size:0.9rem;line-height:1.8" id="novelOutput">
+          <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">📝</div><p>选类型开始创作</p></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
+          <button class="btn-sm" onclick="copyNovelOutput()">📋</button>
+          <button class="btn-sm primary" onclick="saveChapter()">💾 存章节</button>
+          <button class="btn-sm" onclick="downloadNovel()">⬇</button>
+        </div>
+      </div>
+    </div>
+    <div class="feature-card" style="margin-top:20px" id="novelProgress"><div style="font-weight:600;font-size:0.85rem;margin-bottom:6px">📚 <span id="novelBookTitle">未开始</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:0.8rem;color:var(--text-secondary)">已写:</span><span id="chapterCount" style="font-weight:700;color:var(--accent)">0</span><span style="font-size:0.8rem;color:var(--text-secondary)">章</span><span id="totalWords" style="font-weight:700;color:var(--accent)">0</span><span style="font-size:0.8rem;color:var(--text-secondary)">字</span><button class="btn-sm" onclick="loadNovelProject()" style="margin-left:auto">📂 管理</button></div></div>
+  </section>
+</div>
+
+<div class="page" id="page-media">
+  <section class="section container">
+    <h2 class="section-title">🎬 AI 漫剧</h2>
+    <p class="section-desc">输入故事 → 选风格 → 出分镜脚本/角色/场景/对白</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div class="feature-card" style="margin-bottom:12px">
+          <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">创作类型</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="mediaModes">
+            <button class="filter-tag active" data-mode="storyboard" onclick="mediaMode(this)">分镜脚本</button>
+            <button class="filter-tag" data-mode="chars" onclick="mediaMode(this)">角色设计</button>
+            <button class="filter-tag" data-mode="scene" onclick="mediaMode(this)">场景描述</button>
+            <button class="filter-tag" data-mode="dialog" onclick="mediaMode(this)">对白生成</button>
+          </div>
+        </div>
+        <textarea id="mediaInput" rows="5" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical;margin-bottom:12px" placeholder="描述你的故事场景..."></textarea>
+        <div style="display:flex;gap:8px">
+          <select id="mediaStyle" class="col-select"><option>日系动漫</option><option>国风水墨</option><option>写实电影</option><option>Q版可爱</option><option>暗黑哥特</option></select>
+          <button class="btn-send" onclick="aiCreateMedia()">生成</button>
+        </div>
+      </div>
+      <div>
+        <div class="feature-card" style="min-height:400px;max-height:600px;overflow-y:auto;white-space:pre-wrap;font-size:0.9rem;line-height:1.8" id="mediaOutput">
+          <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">🎬</div><p>输入故事开始</p></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button class="btn-sm primary" onclick="generateComicImage()">🖼️ 生成画面提示词</button><button class="btn-sm" onclick="copyMediaOutput()">📋</button><button class="btn-sm" onclick="downloadMedia()">⬇</button></div>
       </div>
     </div>
   </section>
 </div>
 
-<!-- Edit Model Modal -->
-<div class="modal-overlay" id="modelModal">
-  <div class="modal">
-    <h3 id="modalTitle">添加模型</h3>
-    <div class="form-group">
-      <label>模型 ID（英文，不可重复）</label>
-      <input type="text" id="editId" placeholder="如: gpt5">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>模型名称</label>
-        <input type="text" id="editName" placeholder="如: GPT-5">
-      </div>
-      <div class="form-group">
-        <label>供应商</label>
-        <input type="text" id="editProvider" placeholder="如: OpenAI">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>描述</label>
-      <textarea id="editDesc" placeholder="模型简介…"></textarea>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>头像颜色</label>
-        <input type="color" id="editAvatar" value="#6366f1" style="height:42px;padding:4px">
-      </div>
-      <div class="form-group">
-        <label>上下文窗口</label>
-        <input type="text" id="editContext" placeholder="如: 128K">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>输入价格</label>
-        <input type="text" id="editInputPrice" placeholder="如: ¥18/M">
-      </div>
-      <div class="form-group">
-        <label>输出价格</label>
-        <input type="text" id="editOutputPrice" placeholder="如: ¥72/M">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>标签（点击选择/取消）</label>
-      <div class="tags-input" id="editTags">
-        <!-- filled by JS -->
-      </div>
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:16px">
-      <input type="checkbox" id="editFeatured"> 标记为热门模型
-    </label>
-    <div class="form-actions">
-      <button class="btn-sm danger" id="btnDeleteModel" style="display:none;margin-right:auto" onclick="deleteModel()">删除模型</button>
-      <button class="btn-sm" onclick="closeModal()">取消</button>
-      <button class="btn-sm primary" onclick="saveModel()">保存</button>
+<!-- AI Office -->
+<div class="page" id="page-office"><section class="section container">
+<h2 class="section-title">💼 AI 智能办公</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+<div class="feature-card" style="cursor:pointer" onclick="aiOffice('doc','写一篇关于[主题]的1000字文章')"><div class="feature-icon">📄</div><h3>文档写作</h3><p>报告、方案、合同——输入主题秒出稿</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiOffice('email','写一封商务邮件，主题：[合作邀约]')"><div class="feature-icon">📧</div><h3>邮件起草</h3><p>商务/求职/客户邮件，语气得体专业</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiOffice('ppt','为[公司年度总结]设计PPT大纲')"><div class="feature-icon">📊</div><h3>PPT 大纲</h3><p>结构化大纲+每页要点+演讲备注</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiOffice('meeting','整理以下会议纪要：\n主题：[周会]\n内容：[...]')"><div class="feature-icon">📝</div><h3>会议纪要</h3><p>自动提炼重点、待办、决策事项</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiOffice('translate','将以下内容翻译成英文：\n[文本]')"><div class="feature-icon">🌐</div><h3>智能翻译</h3><p>中英日韩多语言互译，专业术语准确</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiOffice('summary','总结以下长文的核心要点：\n[文章]')"><div class="feature-icon">📋</div><h3>文档摘要</h3><p>长文一键提炼，抓核心省时间</p></div>
+</div>
+<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><textarea id="officeInput" rows="4" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="输入你的需求..."></textarea>
+<div style="display:flex;gap:8px;margin-top:8px"><select id="officeModel" class="col-select"><option value="deepseekv3">DeepSeek-V3</option><option value="qwen3">通义千问3</option><option value="gpt4o">GPT-4o</option></select>
+<button class="btn-send" onclick="runAiOffice()">生成</button></div></div>
+<div class="feature-card" style="min-height:200px;max-height:400px;overflow-y:auto;white-space:pre-wrap" id="officeOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择上方功能，输入需求开始</p></div></div>
+</section></div>
+
+<!-- AI Brand -->
+<div class="page" id="page-brand"><section class="section container">
+<h2 class="section-title">🎨 AI 品牌设计</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('logo','为品牌[名称]，行业[领域]，设计3个Logo方案（图形+文字组合）')"><div class="feature-icon">🔣</div><h3>Logo 方案</h3><p>AI 生成 Logo 创意描述+配色方案</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('naming','为[行业/产品]起10个品牌名，中英文各5个')"><div class="feature-icon">✏️</div><h3>品牌命名</h3><p>中英文命名+含义解析+商标可用性</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('slogan','为品牌[名称]（行业：[领域]）创作10条Slogan')"><div class="feature-icon">💬</div><h3>Slogan 创作</h3><p>朗朗上口的品牌口号，含传播力分析</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('color','为[品牌名]（行业：[领域]，调性：[年轻/高端/亲民]）设计配色方案')"><div class="feature-icon">🎨</div><h3>配色方案</h3><p>主色/辅色/点缀色+应用场景说明</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('guide','为[品牌名]撰写品牌视觉识别手册(VI)大纲')"><div class="feature-icon">📘</div><h3>VI 手册</h3><p>品牌视觉规范，含字体/色彩/应用</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('story','为[品牌名]创作品牌故事（500字）')"><div class="feature-icon">📖</div><h3>品牌故事</h3><p>有温度的品牌叙事，打动你的用户</p></div>
+</div>
+<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><textarea id="brandInput" rows="4" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="输入品牌信息..."></textarea>
+<div style="display:flex;gap:8px;margin-top:8px"><select id="brandModel" class="col-select"><option value="deepseekv3">DeepSeek-V3</option><option value="qwen3">通义千问3</option></select>
+<button class="btn-send" onclick="runAiBrand()">生成</button></div></div>
+<div class="feature-card" style="min-height:200px;max-height:400px;overflow-y:auto;white-space:pre-wrap" id="brandOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择功能开始</p></div></div>
+</section></div>
+
+<!-- AI Marketing -->
+<div class="page" id="page-market"><section class="section container">
+<h2 class="section-title">📢 AI 智能营销</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('social','为[产品/品牌]写5条小红书种草文案')"><div class="feature-icon">📱</div><h3>小红书文案</h3><p>种草/测评/教程——爆款标题+正文+标签</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('ad','为[产品]创作3条30秒短视频广告脚本')"><div class="feature-icon">🎬</div><h3>广告脚本</h3><p>短视频/抖音/TikTok 分镜头脚本</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('seo','为网站[URL/主题]写SEO优化的元描述和关键词')"><div class="feature-icon">🔍</div><h3>SEO 优化</h3><p>标题/描述/关键词/内链策略</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('product','为[产品]写电商详情页文案（天猫/京东风格）')"><div class="feature-icon">🛒</div><h3>电商文案</h3><p>卖点提炼+场景描述+促销话术</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('wechat','为[品牌]写一篇微信公众号推文')"><div class="feature-icon">💬</div><h3>公众号推文</h3><p>标题党+正文+引导关注+阅读原文</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('email2','为[产品]设计邮件营销EDM文案')"><div class="feature-icon">📬</div><h3>邮件营销</h3><p>高打开率标题+内容+CTA 按钮</p></div>
+</div>
+<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><textarea id="marketInput" rows="4" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="输入产品/品牌信息..."></textarea>
+<div style="display:flex;gap:8px;margin-top:8px"><select id="marketModel" class="col-select"><option value="deepseekv3">DeepSeek-V3</option><option value="qwen3">通义千问3</option></select>
+<button class="btn-send" onclick="runAiMarket()">生成</button></div></div>
+<div class="feature-card" style="min-height:200px;max-height:400px;overflow-y:auto;white-space:pre-wrap" id="marketOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择功能开始</p></div></div>
+</section></div>
+
+<!-- AI Art -->
+<div class="page" id="page-art"><section class="section container">
+<h2 class="section-title">🎨 AI 绘画工坊</h2>
+<p class="section-desc">Midjourney / Stable Diffusion 完整提示词库，点选组合一键生成提示词</p>
+
+<!-- Prompt Builder -->
+<div class="feature-card" style="margin-bottom:20px">
+  <h4 style="margin-bottom:12px">🧩 提示词组装器</h4>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+    <div><label style="font-size:0.82rem;font-weight:600">主体/内容</label><input id="artSubject" placeholder="a girl, dragon, castle..." style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"></div>
+    <div><label style="font-size:0.82rem;font-weight:600">风格</label><select id="artStyle" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选风格</option></select></div>
+    <div><label style="font-size:0.82rem;font-weight:600">光照</label><select id="artLight" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选光照</option></select></div>
+    <div><label style="font-size:0.82rem;font-weight:600">镜头</label><select id="artCamera" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选镜头</option></select></div>
+    <div><label style="font-size:0.82rem;font-weight:600">画质</label><select id="artQuality" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选画质</option></select></div>
+    <div><label style="font-size:0.82rem;font-weight:600">比例</label><select id="artRatio" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选比例</option></select></div>
+  </div>
+  <div style="margin-top:16px;padding:16px;background:var(--bg-input);border-radius:10px;font-size:0.9rem;word-break:break-all;min-height:60px" id="artPrompt">选择上方选项组合提示词</div>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn-send" onclick="buildArtPrompt()">🔄 刷新组合</button>
+    <button class="btn-sm primary" onclick="copyArtPrompt()">📋 复制提示词</button>
+    <button class="btn-sm" onclick="sendArtToMJ()">🚀 去 MJ 生成</button>
+  </div>
+</div>
+
+<!-- Reference Library -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+  <div class="feature-card">
+    <h4>🎨 风格关键词</h4>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artStyleTags"></div>
+  </div>
+  <div class="feature-card">
+    <h4>💡 光照关键词</h4>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artLightTags"></div>
+  </div>
+  <div class="feature-card">
+    <h4>📷 镜头/角度</h4>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artCameraTags"></div>
+  </div>
+  <div class="feature-card">
+    <h4>👨‍🎨 艺术家风格</h4>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artArtistTags"></div>
+  </div>
+  <div class="feature-card">
+    <h4>🖼️ 画质增强词</h4>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artQualityTags"></div>
+  </div>
+  <div class="feature-card">
+    <h4>⚙️ MJ 参数速查</h4>
+    <div style="font-size:0.82rem;line-height:1.8;color:var(--text-secondary);margin-top:8px">
+      <div><code>--ar 16:9</code> 宽高比</div>
+      <div><code>--s 0-1000</code> 风格化(默认100)</div>
+      <div><code>--c 0-100</code> 随机性(默认0)</div>
+      <div><code>--q .25/.5/1</code> 质量</div>
+      <div><code>--no xxx</code> 排除元素</div>
+      <div><code>--iw 0.5-2</code> 图生图权重</div>
+      <div><code>::权重</code> 多提示词权重</div>
     </div>
   </div>
 </div>
 
-<!-- API Settings Modal -->
-<div class="modal-overlay" id="apiModal">
-  <div class="modal">
-    <h3>🔑 API 密钥配置</h3>
-    <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:16px">密钥保存在浏览器本地，用于前端直连 API（仅限支持 CORS 的平台）</p>
-    <div class="form-group"><label>API 基础 URL</label><input type="text" id="apiBaseInput" placeholder="http://localhost:3001"></div>
-    <div class="form-group"><label>OpenAI API Key</label><input type="password" id="apiOpenAIKey" placeholder="sk-..."></div>
-    <div class="form-group"><label>DeepSeek API Key</label><input type="password" id="apiDeepSeekKey" placeholder="sk-..."></div>
-    <div class="form-group"><label>Gemini API Key</label><input type="password" id="apiGeminiKey" placeholder="..."></div>
-    <div class="form-group"><label>通义千问 API Key</label><input type="password" id="apiQwenKey" placeholder="sk-..."></div>
-    <div class="form-group"><label>Kimi API Key</label><input type="password" id="apiKimiKey" placeholder="sk-..."></div>
-    <div class="form-actions">
-      <button class="btn-sm" onclick="closeApiModal()">取消</button>
-      <button class="btn-sm primary" onclick="saveApiKeys()">保存</button>
-    </div>
+<!-- Prompt Templates -->
+<div style="margin-top:32px">
+  <h3 style="margin-bottom:16px">📋 场景模板</h3>
+  <div class="filter-bar" id="artTplFilters">
+    <button class="filter-tag active" data-tpl="all">全部</button>
   </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px" id="artTemplates"></div>
+</div>
+</section></div>
+
+<!-- Login/Register Modal -->
+<div class="modal-overlay" id="authModal"><div class="modal" style="max-width:420px">
+<div id="authLogin"><h3>👤 登录</h3>
+<div class="form-group"><label>用户名/邮箱</label><input id="loginUser"></div>
+<div class="form-group"><label>密码</label><input type="password" id="loginPwd" onkeydown="if(event.key==='Enter')doLogin()"></div>
+<div class="form-actions"><button class="btn-sm" onclick="showRegister()">去注册</button><button class="btn-sm primary" onclick="doLogin()">登录</button></div></div>
+<div id="authRegister" style="display:none"><h3>📝 注册</h3>
+<div class="form-group"><label>用户名</label><input id="regUser"></div>
+<div class="form-group"><label>邮箱</label><input type="email" id="regEmail"></div>
+<div class="form-group"><label>密码(6位以上)</label><input type="password" id="regPwd"></div>
+<div class="form-actions"><button class="btn-sm" onclick="showLogin()">去登录</button><button class="btn-sm primary" onclick="doRegister()">注册</button></div></div></div></div>
+
+<div class="page" id="page-pricing">
+  <section class="section container">
+    <h2 class="section-title">💎 积分充值</h2>
+    <div class="feature-card" style="text-align:center;margin-bottom:32px;background:linear-gradient(135deg,var(--accent-light),var(--bg-card))">
+      <div style="font-size:2.5rem">💎</div>
+      <div style="font-size:2rem;font-weight:800;color:var(--accent)" id="creditBalance">0</div>
+      <div style="color:var(--text-secondary);margin-bottom:16px">当前积分</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px">
+      <div class="feature-card" style="text-align:center;cursor:pointer" onclick="purchaseCredits(100,'¥9.9')"><div style="font-size:2rem">💎</div><div style="font-size:1.5rem;font-weight:800">100</div><div style="color:var(--text-secondary)">积分</div><div style="font-weight:700;color:var(--accent);margin-top:8px">¥9.9</div><button class="btn-sm primary" style="margin-top:12px;width:100%">购买</button></div>
+      <div class="feature-card" style="text-align:center;border:2px solid var(--accent);cursor:pointer" onclick="purchaseCredits(500,'¥39.9')"><div style="font-size:2rem">⭐</div><div style="font-size:1.5rem;font-weight:800">500</div><div style="color:var(--text-secondary)">积分 热门</div><div style="font-weight:700;color:var(--accent);margin-top:8px">¥39.9</div><button class="btn-send" style="margin-top:12px;width:100%">购买</button></div>
+      <div class="feature-card" style="text-align:center;cursor:pointer" onclick="purchaseCredits(2000,'¥99')"><div style="font-size:2rem">💎</div><div style="font-size:1.5rem;font-weight:800">2000</div><div style="color:var(--text-secondary)">积分</div><div style="font-weight:700;color:var(--accent);margin-top:8px">¥99</div><button class="btn-sm primary" style="margin-top:12px;width:100%">购买</button></div>
+    </div>
+    <!-- 推广指南 -->
+    <h3 class="section-title">📢 推广指南</h3>
+    <div class="features">
+      <div class="guide-card"><h4>🔗 你的推广地址</h4><p style="color:var(--accent);font-size:1rem;font-weight:600;word-break:break-all">j3trisheng.com</p><p style="font-size:0.85rem;color:var(--text-secondary);margin-top:8px">保护域名：.cyou / .fun / .asia 已注册</p></div>
+      <div class="guide-card"><h4>🔐 管理后台地址</h4><p style="color:var(--cyan);font-size:1rem">同上 + 底部「管理后台」</p><p style="font-size:0.85rem;color:var(--text-secondary);margin-top:8px">密码: admin123（登录后可改）</p></div>
+      <div class="guide-card"><h4>💻 换电脑怎么办</h4><p style="font-size:0.85rem;color:var(--text-secondary)">1. 复制整个 G:\大模型聚合网站 文件夹到新电脑<br>2. 在新电脑的 server\ 目录运行: npm install<br>3. 复制 server\.env 文件（含API Key）<br>4. 双击 启动.bat</p></div>
+      <div class="guide-card"><h4>📱 推广渠道</h4><p style="font-size:0.85rem;color:var(--text-secondary)">小红书："AI写小说神器"帖子引流<br>抖音：发AI创作过程视频<br>知乎：回答写作相关话题放链接<br>微信群/朋友圈：分享创作成果</p></div>
+    </div>
+  </section>
 </div>
 
-<!-- Password Modal -->
-<div class="modal-overlay" id="pwdModal">
-  <div class="modal">
-    <h3>⚙️ 修改管理密码</h3>
-    <div class="form-group"><label>当前密码</label><input type="password" id="pwdCurrent"></div>
-    <div class="form-group"><label>新密码</label><input type="password" id="pwdNew"></div>
-    <div class="form-group"><label>确认新密码</label><input type="password" id="pwdConfirm"></div>
-    <div class="form-actions">
-      <button class="btn-sm" onclick="closePwdModal()">取消</button>
-      <button class="btn-sm primary" onclick="changePassword()">保存</button>
+<div class="page" id="page-admin">
+  <section class="section container">
+    <div class="admin-login" id="adminLogin"><div style="font-size:3rem">🔐</div><h2>管理后台</h2><p>输入管理密码</p><input type="password" class="admin-pwd" id="adminPwd" placeholder="密码" onkeydown="if(event.key==='Enter')adminLogin()"><button class="btn-send" onclick="adminLogin()" style="width:100%">登录</button><p style="margin-top:16px;font-size:0.8rem;color:var(--text-secondary)">默认: admin123</p></div>
+    <div class="admin-dashboard" id="adminDashboard">
+      <div class="admin-header"><h2>📊 模型管理</h2><div class="admin-actions"><button class="btn-sm primary" onclick="openAddModel()">+ 添加</button><button class="btn-sm" onclick="exportData()">📥 导出</button><button class="btn-sm" onclick="document.getElementById('importFile').click()">📤 导入</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"><button class="btn-sm" onclick="openApiSettings()">🔑 API Key</button><button class="btn-sm" onclick="openSiteSettings()">⚙️ 系统设置</button><button class="btn-sm" onclick="openPasswordSettings()">🔒 改密码</button><button class="btn-sm danger" onclick="adminLogout()">退出</button></div></div>
+      <div style="overflow-x:auto"><table class="admin-table" id="adminModelTable"><thead><tr><th>名称</th><th>供应商</th><th>标签</th><th>价格</th><th>上下文</th><th>热门</th><th>操作</th></tr></thead><tbody id="adminModelTbody"></tbody></table></div>
     </div>
-  </div>
+  </section>
 </div>
 
-<footer class="footer">
-  <p>AI Nexus 大模型聚合平台 | 数据来源：各模型官方文档 | <a href="javascript:switchPage('admin')" style="color:var(--text-secondary)">管理后台</a></p>
-</footer>
+<!-- Modals -->
+<div class="modal-overlay" id="modelModal"><div class="modal"><h3 id="modalTitle">添加模型</h3><div class="form-group"><label>ID</label><input id="editId" placeholder="如: gpt5"></div><div class="form-row"><div class="form-group"><label>名称</label><input id="editName"></div><div class="form-group"><label>供应商</label><input id="editProvider"></div></div><div class="form-group"><label>描述</label><textarea id="editDesc"></textarea></div><div class="form-row"><div class="form-group"><label>头像色</label><input type="color" id="editAvatar" value="#6366f1"></div><div class="form-group"><label>上下文</label><input id="editContext" placeholder="128K"></div></div><div class="form-row"><div class="form-group"><label>输入价格</label><input id="editInputPrice"></div><div class="form-group"><label>输出价格</label><input id="editOutputPrice"></div></div><label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:16px"><input type="checkbox" id="editFeatured"> 热门</label><div class="form-actions"><button class="btn-sm danger" id="btnDeleteModel" style="display:none;margin-right:auto" onclick="deleteModelConfirm(editingModelId)">删除</button><button class="btn-sm" onclick="closeModal()">取消</button><button class="btn-sm primary" onclick="saveModel()">保存</button></div></div></div>
 
-<!-- Toast -->
+<div class="modal-overlay" id="apiModal"><div class="modal"><h3>🔑 API Key</h3><div class="form-group"><label>API URL</label><input id="apiBaseInput" placeholder="http://localhost:3001"></div><div class="form-group"><label>OpenAI</label><input type="password" id="apiOpenAIKey"></div><div class="form-group"><label>DeepSeek</label><input type="password" id="apiDeepSeekKey"></div><div class="form-group"><label>Gemini</label><input type="password" id="apiGeminiKey"></div><div class="form-group"><label>通义千问</label><input type="password" id="apiQwenKey"></div><div class="form-actions"><button class="btn-sm" onclick="closeApiModal()">取消</button><button class="btn-sm primary" onclick="saveApiKeys()">保存</button></div></div></div>
+
+<div class="modal-overlay" id="siteSettingsModal"><div class="modal" style="max-width:600px"><h3>⚙️ 系统设置</h3><div class="form-group"><label>💎 积分单价 (¥)</label><input type="number" id="setPricePerCredit" step="0.01"></div><div class="form-group"><label>🎁 新用户赠送</label><input type="number" id="setNewUserCredits"></div><div class="form-row"><div class="form-group"><label>聊天消耗</label><input type="number" id="setChatCost"></div><div class="form-group"><label>小说消耗</label><input type="number" id="setNovelCost"></div></div><div class="form-group"><label>🌐 端口</label><input type="number" id="setPort"><span style="font-size:0.7rem;color:var(--text-secondary)">改后重启 server.js</span></div><div class="form-group"><label>📊 成本倍率 (DeepSeek)</label><input type="number" id="setDeepSeekMultiplier" step="0.1"><span style="font-size:0.75rem;color:var(--text-secondary)">成本¥1/M字×倍率=售价</span></div><div class="form-actions"><button class="btn-sm" onclick="closeSiteSettings()">取消</button><button class="btn-sm danger" onclick="resetSiteSettings()">默认</button><button class="btn-sm primary" onclick="saveSiteSettings()">保存</button></div></div></div>
+
+<div class="modal-overlay" id="pwdModal"><div class="modal"><h3>🔒 改密码</h3><div class="form-group"><label>当前密码</label><input type="password" id="pwdCurrent"></div><div class="form-group"><label>新密码</label><input type="password" id="pwdNew"></div><div class="form-group"><label>确认</label><input type="password" id="pwdConfirm"></div><div class="form-actions"><button class="btn-sm" onclick="closePwdModal()">取消</button><button class="btn-sm primary" onclick="changePassword()">保存</button></div></div></div>
+
+<footer class="footer"><p>AI Nexus | j3trisheng.com | <a href="javascript:switchPage('admin')">管理后台</a> | <a href="javascript:switchPage('pricing')">推广指南</a></p></footer>
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== API 配置 =====
-// 自动检测：部署时用同源，本地开发时用 localhost:3001
-const API_BASE = (() => {
-  if (typeof window !== 'undefined' && window.location.hostname !== '' && window.location.hostname !== 'localhost') {
-    return window.location.origin;
-  }
-  const saved = localStorage.getItem('api_base');
-  return saved || 'http://localhost:3001';
+// === Theme (default light) ===
+const themeToggle=document.getElementById('themeToggle');
+const savedTheme=localStorage.getItem('theme')||'light';
+document.documentElement.setAttribute('data-theme',savedTheme);
+themeToggle.textContent=savedTheme==='light'?'🌙':'☀️';
+themeToggle.addEventListener('click',()=>{
+  const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',n);
+  themeToggle.textContent=n==='light'?'🌙':'☀️';
+  localStorage.setItem('theme',n);
+});
+
+// === Toast ===
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
+
+// === Nav ===
+function switchPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);if(pg)pg.classList.add('active');
+  const nl=document.querySelector(`[data-page="${name}"]`);if(nl)nl.classList.add('active');
+  if(name==='models')initAllModels();
+  if(name==='chat')initChatModels();
+  if(name==='compare')initCompareModels();
+  if(name==='novel')renderWizard();
+  if(name==='admin'){document.getElementById('adminLogin').style.display='block';document.getElementById('adminDashboard').style.display='none'}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav-link[data-page]').forEach(l=>l.addEventListener('click',()=>switchPage(l.dataset.page)));
+
+// === API Config ===
+const API_BASE=(()=>{
+  if(typeof window!=='undefined'&&window.location.hostname&&window.location.hostname!=='localhost')return window.location.origin;
+  return localStorage.getItem('api_base')||'http://localhost:3001';
 })();
-let apiOnline = false;
+let apiOnline=false;
 
-// ===== Theme =====
-const themeToggle = document.getElementById('themeToggle');
-const savedTheme = localStorage.getItem('theme') || 'light';
-document.documentElement.setAttribute('data-theme', savedTheme);
-themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-themeToggle.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
-  localStorage.setItem('theme', next);
-});
-
-// ===== Toast =====
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 2500);
-}
-
-// ===== Navigation =====
-function switchPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  const navLink = document.querySelector(`[data-page="${name}"]`);
-  if (navLink) navLink.classList.add('active');
-  if (name === 'models') initAllModels();
-  if (name === 'chat') initChatModels();
-  if (name === 'compare') initCompareModels();
-  if (name === 'admin') {
-    // 检查是否已登录
-    const saved = localStorage.getItem(ADMIN_STORAGE_KEY);
-    if (saved || DEFAULT_PASSWORD) {
-      // 不自动登录，用户需手动输入
-      document.getElementById('adminLogin').style.display = 'block';
-      document.getElementById('adminDashboard').style.display = 'none';
-    }
-  }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-document.querySelectorAll('.nav-link[data-page]').forEach(link => {
-  link.addEventListener('click', () => switchPage(link.dataset.page));
-});
-
-// ===== Model Data =====
-const models = [
-  { id:'gpt4o', name:'GPT-4o', provider:'OpenAI', desc:'OpenAI 最先进的多模态模型，支持文本、图像、音频输入输出，速度极快。', avatar:'#10a37f', tags:['多模态','推理','编程','海外'], context:'128K', inputPrice:'¥18/M', outputPrice:'¥72/M', featured:true, free:false },
-  { id:'gpt4turbo', name:'GPT-4 Turbo', provider:'OpenAI', desc:'GPT-4 的增强版本，知识截止日期更新，指令遵循能力更强。', avatar:'#10a37f', tags:['推理','编程','海外'], context:'128K', inputPrice:'¥72/M', outputPrice:'¥216/M', featured:false, free:false },
-  { id:'claude35', name:'Claude 3.5 Sonnet', provider:'Anthropic', desc:'当前最智能的 Claude 模型，在编程和推理方面表现卓越。', avatar:'#d97706', tags:['推理','编程','长文本','海外'], context:'200K', inputPrice:'¥21.6/M', outputPrice:'¥108/M', featured:true, free:false },
-  { id:'claude3opus', name:'Claude 3 Opus', provider:'Anthropic', desc:'Anthropic 的旗舰模型，强大的深度推理和复杂任务处理能力。', avatar:'#d97706', tags:['推理','深度分析','海外'], context:'200K', inputPrice:'¥108/M', outputPrice:'¥540/M', featured:false, free:false },
-  { id:'gemini15pro', name:'Gemini 1.5 Pro', provider:'Google', desc:'Google 最新旗舰模型，原生多模态，支持超长上下文处理。', avatar:'#4285f4', tags:['多模态','长文本','推理','海外'], context:'2M', inputPrice:'¥25/M', outputPrice:'¥75/M', featured:true, free:false },
-  { id:'gemini15flash', name:'Gemini 1.5 Flash', provider:'Google', desc:'轻量级快速模型，适合高吞吐场景，延迟极低。', avatar:'#4285f4', tags:['多模态','快速','海外'], context:'1M', inputPrice:'¥0.5/M', outputPrice:'¥2/M', featured:false, free:false },
-  { id:'deepseekv3', name:'DeepSeek-V3', provider:'DeepSeek', desc:'国产最强开源模型，671B MoE 架构，性能媲美 GPT-4o。', avatar:'#4f46e5', tags:['开源','推理','编程','国内'], context:'128K', inputPrice:'¥1/M', outputPrice:'¥4/M', featured:true, free:false },
-  { id:'deepseekr1', name:'DeepSeek-R1', provider:'DeepSeek', desc:'深度推理专用模型，思维链能力极强，擅长数学和逻辑推理。', avatar:'#4f46e5', tags:['推理','数学','开源','国内'], context:'128K', inputPrice:'¥4/M', outputPrice:'¥16/M', featured:true, free:false },
-  { id:'llama31', name:'Llama 3.1 405B', provider:'Meta', desc:'Meta 最大的开源模型，405B 参数，性能追赶闭源顶级模型。', avatar:'#0668e1', tags:['开源','通用','海外'], context:'128K', inputPrice:'免费', outputPrice:'免费', featured:false, free:true },
-  { id:'qwen25', name:'通义千问 2.5', provider:'阿里云', desc:'阿里最新旗舰，中文能力突出，多模态理解全面升级。', avatar:'#ff6a00', tags:['多模态','中文优化','开源','国内'], context:'128K', inputPrice:'¥2/M', outputPrice:'¥8/M', featured:true, free:false },
-  { id:'ernie40', name:'文心一言 4.0', provider:'百度', desc:'百度旗舰大模型，中文理解和生成能力业界领先。', avatar:'#2932e1', tags:['中文优化','知识增强','国内'], context:'128K', inputPrice:'¥90/M', outputPrice:'¥90/M', featured:false, free:false },
-  { id:'hunyuan', name:'混元大模型', provider:'腾讯', desc:'腾讯自研万亿参数大模型，多模态理解与生成能力出色。', avatar:'#00a4ff', tags:['多模态','中文优化','国内'], context:'256K', inputPrice:'¥1/M', outputPrice:'¥2/M', featured:false, free:false },
-  { id:'doubao', name:'豆包大模型', provider:'字节跳动', desc:'字节跳动旗下大模型，在对话和内容生成方面表现出色。', avatar:'#e8426e', tags:['中文优化','内容创作','国内'], context:'128K', inputPrice:'¥0.8/M', outputPrice:'¥2/M', featured:false, free:false },
-  { id:'kimi', name:'Kimi 智能助手', provider:'月之暗面', desc:'超长上下文处理能力，支持 200 万字无损理解。', avatar:'#6c5ce7', tags:['长文本','中文优化','国内'], context:'2M', inputPrice:'¥12/M', outputPrice:'¥12/M', featured:true, free:false },
-  { id:'glm4', name:'GLM-4', provider:'智谱 AI', desc:'智谱最新旗舰，All-Tools 智能体能力，中英双语双强。', avatar:'#3859ff', tags:['智能体','中文优化','开源','国内'], context:'128K', inputPrice:'¥0.5/M', outputPrice:'¥0.5/M', featured:false, free:false },
-  { id:'baichuan4', name:'Baichuan 4', provider:'百川智能', desc:'百川最新一代模型，中文医疗和知识问答领域表现突出。', avatar:'#00b894', tags:['中文优化','知识','国内'], context:'128K', inputPrice:'¥20/M', outputPrice:'¥20/M', featured:false, free:false },
-  { id:'minimax', name:'MiniMax-abab6.5', provider:'MiniMax', desc:'MiniMax 旗舰模型，万亿 MoE，多模态理解和语音能力卓越。', avatar:'#fd79a8', tags:['多模态','语音','国内'], context:'256K', inputPrice:'¥5/M', outputPrice:'¥15/M', featured:false, free:false },
-  { id:'yi', name:'Yi-Large', provider:'零一万物', desc:'零一万物旗舰模型，在推理和中文能力上表现出色。', avatar:'#e17055', tags:['推理','中文优化','国内'], context:'200K', inputPrice:'¥10/M', outputPrice:'¥10/M', featured:false, free:false },
-  { id:'mistral', name:'Mistral Large', provider:'Mistral AI', desc:'欧洲最强开源大模型，多语言能力和推理表现优异。', avatar:'#ff6b35', tags:['开源','多语言','推理','海外'], context:'128K', inputPrice:'¥29/M', outputPrice:'¥87/M', featured:false, free:false },
-  { id:'commandr', name:'Command R+', provider:'Cohere', desc:'企业级 RAG 优化模型，检索增强和多语言能力出色。', avatar:'#39594d', tags:['RAG','多语言','海外'], context:'128K', inputPrice:'¥22/M', outputPrice:'¥72/M', featured:false, free:false },
-  { id:'spark4', name:'讯飞星火 4.0', provider:'科大讯飞', desc:'讯飞最新旗舰，语音识别和理解能力领先，多模态全面。', avatar:'#2563eb', tags:['语音','多模态','国内'], context:'128K', inputPrice:'¥30/M', outputPrice:'¥30/M', featured:false, free:false },
-  { id:'step2', name:'Step-2', provider:'阶跃星辰', desc:'万亿参数 MoE 模型，多模态理解和推理能力强劲。', avatar:'#7c3aed', tags:['多模态','推理','国内'], context:'256K', inputPrice:'¥18/M', outputPrice:'¥36/M', featured:false, free:false },
-  { id:'sensechat', name:'日日新 5.0', provider:'商汤科技', desc:'商汤旗舰，原生多模态，端云协同，视觉理解能力强。', avatar:'#dc2626', tags:['多模态','视觉','国内'], context:'128K', inputPrice:'¥15/M', outputPrice:'¥15/M', featured:false, free:false },
-  { id:'phi3', name:'Phi-3.5', provider:'Microsoft', desc:'微软小型高性能模型，在移动端和边缘设备上表现极佳。', avatar:'#0078d4', tags:['轻量','开源','海外'], context:'128K', inputPrice:'免费', outputPrice:'免费', featured:false, free:true },
+// === Models (Latest Versions 2026) ===
+const models=[
+  {id:'gpt4o',name:'GPT-4o',provider:'OpenAI',desc:'最新旗舰多模态模型，文本/图像/音频全通，速度极快。',avatar:'#10a37f',tags:['多模态','推理','编程','海外'],context:'128K',inputPrice:'$2.5/M',outputPrice:'$10/M',featured:true,free:false},
+  {id:'gpt4omini',name:'GPT-4o Mini',provider:'OpenAI',desc:'轻量高效版，性价比极高，适合大量调用。',avatar:'#10a37f',tags:['快速','编程','海外'],context:'128K',inputPrice:'$0.15/M',outputPrice:'$0.6/M',featured:false,free:false},
+  {id:'claude4',name:'Claude 4 Sonnet',provider:'Anthropic',desc:'2026最新Claude，编程和深度推理业界顶尖。',avatar:'#d97706',tags:['推理','编程','长文本','海外'],context:'200K',inputPrice:'$3/M',outputPrice:'$15/M',featured:true,free:false},
+  {id:'claude4opus',name:'Claude 4 Opus',provider:'Anthropic',desc:'Anthropic旗舰，最强深度分析和复杂任务处理。',avatar:'#d97706',tags:['深度分析','推理','海外'],context:'200K',inputPrice:'$15/M',outputPrice:'$75/M',featured:false,free:false},
+  {id:'gemini25pro',name:'Gemini 2.5 Pro',provider:'Google',desc:'Google最新旗舰，原生多模态，百万级上下文。',avatar:'#4285f4',tags:['多模态','长文本','推理','海外'],context:'2M',inputPrice:'$1.25/M',outputPrice:'$5/M',featured:true,free:false},
+  {id:'gemini25flash',name:'Gemini 2.5 Flash',provider:'Google',desc:'极速轻量版，高吞吐低延迟，性价比之王。',avatar:'#4285f4',tags:['多模态','快速','海外'],context:'1M',inputPrice:'$0.15/M',outputPrice:'$0.6/M',featured:false,free:false},
+  {id:'deepseekv3',name:'DeepSeek-V3 (0324)',provider:'DeepSeek',desc:'国产最强大模型，671B MoE，写作能力极强。',avatar:'#4f46e5',tags:['开源','推理','编程','写作','国内'],context:'128K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:true,free:false},
+  {id:'deepseekr1',name:'DeepSeek-R1',provider:'DeepSeek',desc:'深度推理专家，思维链超强，数学逻辑拉满。',avatar:'#4f46e5',tags:['推理','数学','开源','国内'],context:'128K',inputPrice:'¥4/M',outputPrice:'¥16/M',featured:true,free:false},
+  {id:'qwen3',name:'通义千问 3.0',provider:'阿里云',desc:'阿里最新旗舰，中文能力顶尖，多模态全面。',avatar:'#ff6a00',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥2/M',outputPrice:'¥8/M',featured:true,free:false},
+  {id:'kimi2',name:'Kimi K2',provider:'月之暗面',desc:'超长上下文200万字，最强长文本处理。',avatar:'#6c5ce7',tags:['长文本','中文优化','国内'],context:'2M',inputPrice:'¥12/M',outputPrice:'¥12/M',featured:true,free:false},
+  {id:'glm4plus',name:'GLM-4 Plus',provider:'智谱AI',desc:'智谱最新，All-Tools智能体，中英双强。',avatar:'#3859ff',tags:['智能体','中文优化','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥0.5/M',featured:false,free:false},
+  {id:'hunyuan',name:'混元 TurboS',provider:'腾讯',desc:'腾讯最快大模型，多模态理解生成出色。',avatar:'#00a4ff',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥1/M',outputPrice:'¥2/M',featured:false,free:false},
+  {id:'doubao15',name:'豆包 1.5 Pro',provider:'字节跳动',desc:'字节旗舰，对话和内容生成表现卓越。',avatar:'#e8426e',tags:['中文优化','内容创作','国内'],context:'256K',inputPrice:'¥0.8/M',outputPrice:'¥2/M',featured:false,free:false},
+  {id:'ernie45',name:'文心一言 4.5',provider:'百度',desc:'百度旗舰，中文理解和知识增强业界领先。',avatar:'#2932e1',tags:['中文优化','知识增强','国内'],context:'128K',inputPrice:'¥60/M',outputPrice:'¥60/M',featured:false,free:false},
+  {id:'minimax1',name:'MiniMax-M1',provider:'MiniMax',desc:'万亿MoE，多模态理解和语音能力卓越。',avatar:'#fd79a8',tags:['多模态','语音','国内'],context:'256K',inputPrice:'¥5/M',outputPrice:'¥15/M',featured:false,free:false},
+  {id:'yi-lightning',name:'Yi-Lightning',provider:'零一万物',desc:'极速推理模型，中文能力出色，性价比高。',avatar:'#e17055',tags:['推理','快速','国内'],context:'200K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:false,free:false},
+  {id:'llama4',name:'Llama 4 Scout',provider:'Meta',desc:'Meta最新开源，109B参数，性能强劲。',avatar:'#0668e1',tags:['开源','通用','海外'],context:'10M',inputPrice:'免费',outputPrice:'免费',featured:false,free:true},
+  {id:'mistral-large2',name:'Mistral Large 2',provider:'Mistral AI',desc:'欧洲最强开源，多语言和推理表现优异。',avatar:'#ff6b35',tags:['开源','多语言','推理','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$6/M',featured:false,free:false},
+  {id:'grok3',name:'Grok-3',provider:'xAI',desc:'马斯克xAI最新，实时信息+深度推理。',avatar:'#1d9bf0',tags:['推理','实时信息','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$8/M',featured:false,free:false},
+  {id:'spark4',name:'讯飞星火 4.0',provider:'科大讯飞',desc:'讯飞最新，语音识别领先，多模态全面。',avatar:'#2563eb',tags:['语音','多模态','国内'],context:'128K',inputPrice:'¥30/M',outputPrice:'¥30/M',featured:false,free:false},
 ];
 
-// ===== Render Model Card =====
-function renderModelCard(m) {
-  return `
-    <div class="model-card ${m.featured ? 'featured' : ''}" data-id="${m.id}">
-      <div class="model-header">
-        <div class="model-avatar" style="background:${m.avatar}">${m.name[0]}</div>
-        <div>
-          <div class="model-name">${m.name}</div>
-          <div class="model-provider">${m.provider}</div>
-        </div>
-      </div>
-      <div class="model-desc">${m.desc}</div>
-      <div class="model-tags">
-        ${m.tags.map(t => `<span class="tag${t==='免费'?' green':''}${t==='开源'?' orange':''}">${t}</span>`).join('')}
-      </div>
-      <div class="model-meta">
-        <span class="model-price">输入:${m.inputPrice} | 输出:${m.outputPrice}</span>
-        <span class="model-context">上下文: ${m.context}</span>
-      </div>
-    </div>
-  `;
-}
-
-// ===== Featured Models =====
-function initFeaturedModels() {
-  const container = document.getElementById('featuredModels');
-  container.innerHTML = models.filter(m => m.featured).map(renderModelCard).join('');
-}
+// === Render ===
+function renderModelCard(m){return`<div class="model-card${m.featured?' featured':''}"><div class="model-header"><div class="model-avatar" style="background:${m.avatar}">${m.name[0]}</div><div><div class="model-name">${m.name}</div><div class="model-provider">${m.provider}</div></div></div><div class="model-desc">${m.desc}</div><div class="model-tags">${m.tags.map(t=>`<span class="tag${t==='免费'?' green':''}${t==='开源'?' orange':''}">${t}</span>`).join('')}</div><div class="model-meta"><span class="model-price">入:${m.inputPrice} | 出:${m.outputPrice}</span><span class="model-context">${m.context}</span></div></div>`}
+function initFeaturedModels(){document.getElementById('featuredModels').innerHTML=models.filter(m=>m.featured).map(renderModelCard).join('')}
 initFeaturedModels();
 
-// ===== All Models with Filter =====
-function initAllModels() {
-  const container = document.getElementById('allModels');
-  const activeFilter = document.querySelector('#page-models .filter-tag.active')?.dataset?.filter || 'all';
-  const searchTerm = document.getElementById('modelSearch')?.value?.toLowerCase() || '';
-  let filtered = models;
-  if (activeFilter !== 'all') {
-    filtered = filtered.filter(m => m.tags.includes(activeFilter));
-  }
-  if (searchTerm) {
-    filtered = filtered.filter(m =>
-      m.name.toLowerCase().includes(searchTerm) ||
-      m.provider.toLowerCase().includes(searchTerm) ||
-      m.tags.some(t => t.toLowerCase().includes(searchTerm)) ||
-      m.desc.toLowerCase().includes(searchTerm)
-    );
-  }
-  container.innerHTML = filtered.map(renderModelCard).join('');
-  document.getElementById('noResults').style.display = filtered.length ? 'none' : 'block';
-  document.getElementById('modelCount').textContent = models.length;
+function initAllModels(){
+  const af=document.querySelector('#page-models .filter-tag.active')?.dataset?.filter||'all';
+  const st=document.getElementById('modelSearch')?.value?.toLowerCase()||'';
+  let f=models;
+  if(af!=='all')f=f.filter(m=>m.tags.includes(af));
+  if(st)f=f.filter(m=>m.name.toLowerCase().includes(st)||m.provider.toLowerCase().includes(st)||m.tags.some(t=>t.includes(st)));
+  document.getElementById('allModels').innerHTML=f.map(renderModelCard).join('');
+  document.getElementById('noResults').style.display=f.length?'none':'block';
+  document.getElementById('modelCount').textContent=models.length;
 }
+document.getElementById('modelSearch').addEventListener('input',initAllModels);
+document.querySelectorAll('#page-models .filter-tag').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('#page-models .filter-tag').forEach(x=>x.classList.remove('active'));t.classList.add('active');initAllModels()}));
 
-document.getElementById('modelSearch').addEventListener('input', initAllModels);
-document.querySelectorAll('#page-models .filter-tag').forEach(tag => {
-  tag.addEventListener('click', () => {
-    document.querySelectorAll('#page-models .filter-tag').forEach(t => t.classList.remove('active'));
-    tag.classList.add('active');
-    initAllModels();
+// === Chat ===
+function initChatModels(){document.getElementById('chatModelList').innerHTML=models.map(m=>`<label class="model-checkbox"><input type="checkbox" value="${m.id}" ${m.featured?'checked':''}><div><div class="model-checkbox-label">${m.name}</div><div class="model-checkbox-provider">${m.provider}</div></div></label>`).join('')}
+async function sendChatMessage(){
+  const msg=document.getElementById('chatInput').value.trim();if(!msg)return;
+  const sel=[...document.querySelectorAll('#chatModelList input:checked')].map(cb=>cb.value);
+  if(!sel.length){showToast('请选模型');return}
+  const md=document.getElementById('chatMessages');if(md.querySelector('[data-p]'))md.innerHTML='';
+  const time=new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+  md.innerHTML+=`<div class="chat-msg user"><div class="chat-msg-header"><span class="chat-msg-model">你</span></div><div class="chat-msg-content">${escapeHtml(msg)}</div></div>`;
+  document.getElementById('chatInput').value='';const btn=document.getElementById('btnSend');btn.disabled=true;
+  const ps=sel.map(async id=>{
+    const m=models.find(x=>x.id===id);if(!m)return;
+    const pid='m-'+id+'-'+Date.now();
+    md.innerHTML+=`<div class="chat-msg" id="${pid}"><div class="chat-msg-header"><div class="chat-msg-avatar" style="background:${m.avatar}">${m.name[0]}</div><span class="chat-msg-model">${m.name}</span></div><div class="chat-msg-content"><span class="spinner"></span>思考中…</div></div>`;
+    md.scrollTop=md.scrollHeight;
+    try{
+      const r=await callModelAPI(id,msg);
+      const el=document.getElementById(pid);if(el){el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if(r.simulated)el.querySelector('.chat-msg-content').style.opacity='0.6'}
+    }catch(e){const el=document.getElementById(pid);if(el)el.querySelector('.chat-msg-content').innerHTML=`<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`}
+    md.scrollTop=md.scrollHeight;
   });
-});
+  await Promise.all(ps);btn.disabled=false;
+}
+function escapeHtml(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
 
-// ===== Chat =====
-function initChatModels() {
-  const container = document.getElementById('chatModelList');
-  container.innerHTML = models.map(m => `
-    <label class="model-checkbox">
-      <input type="checkbox" value="${m.id}" ${m.featured ? 'checked' : ''}>
-      <div>
-        <div class="model-checkbox-label">${m.name}</div>
-        <div class="model-checkbox-provider">${m.provider}</div>
-      </div>
-    </label>
-  `).join('');
+// === API Call ===
+async function callModelAPI(modelId,question){
+  try{const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:modelId,messages:[{role:'user',content:question}]})});if(r.ok)return await r.json()}catch(e){}
+  const m=models.find(x=>x.id===modelId);
+  return {model:modelId,content:`[${m?.name||modelId} 模拟]\n\n⚠️ API未连接。\n在管理后台→API Key 中配置后获得真实回复。`,simulated:true};
 }
 
-async function sendChatMessage() {
-  const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
-  if (!msg) return;
+// === Compare ===
+function initCompareModels(){updateCompareLayout()}
+function updateCompareLayout(){
+  const cols=parseInt(document.getElementById('colSelect').value);
+  const g=document.getElementById('compareGrid');g.className='compare-grid cols-'+cols;g.innerHTML='';
+  const defs=['gpt4o','deepseekv3','qwen3','kimi2'];
+  for(let i=0;i<cols;i++){
+    const dm=models.find(m=>m.id===defs[i]);
+    g.innerHTML+=`<div class="compare-panel"><div class="compare-panel-header"><div class="compare-panel-avatar" style="background:${dm.avatar}">${dm.name[0]}</div><select class="col-select" style="flex:1" onchange="updateCompareModel(this,${i})">${models.map(m=>`<option value="${m.id}" ${m.id===defs[i]?'selected':''}>${m.name}</option>`).join('')}</select></div><div class="compare-panel-content" id="compareContent${i}">选模型，输问题，点对比</div></div>`;
+  }
+}
+function updateCompareModel(s,i){const m=models.find(x=>x.id===s.value);const h=s.parentElement;const a=h.querySelector('.compare-panel-avatar');if(a){a.style.background=m.avatar;a.textContent=m.name[0]}}
+async function runCompare(){
+  const p=document.getElementById('comparePrompt').value.trim();if(!p){showToast('输入问题');return}
+  const cols=parseInt(document.getElementById('colSelect').value);
+  const ps=[];
+  for(let i=0;i<cols;i++){
+    const c=document.getElementById('compareContent'+i);c.innerHTML='<span class="spinner"></span>';const s=document.querySelectorAll('#compareGrid select')[i];
+    ps.push(callModelAPI(s.value,p).then(r=>{c.innerHTML=escapeHtml(r.content);if(r.simulated)c.style.opacity='0.6'}).catch(e=>{c.innerHTML=`❌ ${e.message}`}));
+  }
+  await Promise.all(ps);
+}
+function setComparePrompt(t){document.getElementById('comparePrompt').value=t;runCompare()}
 
-  const selected = [...document.querySelectorAll('#chatModelList input:checked')].map(cb => cb.value);
-  if (selected.length === 0) { showToast('请至少选择一个模型'); return; }
+// === Novel Wizard ===
+let wizardStep='type',novelType='玄幻',novelOutline='',novelChars='',novelWorld='',novelHistory='';
+let totalWordsWritten=parseInt(localStorage.getItem('nw')||'0'),chapterCountWritten=parseInt(localStorage.getItem('nc')||'0');
+let novelBookTitle=localStorage.getItem('nbt')||'未开始';
+function renderWizard(){
+  const steps=[{id:'type',t:'选小说类型',c:`<div class="feature-card"><select id="wizType" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.95rem"><option>玄幻</option><option>仙侠</option><option>都市</option><option>科幻</option><option>悬疑</option><option>言情</option><option>历史</option><option>游戏</option><option>轻小说</option></select></div>`},
+  {id:'outline',t:'定故事大纲',c:`<div class="feature-card"><textarea id="wizOutline" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="如：废柴少年捡到上古神剑，逆天改命踏上修仙之路...&#10;越详细越好，AI会根据你的大纲创作"></textarea></div>`},
+  {id:'chars',t:'出人物设定',c:`<div class="feature-card"><textarea id="wizChars" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="主角叫什么、什么性格、有什么能力...&#10;留空让AI自动生成"></textarea></div>`},
+  {id:'world',t:'世界观设定',c:`<div class="feature-card"><textarea id="wizWorld" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="修炼体系、势力分布、规则设定...&#10;留空让AI自动构建"></textarea></div>`},
+  {id:'write',t:'开始写正文',c:`<div class="feature-card"><textarea id="wizWrite" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="本章要写什么内容？&#10;如：第一章 废柴少年的日常"></textarea><div style="margin-top:8px"><select id="wizModel" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="deepseekv3">DeepSeek-V3 (推荐写作)</option><option value="deepseekr1">DeepSeek-R1 (深度推理)</option><option value="qwen3">通义千问3.0</option></select></div></div>`}];
+  const s=steps.find(s=>s.id===wizardStep);
+  document.getElementById('wizardPanel').innerHTML=`<h4 style="margin-bottom:12px">${s.t}</h4>${s.c}`;
+  document.querySelectorAll('.wizard-step').forEach(el=>{el.classList.remove('active','done');if(el.dataset.wstep===wizardStep)el.classList.add('active');const o=['type','outline','chars','world','write'];if(o.indexOf(el.dataset.wstep)<o.indexOf(wizardStep))el.classList.add('done')});
+  document.getElementById('wizardActionBtn').textContent=wizardStep==='write'?'开始创作 ✍️':'下一步 →';
+  if(wizardStep==='type'){const sel=document.getElementById('wizType');if(sel)sel.value=novelType}
+  if(wizardStep==='outline'){const ta=document.getElementById('wizOutline');if(ta)ta.value=novelOutline}
+  if(wizardStep==='chars'){const ta=document.getElementById('wizChars');if(ta)ta.value=novelChars}
+  if(wizardStep==='world'){const ta=document.getElementById('wizWorld');if(ta)ta.value=novelWorld}
+  updateNovelProgress2();
+}
+async function wizardAction(){
+  const order=['type','outline','chars','world','write'];
+  if(wizardStep==='type'){novelType=document.getElementById('wizType')?.value||'玄幻';wizardStep='outline'}
+  else if(wizardStep==='outline'){novelOutline=document.getElementById('wizOutline')?.value||'';wizardStep='chars'}
+  else if(wizardStep==='chars'){novelChars=document.getElementById('wizChars')?.value||'';wizardStep='world'}
+  else if(wizardStep==='world'){novelWorld=document.getElementById('wizWorld')?.value||'';wizardStep='write'}
+  else if(wizardStep==='write'){
+    const content=document.getElementById('wizWrite')?.value||'';
+    if(!content&&!novelOutline){showToast('请输入本章要写的内容');return}
+    if(!spendCredits(5))return;
+    const modelId=document.getElementById('wizModel')?.value||'deepseekv3';
+    const prompt=`你是专业${novelType}小说家。严格遵循以下设定创作。\n\n【小说大纲】${novelOutline}\n【人物设定】${novelChars||'由你合理设计'}\n【世界观】${novelWorld||'由你合理构建'}\n【前情】${novelHistory||'故事开始'}\n【本章要求】${content}\n\n写一章3500字左右的完整小说。`;
+    const out=document.getElementById('novelOutput');out.innerHTML='<span class="spinner"></span> 创作中...';
+    try{
+      const r=await callModelAPI(modelId,prompt);
+      novelHistory+=(novelHistory?'\n':'')+r.content;
+      out.innerHTML=escapeHtml(r.content);
+      usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
+    }catch(e){out.innerHTML=`<span style="color:var(--red)">❌ ${e.message}</span>`}
+    return;
+  }
+  renderWizard();
+}
+function updateNovelProgress2(){document.getElementById('totalWords').textContent=totalWordsWritten.toLocaleString();document.getElementById('chapterCount').textContent=chapterCountWritten;document.getElementById('novelBookTitle').textContent=novelBookTitle}
+function saveChapter(){
+  const c=document.getElementById('novelOutput').textContent.trim();if(!c||c.includes('创作中')){showToast('请先完成创作');return}
+  if(novelBookTitle==='未开始'){const t=prompt('书名：','');if(!t)return;novelBookTitle=t;localStorage.setItem('nbt',t)}
+  chapterCountWritten++;totalWordsWritten+=c.length;localStorage.setItem('nc',chapterCountWritten);localStorage.setItem('nw',totalWordsWritten);
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');ch.push({ch:chapterCountWritten,content:c,time:new Date().toISOString()});localStorage.setItem('nch',JSON.stringify(ch));
+  updateNovelProgress2();showToast(`第${chapterCountWritten}章已保存`);
+}
+function loadNovelProject(){
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');if(!ch.length){showToast('暂无章节');return}
+  const idx=prompt(`${ch.length}章:\n${ch.map((c,i)=>`第${c.ch}章 (${c.content.length}字)`).join('\n')}\n\n输入章节号加载:`);
+  if(idx&&ch[idx-1]){document.getElementById('novelOutput').innerHTML=escapeHtml(ch[idx-1].content);novelHistory=ch[idx-1].content;showToast('已加载')}
+}
+function copyNovelOutput(){navigator.clipboard.writeText(document.getElementById('novelOutput').textContent).then(()=>showToast('已复制'))}
+function downloadNovel(){
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');let t=novelBookTitle+'\n\n';
+  if(ch.length)ch.forEach(c=>{t+=`第${c.ch}章\n\n${c.content}\n\n`});else t+=document.getElementById('novelOutput').textContent;
+  const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(novelBookTitle!=='未开始'?novelBookTitle:'小说')+'.txt';a.click();
+}
 
-  const messagesDiv = document.getElementById('chatMessages');
-  if (messagesDiv.querySelector('[data-placeholder]')) messagesDiv.innerHTML = '';
+// === Media ===
+let mediaModeType='storyboard';
+function mediaMode(b){document.querySelectorAll('#mediaModes .filter-tag').forEach(x=>x.classList.remove('active'));b.classList.add('active');mediaModeType=b.dataset.mode}
+async function aiCreateMedia(){
+  const i=document.getElementById('mediaInput').value.trim();if(!i){showToast('输入故事');return}
+  if(!spendCredits(8))return;const s=document.getElementById('mediaStyle').value;
+  const o=document.getElementById('mediaOutput');o.innerHTML='<span class="spinner"></span> 生成中...';
+  const pm={storyboard:`漫画家(${s})。6格分镜脚本(画面/动作/镜头/对白):\n${i}`,chars:`角色设计师(${s})。3个核心角色(外貌/服装/性格):\n${i}`,scene:`场景设计师(${s})。4个场景(环境/色彩/光影):\n${i}`,dialog:`编剧(${s})。角色对白(语气/情感):\n${i}`};
+  try{const r=await callModelAPI('deepseekv3',pm[mediaModeType]);o.innerHTML=escapeHtml(r.content);usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay()}catch(e){o.innerHTML=`❌ ${e.message}`}
+}
+function generateComicImage(){
+  const s=document.getElementById('mediaOutput').textContent.trim();if(!s.includes('分镜')&&!s.includes('角色')){showToast('先生成内容');return}
+  if(!spendCredits(10))return;const st=document.getElementById('mediaStyle').value;usedImagesCount++;localStorage.setItem('uim',usedImagesCount);updateCreditDisplay();
+  document.getElementById('mediaOutput').innerHTML+=`\n\n--- 🖼️ (${st}) ---\n${st}, ${s.substring(0,300)}, professional comic, --ar 16:9`;
+}
+function copyMediaOutput(){navigator.clipboard.writeText(document.getElementById('mediaOutput').textContent).then(()=>showToast('已复制'))}
+function downloadMedia(){const t=document.getElementById('mediaOutput').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='漫剧_'+new Date().toISOString().slice(0,10)+'.txt';a.click()}
 
-  const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+// === Credits ===
+let userCredits=parseInt(localStorage.getItem('cr')||'10'),usedTokensCount=parseInt(localStorage.getItem('utk')||'0'),usedImagesCount=parseInt(localStorage.getItem('uim')||'0');
+function updateCreditDisplay(){const e=document.getElementById('creditDisplay');if(e)e.textContent=userCredits;const b=document.getElementById('creditBalance');if(b)b.textContent=userCredits}
+function spendCredits(a){if(userCredits<a){showToast(`积分不足(${userCredits})，请充值`);return false}userCredits-=a;localStorage.setItem('cr',userCredits);updateCreditDisplay();return true}
+function purchaseCredits(a,p){if(confirm(`购买${a}积分(${p})？\n演示版模拟充值`)){userCredits+=a;localStorage.setItem('cr',userCredits);updateCreditDisplay();showToast(`+${a}积分`)}}
 
-  // 用户消息
-  messagesDiv.innerHTML += `
-    <div class="chat-msg user">
-      <div class="chat-msg-header">
-        <span class="chat-msg-model">你</span>
-        <span class="chat-msg-time">${time}</span>
-      </div>
-      <div class="chat-msg-content">${escapeHtml(msg)}</div>
-    </div>
-  `;
-  input.value = ''; input.style.height = 'auto';
-  const btn = document.getElementById('btnSend');
-  btn.disabled = true;
+// === User Auth ===
+let currentUser=JSON.parse(localStorage.getItem('cuser')||'null');
+function getUsers(){try{return JSON.parse(localStorage.getItem('users')||'[]')}catch(e){return[]}}
+function saveUsers(u){localStorage.setItem('users',JSON.stringify(u))}
+function renderUserNav(){
+  const el=document.getElementById('userNav');
+  if(currentUser){
+    el.innerHTML=`<span style="font-size:0.82rem;cursor:pointer" onclick="switchPage('pricing')">👤 ${escapeHtml(currentUser.username)}</span><button class="btn-sm" onclick="doLogout()">退出</button>`;
+  }else{
+    el.innerHTML=`<button class="btn-sm primary" onclick="openAuth()">登录</button>`;
+  }
+}
+function openAuth(){document.getElementById('authModal').classList.add('show');showLogin()}
+function closeAuth(){document.getElementById('authModal').classList.remove('show')}
+function showLogin(){document.getElementById('authLogin').style.display='block';document.getElementById('authRegister').style.display='none'}
+function showRegister(){document.getElementById('authLogin').style.display='none';document.getElementById('authRegister').style.display='block'}
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPwd').value;
+  if(!u||!p){showToast('请输入用户名和密码');return}
+  const users=getUsers();const found=users.find(x=>(x.username===u||x.email===u)&&x.password===btoa(p));
+  if(!found){showToast('用户名或密码错误');return}
+  currentUser={username:found.username,email:found.email};localStorage.setItem('cuser',JSON.stringify(currentUser));
+  userCredits=parseInt(localStorage.getItem('cr_'+found.username)||'10');localStorage.setItem('cr',userCredits);
+  closeAuth();renderUserNav();updateCreditDisplay();showToast('登录成功');
+}
+function doRegister(){
+  const u=document.getElementById('regUser').value.trim(),e=document.getElementById('regEmail').value.trim(),p=document.getElementById('regPwd').value;
+  if(!u||!e||!p){showToast('请填写所有字段');return}
+  if(p.length<6){showToast('密码至少6位');return}
+  const users=getUsers();
+  if(users.find(x=>x.username===u)){showToast('用户名已存在');return}
+  if(users.find(x=>x.email===e)){showToast('邮箱已被注册');return}
+  users.push({username:u,email:e,password:btoa(p),created:new Date().toISOString()});saveUsers(users);
+  showToast('注册成功，请登录');showLogin();
+}
+function doLogout(){currentUser=null;localStorage.removeItem('cuser');renderUserNav();showToast('已退出')}
 
-  // 并发调用所有选中的模型
-  const promises = selected.map(async (id) => {
-    const m = models.find(x => x.id === id);
-    if (!m) return;
+// === AI Office ===
+let officePrompt='';
+function aiOffice(type,template){officePrompt=template;document.getElementById('officeInput').value=template;document.getElementById('officeInput').focus()}
+async function runAiOffice(){
+  const i=document.getElementById('officeInput').value.trim();if(!i){showToast('输入需求');return}
+  if(!spendCredits(3))return;
+  const m=document.getElementById('officeModel').value,o=document.getElementById('officeOutput');
+  o.innerHTML='<span class="spinner"></span> 生成中...';
+  try{const r=await callModelAPI(m,i);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
+}
 
-    // 插入加载占位
-    const placeholderId = 'msg-' + id + '-' + Date.now();
-    messagesDiv.innerHTML += `
-      <div class="chat-msg" id="${placeholderId}">
-        <div class="chat-msg-header">
-          <div class="chat-msg-avatar" style="background:${m.avatar}">${m.name[0]}</div>
-          <span class="chat-msg-model">${m.name}</span>
-          <span class="chat-msg-time">${time}</span>
-        </div>
-        <div class="chat-msg-content"><span class="spinner"></span>思考中…</div>
-      </div>
-    `;
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+// === AI Brand ===
+let brandPrompt='';
+function aiBrand(type,template){brandPrompt=template;document.getElementById('brandInput').value=template;document.getElementById('brandInput').focus()}
+async function runAiBrand(){
+  const i=document.getElementById('brandInput').value.trim();if(!i){showToast('输入品牌信息');return}
+  if(!spendCredits(5))return;
+  const m=document.getElementById('brandModel').value,o=document.getElementById('brandOutput');
+  o.innerHTML='<span class="spinner"></span> 生成中...';
+  try{const r=await callModelAPI(m,i);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
+}
 
-    try {
-      const response = await callModelAPI(id, msg);
-      const placeholder = document.getElementById(placeholderId);
-      if (placeholder) {
-        placeholder.querySelector('.chat-msg-content').innerHTML = escapeHtml(response.content);
-        if (response.simulated) {
-          placeholder.querySelector('.chat-msg-content').style.opacity = '0.7';
-        }
-      }
-    } catch (err) {
-      const placeholder = document.getElementById(placeholderId);
-      if (placeholder) {
-        placeholder.querySelector('.chat-msg-content').innerHTML =
-          `<span style="color:var(--red)">❌ 调用失败: ${escapeHtml(err.message)}</span>`;
-      }
-    }
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+// === AI Marketing ===
+let marketPrompt='';
+function aiMarket(type,template){marketPrompt=template;document.getElementById('marketInput').value=template;document.getElementById('marketInput').focus()}
+async function runAiMarket(){
+  const i=document.getElementById('marketInput').value.trim();if(!i){showToast('输入产品信息');return}
+  if(!spendCredits(3))return;
+  const m=document.getElementById('marketModel').value,o=document.getElementById('marketOutput');
+  o.innerHTML='<span class="spinner"></span> 生成中...';
+  try{const r=await callModelAPI(m,i);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
+}
+
+// === AI Art ===
+const ART_DATA={
+  styles:[
+    {v:'anime style',l:'动漫风'},{v:'cyberpunk',l:'赛博朋克'},{v:'oil painting',l:'油画'},
+    {v:'watercolor',l:'水彩'},{v:'ink wash painting',l:'水墨画'},{v:'pencil sketch',l:'素描'},
+    {v:'3D render, C4D',l:'3D渲染'},{v:'pixel art',l:'像素风'},{v:'Chinese ink style',l:'国潮水墨'},
+    {v:'surrealism',l:'超现实'},{v:'impressionism',l:'印象派'},{v:'art nouveau',l:'新艺术'},
+    {v:'minimalist',l:'极简'},{v:'Baroque',l:'巴洛克'},{v:'pop art',l:'波普'},
+    {v:'Ukiyo-e',l:'浮世绘'},{v:'steampunk',l:'蒸汽朋克'},{v:'fantasy art',l:'奇幻'},
+    {v:'dark fantasy',l:'暗黑'},{v:'synthwave',l:'合成波'},{v:'low poly',l:'低多边形'},
+    {v:'isometric',l:'等距'},{v:'Studio Ghibli',l:'吉卜力'},{v:'Makoto Shinkai',l:'新海诚'},
+    {v:'comic book style',l:'美漫'},{v:'manga style',l:'日漫'},{v:'brutalism',l:'野兽派'},
+  ],
+  lights:[
+    {v:'cinematic lighting',l:'电影光'},{v:'volumetric lighting',l:'体积光'},{v:'golden hour',l:'黄金时刻'},
+    {v:'neon lights',l:'霓虹灯'},{v:'rim lighting',l:'轮廓光'},{v:'backlight',l:'逆光'},
+    {v:'soft diffused light',l:'柔光'},{v:'dramatic lighting',l:'戏剧光'},{v:'god rays',l:'圣光'},
+    {v:'studio lighting',l:'棚拍'},{v:'moonlight',l:'月光'},{v:'candlelight',l:'烛光'},
+    {v:'sunlight streaming',l:'阳光'},{v:'bioluminescent',l:'生物光'},{v:'fog and haze',l:'雾光'},
+  ],
+  cameras:[
+    {v:'close-up shot',l:'特写'},{v:'medium shot',l:'中景'},{v:'wide shot',l:'全景'},
+    {v:'aerial view',l:'俯瞰'},{v:'bird eye view',l:'鸟瞰'},{v:'low angle shot',l:'仰拍'},
+    {v:'fisheye lens',l:'鱼眼'},{v:'macro lens',l:'微距'},{v:'tilt-shift',l:'移轴'},
+    {v:'depth of field',l:'景深'},{v:'bokeh',l:'散景'},{v:'portrait lens 85mm',l:'85mm人像'},
+  ],
+  artists:[
+    {v:'by Greg Rutkowski',l:'G.Rutkowski'},{v:'by Alphonse Mucha',l:'A.Mucha'},
+    {v:'by James Jean',l:'James Jean'},{v:'by Yoshitaka Amano',l:'天野喜孝'},
+    {v:'by HR Giger',l:'HR Giger'},{v:'by Makoto Shinkai',l:'新海诚'},
+    {v:'by Hayao Miyazaki',l:'宫崎骏'},{v:'by WLOP',l:'WLOP'},
+    {v:'by Moebius',l:'Moebius'},{v:'by Syd Mead',l:'Syd Mead'},
+    {v:'by Zdzisław Beksiński',l:'贝克辛斯基'},{v:'by Guweiz',l:'Guweiz'},
+  ],
+  qualities:[
+    {v:'8K, hyper detailed',l:'8K超精细'},{v:'4K, highly detailed',l:'4K高清'},
+    {v:'photorealistic',l:'照片级'},{v:'masterpiece, best quality',l:'大师级'},
+    {v:'intricate details',l:'精细细节'},{v:'sharp focus',l:'锐利对焦'},
+    {v:'HDR',l:'HDR'},{v:'trending on ArtStation',l:'ArtStation'},
+  ],
+  ratios:[
+    {v:'--ar 1:1',l:'1:1 方形'},{v:'--ar 2:3',l:'2:3 竖版'},{v:'--ar 3:2',l:'3:2 横版'},
+    {v:'--ar 16:9',l:'16:9 宽屏'},{v:'--ar 9:16',l:'9:16 手机'},
+  ],
+  templates:[
+    {cat:'人物',p:'beautiful portrait of {subject}, {style}, {light}, {camera}, {quality}, {ratio}'},
+    {cat:'场景',p:'epic landscape, {subject}, {style}, {light}, {camera}, {quality}, {ratio}'},
+    {cat:'概念',p:'concept art, {subject}, {style}, {light}, {quality}, {ratio}'},
+    {cat:'产品',p:'product photography, {subject}, {style}, studio lighting, {camera}, {quality}, {ratio}'},
+    {cat:'建筑',p:'architecture visualization, {subject}, {style}, {light}, {camera}, {quality}, {ratio}'},
+    {cat:'食物',p:'food photography, {subject}, {style}, {light}, appetizing, {camera}, {quality}, {ratio}'},
+    {cat:'科幻',p:'sci-fi, {subject}, futuristic, {style}, {light}, {camera}, {quality}, {ratio}'},
+    {cat:'古风',p:'ancient Chinese style, {subject}, ink painting influence, {light}, {quality}, {ratio}'},
+    {cat:'赛博',p:'cyberpunk city, {subject}, neon lights, rain, {camera}, {quality}, {ratio}'},
+  ]
+};
+
+let artPageInit=false;
+function initArtData(){
+  if(artPageInit)return;artPageInit=true;
+  ['artStyle','artLight','artCamera','artQuality','artRatio'].forEach(id=>{
+    const sel=document.getElementById(id);if(!sel)return;
+    const key=id.replace('art','').toLowerCase()+(id.includes('Ratio')?'s':(id.includes('Quality')?'ies':'s'));
+    (ART_DATA[key]||[]).forEach(d=>{const o=document.createElement('option');o.value=d.v;o.textContent=d.l;sel.appendChild(o)});
   });
-
-  await Promise.all(promises);
-  btn.disabled = false;
-}
-
-// ===== API 调用 =====
-async function callModelAPI(modelId, question) {
-  try {
-    const res = await fetch(`${API_BASE}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: modelId,
-        messages: [{ role: 'user', content: question }],
-      }),
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    // API 不可用时降级为模拟回复
-    const m = models.find(x => x.id === modelId);
-    return {
-      model: modelId,
-      content: `[${m?.name || modelId} 模拟回复]\n\n⚠️ 后端 API 未连接，当前为模拟回复。\n\n如需真实 AI 回复，请启动本地后端服务 (双击启动.bat) 或配置 API Key。\n\n---\n关于「${question}」这个问题：\n\n这是一个值得深入探讨的话题。从我的分析来看，建议从以下几个角度思考：\n\n1. 明确核心诉求和边界条件\n2. 收集相关信息辅助决策\n3. 小步迭代，在实践中优化\n\n接入真实 API 后，我会给出更精准的回答。`,
-      simulated: true,
-    };
-  }
-}
-
-// ===== Compare =====
-function initCompareModels() { updateCompareLayout(); }
-
-function updateCompareLayout() {
-  const cols = parseInt(document.getElementById('colSelect').value);
-  const grid = document.getElementById('compareGrid');
-  grid.className = 'compare-grid cols-' + cols;
-  grid.innerHTML = '';
-  const defaults = ['gpt4o', 'deepseekv3', 'qwen25', 'kimi'];
-  for (let i = 0; i < cols; i++) {
-    const defaultId = defaults[i];
-    const defaultModel = models.find(m => m.id === defaultId);
-    grid.innerHTML += `
-      <div class="compare-panel">
-        <div class="compare-panel-header">
-          <div class="compare-panel-avatar" style="background:${defaultModel.avatar}">${defaultModel.name[0]}</div>
-          <select class="col-select" style="flex:1" onchange="updateCompareModel(this, ${i})">
-            ${models.map(m => `<option value="${m.id}" ${m.id === defaultId ? 'selected' : ''}>${m.name} - ${m.provider}</option>`).join('')}
-          </select>
-        </div>
-        <div class="compare-panel-content" id="compareContent${i}">选择一个模型，输入问题后点击"开始对比"查看结果</div>
-      </div>
-    `;
-  }
-}
-
-function updateCompareModel(select, index) {
-  const m = models.find(x => x.id === select.value);
-  const header = select.parentElement;
-  const existingAvatar = header.querySelector('.compare-panel-avatar');
-  if (existingAvatar) {
-    existingAvatar.style.background = m.avatar;
-    existingAvatar.textContent = m.name[0];
-  }
-}
-
-async function runCompare() {
-  const prompt = document.getElementById('comparePrompt').value.trim();
-  if (!prompt) { showToast('请输入对比问题'); return; }
-
-  const cols = parseInt(document.getElementById('colSelect').value);
-  const promises = [];
-  for (let i = 0; i < cols; i++) {
-    const content = document.getElementById('compareContent' + i);
-    content.innerHTML = '<span class="spinner"></span>思考中…';
-    content.classList.add('typing');
-    const select = document.querySelectorAll('#compareGrid select')[i];
-    const modelId = select.value;
-    const m = models.find(x => x.id === modelId);
-
-    const p = callModelAPI(modelId, prompt).then(response => {
-      content.classList.remove('typing');
-      if (response.simulated) content.style.opacity = '0.7';
-      content.innerHTML = escapeHtml(response.content);
-    }).catch(err => {
-      content.classList.remove('typing');
-      content.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(err.message)}</span>`;
-    });
-    promises.push(p);
-  }
-  await Promise.all(promises);
-}
-
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-// ===== 连接状态检测 =====
-async function checkConnection() {
-  const dot = document.querySelector('#connStatus .conn-dot');
-  const label = document.querySelector('#connStatus span:last-child');
-  dot.className = 'conn-dot checking';
-  label.textContent = '检测中';
-  try {
-    const res = await fetch(`${API_BASE}/api/status`);
-    if (res.ok) {
-      apiOnline = true;
-      dot.className = 'conn-dot online';
-      const data = await res.json();
-      const configuredCount = Object.values(data.providers).filter(p => p.configured).length;
-      label.textContent = `已连接 (${configuredCount}个平台已配置)`;
-    } else {
-      throw new Error('Status check failed');
-    }
-  } catch {
-    apiOnline = false;
-    dot.className = 'conn-dot offline';
-    label.textContent = '未连接后端';
-  }
-}
-
-checkConnection();
-setInterval(checkConnection, 30000);
-
-// Chat input auto-resize & keyboard shortcut
-const chatInput = document.getElementById('chatInput');
-chatInput.addEventListener('input', () => {
-  chatInput.style.height = 'auto';
-  chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
-});
-chatInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendChatMessage();
-  }
-});
-
-// Compare prompt Enter key
-const comparePrompt = document.getElementById('comparePrompt');
-if (comparePrompt) {
-  comparePrompt.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      runCompare();
-    }
+  ['artStyleTags','artLightTags','artCameraTags','artArtistTags','artQualityTags'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const key=id.replace('art','').replace('Tags','').toLowerCase()+'s';
+    (ART_DATA[key]||[]).forEach(d=>{el.innerHTML+=`<span class="filter-tag" style="font-size:0.72rem;padding:4px 10px;margin:2px;cursor:pointer" onclick="clickArtTag('${id.replace('Tags','')}','${d.v.replace(/'/g,"\\'")}')">${d.l}</span>`});
   });
+  const tplF=document.getElementById('artTplFilters');const cats=[...new Set(ART_DATA.templates.map(t=>t.cat))];
+  tplF.innerHTML='<button class="filter-tag active" data-tpl="all">全部</button>'+cats.map(c=>`<button class="filter-tag" data-tpl="${c}">${c}</button>`).join('');
+  tplF.querySelectorAll('.filter-tag').forEach(b=>b.addEventListener('click',()=>{tplF.querySelectorAll('.filter-tag').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderArtTemplates(b.dataset.tpl)}));
+  renderArtTemplates('all');
+  document.getElementById('artSubject').addEventListener('input',buildArtPrompt);
+  ['artStyle','artLight','artCamera','artQuality','artRatio'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',buildArtPrompt)});
 }
+function renderArtTemplates(cat){
+  const el=document.getElementById('artTemplates');const f=cat==='all'?ART_DATA.templates:ART_DATA.templates.filter(t=>t.cat===cat);
+  el.innerHTML=f.map(t=>`<div class="feature-card" style="cursor:pointer;padding:14px" onclick="document.getElementById('artSubject').value='';document.getElementById('artSubject').focus();showToast('输入主体后点刷新组合')"><div style="font-weight:600;margin-bottom:4px;font-size:0.85rem">${t.cat}</div><div style="font-size:0.76rem;color:var(--text-secondary)">${t.p}</div></div>`).join('')}
+function clickArtTag(type,value){const sel=document.getElementById('art'+type.charAt(0).toUpperCase()+type.slice(1));if(sel)sel.value=value;buildArtPrompt()}
+function buildArtPrompt(){const p=[document.getElementById('artSubject').value,document.getElementById('artStyle').value,document.getElementById('artLight').value,document.getElementById('artCamera').value,document.getElementById('artQuality').value,document.getElementById('artRatio').value].filter(Boolean);document.getElementById('artPrompt').textContent=p.join(', ')||'选择上方选项组合提示词'}
+function copyArtPrompt(){const t=document.getElementById('artPrompt').textContent;if(!t||t.includes('选择')){showToast('请先组合提示词');return}navigator.clipboard.writeText(t).then(()=>showToast('已复制，粘贴到 Midjourney 用 /imagine 发送'))}
+function sendArtToMJ(){copyArtPrompt();window.open('https://www.midjourney.com','_blank')}
 
-function setComparePrompt(text) {
-  document.getElementById('comparePrompt').value = text;
-  runCompare();
-}
+// Hook into page switch for art init
+const _origSwitch=switchPage;
+switchPage=function(name){_origSwitch(name);if(name==='art'){setTimeout(initArtData,100)}}
 
-// 初始聊天室占位标记
-document.addEventListener('DOMContentLoaded', () => {
-  const msgDiv = document.getElementById('chatMessages');
-  if (msgDiv) msgDiv.setAttribute('data-placeholder', 'true');
-  initAdmin();
-});
+// === Admin ===
+const DEFAULT_PASSWORD='admin123',ADMIN_STORAGE_KEY='apwd',MODELS_STORAGE_KEY='amod',API_KEYS_KEY='akeys',SETTINGS_KEY='aset';
+let adminModels=[],editingModelId=null;
+function initAdmin(){const s=localStorage.getItem(MODELS_STORAGE_KEY);if(s){try{adminModels=JSON.parse(s)}catch(e){}}if(!adminModels.length)adminModels=JSON.parse(JSON.stringify(models))}
+function adminLogin(){const p=document.getElementById('adminPwd').value;const s=localStorage.getItem(ADMIN_STORAGE_KEY)||DEFAULT_PASSWORD;if(p===s){document.getElementById('adminLogin').style.display='none';document.getElementById('adminDashboard').style.display='block';renderAdminTable();showToast('登录成功')}else showToast('密码错误')}
+function adminLogout(){document.getElementById('adminLogin').style.display='block';document.getElementById('adminDashboard').style.display='none'}
+function renderAdminTable(){document.getElementById('adminModelTbody').innerHTML=adminModels.map(m=>`<tr><td><strong>${m.name}</strong></td><td>${m.provider}</td><td>${m.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</td><td>${m.inputPrice} / ${m.outputPrice}</td><td>${m.context}</td><td>${m.featured?'⭐':'-'}</td><td><button class="btn-sm" onclick="openEditModel('${m.id}')">编辑</button><button class="btn-sm" onclick="toggleFeatured('${m.id}')">${m.featured?'取消热门':'热门'}</button><button class="btn-sm danger" onclick="deleteModelConfirm('${m.id}')">删除</button></td></tr>`).join('')}
+function openAddModel(){editingModelId=null;['modalTitle','editId','editName','editProvider','editDesc','editContext','editInputPrice','editOutputPrice'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});document.getElementById('editId').disabled=false;document.getElementById('editAvatar').value='#6366f1';document.getElementById('editFeatured').checked=false;document.getElementById('btnDeleteModel').style.display='none';document.getElementById('modelModal').classList.add('show')}
+function openEditModel(id){const m=adminModels.find(x=>x.id===id);if(!m)return;editingModelId=id;document.getElementById('modalTitle').textContent='编辑: '+m.name;document.getElementById('editId').value=m.id;document.getElementById('editId').disabled=true;document.getElementById('editName').value=m.name;document.getElementById('editProvider').value=m.provider;document.getElementById('editDesc').value=m.desc;document.getElementById('editAvatar').value=m.avatar;document.getElementById('editContext').value=m.context;document.getElementById('editInputPrice').value=m.inputPrice;document.getElementById('editOutputPrice').value=m.outputPrice;document.getElementById('editFeatured').checked=m.featured;document.getElementById('btnDeleteModel').style.display='inline-block';document.getElementById('modelModal').classList.add('show')}
+function closeModal(){document.getElementById('modelModal').classList.remove('show')}
+function saveModel(){const id=document.getElementById('editId').value.trim(),name=document.getElementById('editName').value.trim(),prov=document.getElementById('editProvider').value.trim();if(!id||!name||!prov){showToast('ID/名称/供应商必填');return}if(!editingModelId&&adminModels.find(m=>m.id===id)){showToast('ID已存在');return}const md={id,name,provider:prov,desc:document.getElementById('editDesc').value.trim(),avatar:document.getElementById('editAvatar').value,tags:[],context:document.getElementById('editContext').value.trim()||'128K',inputPrice:document.getElementById('editInputPrice').value.trim()||'--',outputPrice:document.getElementById('editOutputPrice').value.trim()||'--',featured:document.getElementById('editFeatured').checked,free:false};if(editingModelId){const i=adminModels.findIndex(m=>m.id===editingModelId);if(i>=0)adminModels[i]=md}else adminModels.push(md);saveAndRefresh();closeModal();showToast(editingModelId?'已更新':'已添加')}
+function deleteModelConfirm(id){if(confirm('确定删除？')){adminModels=adminModels.filter(m=>m.id!==id);saveAndRefresh();closeModal();showToast('已删除')}}
+function toggleFeatured(id){const m=adminModels.find(x=>x.id===id);if(m){m.featured=!m.featured;saveAndRefresh()}}
+function saveAndRefresh(){localStorage.setItem(MODELS_STORAGE_KEY,JSON.stringify(adminModels));models.length=0;adminModels.forEach(m=>models.push(m));initFeaturedModels();renderAdminTable()}
+function exportData(){const d=JSON.stringify(adminModels,null,2);const b=new Blob([d],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='models.json';a.click();showToast('已导出')}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d))throw new Error('格式错');if(confirm(`导入${d.length}个模型？`)){adminModels=d;saveAndRefresh();showToast('已导入')}}catch(err){showToast(err.message)}e.target.value=''};r.readAsText(f)}
+function openApiSettings(){document.getElementById('apiModal').classList.add('show')}
+function closeApiModal(){document.getElementById('apiModal').classList.remove('show')}
+function saveApiKeys(){const k={apiBase:document.getElementById('apiBaseInput').value.trim(),openai:document.getElementById('apiOpenAIKey').value.trim(),deepseek:document.getElementById('apiDeepSeekKey').value.trim(),gemini:document.getElementById('apiGeminiKey').value.trim(),dashscope:document.getElementById('apiQwenKey').value.trim()};localStorage.setItem(API_KEYS_KEY,JSON.stringify(k));if(k.apiBase)localStorage.setItem('api_base',k.apiBase);closeApiModal();showToast('已保存')}
+const DEFAULT_SETTINGS={pricePerCredit:0.1,newUserCredits:10,chatCost:1,novelCost:5,port:3001,deepseekMultiplier:20};
+function getSiteSettings(){try{return JSON.parse(localStorage.getItem(SETTINGS_KEY))||{}}catch(e){return{}}}
+function openSiteSettings(){const s=getSiteSettings();document.getElementById('setPricePerCredit').value=s.pricePerCredit??10;document.getElementById('setNewUserCredits').value=s.newUserCredits??10;document.getElementById('setChatCost').value=s.chatCost??1;document.getElementById('setNovelCost').value=s.novelCost??5;document.getElementById('setPort').value=s.port??3001;document.getElementById('setDeepSeekMultiplier').value=s.deepseekMultiplier??20;document.getElementById('siteSettingsModal').classList.add('show')}
+function closeSiteSettings(){document.getElementById('siteSettingsModal').classList.remove('show')}
+function saveSiteSettings(){const s={pricePerCredit:parseFloat(document.getElementById('setPricePerCredit').value)||10,newUserCredits:parseInt(document.getElementById('setNewUserCredits').value)||10,chatCost:parseInt(document.getElementById('setChatCost').value)||1,novelCost:parseInt(document.getElementById('setNovelCost').value)||5,port:parseInt(document.getElementById('setPort').value)||3001,deepseekMultiplier:parseFloat(document.getElementById('setDeepSeekMultiplier').value)||20};localStorage.setItem(SETTINGS_KEY,JSON.stringify(s));closeSiteSettings();showToast('已保存')}
+function resetSiteSettings(){if(confirm('恢复默认？')){localStorage.removeItem(SETTINGS_KEY);closeSiteSettings();showToast('已恢复')}}
+function openPasswordSettings(){document.getElementById('pwdModal').classList.add('show')}
+function closePwdModal(){document.getElementById('pwdModal').classList.remove('show')}
+function changePassword(){const c=document.getElementById('pwdCurrent').value,n=document.getElementById('pwdNew').value,cf=document.getElementById('pwdConfirm').value;const s=localStorage.getItem(ADMIN_STORAGE_KEY)||DEFAULT_PASSWORD;if(c!==s){showToast('密码错');return}if(!n||n.length<4){showToast('至少4位');return}if(n!==cf){showToast('不一致');return}localStorage.setItem(ADMIN_STORAGE_KEY,n);closePwdModal();showToast('已修改')}
 
-// ============================================================
-// 管理后台
-// ============================================================
-const DEFAULT_PASSWORD = 'admin123';
-const ADMIN_STORAGE_KEY = 'ai_nexus_admin';
-const MODELS_STORAGE_KEY = 'ai_nexus_models';
-const API_KEYS_KEY = 'ai_nexus_api_keys';
-const ALL_TAGS = ['推理','编程','多模态','开源','中文优化','长文本','深度分析','快速','通用','数学','知识增强','内容创作','语音','视觉','智能体','RAG','多语言','知识','轻量','免费','海外','国内'];
+// === Connection ===
+async function checkConnection(){const d=document.querySelector('#connStatus .conn-dot'),l=document.querySelector('#connStatus span:last-child');d.className='conn-dot checking';try{const r=await fetch(API_BASE+'/api/status');if(r.ok){apiOnline=true;d.className='conn-dot online';const data=await r.json();l.textContent='在线'}else throw new Error()}catch{apiOnline=false;d.className='conn-dot offline';l.textContent='离线'}}
+checkConnection();setInterval(checkConnection,30000);
 
-let adminModels = [];
-let editingModelId = null;
+// === Input events ===
+const ci=document.getElementById('chatInput');ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage()}});
+const cp=document.getElementById('comparePrompt');if(cp)cp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runCompare()}});
 
-// ===== Admin Init =====
-function initAdmin() {
-  // 从 localStorage 加载模型数据（没有则用默认）
-  const saved = localStorage.getItem(MODELS_STORAGE_KEY);
-  if (saved) {
-    try { adminModels = JSON.parse(saved); } catch(e) {}
-  }
-  if (!adminModels.length) {
-    adminModels = JSON.parse(JSON.stringify(models));
-  }
-
-  // 加载 API keys
-  const savedKeys = localStorage.getItem(API_KEYS_KEY);
-  if (savedKeys) {
-    try {
-      const keys = JSON.parse(savedKeys);
-      if (keys.apiBase) document.getElementById('apiBaseInput').value = keys.apiBase;
-      if (keys.openai) document.getElementById('apiOpenAIKey').value = keys.openai;
-      if (keys.deepseek) document.getElementById('apiDeepSeekKey').value = keys.deepseek;
-      if (keys.gemini) document.getElementById('apiGeminiKey').value = keys.gemini;
-      if (keys.qwen) document.getElementById('apiQwenKey').value = keys.qwen;
-      if (keys.kimi) document.getElementById('apiKimiKey').value = keys.kimi;
-    } catch(e) {}
-  }
-}
-
-// ===== Admin Login =====
-function adminLogin() {
-  const pwd = document.getElementById('adminPwd').value;
-  const saved = localStorage.getItem(ADMIN_STORAGE_KEY);
-  const correctPwd = saved || DEFAULT_PASSWORD;
-
-  if (pwd === correctPwd) {
-    document.getElementById('adminLogin').style.display = 'none';
-    document.getElementById('adminDashboard').style.display = 'block';
-    renderAdminTable();
-    showToast('登录成功');
-  } else {
-    showToast('密码错误');
-  }
-}
-
-function adminLogout() {
-  document.getElementById('adminLogin').style.display = 'block';
-  document.getElementById('adminDashboard').style.display = 'none';
-  document.getElementById('adminPwd').value = '';
-}
-
-// ===== Admin Table =====
-function renderAdminTable() {
-  const tbody = document.getElementById('adminModelTbody');
-  tbody.innerHTML = adminModels.map((m, i) => `
-    <tr>
-      <td><strong>${escapeHtml(m.name)}</strong></td>
-      <td>${escapeHtml(m.provider)}</td>
-      <td>${m.tags.map(t => `<span class="tag">${t}</span>`).join(' ')}</td>
-      <td>${m.inputPrice}</td>
-      <td>${m.outputPrice}</td>
-      <td>${m.context}</td>
-      <td>${m.featured ? '⭐' : '-'}</td>
-      <td class="actions">
-        <button class="btn-sm" onclick="openEditModel('${m.id}')">编辑</button>
-        <button class="btn-sm" onclick="toggleFeatured('${m.id}')">${m.featured ? '取消热门' : '设热门'}</button>
-        <button class="btn-sm danger" onclick="deleteModelConfirm('${m.id}')">删除</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// ===== Add / Edit Model =====
-function openAddModel() {
-  editingModelId = null;
-  document.getElementById('modalTitle').textContent = '添加模型';
-  document.getElementById('editId').value = '';
-  document.getElementById('editId').disabled = false;
-  document.getElementById('editName').value = '';
-  document.getElementById('editProvider').value = '';
-  document.getElementById('editDesc').value = '';
-  document.getElementById('editAvatar').value = '#6366f1';
-  document.getElementById('editContext').value = '128K';
-  document.getElementById('editInputPrice').value = '';
-  document.getElementById('editOutputPrice').value = '';
-  document.getElementById('editFeatured').checked = false;
-  document.getElementById('btnDeleteModel').style.display = 'none';
-  renderTagChips([]);
-  document.getElementById('modelModal').classList.add('show');
-}
-
-function openEditModel(id) {
-  const m = adminModels.find(x => x.id === id);
-  if (!m) return;
-  editingModelId = id;
-  document.getElementById('modalTitle').textContent = '编辑: ' + m.name;
-  document.getElementById('editId').value = m.id;
-  document.getElementById('editId').disabled = true;
-  document.getElementById('editName').value = m.name;
-  document.getElementById('editProvider').value = m.provider;
-  document.getElementById('editDesc').value = m.desc;
-  document.getElementById('editAvatar').value = m.avatar;
-  document.getElementById('editContext').value = m.context;
-  document.getElementById('editInputPrice').value = m.inputPrice;
-  document.getElementById('editOutputPrice').value = m.outputPrice;
-  document.getElementById('editFeatured').checked = m.featured;
-  document.getElementById('btnDeleteModel').style.display = 'inline-block';
-  renderTagChips(m.tags);
-  document.getElementById('modelModal').classList.add('show');
-}
-
-function closeModal() {
-  document.getElementById('modelModal').classList.remove('show');
-}
-
-function renderTagChips(selectedTags) {
-  const container = document.getElementById('editTags');
-  container.innerHTML = ALL_TAGS.map(t => `
-    <span class="tag-chip ${selectedTags.includes(t) ? 'selected' : ''}" onclick="toggleTag(this, '${t}')">${t}</span>
-  `).join('');
-}
-
-function toggleTag(el, tag) {
-  el.classList.toggle('selected');
-}
-
-function getSelectedTags() {
-  return [...document.querySelectorAll('#editTags .tag-chip.selected')].map(el => el.textContent);
-}
-
-function saveModel() {
-  const id = document.getElementById('editId').value.trim();
-  const name = document.getElementById('editName').value.trim();
-  const provider = document.getElementById('editProvider').value.trim();
-  if (!id || !name || !provider) { showToast('ID、名称、供应商为必填'); return; }
-
-  if (!editingModelId && adminModels.find(m => m.id === id)) {
-    showToast('模型 ID 已存在'); return;
-  }
-
-  const modelData = {
-    id,
-    name,
-    provider,
-    desc: document.getElementById('editDesc').value.trim(),
-    avatar: document.getElementById('editAvatar').value,
-    tags: getSelectedTags(),
-    context: document.getElementById('editContext').value.trim() || '128K',
-    inputPrice: document.getElementById('editInputPrice').value.trim() || '--',
-    outputPrice: document.getElementById('editOutputPrice').value.trim() || '--',
-    featured: document.getElementById('editFeatured').checked,
-    free: getSelectedTags().includes('免费'),
-  };
-
-  if (editingModelId) {
-    const idx = adminModels.findIndex(m => m.id === editingModelId);
-    if (idx >= 0) adminModels[idx] = modelData;
-  } else {
-    adminModels.push(modelData);
-  }
-
-  saveAndRefreshModels();
-  closeModal();
-  showToast(editingModelId ? '模型已更新' : '模型已添加');
-}
-
-function deleteModelConfirm(id) {
-  if (confirm('确定要删除该模型吗？此操作不可撤销。')) {
-    deleteModelById(id);
-  }
-}
-
-function deleteModelById(id) {
-  adminModels = adminModels.filter(m => m.id !== id);
-  saveAndRefreshModels();
-  closeModal();
-  showToast('模型已删除');
-}
-
-function toggleFeatured(id) {
-  const m = adminModels.find(x => x.id === id);
-  if (m) { m.featured = !m.featured; saveAndRefreshModels(); }
-}
-
-function saveAndRefreshModels() {
-  localStorage.setItem(MODELS_STORAGE_KEY, JSON.stringify(adminModels));
-  // 同步到全局 models 数组（前端页面会立即反映）
-  models.length = 0;
-  adminModels.forEach(m => models.push(m));
-  initFeaturedModels();
-  initAllModels();
-  renderAdminTable();
-}
-
-// ===== Export / Import =====
-function exportData() {
-  const data = JSON.stringify(adminModels, null, 2);
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'ai-nexus-models-backup.json';
-  a.click(); URL.revokeObjectURL(url);
-  showToast('数据已导出');
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!Array.isArray(data)) throw new Error('格式错误');
-      if (confirm(`即将导入 ${data.length} 个模型，覆盖现有数据。确定？`)) {
-        adminModels = data;
-        saveAndRefreshModels();
-        showToast(`已导入 ${data.length} 个模型`);
-      }
-    } catch(err) {
-      showToast('导入失败：' + err.message);
-    }
-    event.target.value = '';
-  };
-  reader.readAsText(file);
-}
-
-// ===== API Key Settings =====
-function openApiSettings() {
-  document.getElementById('apiModal').classList.add('show');
-}
-
-function closeApiModal() {
-  document.getElementById('apiModal').classList.remove('show');
-}
-
-function saveApiKeys() {
-  const keys = {
-    apiBase: document.getElementById('apiBaseInput').value.trim(),
-    openai: document.getElementById('apiOpenAIKey').value.trim(),
-    deepseek: document.getElementById('apiDeepSeekKey').value.trim(),
-    gemini: document.getElementById('apiGeminiKey').value.trim(),
-    qwen: document.getElementById('apiQwenKey').value.trim(),
-    kimi: document.getElementById('apiKimiKey').value.trim(),
-  };
-  localStorage.setItem(API_KEYS_KEY, JSON.stringify(keys));
-  if (keys.apiBase) localStorage.setItem('api_base', keys.apiBase);
-  closeApiModal();
-  showToast('API 密钥已保存');
-}
-
-// ===== Password Settings =====
-function openPasswordSettings() {
-  document.getElementById('pwdModal').classList.add('show');
-}
-
-function closePwdModal() {
-  document.getElementById('pwdModal').classList.remove('show');
-  document.getElementById('pwdCurrent').value = '';
-  document.getElementById('pwdNew').value = '';
-  document.getElementById('pwdConfirm').value = '';
-}
-
-function changePassword() {
-  const current = document.getElementById('pwdCurrent').value;
-  const newPwd = document.getElementById('pwdNew').value;
-  const confirm = document.getElementById('pwdConfirm').value;
-  const saved = localStorage.getItem(ADMIN_STORAGE_KEY) || DEFAULT_PASSWORD;
-
-  if (current !== saved) { showToast('当前密码错误'); return; }
-  if (!newPwd || newPwd.length < 4) { showToast('新密码至少4位'); return; }
-  if (newPwd !== confirm) { showToast('两次密码不一致'); return; }
-
-  localStorage.setItem(ADMIN_STORAGE_KEY, newPwd);
-  closePwdModal();
-  showToast('密码已修改');
-}
+// === Init ===
+if(currentUser){userCredits=parseInt(localStorage.getItem('cr_'+currentUser.username)||'10');localStorage.setItem('cr',userCredits)}
+updateCreditDisplay();
+renderUserNav();
+initAdmin();
 </script>
 </body>
 </html>
