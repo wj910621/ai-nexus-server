@@ -3,25 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="AI Nexus - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，24+顶尖模型免费体验。">
-<meta name="keywords" content="AI写作,AI写小说,AI漫画,大模型,AI聊天,DeepSeek,GPT-4,Claude">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AI Nexus">
+<meta name="theme-color" content="#0d0721">
+<meta name="description" content="AI Nexus - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，30+顶尖模型免费体验。">
+<meta name="keywords" content="AI写作,AI写小说,AI漫画,大模型,AI聊天,DeepSeek,GPT-4,Claude,Midjourney,AI绘画">
 <title>AI Nexus - 智能创作平台</title>
 <style>
 :root{
-  --bg:#f8f7ff;--bg-card:rgba(255,255,255,0.92);--bg-input:#f0edff;
+  --bg:#0d0721;--bg-card:#1a1035;--bg-sidebar:#100928;--bg-input:#261652;
+  --text:#e8e0f0;--text-secondary:#9d92b5;--border:rgba(155,89,247,0.15);
+  --accent:#9b59f7;--accent-hover:#b87fff;--accent-light:rgba(155,89,247,0.1);
+  --accent-glow:rgba(155,89,247,0.3);--accent-soft:rgba(155,89,247,0.06);
+  --cyan:#06b6d4;--cyan-light:rgba(6,182,212,0.08);
+  --green:#10b981;--red:#ef4444;--orange:#f59e0b;
+  --shadow:0 4px 24px rgba(0,0,0,0.3);--shadow-lg:0 8px 40px rgba(0,0,0,0.5);
+  --radius:12px;--transition:0.25s cubic-bezier(0.4,0,0.2,1);
+  --glass:rgba(26,16,53,0.8);--glass-border:rgba(155,89,247,0.12);
+}
+[data-theme="light"]{
+  --bg:#f8f7ff;--bg-card:rgba(255,255,255,0.92);--bg-sidebar:#f0edff;--bg-input:#f0edff;
   --text:#1a1035;--text-secondary:#6b5b95;--border:rgba(124,92,252,0.15);
   --accent:#6c4ef5;--accent-hover:#8b70ff;--accent-light:rgba(108,78,245,0.08);
-  --accent-glow:rgba(108,78,245,0.25);--cyan:#0098db;--cyan-light:rgba(0,152,219,0.08);
-  --green:#00a86b;--red:#e74c5e;--orange:#f08a24;
+  --accent-glow:rgba(108,78,245,0.25);--accent-soft:rgba(108,78,245,0.04);
+  --cyan:#0098db;--cyan-light:rgba(0,152,219,0.08);
   --shadow:0 2px 16px rgba(108,78,245,0.06);--shadow-lg:0 8px 32px rgba(108,78,245,0.1);
-  --radius:14px;--transition:0.25s cubic-bezier(0.4,0,0.2,1);
   --glass:rgba(255,255,255,0.8);--glass-border:rgba(108,78,245,0.12);
-}
-[data-theme="dark"]{
-  --bg:#0a0a16;--bg-card:rgba(18,18,40,0.9);--bg-input:rgba(30,30,60,0.6);
-  --text:#e8e8f0;--text-secondary:#8888aa;--border:rgba(100,80,200,0.2);
-  --accent-light:rgba(124,92,252,0.15);--glass:rgba(18,18,40,0.7);
-  --shadow:0 2px 20px rgba(0,0,0,0.4);--shadow-lg:0 8px 40px rgba(0,0,0,0.5);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -30,100 +38,146 @@ body{
   transition:background var(--transition),color var(--transition);
 }
 body::before{
-  content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
-  background:radial-gradient(ellipse at 30% 20%,rgba(108,78,245,0.04) 0%,transparent 50%),
-             radial-gradient(ellipse at 70% 60%,rgba(0,152,219,0.03) 0%,transparent 50%);
+  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+  background:radial-gradient(ellipse at 25% 15%,rgba(155,89,247,0.08) 0%,transparent 50%),
+             radial-gradient(ellipse at 75% 55%,rgba(6,182,212,0.05) 0%,transparent 50%),
+             radial-gradient(ellipse at 50% 85%,rgba(155,89,247,0.04) 0%,transparent 50%);
   pointer-events:none;z-index:0;
 }
 a{color:var(--accent);text-decoration:none}
-/* Nav */
-.nav{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border)}
-.nav-inner{max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:68px}
-.logo{display:flex;align-items:center;gap:12px;font-size:1.2rem;font-weight:700;color:var(--text)}
-.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#7c5cfc,#00d4ff);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;box-shadow:0 0 20px rgba(124,92,252,0.4)}
-.nav-links{display:flex;gap:2px;align-items:center;overflow-x:auto;scrollbar-width:none}
-.nav-links::-webkit-scrollbar{display:none}
-.nav-link{padding:8px 15px;border-radius:10px;border:none;cursor:pointer;background:none;color:var(--text-secondary);font-size:0.85rem;font-weight:500;transition:all var(--transition);font-family:inherit;white-space:nowrap}
-.nav-link:hover{background:var(--bg-input);color:var(--text)}
-.nav-link.active,.nav-link.primary-link{background:var(--accent-light);color:var(--accent)}
-.nav-link.primary-link{background:linear-gradient(135deg,var(--accent-light),var(--cyan-light));border:1px solid var(--glass-border);font-weight:600}
-.theme-toggle{width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all var(--transition);color:var(--text);margin-left:6px}
+
+/* Top Bar */
+.top-bar{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.top-logo{display:flex;align-items:center;gap:10px;font-size:1.1rem;font-weight:700;color:var(--text)}
+.top-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;box-shadow:0 0 16px rgba(124,58,237,0.5)}
+.top-actions{display:flex;align-items:center;gap:8px}
+.top-credit{display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:20px;background:var(--accent-light);font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all var(--transition)}
+.top-credit:hover{background:var(--accent-glow)}
+.theme-toggle{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95rem;transition:all var(--transition);color:var(--text)}
 .theme-toggle:hover{border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow)}
-/* Layout */
-.container{max-width:1320px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
-.page{display:none;animation:fadeIn 0.4s cubic-bezier(0.4,0,0.2,1)}
+.conn-status{display:flex;align-items:center;gap:6px;font-size:0.73rem;color:var(--text-secondary);padding:4px 8px}
+
+/* App Layout */
+.app-layout{display:grid;grid-template-columns:220px 1fr 300px;min-height:calc(100vh - 56px);position:relative;z-index:1}
+
+/* Sidebar */
+.sidebar{background:var(--bg-sidebar);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;border:none;cursor:pointer;background:none;color:var(--text-secondary);font-size:0.85rem;font-weight:500;transition:all var(--transition);font-family:inherit;text-align:left;position:relative}
+.sidebar-link:hover{background:var(--accent-soft);color:var(--text)}
+.sidebar-link.active{background:linear-gradient(135deg,var(--accent-light),var(--cyan-light));color:var(--accent);border:1px solid var(--glass-border)}
+.sidebar-link.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent);border-radius:0 3px 3px 0}
+.sidebar-link.primary{font-weight:600}
+.sidebar-icon{font-size:1.15rem;width:24px;text-align:center}
+.sidebar-divider{height:1px;background:var(--border);margin:8px 8px}
+.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:6px}
+.sidebar-user{padding:10px 14px;border-radius:10px;background:var(--accent-soft);font-size:0.8rem;display:flex;align-items:center;gap:8px}
+.sidebar-conn{display:flex;align-items:center;gap:6px;padding:6px 14px;font-size:0.75rem;color:var(--text-secondary)}
+
+/* Main Content */
+.main-content{overflow-y:auto;padding:0}
+.page{display:none;animation:fadeIn 0.35s cubic-bezier(0.4,0,0.2,1)}
 .page.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-/* Hero */
-.hero{text-align:center;padding:90px 28px 70px;position:relative}
-.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.2;background:linear-gradient(135deg,#c4b5fd,#7c5cfc,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px}
-.hero p{color:var(--text-secondary);font-size:1.1rem;max-width:650px;margin:0 auto 40px;line-height:1.7}
-.hero-stats{display:flex;justify-content:center;gap:56px;flex-wrap:wrap}
-.stat{text-align:center}.stat-num{font-size:2.2rem;font-weight:800;color:var(--accent)}.stat-label{font-size:0.85rem;color:var(--text-secondary);margin-top:6px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Right Panel */
+.right-panel{background:var(--bg-sidebar);border-left:1px solid var(--border);padding:20px 16px;overflow-y:auto}
+.right-panel-title{font-size:0.85rem;font-weight:700;margin-bottom:14px;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px}
+.right-panel-empty{text-align:center;color:var(--text-secondary);font-size:0.8rem;padding:40px 0;opacity:0.6}
+.right-panel-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;transition:all var(--transition)}
+.right-panel-card:hover{border-color:var(--accent);box-shadow:0 0 16px var(--accent-soft)}
+
 /* Section */
-.section{padding:60px 0}.section-title{font-size:1.6rem;font-weight:700;margin-bottom:8px}.section-desc{color:var(--text-secondary);margin-bottom:36px;font-size:0.95rem}
+.section{padding:48px 36px}.section-title{font-size:1.5rem;font-weight:700;margin-bottom:6px}.section-desc{color:var(--text-secondary);margin-bottom:28px;font-size:0.9rem}
+
+/* Hero */
+.hero{text-align:center;padding:70px 28px 50px}
+.hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.2;background:linear-gradient(135deg,#c4b5fd,#a855f7,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px}
+.hero p{color:var(--text-secondary);font-size:1.05rem;max-width:600px;margin:0 auto 32px;line-height:1.7}
+.hero-stats{display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
+.stat{text-align:center}.stat-num{font-size:2rem;font-weight:800;color:var(--accent)}.stat-label{font-size:0.8rem;color:var(--text-secondary);margin-top:4px}
+
 /* Cards */
-.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
-.feature-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:28px;transition:all var(--transition);backdrop-filter:blur(10px);position:relative;overflow:hidden}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.feature-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;transition:all var(--transition);backdrop-filter:blur(10px);position:relative;overflow:hidden}
 .feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-glow),transparent);opacity:0;transition:opacity var(--transition)}
 .feature-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px)}
 .feature-card:hover::before{opacity:1}
-.feature-icon{font-size:2rem;margin-bottom:16px}.feature-card h3{font-size:1.1rem;margin-bottom:8px}.feature-card p{color:var(--text-secondary);font-size:0.9rem;line-height:1.6}
+.feature-icon{font-size:1.8rem;margin-bottom:12px}.feature-card h3{font-size:1rem;margin-bottom:6px}.feature-card p{color:var(--text-secondary);font-size:0.85rem;line-height:1.6}
+
 /* Filter */
-.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;align-items:center}
-.search-input{flex:1;min-width:220px;padding:11px 18px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none;transition:border var(--transition)}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center}
+.search-input{flex:1;min-width:200px;padding:10px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;outline:none;transition:border var(--transition)}
 .search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
-.filter-tag{padding:8px 18px;border-radius:22px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;font-size:0.83rem;font-family:inherit;transition:all var(--transition);white-space:nowrap;backdrop-filter:blur(10px)}
+.filter-tag{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;font-size:0.8rem;font-family:inherit;transition:all var(--transition);white-space:nowrap;backdrop-filter:blur(10px)}
 .filter-tag:hover{border-color:var(--accent);color:var(--accent)}
 .filter-tag.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 0 16px var(--accent-glow)}
+
 /* Model Grid */
-.models-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px}
-.model-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;transition:all var(--transition);position:relative;overflow:hidden;backdrop-filter:blur(10px)}
+.models-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.model-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;transition:all var(--transition);position:relative;overflow:hidden;backdrop-filter:blur(10px)}
 .model-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px)}
-.model-card.featured::before{content:'HOT';position:absolute;top:14px;right:-26px;background:linear-gradient(135deg,var(--accent),var(--cyan));color:#fff;font-size:0.7rem;padding:3px 30px;transform:rotate(45deg);font-weight:700;box-shadow:0 0 20px rgba(124,92,252,0.4)}
-.model-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
-.model-avatar{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
-.model-name{font-size:1.05rem;font-weight:700}.model-provider{font-size:0.8rem;color:var(--text-secondary)}
-.model-desc{font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.5}
-.model-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.tag{padding:3px 10px;border-radius:14px;font-size:0.73rem;font-weight:500;background:var(--accent-light);color:var(--accent)}
-.tag.green{background:rgba(0,227,150,0.15);color:var(--green)}.tag.orange{background:rgba(255,166,71,0.15);color:var(--orange)}
-.model-meta{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--border)}
-.model-price{font-size:0.85rem;font-weight:600;color:var(--accent)}.model-context{font-size:0.8rem;color:var(--text-secondary)}
+.model-card.featured::before{content:'HOT';position:absolute;top:14px;right:-26px;background:linear-gradient(135deg,var(--accent),var(--cyan));color:#fff;font-size:0.7rem;padding:3px 30px;transform:rotate(45deg);font-weight:700;box-shadow:0 0 20px rgba(155,89,247,0.4)}
+.model-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.model-avatar{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.model-name{font-size:1rem;font-weight:700}.model-provider{font-size:0.78rem;color:var(--text-secondary)}
+.model-desc{font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;line-height:1.5}
+.model-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.tag{padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:500;background:var(--accent-light);color:var(--accent)}
+.tag.green{background:rgba(16,185,129,0.15);color:var(--green)}.tag.orange{background:rgba(245,158,11,0.15);color:var(--orange)}
+.model-meta{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border)}
+.model-price{font-size:0.82rem;font-weight:600;color:var(--accent)}.model-context{font-size:0.78rem;color:var(--text-secondary)}
+
 /* Chat */
-.chat-layout{display:grid;grid-template-columns:280px 1fr;gap:24px;min-height:calc(100vh - 140px)}
-.chat-sidebar{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;height:fit-content;backdrop-filter:blur(10px)}
-.chat-sidebar h3{font-size:0.95rem;margin-bottom:16px}
-.chat-messages{flex:1;overflow-y:auto;padding:20px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);margin-bottom:16px;max-height:500px;min-height:400px;backdrop-filter:blur(10px)}
-.chat-msg{margin-bottom:20px;animation:fadeIn 0.3s ease}
+.chat-layout{display:grid;grid-template-columns:1fr;gap:16px}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);margin-bottom:12px;max-height:420px;min-height:350px;backdrop-filter:blur(10px)}
+.chat-msg{margin-bottom:18px;animation:fadeIn 0.3s ease}
 .chat-msg-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.chat-msg-avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#fff;font-weight:700}
-.chat-msg-model{font-size:0.82rem;font-weight:600}
-.chat-msg-content{padding:12px 16px;border-radius:0 12px 12px 12px;background:var(--bg-input);font-size:0.9rem;line-height:1.6;white-space:pre-wrap}
-.chat-msg.user .chat-msg-content{background:var(--accent-light);border-radius:12px 0 12px 12px;max-width:80%}
+.chat-msg-avatar{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#fff;font-weight:700}
+.chat-msg-model{font-size:0.8rem;font-weight:600}
+.chat-msg-content{padding:11px 14px;border-radius:0 10px 10px 10px;background:var(--bg-input);font-size:0.85rem;line-height:1.6;white-space:pre-wrap}
+.chat-msg.user .chat-msg-content{background:var(--accent-light);border-radius:10px 0 10px 10px;max-width:80%}
 .chat-msg.user{display:flex;flex-direction:column;align-items:flex-end}
-.chat-input-area{display:flex;gap:12px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;backdrop-filter:blur(10px)}
-.chat-input{flex:1;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:none;outline:none;min-height:44px;max-height:120px;transition:border var(--transition)}
+.chat-input-area{display:flex;gap:10px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:14px;backdrop-filter:blur(10px)}
+.chat-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:none;outline:none;min-height:42px;max-height:120px;transition:border var(--transition)}
 .chat-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
-.btn-send{padding:10px 28px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--accent),#9b7fff);color:#fff;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem;transition:all var(--transition);white-space:nowrap;box-shadow:0 4px 16px rgba(124,92,252,0.3)}
-.btn-send:hover{box-shadow:0 6px 24px rgba(124,92,252,0.5);transform:translateY(-1px)}
+.btn-send{padding:9px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.85rem;transition:all var(--transition);white-space:nowrap;box-shadow:0 4px 16px rgba(124,58,237,0.3)}
+.btn-send:hover{box-shadow:0 6px 24px rgba(124,58,237,0.5);transform:translateY(-1px)}
 .btn-send:disabled{opacity:0.5;cursor:not-allowed;transform:none}
-.model-checkbox{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;transition:background var(--transition)}
-.model-checkbox:hover{background:var(--bg-input)}
-.model-checkbox-label{font-size:0.85rem;font-weight:500}
-.model-checkbox-provider{font-size:0.75rem;color:var(--text-secondary)}
+
 /* Compare */
-.compare-grid{display:grid;gap:20px}.compare-grid.cols-2{grid-template-columns:1fr 1fr}.compare-grid.cols-3{grid-template-columns:1fr 1fr 1fr}.compare-grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.compare-grid{display:grid;gap:16px}.compare-grid.cols-2{grid-template-columns:1fr 1fr}.compare-grid.cols-3{grid-template-columns:1fr 1fr 1fr}.compare-grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
 .compare-panel{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;backdrop-filter:blur(10px)}
-.compare-panel-header{padding:14px 16px;background:var(--bg-input);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
-.compare-panel-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700}
-.compare-panel-content{padding:16px;min-height:200px;max-height:400px;overflow-y:auto;font-size:0.9rem;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap}
-.compare-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
-.compare-prompt{flex:1;min-width:300px;padding:10px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none;transition:border var(--transition)}
+.compare-panel-header{padding:12px 14px;background:var(--bg-input);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.compare-panel-avatar{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.7rem;font-weight:700}
+.compare-panel-content{padding:14px;min-height:160px;max-height:350px;overflow-y:auto;font-size:0.85rem;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap}
+.compare-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.compare-prompt{flex:1;min-width:250px;padding:9px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;outline:none;transition:border var(--transition)}
 .compare-prompt:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
-.col-select{padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg-card);color:var(--text);font-size:0.85rem;font-family:inherit;cursor:pointer;outline:none}
-/* Toast/Status */
-.conn-status{display:flex;align-items:center;gap:6px;margin-left:8px;font-size:0.76rem;color:var(--text-secondary)}
+.col-select{padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg-card);color:var(--text);font-size:0.82rem;font-family:inherit;cursor:pointer;outline:none}
+
+/* Wizard */
+.wizard-steps{display:flex;gap:2px;margin-bottom:24px;flex-wrap:wrap}
+.wizard-step{flex:1;min-width:100px;text-align:center;padding:12px 10px;border-radius:10px;cursor:pointer;font-size:0.78rem;font-weight:600;transition:all var(--transition);border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);position:relative}
+.wizard-step.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
+.wizard-step.done{background:rgba(16,185,129,0.1);color:var(--green);border-color:var(--green)}
+.wizard-num{display:block;font-size:1.3rem;font-weight:800;margin-bottom:3px}
+
+/* Tabs */
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0}
+.tab-btn{padding:10px 20px;border:none;border-bottom:2px solid transparent;background:none;color:var(--text-secondary);cursor:pointer;font-size:0.85rem;font-weight:500;font-family:inherit;transition:all var(--transition)}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* Gallery */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.gallery-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all var(--transition);position:relative;overflow:hidden}
+.gallery-card:hover{border-color:var(--accent);box-shadow:var(--shadow-lg);transform:translateY(-3px)}
+.gallery-preview{width:100%;height:160px;border-radius:8px;margin-bottom:14px}
+.gallery-card h4{font-size:0.95rem;margin-bottom:6px}
+.gallery-card p{font-size:0.78rem;color:var(--text-secondary);line-height:1.5}
+
+/* Toast & Status */
 .conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .conn-dot.online{background:var(--green);box-shadow:0 0 8px var(--green)}
 .conn-dot.offline{background:var(--red)}.conn-dot.checking{background:var(--orange);animation:pulse 1s infinite}
@@ -132,100 +186,170 @@ a{color:var(--accent);text-decoration:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:28px;right:28px;z-index:1000;padding:14px 28px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--shadow-lg);font-size:0.9rem;animation:slideUp 0.3s ease;display:none;backdrop-filter:blur(10px)}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
 /* Admin */
-.admin-login{max-width:400px;margin:80px auto;text-align:center;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:40px;backdrop-filter:blur(10px)}
-.admin-pwd{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:1rem;font-family:inherit;outline:none;margin-bottom:16px;text-align:center}
+.admin-login{max-width:400px;margin:60px auto;text-align:center;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:36px;backdrop-filter:blur(10px)}
+.admin-pwd{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.95rem;font-family:inherit;outline:none;margin-bottom:14px;text-align:center}
 .admin-pwd:focus{border-color:var(--accent)}
 .admin-dashboard{display:none}
-.admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
-.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
-.admin-table{width:100%;border-collapse:collapse;font-size:0.85rem}
-.admin-table th,.admin-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
-.admin-table th{font-weight:600;color:var(--text-secondary);font-size:0.8rem}
+.admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.admin-actions{display:flex;gap:6px;flex-wrap:wrap}
+.admin-table{width:100%;border-collapse:collapse;font-size:0.82rem}
+.admin-table th,.admin-table td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.admin-table th{font-weight:600;color:var(--text-secondary);font-size:0.78rem}
 .admin-table tr:hover{background:var(--bg-input)}
-.btn-sm{padding:5px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;font-size:0.8rem;font-family:inherit;transition:all var(--transition)}
+.btn-sm{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;font-size:0.78rem;font-family:inherit;transition:all var(--transition)}
 .btn-sm:hover{border-color:var(--accent);color:var(--accent)}
 .btn-sm.danger{color:var(--red);border-color:var(--red)}.btn-sm.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal-overlay.show{display:flex}
-.modal{background:var(--bg-card);border-radius:var(--radius);padding:32px;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;border:1px solid var(--glass-border);backdrop-filter:blur(20px)}
-.modal h3{margin-bottom:20px}
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:0.85rem;font-weight:600;margin-bottom:6px}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none}
+.modal{background:var(--bg-card);border-radius:var(--radius);padding:28px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;border:1px solid var(--glass-border);backdrop-filter:blur(20px)}
+.modal h3{margin-bottom:18px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:0.82rem;font-weight:600;margin-bottom:5px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;outline:none}
 .form-group textarea{resize:vertical;min-height:60px}
 .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
-.footer{text-align:center;padding:36px 28px;border-top:1px solid var(--border);color:var(--text-secondary);font-size:0.85rem;margin-top:60px}
-/* Wizard */
-.wizard-steps{display:flex;gap:0;margin-bottom:28px;flex-wrap:wrap}
-.wizard-step{flex:1;min-width:120px;text-align:center;padding:14px 12px;border-radius:12px;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all var(--transition);border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);position:relative}
-.wizard-step.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
-.wizard-step.done{background:rgba(0,227,150,0.1);color:var(--green);border-color:var(--green)}
-.wizard-num{display:block;font-size:1.4rem;font-weight:800;margin-bottom:4px}
-/* Guide */
-.guide-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;margin-bottom:16px;backdrop-filter:blur(10px)}
-.guide-card h4{margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.guide-card ol,.guide-card ul{padding-left:20px;color:var(--text-secondary);font-size:0.9rem;line-height:1.8}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.footer{text-align:center;padding:28px;border-top:1px solid var(--border);color:var(--text-secondary);font-size:0.8rem;margin-top:40px}
 
+/* Prompt Preview */
+.prompt-preview{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:0.9rem;line-height:1.6;min-height:80px;word-break:break-all;color:var(--accent)}
+.prompt-params{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.param-chip{padding:6px 10px;background:var(--accent-soft);border-radius:8px;font-size:0.72rem;color:var(--text-secondary);font-family:monospace}
+
+@media(max-width:1024px){
+  .app-layout{grid-template-columns:200px 1fr 0}
+  .right-panel{display:none}
+}
 @media(max-width:768px){
-  .chat-layout{grid-template-columns:1fr}
+  .app-layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .top-bar{padding:0 14px}
+  .section{padding:32px 16px}
   .compare-grid.cols-2,.compare-grid.cols-3,.compare-grid.cols-4{grid-template-columns:1fr}
-  .hero-stats{gap:28px}.filter-bar{flex-direction:column}.nav-links{padding-bottom:4px}
+  .hero-stats{gap:24px}.filter-bar{flex-direction:column}
+  .main-content{padding-bottom:70px}
+  footer{padding-bottom:80px}
+}
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:400;background:var(--glass);backdrop-filter:blur(20px);border-top:1px solid var(--glass-border);padding:6px 8px}
+.mobile-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border:none;background:none;color:var(--text-secondary);font-size:0.65rem;cursor:pointer;font-family:inherit;transition:all var(--transition);border-radius:8px}
+.mobile-nav button:hover{color:var(--text);background:var(--accent-soft)}
+.mobile-nav button .mn-icon{font-size:1.25rem}
+@media(max-width:768px){
+  .mobile-nav{display:flex}
+}
+@media(min-width:769px){
+  .mobile-nav,#mobileMenu{display:none!important}
 }
 </style>
 </head>
 <body>
-<nav class="nav"><div class="nav-inner">
-  <div class="logo"><div class="logo-icon">⚡</div><span>AI Nexus</span></div>
-  <div class="nav-links">
-    <button class="nav-link active" data-page="home">首页</button>
-    <button class="nav-link" data-page="models">模型</button>
-    <button class="nav-link" data-page="chat">聊天</button>
-    <button class="nav-link" data-page="compare">对比</button>
-    <button class="nav-link primary-link" data-page="novel">写小说</button>
-    <button class="nav-link" data-page="media">漫剧</button>
-    <button class="nav-link" data-page="pricing">充值</button>
-    <button class="nav-link" data-page="office">办公</button>
-    <button class="nav-link" data-page="brand">品牌</button>
-    <button class="nav-link" data-page="market">营销</button>
-    <button class="nav-link" data-page="art">绘画</button>
-    <span style="display:flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;background:var(--accent-light);font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="switchPage('pricing')" title="积分">💎<span id="creditDisplay">0</span></span>
-    <span id="userNav" style="display:flex;align-items:center;gap:6px;margin-left:4px"></span>
-    <button class="theme-toggle" id="themeToggle">🌙</button>
+
+<!-- Top Bar -->
+<header class="top-bar">
+  <div class="top-logo"><div class="top-logo-icon">⚡</div><span>AI Nexus</span></div>
+  <div class="top-actions">
+    <span class="top-credit" onclick="dailyCheckin()" title="每日签到">📅 <span id="checkinBadge">签到</span></span>
+    <span class="top-credit" onclick="switchPage('pricing')" title="积分">💎 <span id="creditDisplay">0</span></span>
+    <span id="userNav" style="display:flex;align-items:center;gap:6px"></span>
+    <button class="theme-toggle" id="themeToggle">☀️</button>
     <span class="conn-status" id="connStatus"><span class="conn-dot checking"></span><span>检测</span></span>
   </div>
-</div></nav>
+</header>
+
+<!-- App Layout -->
+<div class="app-layout">
+
+<!-- Left Sidebar -->
+<aside class="sidebar">
+  <button class="sidebar-link active" data-page="home"><span class="sidebar-icon">🏠</span>首页</button>
+  <button class="sidebar-link" data-page="models"><span class="sidebar-icon">🤖</span>模型</button>
+  <button class="sidebar-link" data-page="chat"><span class="sidebar-icon">💬</span>聊天</button>
+  <button class="sidebar-link" data-page="compare"><span class="sidebar-icon">📊</span>对比</button>
+  <button class="sidebar-link primary" data-page="novel"><span class="sidebar-icon">📖</span>写小说</button>
+  <button class="sidebar-link" data-page="media"><span class="sidebar-icon">🎬</span>漫剧</button>
+  <button class="sidebar-link" data-page="agents"><span class="sidebar-icon">🤖</span>智能体</button>
+  <div class="sidebar-divider"></div>
+  <button class="sidebar-link" data-page="office"><span class="sidebar-icon">💼</span>办公</button>
+  <button class="sidebar-link" data-page="brand"><span class="sidebar-icon">🎨</span>品牌</button>
+  <button class="sidebar-link" data-page="market"><span class="sidebar-icon">📢</span>营销</button>
+  <button class="sidebar-link" data-page="art"><span class="sidebar-icon">🖼</span>绘画</button>
+  <div class="sidebar-divider"></div>
+  <button class="sidebar-link" data-page="pricing"><span class="sidebar-icon">💎</span>充值</button>
+  <button class="sidebar-link" data-page="admin"><span class="sidebar-icon">⚙</span>管理</button>
+  <button class="sidebar-link" data-page="feedback"><span class="sidebar-icon">💬</span>反馈</button>
+  <button class="sidebar-link" data-page="terms"><span class="sidebar-icon">📋</span>服务条款</button>
+  <button class="sidebar-link" data-page="privacy"><span class="sidebar-icon">🔒</span>隐私政策</button>
+  <div class="sidebar-bottom">
+    <div class="sidebar-conn" id="sidebarConn"><span class="conn-dot checking"></span><span>检查连接</span></div>
+    <div class="sidebar-user" id="sidebarUser"><span>👤</span><span id="sidebarUserName">未登录</span></div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
 
 <div class="page active" id="page-home">
-  <section class="hero"><div class="container">
+  <section class="hero">
     <h1>AI Nexus 智能创作平台</h1>
-    <p>汇聚全球 30+ 顶尖大模型。AI 写作、漫剧、聊天、对比——所见即所得，小白秒上手。</p>
+    <p>不需要买7个AI订阅，不需要学提示词，不需要搭智能体——一个网站，全搞定。对话30+顶级模型、写小说变漫剧做品牌去营销、10个预制智能体一键使用。</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px">
+      <button class="btn-send" onclick="switchPage('chat');showToast('首次聊天不扣积分，试试吧~')" style="font-size:1rem;padding:14px 36px">🚀 免费体验</button>
+      <button class="btn-send" onclick="switchPage('pricing')" style="font-size:1rem;padding:14px 36px;background:linear-gradient(135deg,#f59e0b,#d97706)">💎 查看套餐</button>
+    </div>
+    <div style="display:inline-block;background:rgba(16,185,129,0.15);color:var(--green);padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;margin-bottom:24px">✨ 新用户注册即送 <span style="font-size:1rem">30积分</span> 免费体验</div>
     <div class="hero-stats">
       <div class="stat"><div class="stat-num" id="modelCount">30</div><div class="stat-label">收录模型</div></div>
       <div class="stat"><div class="stat-num">10</div><div class="stat-label">供应商</div></div>
-      <div class="stat"><div class="stat-num">免费</div><div class="stat-label">基础体验</div></div>
+      <div class="stat"><div class="stat-num" style="font-size:1.5rem">¥39起</div><div class="stat-label">基础套餐</div></div>
       <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">在线服务</div></div>
     </div>
-  </div></section>
-  <section class="section container">
-    <h2 class="section-title">🚀 三步上手</h2>
-    <div class="features">
-      <div class="feature-card" onclick="switchPage('models')" style="cursor:pointer"><div class="feature-icon">1️⃣</div><h3>选模型</h3><p>浏览 30+ 大模型，按需筛选，找到最适合你的 AI。</p></div>
-      <div class="feature-card" onclick="switchPage('novel')" style="cursor:pointer"><div class="feature-icon">2️⃣</div><h3>开创作</h3><p>AI 写小说、漫剧分镜——输入想法，秒出成果。</p></div>
-      <div class="feature-card" onclick="switchPage('chat')" style="cursor:pointer"><div class="feature-icon">3️⃣</div><h3>聊起来</h3><p>多模型同时对话，对比不同 AI 的回答风格。</p></div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:24px">
+      <span style="background:var(--accent-soft);color:var(--accent);padding:4px 12px;border-radius:16px;font-size:0.72rem">🔒 数据加密传输</span>
+      <span style="background:var(--accent-soft);color:var(--accent);padding:4px 12px;border-radius:16px;font-size:0.72rem">🗝️ 对话仅本地存储</span>
+      <span style="background:var(--accent-soft);color:var(--accent);padding:4px 12px;border-radius:16px;font-size:0.72rem">📡 不保存聊天内容</span>
+    </div>
+    <!-- Creative Pipeline -->
+    <div style="margin-top:28px;padding:20px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius);max-width:900px;margin-left:auto;margin-right:auto">
+      <div style="font-weight:600;font-size:0.85rem;text-align:center;margin-bottom:16px;color:var(--accent)">🔄 你的创意流水线 — 一个想法，完整变现</div>
+      <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;font-size:0.75rem">
+        <span onclick="switchPage('novel')" style="cursor:pointer;padding:8px 14px;background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.1));border-radius:8px;border:1px solid rgba(124,58,237,0.3);white-space:nowrap">📖 写小说</span>
+        <span style="color:var(--accent);font-weight:700">→</span>
+        <span onclick="switchPage('media')" style="cursor:pointer;padding:8px 14px;background:linear-gradient(135deg,rgba(6,182,212,0.2),rgba(8,145,178,0.1));border-radius:8px;border:1px solid rgba(6,182,212,0.3);white-space:nowrap">🎬 变漫剧</span>
+        <span style="color:var(--accent);font-weight:700">→</span>
+        <span onclick="switchPage('brand')" style="cursor:pointer;padding:8px 14px;background:linear-gradient(135deg,rgba(108,78,245,0.2),rgba(139,112,255,0.1));border-radius:8px;border:1px solid rgba(108,78,245,0.3);white-space:nowrap">🎨 做品牌</span>
+        <span style="color:var(--accent);font-weight:700">→</span>
+        <span onclick="switchPage('market')" style="cursor:pointer;padding:8px 14px;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(217,119,6,0.1));border-radius:8px;border:1px solid rgba(245,158,11,0.3);white-space:nowrap">📢 去营销</span>
+        <span style="color:var(--accent);font-weight:700">→</span>
+        <span style="padding:8px 14px;background:rgba(16,185,129,0.1);border-radius:8px;border:1px solid rgba(16,185,129,0.3);white-space:nowrap;font-weight:700;color:var(--green)">💰 变现</span>
+      </div>
+      <p style="text-align:center;font-size:0.72rem;color:var(--text-secondary);margin-top:10px">每个步骤自动衔接——输入一次想法，产出IP全链路</p>
+    </div>
+    <div class="features" style="margin-top:36px">
+      <div class="feature-card" onclick="switchPage('chat')" style="cursor:pointer"><div class="feature-icon">💬</div><h3>AI 聊天</h3><p>多模型同时对话，对比不同AI的回答</p></div>
+      <div class="feature-card" onclick="switchPage('novel')" style="cursor:pointer"><div class="feature-icon">📖</div><h3>AI 写小说</h3><p>向导式创作→一键变漫剧→打造IP品牌</p></div>
+      <div class="feature-card" onclick="switchPage('media')" style="cursor:pointer"><div class="feature-icon">🎬</div><h3>AI 漫剧</h3><p>分镜脚本+角色设计→扩展成小说</p></div>
+      <div class="feature-card" onclick="switchPage('art')" style="cursor:pointer"><div class="feature-icon">🖼</div><h3>AI 绘画</h3><p>Midjourney提示词→IP视觉化</p></div>
+      <div class="feature-card" onclick="switchPage('agents')" style="cursor:pointer"><div class="feature-icon">🤖</div><h3>AI 智能体</h3><p>10个预制专家智能体，输入需求直出结果，零配置</p></div>
+      <div class="feature-card" onclick="switchPage('brand')" style="cursor:pointer"><div class="feature-icon">🎨</div><h3>品牌设计</h3><p>Logo+命名+Slogan→一键去营销</p></div>
+      <div class="feature-card" onclick="switchPage('market')" style="cursor:pointer"><div class="feature-icon">📢</div><h3>智能营销</h3><p>小红书+公众号→打造品牌IP</p></div>
     </div>
   </section>
-  <section class="section container">
+  <section class="section" id="continueSection" style="display:none">
+    <h2 class="section-title">📌 继续上次</h2>
+    <div id="continueContent" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+  </section>
+  <section class="section">
     <h2 class="section-title">热门模型</h2>
     <div class="models-grid" id="featuredModels"></div>
   </section>
 </div>
 
 <div class="page" id="page-models">
-  <section class="section container">
-    <h2 class="section-title">模型目录</h2>
+  <section class="section">
+    <h2 class="section-title">🤖 模型目录</h2>
     <div class="filter-bar">
       <input class="search-input" id="modelSearch" placeholder="搜索模型...">
       <button class="filter-tag active" data-filter="all">全部</button>
@@ -241,42 +365,42 @@ a{color:var(--accent);text-decoration:none}
 </div>
 
 <div class="page" id="page-chat">
-  <section class="section container">
-    <h2 class="section-title">多模型聊天</h2>
+  <section class="section">
+    <h2 class="section-title">💬 多模型聊天</h2>
     <div class="chat-layout">
-      <div class="chat-sidebar"><h3>选择模型</h3><div id="chatModelList"></div></div>
       <div class="chat-main">
-        <div class="chat-messages" id="chatMessages"><div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">💡</div><p>选模型 → 输入问题 → 看回复</p></div></div>
+        <div class="chat-messages" id="chatMessages"><div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">💡</div><p>在右侧面板选择模型 → 输入问题 → 看回复</p></div></div>
         <div class="chat-input-area">
           <textarea class="chat-input" id="chatInput" placeholder="输入问题 (Enter发送)" rows="1"></textarea>
           <button class="btn-send" id="btnSend" onclick="sendChatMessage()">发送</button>
         </div>
       </div>
     </div>
+    <div class="filter-bar" style="margin-top:12px" id="chatModelBar"><p style="color:var(--text-secondary);font-size:0.8rem">提示：右侧面板选择要使用的模型</p></div>
   </section>
 </div>
 
 <div class="page" id="page-compare">
-  <section class="section container">
-    <h2 class="section-title">模型对比</h2>
+  <section class="section">
+    <h2 class="section-title">📊 模型对比</h2>
     <div class="compare-controls">
-      <select class="col-select" id="colSelect" onchange="updateCompareLayout()"><option value="2">2列</option><option value="3">3列</option><option value="4">4列</option></select>
       <input class="compare-prompt" id="comparePrompt" placeholder="输入问题对比...">
       <button class="btn-send" onclick="runCompare()">对比</button>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
       <button class="filter-tag" onclick="setComparePrompt('量子计算通俗解释')">量子计算</button>
       <button class="filter-tag" onclick="setComparePrompt('写一首春天的诗')">写诗</button>
       <button class="filter-tag" onclick="setComparePrompt('Python快速排序')">编程</button>
+      <button class="filter-tag" onclick="setComparePrompt('比特币原理')">比特币</button>
     </div>
     <div class="compare-grid cols-2" id="compareGrid"></div>
   </section>
 </div>
 
 <div class="page" id="page-novel">
-  <section class="section container">
+  <section class="section">
     <h2 class="section-title">📖 AI 小说创作</h2>
-    <p class="section-desc">小白向导模式：选类型→定大纲→出人物→写正文，一路点下去就行</p>
+    <p class="section-desc">向导模式：选类型→定大纲→出人物→写正文。写完一键变漫剧→设计品牌→去营销，IP全链路打通</p>
     <div class="wizard-steps" id="wizardSteps">
       <div class="wizard-step active" data-wstep="type"><span class="wizard-num">1</span>选类型</div>
       <div class="wizard-step" data-wstep="outline"><span class="wizard-num">2</span>定大纲</div>
@@ -284,7 +408,7 @@ a{color:var(--accent);text-decoration:none}
       <div class="wizard-step" data-wstep="world"><span class="wizard-num">4</span>世界观</div>
       <div class="wizard-step" data-wstep="write"><span class="wizard-num">5</span>写正文</div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div>
         <div id="wizardPanel"></div>
         <div style="display:flex;gap:8px;margin-top:8px">
@@ -292,55 +416,88 @@ a{color:var(--accent);text-decoration:none}
         </div>
       </div>
       <div>
-        <div class="feature-card" style="min-height:420px;max-height:620px;overflow-y:auto;white-space:pre-wrap;font-size:0.9rem;line-height:1.8" id="novelOutput">
+        <div class="feature-card" style="min-height:380px;max-height:580px;overflow-y:auto;white-space:pre-wrap;font-size:0.85rem;line-height:1.8" id="novelOutput">
           <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">📝</div><p>选类型开始创作</p></div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
+        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end;flex-wrap:wrap">
+          <button class="btn-sm" onclick="saveChapter()">💾 存章节</button>
+          <button class="btn-sm primary" onclick="novelToMedia()" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;border:none">🎬 变成漫剧</button>
+          <button class="btn-sm" onclick="novelToBrand()">🎨 设计IP品牌</button>
           <button class="btn-sm" onclick="copyNovelOutput()">📋</button>
-          <button class="btn-sm primary" onclick="saveChapter()">💾 存章节</button>
           <button class="btn-sm" onclick="downloadNovel()">⬇</button>
         </div>
       </div>
     </div>
-    <div class="feature-card" style="margin-top:20px" id="novelProgress"><div style="font-weight:600;font-size:0.85rem;margin-bottom:6px">📚 <span id="novelBookTitle">未开始</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:0.8rem;color:var(--text-secondary)">已写:</span><span id="chapterCount" style="font-weight:700;color:var(--accent)">0</span><span style="font-size:0.8rem;color:var(--text-secondary)">章</span><span id="totalWords" style="font-weight:700;color:var(--accent)">0</span><span style="font-size:0.8rem;color:var(--text-secondary)">字</span><button class="btn-sm" onclick="loadNovelProject()" style="margin-left:auto">📂 管理</button></div></div>
+    <div class="feature-card" style="margin-top:16px" id="novelProgress"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">📚 <span id="novelBookTitle">未开始</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:0.78rem;color:var(--text-secondary)">已写:</span><span id="chapterCount" style="font-weight:700;color:var(--accent)">0</span><span style="font-size:0.78rem;color:var(--text-secondary)">章</span><span id="totalWords" style="font-weight:700;color:var(--accent)">0</span><span style="font-size:0.78rem;color:var(--text-secondary)">字</span><button class="btn-sm" onclick="loadNovelProject()" style="margin-left:auto">📂 管理</button></div></div>
   </section>
 </div>
 
 <div class="page" id="page-media">
-  <section class="section container">
+  <section class="section">
     <h2 class="section-title">🎬 AI 漫剧</h2>
     <p class="section-desc">输入故事 → 选风格 → 出分镜脚本/角色/场景/对白</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div>
-        <div class="feature-card" style="margin-bottom:12px">
-          <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">创作类型</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap" id="mediaModes">
+        <div class="feature-card" style="margin-bottom:10px">
+          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:8px">创作类型</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="mediaModes">
             <button class="filter-tag active" data-mode="storyboard" onclick="mediaMode(this)">分镜脚本</button>
             <button class="filter-tag" data-mode="chars" onclick="mediaMode(this)">角色设计</button>
             <button class="filter-tag" data-mode="scene" onclick="mediaMode(this)">场景描述</button>
             <button class="filter-tag" data-mode="dialog" onclick="mediaMode(this)">对白生成</button>
           </div>
         </div>
-        <textarea id="mediaInput" rows="5" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical;margin-bottom:12px" placeholder="描述你的故事场景..."></textarea>
+        <textarea id="mediaInput" rows="5" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical;margin-bottom:10px" placeholder="描述你的故事场景..."></textarea>
         <div style="display:flex;gap:8px">
           <select id="mediaStyle" class="col-select"><option>日系动漫</option><option>国风水墨</option><option>写实电影</option><option>Q版可爱</option><option>暗黑哥特</option></select>
           <button class="btn-send" onclick="aiCreateMedia()">生成</button>
         </div>
       </div>
       <div>
-        <div class="feature-card" style="min-height:400px;max-height:600px;overflow-y:auto;white-space:pre-wrap;font-size:0.9rem;line-height:1.8" id="mediaOutput">
+        <div class="feature-card" style="min-height:380px;max-height:580px;overflow-y:auto;white-space:pre-wrap;font-size:0.85rem;line-height:1.8" id="mediaOutput">
           <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">🎬</div><p>输入故事开始</p></div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button class="btn-sm primary" onclick="generateComicImage()">🖼️ 生成画面提示词</button><button class="btn-sm" onclick="copyMediaOutput()">📋</button><button class="btn-sm" onclick="downloadMedia()">⬇</button></div>
+        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn-sm primary" onclick="generateComicImage()">🖼 生成画面提示词</button><button class="btn-sm" onclick="mediaToNovel()" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none">📖 扩展成小说</button><button class="btn-sm" onclick="copyMediaOutput()">📋</button><button class="btn-sm" onclick="downloadMedia()">⬇</button></div>
       </div>
     </div>
   </section>
 </div>
 
-<!-- AI Office -->
-<div class="page" id="page-office"><section class="section container">
+<!-- AI Agents Workshop -->
+<div class="page" id="page-agents">
+  <section class="section">
+    <h2 class="section-title">🤖 AI 智能体工坊</h2>
+    <p class="section-desc">10 个预制专业智能体，输入需求直接出结果。不需要写提示词、不需要搭工作流、不需要学技术——像跟专家说话一样简单。</p>
+    <div class="filter-bar" id="agentFilters">
+      <button class="filter-tag active" data-filter="all">全部</button>
+      <button class="filter-tag" data-filter="创作">创作</button>
+      <button class="filter-tag" data-filter="商业">商业</button>
+      <button class="filter-tag" data-filter="营销">营销</button>
+      <button class="filter-tag" data-filter="研究">研究</button>
+    </div>
+    <div class="models-grid" id="agentGrid"></div>
+  </section>
+  <!-- Agent Run Modal -->
+  <div class="modal-overlay" id="agentModal"><div class="modal" style="max-width:650px">
+    <h3 id="agentModalTitle">智能体</h3>
+    <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:14px" id="agentModalDesc"></p>
+    <div class="form-group"><label id="agentModalLabel">输入你的需求</label><textarea id="agentInput" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical"></textarea></div>
+    <div class="feature-card" style="min-height:120px;max-height:400px;overflow-y:auto;white-space:pre-wrap;font-size:0.85rem;line-height:1.7;margin-bottom:12px;display:none" id="agentOutput"></div>
+    <div class="form-actions" id="agentActions">
+      <button class="btn-send" onclick="runAgent()">🚀 开始执行</button>
+      <button class="btn-sm" onclick="closeAgent()">关闭</button>
+    </div>
+    <div class="form-actions" id="agentResultActions" style="display:none">
+      <button class="btn-sm primary" onclick="copyAgentOutput()">📋 复制</button>
+      <button class="btn-sm" onclick="retryAgent()">🔄 重新生成</button>
+      <button class="btn-sm" onclick="closeAgent()">关闭</button>
+    </div>
+  </div></div>
+</div>
+
+<div class="page" id="page-office"><section class="section">
 <h2 class="section-title">💼 AI 智能办公</h2>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
 <div class="feature-card" style="cursor:pointer" onclick="aiOffice('doc','写一篇关于[主题]的1000字文章')"><div class="feature-icon">📄</div><h3>文档写作</h3><p>报告、方案、合同——输入主题秒出稿</p></div>
 <div class="feature-card" style="cursor:pointer" onclick="aiOffice('email','写一封商务邮件，主题：[合作邀约]')"><div class="feature-icon">📧</div><h3>邮件起草</h3><p>商务/求职/客户邮件，语气得体专业</p></div>
 <div class="feature-card" style="cursor:pointer" onclick="aiOffice('ppt','为[公司年度总结]设计PPT大纲')"><div class="feature-icon">📊</div><h3>PPT 大纲</h3><p>结构化大纲+每页要点+演讲备注</p></div>
@@ -348,240 +505,600 @@ a{color:var(--accent);text-decoration:none}
 <div class="feature-card" style="cursor:pointer" onclick="aiOffice('translate','将以下内容翻译成英文：\n[文本]')"><div class="feature-icon">🌐</div><h3>智能翻译</h3><p>中英日韩多语言互译，专业术语准确</p></div>
 <div class="feature-card" style="cursor:pointer" onclick="aiOffice('summary','总结以下长文的核心要点：\n[文章]')"><div class="feature-icon">📋</div><h3>文档摘要</h3><p>长文一键提炼，抓核心省时间</p></div>
 </div>
-<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
-<div><textarea id="officeInput" rows="4" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="输入你的需求..."></textarea>
+<div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div><textarea id="officeInput" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="例：为「AI绘画工具」写一篇1000字的公众号推广文章，目标读者是设计师和创作者，语气专业但不死板..."></textarea>
 <div style="display:flex;gap:8px;margin-top:8px"><select id="officeModel" class="col-select"><option value="deepseekv3">DeepSeek-V3</option><option value="qwen3">通义千问3</option><option value="gpt4o">GPT-4o</option></select>
 <button class="btn-send" onclick="runAiOffice()">生成</button></div></div>
-<div class="feature-card" style="min-height:200px;max-height:400px;overflow-y:auto;white-space:pre-wrap" id="officeOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择上方功能，输入需求开始</p></div></div>
+<div class="feature-card" style="min-height:180px;max-height:360px;overflow-y:auto;white-space:pre-wrap" id="officeOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择上方功能，输入需求开始</p></div></div>
 </section></div>
 
-<!-- AI Brand -->
-<div class="page" id="page-brand"><section class="section container">
+<div class="page" id="page-brand"><section class="section">
 <h2 class="section-title">🎨 AI 品牌设计</h2>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
-<div class="feature-card" style="cursor:pointer" onclick="aiBrand('logo','为品牌[名称]，行业[领域]，设计3个Logo方案（图形+文字组合）')"><div class="feature-icon">🔣</div><h3>Logo 方案</h3><p>AI 生成 Logo 创意描述+配色方案</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiBrand('naming','为[行业/产品]起10个品牌名，中英文各5个')"><div class="feature-icon">✏️</div><h3>品牌命名</h3><p>中英文命名+含义解析+商标可用性</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiBrand('slogan','为品牌[名称]（行业：[领域]）创作10条Slogan')"><div class="feature-icon">💬</div><h3>Slogan 创作</h3><p>朗朗上口的品牌口号，含传播力分析</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiBrand('color','为[品牌名]（行业：[领域]，调性：[年轻/高端/亲民]）设计配色方案')"><div class="feature-icon">🎨</div><h3>配色方案</h3><p>主色/辅色/点缀色+应用场景说明</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiBrand('guide','为[品牌名]撰写品牌视觉识别手册(VI)大纲')"><div class="feature-icon">📘</div><h3>VI 手册</h3><p>品牌视觉规范，含字体/色彩/应用</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiBrand('story','为[品牌名]创作品牌故事（500字）')"><div class="feature-icon">📖</div><h3>品牌故事</h3><p>有温度的品牌叙事，打动你的用户</p></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('logo','为品牌[名称]，行业[领域]，设计3个Logo方案')"><div class="feature-icon">🔣</div><h3>Logo 方案</h3><p>AI 生成 Logo 创意描述+配色方案</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('naming','为[行业/产品]起10个品牌名，中英文各5个')"><div class="feature-icon">✏️</div><h3>品牌命名</h3><p>中英文命名+含义解析</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('slogan','为品牌[名称]创作10条Slogan')"><div class="feature-icon">💬</div><h3>Slogan 创作</h3><p>朗朗上口的品牌口号</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('color','为[品牌名]设计配色方案')"><div class="feature-icon">🎨</div><h3>配色方案</h3><p>主色/辅色/点缀色+应用说明</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('guide','为[品牌名]撰写VI手册大纲')"><div class="feature-icon">📘</div><h3>VI 手册</h3><p>品牌视觉规范</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiBrand('story','为[品牌名]创作品牌故事')"><div class="feature-icon">📖</div><h3>品牌故事</h3><p>有温度的品牌叙事</p></div>
 </div>
-<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
-<div><textarea id="brandInput" rows="4" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="输入品牌信息..."></textarea>
+<div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div><textarea id="brandInput" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="输入品牌信息..."></textarea>
 <div style="display:flex;gap:8px;margin-top:8px"><select id="brandModel" class="col-select"><option value="deepseekv3">DeepSeek-V3</option><option value="qwen3">通义千问3</option></select>
 <button class="btn-send" onclick="runAiBrand()">生成</button></div></div>
-<div class="feature-card" style="min-height:200px;max-height:400px;overflow-y:auto;white-space:pre-wrap" id="brandOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择功能开始</p></div></div>
+<div class="feature-card" style="min-height:180px;max-height:360px;overflow-y:auto;white-space:pre-wrap" id="brandOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择功能开始</p></div>
+  <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button class="btn-sm" onclick="brandToMarket()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none">📢 去营销推广</button></div>
+</div>
 </section></div>
 
-<!-- AI Marketing -->
-<div class="page" id="page-market"><section class="section container">
+<div class="page" id="page-market"><section class="section">
 <h2 class="section-title">📢 AI 智能营销</h2>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
-<div class="feature-card" style="cursor:pointer" onclick="aiMarket('social','为[产品/品牌]写5条小红书种草文案')"><div class="feature-icon">📱</div><h3>小红书文案</h3><p>种草/测评/教程——爆款标题+正文+标签</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiMarket('ad','为[产品]创作3条30秒短视频广告脚本')"><div class="feature-icon">🎬</div><h3>广告脚本</h3><p>短视频/抖音/TikTok 分镜头脚本</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiMarket('seo','为网站[URL/主题]写SEO优化的元描述和关键词')"><div class="feature-icon">🔍</div><h3>SEO 优化</h3><p>标题/描述/关键词/内链策略</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiMarket('product','为[产品]写电商详情页文案（天猫/京东风格）')"><div class="feature-icon">🛒</div><h3>电商文案</h3><p>卖点提炼+场景描述+促销话术</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiMarket('wechat','为[品牌]写一篇微信公众号推文')"><div class="feature-icon">💬</div><h3>公众号推文</h3><p>标题党+正文+引导关注+阅读原文</p></div>
-<div class="feature-card" style="cursor:pointer" onclick="aiMarket('email2','为[产品]设计邮件营销EDM文案')"><div class="feature-icon">📬</div><h3>邮件营销</h3><p>高打开率标题+内容+CTA 按钮</p></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('xhs','为[产品]创作小红书种草笔记（含标题+正文+话题标签）')"><div class="feature-icon">📕</div><h3>小红书</h3><p>种草笔记标题正文标签</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('ad','为[产品]撰写广告投放文案（多版本A/B测试用）')"><div class="feature-icon">📺</div><h3>广告文案</h3><p>投放多版A/B测试</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('seo','为[网站/产品]生成SEO优化内容（关键词+描述）')"><div class="feature-icon">🔍</div><h3>SEO 优化</h3><p>关键词密度元描述</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('ecom','为[产品]写电商详情页文案（卖点+使用场景）')"><div class="feature-icon">🛒</div><h3>电商详情</h3><p>卖点场景用户痛点</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('wechat','为[品牌]创作公众号推文（标题+摘要+正文）')"><div class="feature-icon">💚</div><h3>公众号</h3><p>推文标题摘要正文</p></div>
+<div class="feature-card" style="cursor:pointer" onclick="aiMarket('email','为[产品]撰写EDM邮件营销（主题+内容+CTA）')"><div class="feature-icon">📬</div><h3>邮件营销</h3><p>自动序列转化策略</p></div>
 </div>
-<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
-<div><textarea id="marketInput" rows="4" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="输入产品/品牌信息..."></textarea>
+<div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div><textarea id="marketInput" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="输入产品信息..."></textarea>
 <div style="display:flex;gap:8px;margin-top:8px"><select id="marketModel" class="col-select"><option value="deepseekv3">DeepSeek-V3</option><option value="qwen3">通义千问3</option></select>
 <button class="btn-send" onclick="runAiMarket()">生成</button></div></div>
-<div class="feature-card" style="min-height:200px;max-height:400px;overflow-y:auto;white-space:pre-wrap" id="marketOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择功能开始</p></div></div>
+<div class="feature-card" style="min-height:180px;max-height:360px;overflow-y:auto;white-space:pre-wrap" id="marketOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择功能开始</p></div>
+  <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button class="btn-sm" onclick="marketToBrand()" style="background:linear-gradient(135deg,#6c4ef5,#8b70ff);color:#fff;border:none">🎨 去设计品牌</button></div>
+</div>
 </section></div>
 
-<!-- AI Art -->
-<div class="page" id="page-art"><section class="section container">
-<h2 class="section-title">🎨 AI 绘画工坊</h2>
-<p class="section-desc">Midjourney / Stable Diffusion 完整提示词库，点选组合一键生成提示词</p>
+<!-- AI Art Page - Enhanced -->
+<div class="page" id="page-art">
+  <section class="section">
+    <h2 class="section-title">🎨 AI 绘画工坊</h2>
+    <p class="section-desc">Midjourney 提示词生成器——像搭积木一样组合专业 Prompt</p>
 
-<!-- Prompt Builder -->
-<div class="feature-card" style="margin-bottom:20px">
-  <h4 style="margin-bottom:12px">🧩 提示词组装器</h4>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-    <div><label style="font-size:0.82rem;font-weight:600">主体/内容</label><input id="artSubject" placeholder="a girl, dragon, castle..." style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"></div>
-    <div><label style="font-size:0.82rem;font-weight:600">风格</label><select id="artStyle" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选风格</option></select></div>
-    <div><label style="font-size:0.82rem;font-weight:600">光照</label><select id="artLight" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选光照</option></select></div>
-    <div><label style="font-size:0.82rem;font-weight:600">镜头</label><select id="artCamera" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选镜头</option></select></div>
-    <div><label style="font-size:0.82rem;font-weight:600">画质</label><select id="artQuality" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选画质</option></select></div>
-    <div><label style="font-size:0.82rem;font-weight:600">比例</label><select id="artRatio" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="">选比例</option></select></div>
-  </div>
-  <div style="margin-top:16px;padding:16px;background:var(--bg-input);border-radius:10px;font-size:0.9rem;word-break:break-all;min-height:60px" id="artPrompt">选择上方选项组合提示词</div>
-  <div style="display:flex;gap:8px;margin-top:12px">
-    <button class="btn-send" onclick="buildArtPrompt()">🔄 刷新组合</button>
-    <button class="btn-sm primary" onclick="copyArtPrompt()">📋 复制提示词</button>
-    <button class="btn-sm" onclick="sendArtToMJ()">🚀 去 MJ 生成</button>
-  </div>
-</div>
-
-<!-- Reference Library -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
-  <div class="feature-card">
-    <h4>🎨 风格关键词</h4>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artStyleTags"></div>
-  </div>
-  <div class="feature-card">
-    <h4>💡 光照关键词</h4>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artLightTags"></div>
-  </div>
-  <div class="feature-card">
-    <h4>📷 镜头/角度</h4>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artCameraTags"></div>
-  </div>
-  <div class="feature-card">
-    <h4>👨‍🎨 艺术家风格</h4>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artArtistTags"></div>
-  </div>
-  <div class="feature-card">
-    <h4>🖼️ 画质增强词</h4>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px" id="artQualityTags"></div>
-  </div>
-  <div class="feature-card">
-    <h4>⚙️ MJ 参数速查</h4>
-    <div style="font-size:0.82rem;line-height:1.8;color:var(--text-secondary);margin-top:8px">
-      <div><code>--ar 16:9</code> 宽高比</div>
-      <div><code>--s 0-1000</code> 风格化(默认100)</div>
-      <div><code>--c 0-100</code> 随机性(默认0)</div>
-      <div><code>--q .25/.5/1</code> 质量</div>
-      <div><code>--no xxx</code> 排除元素</div>
-      <div><code>--iw 0.5-2</code> 图生图权重</div>
-      <div><code>::权重</code> 多提示词权重</div>
+    <div class="tab-bar" id="artTabs">
+      <button class="tab-btn active" data-tab="builder">提示词组装器</button>
+      <button class="tab-btn" data-tab="gallery">风格灵感画廊</button>
     </div>
-  </div>
-</div>
 
-<!-- Prompt Templates -->
-<div style="margin-top:32px">
-  <h3 style="margin-bottom:16px">📋 场景模板</h3>
-  <div class="filter-bar" id="artTplFilters">
-    <button class="filter-tag active" data-tpl="all">全部</button>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px" id="artTemplates"></div>
-</div>
-</section></div>
+    <!-- Tab 1: Prompt Builder -->
+    <div class="tab-content active" id="tab-builder">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="feature-card">
+          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">🎯 主体/内容</label>
+          <input id="artSubject" placeholder="输入你想要的画面主体..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none">
+        </div>
+        <div class="feature-card">
+          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">🎨 风格</label>
+          <select id="artStyle" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
+        </div>
+        <div class="feature-card">
+          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">💡 光照</label>
+          <select id="artLight" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
+        </div>
+        <div class="feature-card">
+          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">📷 镜头/构图</label>
+          <select id="artCamera" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
+        </div>
+        <div class="feature-card">
+          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">✨ 画质</label>
+          <select id="artQuality" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
+        </div>
+        <div class="feature-card">
+          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">📐 比例</label>
+          <select id="artRatio" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
+        </div>
+      </div>
+      <div class="prompt-preview" id="artPrompt" style="margin-bottom:12px">选择上方选项组合提示词</div>
+      <div style="display:flex;gap:8px;margin-bottom:20px">
+        <button class="btn-send" onclick="buildArtPrompt()">🔄 刷新组合</button>
+        <button class="btn-send" style="background:linear-gradient(135deg,#06b6d4,#0891b2)" onclick="copyArtPrompt()">📋 复制提示词</button>
+        <button class="btn-send" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="sendArtToMJ()">🚀 去MJ生成</button>
+      </div>
 
-<!-- Login/Register Modal -->
-<div class="modal-overlay" id="authModal"><div class="modal" style="max-width:420px">
-<div id="authLogin"><h3>👤 登录</h3>
-<div class="form-group"><label>用户名/邮箱</label><input id="loginUser"></div>
-<div class="form-group"><label>密码</label><input type="password" id="loginPwd" onkeydown="if(event.key==='Enter')doLogin()"></div>
-<div class="form-actions"><button class="btn-sm" onclick="showRegister()">去注册</button><button class="btn-sm primary" onclick="doLogin()">登录</button></div></div>
-<div id="authRegister" style="display:none"><h3>📝 注册</h3>
-<div class="form-group"><label>用户名</label><input id="regUser"></div>
-<div class="form-group"><label>邮箱</label><input type="email" id="regEmail"></div>
-<div class="form-group"><label>密码(6位以上)</label><input type="password" id="regPwd"></div>
-<div class="form-actions"><button class="btn-sm" onclick="showLogin()">去登录</button><button class="btn-sm primary" onclick="doRegister()">注册</button></div></div></div></div>
+      <!-- Keyword Library -->
+      <div class="feature-card" style="margin-bottom:14px">
+        <h4 style="margin-bottom:10px">🎨 风格关键词</h4>
+        <div id="artStyleTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
+      <div class="feature-card" style="margin-bottom:14px">
+        <h4 style="margin-bottom:10px">💡 光照关键词</h4>
+        <div id="artLightTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
+      <div class="feature-card" style="margin-bottom:14px">
+        <h4 style="margin-bottom:10px">📷 镜头关键词</h4>
+        <div id="artCameraTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
+      <div class="feature-card" style="margin-bottom:14px">
+        <h4 style="margin-bottom:10px">👨‍🎨 艺术家风格</h4>
+        <div id="artArtistTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
+      <div class="feature-card" style="margin-bottom:14px">
+        <h4 style="margin-bottom:10px">✨ 画质增强词</h4>
+        <div id="artQualityTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
+
+      <!-- Scene Templates -->
+      <div class="feature-card">
+        <h4 style="margin-bottom:10px">📋 场景模板</h4>
+        <div id="artTplFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>
+        <div id="artTemplates" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px"></div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Style Gallery -->
+    <div class="tab-content" id="tab-gallery">
+      <p class="section-desc">点击风格卡片，自动填充对应风格关键词到组装器</p>
+      <div class="gallery-grid" id="styleGallery"></div>
+    </div>
+  </section>
+</div>
 
 <div class="page" id="page-pricing">
-  <section class="section container">
+  <section class="section">
     <h2 class="section-title">💎 积分充值</h2>
-    <div class="feature-card" style="text-align:center;margin-bottom:32px;background:linear-gradient(135deg,var(--accent-light),var(--bg-card))">
-      <div style="font-size:2.5rem">💎</div>
-      <div style="font-size:2rem;font-weight:800;color:var(--accent)" id="creditBalance">0</div>
-      <div style="color:var(--text-secondary);margin-bottom:16px">当前积分</div>
+    <p class="section-desc">积分用于 AI 聊天、小说创作、绘画生成等功能</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px">
+      <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">☕</div><h3>体验套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">100 积分 · 了解平台</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">单模型聊天×100<br>或办公×33次</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥9.9</div><button class="btn-send" onclick="purchaseCredits(100,'¥9.9')">购买</button></div>
+      <div class="feature-card" style="text-align:center;border:2px solid var(--accent);padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">⭐</div><h3>标准套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">500 积分 · 推荐</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">日常写作办公够用<br>¥0.08/次，超值</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥39</div><button class="btn-send" onclick="purchaseCredits(500,'¥39')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">💎</div><h3>进阶套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">1500 积分 · 重度用户</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">畅享对比+小说+漫剧<br>¥0.046/次</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥69</div><button class="btn-send" onclick="purchaseCredits(1500,'¥69')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">🚀</div><h3>专业套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">4000 积分 · 最划算</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">团队或专业创作者<br>¥0.032/次</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥129</div><button class="btn-send" onclick="purchaseCredits(4000,'¥129')">购买</button></div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px">
-      <div class="feature-card" style="text-align:center;cursor:pointer" onclick="purchaseCredits(100,'¥9.9')"><div style="font-size:2rem">💎</div><div style="font-size:1.5rem;font-weight:800">100</div><div style="color:var(--text-secondary)">积分</div><div style="font-weight:700;color:var(--accent);margin-top:8px">¥9.9</div><button class="btn-sm primary" style="margin-top:12px;width:100%">购买</button></div>
-      <div class="feature-card" style="text-align:center;border:2px solid var(--accent);cursor:pointer" onclick="purchaseCredits(500,'¥39.9')"><div style="font-size:2rem">⭐</div><div style="font-size:1.5rem;font-weight:800">500</div><div style="color:var(--text-secondary)">积分 热门</div><div style="font-weight:700;color:var(--accent);margin-top:8px">¥39.9</div><button class="btn-send" style="margin-top:12px;width:100%">购买</button></div>
-      <div class="feature-card" style="text-align:center;cursor:pointer" onclick="purchaseCredits(2000,'¥99')"><div style="font-size:2rem">💎</div><div style="font-size:1.5rem;font-weight:800">2000</div><div style="color:var(--text-secondary)">积分</div><div style="font-weight:700;color:var(--accent);margin-top:8px">¥99</div><button class="btn-sm primary" style="margin-top:12px;width:100%">购买</button></div>
+    <div class="feature-card" style="margin-top:20px">
+      <h4 style="margin-bottom:12px;text-align:center">📊 使用说明</h4>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;text-align:center">
+        <div style="padding:8px;background:var(--accent-soft);border-radius:8px"><span style="font-weight:700;color:var(--accent)">1分</span><br><span style="font-size:0.78rem;color:var(--text-secondary)">单模型聊天</span></div>
+        <div style="padding:8px;background:var(--accent-soft);border-radius:8px"><span style="font-weight:700;color:var(--accent)">3分</span><br><span style="font-size:0.78rem;color:var(--text-secondary)">多模型对比</span></div>
+        <div style="padding:8px;background:var(--accent-soft);border-radius:8px"><span style="font-weight:700;color:var(--accent)">5分</span><br><span style="font-size:0.78rem;color:var(--text-secondary)">AI写小说(章)</span></div>
+        <div style="padding:8px;background:var(--accent-soft);border-radius:8px"><span style="font-weight:700;color:var(--accent)">8分</span><br><span style="font-size:0.78rem;color:var(--text-secondary)">AI漫剧</span></div>
+        <div style="padding:8px;background:var(--accent-soft);border-radius:8px"><span style="font-weight:700;color:var(--accent)">3分</span><br><span style="font-size:0.78rem;color:var(--text-secondary)">办公/品牌/营销</span></div>
+        <div style="padding:8px;background:rgba(16,185,129,0.08);border-radius:8px"><span style="font-weight:700;color:var(--green)">免费</span><br><span style="font-size:0.78rem;color:var(--text-secondary)">AI绘画提示词</span></div>
+      </div>
+      <p style="text-align:center;margin-top:14px;font-size:1rem">当前积分: <span id="creditBalance" style="font-weight:800;color:var(--accent)">0</span></p>
     </div>
-    <!-- 推广指南 -->
-    <h3 class="section-title">📢 推广指南</h3>
-    <div class="features">
-      <div class="guide-card"><h4>🔗 你的推广地址</h4><p style="color:var(--accent);font-size:1rem;font-weight:600;word-break:break-all">j3trisheng.com</p><p style="font-size:0.85rem;color:var(--text-secondary);margin-top:8px">保护域名：.cyou / .fun / .asia 已注册</p></div>
-      <div class="guide-card"><h4>🔐 管理后台地址</h4><p style="color:var(--cyan);font-size:1rem">同上 + 底部「管理后台」</p><p style="font-size:0.85rem;color:var(--text-secondary);margin-top:8px">密码: admin123（登录后可改）</p></div>
-      <div class="guide-card"><h4>💻 换电脑怎么办</h4><p style="font-size:0.85rem;color:var(--text-secondary)">1. 复制整个 G:\大模型聚合网站 文件夹到新电脑<br>2. 在新电脑的 server\ 目录运行: npm install<br>3. 复制 server\.env 文件（含API Key）<br>4. 双击 启动.bat</p></div>
-      <div class="guide-card"><h4>📱 推广渠道</h4><p style="font-size:0.85rem;color:var(--text-secondary)">小红书："AI写小说神器"帖子引流<br>抖音：发AI创作过程视频<br>知乎：回答写作相关话题放链接<br>微信群/朋友圈：分享创作成果</p></div>
+    <!-- Competitor Comparison -->
+    <div class="feature-card" style="margin-top:20px">
+      <h4 style="text-align:center;margin-bottom:16px">💰 为什么选 AI Nexus？</h4>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem">
+          <thead><tr style="border-bottom:2px solid var(--accent)"><th style="padding:10px;text-align:left">服务</th><th style="padding:10px;text-align:center">月费</th><th style="padding:10px;text-align:center">模型数</th><th style="padding:10px;text-align:center">多模型对比</th><th style="padding:10px;text-align:center">写小说</th><th style="padding:10px;text-align:center">绘画工具</th></tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px">ChatGPT Plus</td><td style="text-align:center">¥145</td><td style="text-align:center">1</td><td style="text-align:center">❌</td><td style="text-align:center">-</td><td style="text-align:center">❌</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px">Claude Pro</td><td style="text-align:center">¥145</td><td style="text-align:center">1</td><td style="text-align:center">❌</td><td style="text-align:center">-</td><td style="text-align:center">❌</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px">Midjourney</td><td style="text-align:center">¥220</td><td style="text-align:center">-</td><td style="text-align:center">-</td><td style="text-align:center">-</td><td style="text-align:center">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px;color:var(--text-secondary)">三平台合计</td><td style="text-align:center;text-decoration:line-through;color:var(--text-secondary)">¥510</td><td style="text-align:center">2</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
+            <tr style="background:var(--accent-soft)"><td style="padding:10px;font-weight:700;color:var(--accent)">⚡ AI Nexus</td><td style="text-align:center;font-weight:800;color:var(--accent)">¥39起</td><td style="text-align:center;font-weight:700">30+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="text-align:center;font-size:0.78rem;color:var(--green);margin-top:12px">🎯 一个AI Nexus顶5个订阅 · 按用量付费 · 不用不花钱 · 永远比单买划算</p>
+    </div>
+  </section>
+</div>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+<div class="modal">
+  <div id="authLogin">
+    <h3>登录</h3>
+    <div class="form-group"><label>用户名/邮箱</label><input id="loginUser"></div>
+    <div class="form-group"><label>密码</label><input id="loginPwd" type="password"></div>
+    <div class="form-actions"><button class="btn-sm" onclick="showRegister()">注册</button><button class="btn-sm primary" onclick="doLogin()">登录</button><button class="btn-sm" onclick="closeAuth()">取消</button></div>
+  </div>
+  <div id="authRegister" style="display:none">
+    <h3>注册</h3>
+    <div class="form-group"><label>用户名</label><input id="regUser"></div>
+    <div class="form-group"><label>邮箱</label><input id="regEmail" type="email"></div>
+    <div class="form-group"><label>密码(至少6位)</label><input id="regPwd" type="password"></div>
+    <div class="form-group"><label>推荐码(选填)</label><input id="regRefCode" placeholder="谁推荐你的？填他的推荐码双方各得5积分"></div>
+    <div style="font-size:0.75rem;color:var(--text-secondary);margin:8px 0;padding:8px;background:var(--bg-input);border-radius:8px;line-height:1.5">📋 <b>服务条款：</b>注册即表示同意：AI回复仅供参考，不构成专业建议。充值后不支持退款。禁止滥用API、非法用途。账号仅限本人使用，不得共享。</div>
+    <div style="margin-bottom:12px"><label style="font-size:0.8rem;cursor:pointer"><input type="checkbox" id="regAgree"> 我已阅读并同意服务条款</label></div>
+    <div class="form-actions"><button class="btn-sm" onclick="showLogin()">返回登录</button><button class="btn-sm primary" onclick="doRegister()">注册</button></div>
+  </div>
+</div>
+</div>
+
+<!-- Terms of Service -->
+<div class="page" id="page-terms">
+  <section class="section" style="max-width:800px;margin:0 auto">
+    <h2 class="section-title">📋 用户服务协议</h2>
+    <div class="feature-card" style="font-size:0.88rem;line-height:2;white-space:pre-line">
+      <p style="color:var(--text-secondary);margin-bottom:16px"><b>生效日期：</b>2026年5月28日<br><b>最后更新：</b>2026年5月28日</p>
+
+      <h3>一、总则</h3>
+      <p>1.1 欢迎使用AI Nexus智能创作平台（以下简称"本平台"）。本协议由您与本平台运营主体（以下简称"我们"）共同缔结。</p>
+      <p>1.2 您在注册、登录或使用本平台服务前，请仔细阅读本协议。点击"同意"或实际使用本平台，即表示您已阅读并同意接受本协议全部条款。</p>
+
+      <h3>二、账号管理</h3>
+      <p>2.1 您注册时须提供真实、准确的个人信息。因信息不实导致的后果由您自行承担。</p>
+      <p>2.2 您的账号仅限本人使用，不得转让、出借或共享。因账号共享导致的安全问题，我们概不负责。</p>
+      <p>2.3 您应对账号下的所有操作行为负责。如发现账号异常，请立即联系我们。</p>
+
+      <h3>三、使用规范</h3>
+      <p>3.1 您不得利用本平台从事以下行为：</p>
+      <p>（1）生成或传播违法信息，包括但不限于：危害国家安全、破坏民族团结、宣扬恐怖主义、散布谣言、侮辱诽谤、侵犯隐私、淫秽色情等；</p>
+      <p>（2）生成或传播虚假信息、误导性内容；</p>
+      <p>（3）利用自动化手段恶意请求、爬取数据或实施网络攻击；</p>
+      <p>（4）侵犯他人知识产权、商业秘密或其他合法权益；</p>
+      <p>（5）其他违反法律法规或社会公序良俗的行为。</p>
+      <p>3.2 我们有权对违规用户采取警告、限制功能、暂停或永久封禁账号等措施，且不退还已支付费用。</p>
+
+      <h3>四、内容与知识产权</h3>
+      <p>4.1 您通过本平台输入的内容及其生成的输出内容的版权归您所有。但您授予我们在平台运营范围内存储、展示该内容的权利。</p>
+      <p>4.2 AI生成的内容仅供参考，不构成专业建议（如法律、医疗、投资等）。因使用AI生成内容而产生的任何后果，由您自行承担。</p>
+      <p>4.3 本平台的界面设计、代码、商标等知识产权归我们所有，未经授权不得复制、模仿或使用。</p>
+
+      <h3>五、付费与积分</h3>
+      <p>5.1 本平台采用积分制收费。积分一经购买，不支持退款，法律法规另有规定的除外。</p>
+      <p>5.2 如因平台原因导致服务长期不可用，我们将根据实际情况予以补偿。</p>
+      <p>5.3 免费赠送的积分（注册赠送、签到、推荐奖励等）不可兑换现金，平台有权调整赠送规则。</p>
+
+      <h3>六、免责声明</h3>
+      <p>6.1 本平台按"现状"提供服务。我们不保证服务不会中断、延迟或出错。</p>
+      <p>6.2 因不可抗力（如自然灾害、网络攻击、政策调整等）导致的服务中断，我们不承担责任。</p>
+      <p>6.3 您理解AI模型可能产生不准确、不完整或不适当的输出。您应自行判断内容的准确性和适用性。</p>
+
+      <h3 style="font-weight:800;color:var(--accent)">七、数据安全特别声明（重要）</h3>
+      <p style="font-weight:700;background:var(--accent-soft);padding:10px;border-radius:8px">7.1 您使用的第三方AI模型API密钥仅存储在您本地浏览器中，本平台服务器不获取、不存储、不传输您的任何第三方API密钥信息。</p>
+      <p>7.2 您对API密钥的安全及使用行为负全部责任。请妥善保管您的密钥，如因密钥泄露产生费用损失，本平台不承担责任。</p>
+      <p>7.3 您的对话记录默认存储在本地浏览器中。您可以随时清除浏览器数据来删除所有本地存储的对话记录。</p>
+
+      <h3>八、其他</h3>
+      <p>8.1 本协议的解释、效力及争议解决适用中华人民共和国法律。</p>
+      <p>8.2 如本协议任何条款被认定为无效，其余条款继续有效。</p>
+      <p>8.3 我们有权根据业务需要修改本协议，修改后将通过平台公告通知。继续使用视为同意修改后的协议。</p>
+      <p style="margin-top:20px;font-weight:700">📧 联系方式：[面包多审核通过后填写邮箱]</p>
+    </div>
+  </section>
+</div>
+
+<!-- Privacy Policy -->
+<div class="page" id="page-privacy">
+  <section class="section" style="max-width:800px;margin:0 auto">
+    <h2 class="section-title">🔒 隐私政策</h2>
+    <div class="feature-card" style="font-size:0.88rem;line-height:2;white-space:pre-line">
+      <p style="color:var(--text-secondary);margin-bottom:16px"><b>生效日期：</b>2026年5月28日<br><b>最后更新：</b>2026年5月28日</p>
+
+      <h3>一、我们收集的信息</h3>
+      <p>1.1 <b>账号信息：</b>您注册时提供的用户名、邮箱地址。邮箱用于密码找回和重要通知。</p>
+      <p>1.2 <b>使用数据：</b>您的对话记录（存储在您本地浏览器中）、积分消费记录、功能使用频率等。</p>
+      <p>1.3 <b>设备信息：</b>为优化体验，我们可能会收集浏览器类型、操作系统、IP地址等非身份识别信息。</p>
+      <p>1.4 <b>我们<u>不</u>收集的信息：</b>您的第三方API密钥、支付密码、身份证号等敏感信息。</p>
+
+      <h3>二、信息的使用</h3>
+      <p>2.1 账号信息仅用于：身份验证、密码找回、发送服务通知（如积分余额提醒）。</p>
+      <p>2.2 使用数据仅用于：优化服务质量、统计功能使用情况、排查技术问题。</p>
+      <p>2.3 <b>我们不会将您的个人信息出售、出租或分享给任何第三方。</b></p>
+
+      <h3>三、信息存储与安全</h3>
+      <p>3.1 您的对话记录和API密钥存储在<b>您的本地浏览器</b>中，采用浏览器原生的localStorage机制。</p>
+      <p>3.2 您的账号信息（用户名、密码哈希、积分余额）存储在本平台服务器上，密码采用加密存储（非明文）。</p>
+      <p>3.3 我们采取合理的加密和访问控制措施保护数据传输安全。</p>
+
+      <h3>四、您的权利</h3>
+      <p>4.1 <b>查阅与更正：</b>您可以随时登录账号查看和修改您的个人信息。</p>
+      <p>4.2 <b>删除：</b>您可以通过以下方式删除数据：</p>
+      <p>- 清除浏览器数据：删除所有本地存储的对话记录和API密钥</p>
+      <p>- 注销账号：联系客服注销账号，我们将删除您的账号信息及关联数据</p>
+      <p>4.3 <b>数据导出：</b>您可以通过管理后台的"导出"功能导出模型配置数据。</p>
+
+      <h3>五、Cookie与本地存储</h3>
+      <p>5.1 本平台使用浏览器localStorage存储您的偏好设置（主题、语言等）和会话状态。</p>
+      <p>5.2 您可以在浏览器设置中禁用或清除本地存储。但这可能导致部分功能无法正常使用。</p>
+
+      <h3>六、未成年人保护</h3>
+      <p>6.1 本平台主要面向成年人。如果您未满14周岁，请在监护人指导下使用。</p>
+      <p>6.2 我们不会主动收集未成年人的个人信息。如发现误收集，将立即删除。</p>
+
+      <h3>七、政策更新与联系方式</h3>
+      <p>7.1 我们可能不时更新本隐私政策，更新后将通过平台公告通知。</p>
+      <p>7.2 如您对本政策有任何疑问，请通过以下方式联系我们：</p>
+      <p style="margin-top:10px;font-weight:700">📧 联系邮箱：[面包多审核通过后填写]</p>
+      <p>📱 微信：[待添加]</p>
+    </div>
+  </section>
+</div>
+
+<!-- Feedback Page -->
+<div class="page" id="page-feedback">
+  <section class="section">
+    <h2 class="section-title">💬 用户反馈</h2>
+    <p class="section-desc">你的建议帮助我们变得更好。遇到Bug、想要新功能、或有任何想法，都可以告诉我们。</p>
+    <div style="max-width:600px;margin:0 auto">
+      <div class="feature-card">
+        <div class="form-group"><label>反馈类型</label><select id="fbType" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit"><option value="功能建议">功能建议</option><option value="Bug报告">Bug报告</option><option value="使用体验">使用体验</option><option value="投诉建议">投诉建议</option><option value="其他">其他</option></select></div>
+        <div class="form-group"><label>描述</label><textarea id="fbContent" rows="5" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="请详细描述..."></textarea></div>
+        <div class="form-group"><label>联系方式（选填，方便我们回复）</label><input id="fbContact" placeholder="邮箱/微信"></div>
+        <button class="btn-send" onclick="submitFeedback()" style="width:100%">📤 提交反馈</button>
+      </div>
+      <div class="feature-card" style="margin-top:16px">
+        <h4 style="margin-bottom:10px">📬 其他联系方式</h4>
+        <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.8">
+          📱 微信：待添加<br>
+          📧 邮箱：联系客服获取<br>
+          💬 也可以在知乎/V2EX上找到我们
+        </p>
+      </div>
     </div>
   </section>
 </div>
 
 <div class="page" id="page-admin">
-  <section class="section container">
-    <div class="admin-login" id="adminLogin"><div style="font-size:3rem">🔐</div><h2>管理后台</h2><p>输入管理密码</p><input type="password" class="admin-pwd" id="adminPwd" placeholder="密码" onkeydown="if(event.key==='Enter')adminLogin()"><button class="btn-send" onclick="adminLogin()" style="width:100%">登录</button><p style="margin-top:16px;font-size:0.8rem;color:var(--text-secondary)">默认: admin123</p></div>
+  <section class="section">
+    <div class="admin-login" id="adminLogin">
+      <h3>管理后台</h3>
+      <input class="admin-pwd" id="adminPwd" type="password" placeholder="管理密码" onkeydown="if(event.key==='Enter')adminLogin()">
+      <button class="btn-send" onclick="adminLogin()">登录</button>
+    </div>
     <div class="admin-dashboard" id="adminDashboard">
-      <div class="admin-header"><h2>📊 模型管理</h2><div class="admin-actions"><button class="btn-sm primary" onclick="openAddModel()">+ 添加</button><button class="btn-sm" onclick="exportData()">📥 导出</button><button class="btn-sm" onclick="document.getElementById('importFile').click()">📤 导入</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"><button class="btn-sm" onclick="openApiSettings()">🔑 API Key</button><button class="btn-sm" onclick="openSiteSettings()">⚙️ 系统设置</button><button class="btn-sm" onclick="openPasswordSettings()">🔒 改密码</button><button class="btn-sm danger" onclick="adminLogout()">退出</button></div></div>
-      <div style="overflow-x:auto"><table class="admin-table" id="adminModelTable"><thead><tr><th>名称</th><th>供应商</th><th>标签</th><th>价格</th><th>上下文</th><th>热门</th><th>操作</th></tr></thead><tbody id="adminModelTbody"></tbody></table></div>
+      <div class="admin-header">
+        <h2 class="section-title" style="margin:0">⚙ 管理后台</h2>
+        <div class="admin-actions">
+          <button class="btn-sm primary" onclick="openAddModel()">+ 添加</button>
+          <button class="btn-sm" onclick="openApiSettings()">API Key</button>
+          <button class="btn-sm" onclick="openSiteSettings()">设置</button>
+          <button class="btn-sm" onclick="openPasswordSettings()">改密码</button>
+          <button class="btn-sm" onclick="exportData()">导出</button>
+          <label class="btn-sm" style="cursor:pointer">导入<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
+          <button class="btn-sm danger" onclick="adminLogout()">退出</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="admin-table"><thead><tr><th>名称</th><th>供应商</th><th>标签</th><th>价格(入/出)</th><th>上下文</th><th>热门</th><th>操作</th></tr></thead><tbody id="adminModelTbody"></tbody></table>
+      </div>
+      <h3 style="margin-top:24px;margin-bottom:12px">💬 用户反馈 (<span id="fbCount">0</span>条) <button class="btn-sm" onclick="renderReports()" style="margin-left:8px">📋 查看举报</button></h3>
+      <div id="feedbackList" style="max-height:300px;overflow-y:auto"></div>
+      <div id="reportsList" style="max-height:300px;overflow-y:auto;display:none"><button class="btn-sm" onclick="document.getElementById('reportsList').style.display='none';document.getElementById('feedbackList').style.display='block'" style="margin-bottom:8px">← 返回反馈</button></div>
     </div>
   </section>
 </div>
 
 <!-- Modals -->
-<div class="modal-overlay" id="modelModal"><div class="modal"><h3 id="modalTitle">添加模型</h3><div class="form-group"><label>ID</label><input id="editId" placeholder="如: gpt5"></div><div class="form-row"><div class="form-group"><label>名称</label><input id="editName"></div><div class="form-group"><label>供应商</label><input id="editProvider"></div></div><div class="form-group"><label>描述</label><textarea id="editDesc"></textarea></div><div class="form-row"><div class="form-group"><label>头像色</label><input type="color" id="editAvatar" value="#6366f1"></div><div class="form-group"><label>上下文</label><input id="editContext" placeholder="128K"></div></div><div class="form-row"><div class="form-group"><label>输入价格</label><input id="editInputPrice"></div><div class="form-group"><label>输出价格</label><input id="editOutputPrice"></div></div><label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:16px"><input type="checkbox" id="editFeatured"> 热门</label><div class="form-actions"><button class="btn-sm danger" id="btnDeleteModel" style="display:none;margin-right:auto" onclick="deleteModelConfirm(editingModelId)">删除</button><button class="btn-sm" onclick="closeModal()">取消</button><button class="btn-sm primary" onclick="saveModel()">保存</button></div></div></div>
+<div class="modal-overlay" id="modelModal"><div class="modal">
+  <h3 id="modalTitle">添加模型</h3>
+  <div class="form-row"><div class="form-group"><label>ID</label><input id="editId" placeholder="如: gpt4o"></div><div class="form-group"><label>名称</label><input id="editName" placeholder="如: GPT-4o"></div></div>
+  <div class="form-row"><div class="form-group"><label>供应商</label><input id="editProvider" placeholder="如: OpenAI"></div><div class="form-group"><label>头像色</label><input id="editAvatar" placeholder="#10a37f"></div></div>
+  <div class="form-group"><label>描述</label><textarea id="editDesc" placeholder="简短描述..."></textarea></div>
+  <div class="form-row"><div class="form-group"><label>上下文</label><input id="editContext" placeholder="128K"></div><div class="form-group"><label>功能</label><div style="padding-top:8px"><label style="font-size:0.85rem;cursor:pointer"><input type="checkbox" id="editFeatured"> 设为热门</label></div></div></div>
+  <div class="form-row"><div class="form-group"><label>输入价</label><input id="editInputPrice" placeholder="$2.5/M"></div><div class="form-group"><label>输出价</label><input id="editOutputPrice" placeholder="$10/M"></div></div>
+  <div class="form-actions"><button class="btn-sm danger" id="btnDeleteModel" style="display:none" onclick="deleteModelConfirm(document.getElementById('editId').value)">删除</button><button class="btn-sm primary" onclick="saveModel()">保存</button><button class="btn-sm" onclick="closeModal()">取消</button></div>
+</div></div>
 
-<div class="modal-overlay" id="apiModal"><div class="modal"><h3>🔑 API Key</h3><div class="form-group"><label>API URL</label><input id="apiBaseInput" placeholder="http://localhost:3001"></div><div class="form-group"><label>OpenAI</label><input type="password" id="apiOpenAIKey"></div><div class="form-group"><label>DeepSeek</label><input type="password" id="apiDeepSeekKey"></div><div class="form-group"><label>Gemini</label><input type="password" id="apiGeminiKey"></div><div class="form-group"><label>通义千问</label><input type="password" id="apiQwenKey"></div><div class="form-actions"><button class="btn-sm" onclick="closeApiModal()">取消</button><button class="btn-sm primary" onclick="saveApiKeys()">保存</button></div></div></div>
+<div class="modal-overlay" id="apiModal"><div class="modal">
+  <h3>API Key 配置</h3>
+  <div class="form-group"><label>API 地址</label><input id="apiBaseInput" placeholder="http://localhost:3001"></div>
+  <div class="form-group"><label>OpenAI</label><input id="apiOpenAIKey" type="password" placeholder="sk-..."></div>
+  <div class="form-group"><label>DeepSeek</label><input id="apiDeepSeekKey" type="password" placeholder="sk-..."></div>
+  <div class="form-group"><label>Gemini</label><input id="apiGeminiKey" type="password" placeholder="AIza..."></div>
+  <div class="form-group"><label>通义千问</label><input id="apiQwenKey" type="password" placeholder="sk-..."></div>
+  <div class="form-actions"><button class="btn-sm primary" onclick="saveApiKeys()">保存</button><button class="btn-sm" onclick="closeApiModal()">取消</button></div>
+</div></div>
 
-<div class="modal-overlay" id="siteSettingsModal"><div class="modal" style="max-width:600px"><h3>⚙️ 系统设置</h3><div class="form-group"><label>💎 积分单价 (¥)</label><input type="number" id="setPricePerCredit" step="0.01"></div><div class="form-group"><label>🎁 新用户赠送</label><input type="number" id="setNewUserCredits"></div><div class="form-row"><div class="form-group"><label>聊天消耗</label><input type="number" id="setChatCost"></div><div class="form-group"><label>小说消耗</label><input type="number" id="setNovelCost"></div></div><div class="form-group"><label>🌐 端口</label><input type="number" id="setPort"><span style="font-size:0.7rem;color:var(--text-secondary)">改后重启 server.js</span></div><div class="form-group"><label>📊 成本倍率 (DeepSeek)</label><input type="number" id="setDeepSeekMultiplier" step="0.1"><span style="font-size:0.75rem;color:var(--text-secondary)">成本¥1/M字×倍率=售价</span></div><div class="form-actions"><button class="btn-sm" onclick="closeSiteSettings()">取消</button><button class="btn-sm danger" onclick="resetSiteSettings()">默认</button><button class="btn-sm primary" onclick="saveSiteSettings()">保存</button></div></div></div>
+<div class="modal-overlay" id="siteSettingsModal"><div class="modal">
+  <h3>系统设置</h3>
+  <div class="form-row"><div class="form-group"><label>积分单价 (元)</label><input id="setPricePerCredit" type="number" step="0.01"></div><div class="form-group"><label>新用户积分</label><input id="setNewUserCredits" type="number"></div></div>
+  <div class="form-row"><div class="form-group"><label>聊天消耗</label><input id="setChatCost" type="number"></div><div class="form-group"><label>小说消耗</label><input id="setNovelCost" type="number"></div></div>
+  <div class="form-row"><div class="form-group"><label>端口</label><input id="setPort" type="number"></div><div class="form-group"><label>DeepSeek倍率</label><input id="setDeepSeekMultiplier" type="number" step="0.1"></div></div>
+  <div class="form-actions"><button class="btn-sm danger" onclick="resetSiteSettings()">默认</button><button class="btn-sm primary" onclick="saveSiteSettings()">保存</button><button class="btn-sm" onclick="closeSiteSettings()">取消</button></div>
+</div></div>
 
-<div class="modal-overlay" id="pwdModal"><div class="modal"><h3>🔒 改密码</h3><div class="form-group"><label>当前密码</label><input type="password" id="pwdCurrent"></div><div class="form-group"><label>新密码</label><input type="password" id="pwdNew"></div><div class="form-group"><label>确认</label><input type="password" id="pwdConfirm"></div><div class="form-actions"><button class="btn-sm" onclick="closePwdModal()">取消</button><button class="btn-sm primary" onclick="changePassword()">保存</button></div></div></div>
+<div class="modal-overlay" id="pwdModal"><div class="modal">
+  <h3>修改密码</h3>
+  <div class="form-group"><label>当前密码</label><input id="pwdCurrent" type="password"></div>
+  <div class="form-group"><label>新密码</label><input id="pwdNew" type="password"></div>
+  <div class="form-group"><label>确认新密码</label><input id="pwdConfirm" type="password"></div>
+  <div class="form-actions"><button class="btn-sm primary" onclick="changePassword()">修改</button><button class="btn-sm" onclick="closePwdModal()">取消</button></div>
+</div></div>
 
-<footer class="footer"><p>AI Nexus | j3trisheng.com | <a href="javascript:switchPage('admin')">管理后台</a> | <a href="javascript:switchPage('pricing')">推广指南</a></p></footer>
+<!-- Checkin Modal -->
+<div class="modal-overlay" id="checkinModal"><div class="modal" style="text-align:center">
+  <div style="font-size:3rem;margin-bottom:10px" id="checkinEmoji">🎁</div>
+  <h3 id="checkinTitle">每日签到</h3>
+  <p style="color:var(--text-secondary);margin-bottom:10px;font-size:0.9rem" id="checkinMsg">签到领积分，连续签到有奖励</p>
+  <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px" id="checkinStreak">
+    <span style="width:32px;height:32px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:0.8rem">1</span>
+    <span style="width:32px;height:32px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:0.8rem">2</span>
+    <span style="width:32px;height:32px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:0.8rem">3</span>
+    <span style="width:32px;height:32px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:0.8rem">4</span>
+    <span style="width:32px;height:32px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:0.8rem">5</span>
+    <span style="width:32px;height:32px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:0.8rem">6</span>
+    <span style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700">7</span>
+  </div>
+  <button class="btn-send" id="checkinBtn" onclick="doCheckin()">📅 立即签到 +1积分</button>
+  <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:8px">连续7天额外奖3分 · 中断重新计算</div>
+  <div style="margin-top:14px"><button class="btn-sm" onclick="closeCheckin()">关闭</button></div>
+</div></div>
+
+</main>
+
+<!-- Right Panel -->
+<aside class="right-panel" id="rightPanel">
+  <div class="right-panel-title" id="rightPanelTitle">快捷操作</div>
+  <div id="rightPanelContent">
+    <div class="right-panel-card" onclick="switchPage('chat')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">💬</div><div style="font-weight:600;font-size:0.82rem">AI 聊天</div><div style="font-size:0.72rem;color:var(--text-secondary)">多模型同时对话</div></div>
+    <div class="right-panel-card" onclick="switchPage('novel')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">📖</div><div style="font-weight:600;font-size:0.82rem">写小说</div><div style="font-size:0.72rem;color:var(--text-secondary)">向导式创作</div></div>
+    <div class="right-panel-card" onclick="switchPage('art')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">🖼</div><div style="font-weight:600;font-size:0.82rem">AI 绘画</div><div style="font-size:0.72rem;color:var(--text-secondary)">MJ提示词生成器</div></div>
+  </div>
+</aside>
+
+</div>
+
 <div class="toast" id="toast"></div>
 
+<!-- Credit low overlay -->
+<div id="creditLow" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:500;background:var(--bg-card);border:2px solid var(--accent);border-radius:16px;padding:20px 28px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.6);backdrop-filter:blur(20px);max-width:360px;width:90%">
+  <div style="font-size:2rem;margin-bottom:8px">💎</div>
+  <div style="font-weight:700;font-size:1rem;margin-bottom:6px">积分不足</div>
+  <div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:14px">本次操作需要 <span style="color:var(--accent);font-weight:700">0</span> 积分，当前余额 <span id="creditLowBal">0</span></div>
+  <div style="display:flex;gap:8px;justify-content:center">
+    <button class="btn-send" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="closeCreditLow();switchPage('pricing')">💎 充值</button>
+    <button class="btn-sm" onclick="closeCreditLow()">取消</button>
+  </div>
+</div>
+
+<!-- Mobile Bottom Nav -->
+<nav id="mobileNav" class="mobile-nav">
+  <button onclick="switchPage('home')"><span class="mn-icon">🏠</span><span>首页</span></button>
+  <button onclick="switchPage('chat')"><span class="mn-icon">💬</span><span>聊天</span></button>
+  <button onclick="switchPage('novel')"><span class="mn-icon">📖</span><span>写作</span></button>
+  <button onclick="switchPage('art')"><span class="mn-icon">🖼</span><span>绘画</span></button>
+  <button onclick="toggleMobileMenu()"><span class="mn-icon">☰</span><span>更多</span></button>
+</nav>
+<div id="mobileMenu" style="display:none;position:fixed;bottom:70px;left:0;right:0;z-index:500;background:var(--bg-card);border-top:1px solid var(--border);padding:12px;backdrop-filter:blur(20px)">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+    <button class="btn-sm" onclick="switchPage('compare');toggleMobileMenu()">📊 对比</button>
+    <button class="btn-sm" onclick="switchPage('media');toggleMobileMenu()">🎬 漫剧</button>
+    <button class="btn-sm" onclick="switchPage('office');toggleMobileMenu()">💼 办公</button>
+    <button class="btn-sm" onclick="switchPage('agents');toggleMobileMenu()">🤖 智能体</button>
+    <button class="btn-sm" onclick="switchPage('brand');toggleMobileMenu()">🎨 品牌</button>
+    <button class="btn-sm" onclick="switchPage('market');toggleMobileMenu()">📢 营销</button>
+    <button class="btn-sm" onclick="switchPage('models');toggleMobileMenu()">🤖 模型</button>
+    <button class="btn-sm" onclick="switchPage('pricing');toggleMobileMenu()">💎 充值</button>
+    <button class="btn-sm" onclick="switchPage('feedback');toggleMobileMenu()">💬 反馈</button>
+    <button class="btn-sm" onclick="switchPage('admin');toggleMobileMenu()">⚙ 管理</button>
+    <button class="btn-sm" onclick="switchPage('terms');toggleMobileMenu()">📋 条款</button>
+    <button class="btn-sm" onclick="switchPage('privacy');toggleMobileMenu()">🔒 隐私</button>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="text-align:center;padding:24px 16px;border-top:1px solid var(--border);color:var(--text-secondary);font-size:0.75rem;line-height:2;margin-top:40px">
+  <div style="margin-bottom:8px">
+    <a href="#" onclick="switchPage('terms');return false" style="color:var(--text-secondary);margin:0 10px;text-decoration:underline">用户服务协议</a>
+    <a href="#" onclick="switchPage('privacy');return false" style="color:var(--text-secondary);margin:0 10px;text-decoration:underline">隐私政策</a>
+    <a href="#" onclick="switchPage('feedback');return false" style="color:var(--text-secondary);margin:0 10px;text-decoration:underline">意见反馈</a>
+    <span style="margin:0 10px">|</span>
+    <span>运营主体：[公司全称，办理营业执照后填写]</span>
+  </div>
+  <div>
+    <span>ICP备案号：<a href="https://beian.miit.gov.cn" target="_blank" style="color:var(--text-secondary)">[办理后填写]</a></span>
+    <span style="margin:0 12px">|</span>
+    <span>公安备案号：[办理后填写]</span>
+  </div>
+  <div style="margin-top:6px;font-size:0.68rem;opacity:0.6">
+    ⚠️ 本平台仅提供AI模型聚合服务。禁止生成违法和不良信息。AI生成内容仅供参考，不构成专业建议。
+  </div>
+</footer>
+
 <script>
-// === Theme (default light) ===
+// === Theme (default: dark) ===
 const themeToggle=document.getElementById('themeToggle');
-const savedTheme=localStorage.getItem('theme')||'light';
+const savedTheme=localStorage.getItem('theme')||'dark';
 document.documentElement.setAttribute('data-theme',savedTheme);
-themeToggle.textContent=savedTheme==='light'?'🌙':'☀️';
+themeToggle.textContent=savedTheme==='light'?'☀️':'🌙';
 themeToggle.addEventListener('click',()=>{
   const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',n);
-  themeToggle.textContent=n==='light'?'🌙':'☀️';
+  themeToggle.textContent=n==='light'?'☀️':'🌙';
   localStorage.setItem('theme',n);
 });
 
 // === Toast ===
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
 
-// === Nav ===
+// === Nav (with sidebar + right panel updates) ===
 function switchPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
   const pg=document.getElementById('page-'+name);if(pg)pg.classList.add('active');
-  const nl=document.querySelector(`[data-page="${name}"]`);if(nl)nl.classList.add('active');
+  const nl=document.querySelector(`.sidebar-link[data-page="${name}"]`);if(nl)nl.classList.add('active');
   if(name==='models')initAllModels();
-  if(name==='chat')initChatModels();
+  if(name==='chat'){updateRightPanel('chat');setTimeout(initChatModels,200)}
   if(name==='compare')initCompareModels();
   if(name==='novel')renderWizard();
   if(name==='admin'){document.getElementById('adminLogin').style.display='block';document.getElementById('adminDashboard').style.display='none'}
+  if(name==='agents')renderAgents('all');
+  if(name!='chat'&&name!='art')updateRightPanel(name);
+  if(name==='art'){updateRightPanel('art');setTimeout(initArtData,100)}
   window.scrollTo({top:0,behavior:'smooth'});
 }
-document.querySelectorAll('.nav-link[data-page]').forEach(l=>l.addEventListener('click',()=>switchPage(l.dataset.page)));
+document.querySelectorAll('.sidebar-link[data-page]').forEach(l=>l.addEventListener('click',()=>switchPage(l.dataset.page)));
+
+// Right Panel update
+function updateRightPanel(page){
+  const title=document.getElementById('rightPanelTitle');
+  const content=document.getElementById('rightPanelContent');
+  const panels={
+    'home':{title:'快捷操作',html:`
+      <div class="right-panel-card" onclick="switchPage('chat')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">💬</div><div style="font-weight:600;font-size:0.82rem">AI 聊天</div><div style="font-size:0.72rem;color:var(--text-secondary)">多模型同时对话</div></div>
+      <div class="right-panel-card" onclick="switchPage('novel')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">📖</div><div style="font-weight:600;font-size:0.82rem">写小说</div><div style="font-size:0.72rem;color:var(--text-secondary)">向导式创作</div></div>
+      <div class="right-panel-card" onclick="switchPage('art')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">🖼</div><div style="font-weight:600;font-size:0.82rem">AI 绘画</div><div style="font-size:0.72rem;color:var(--text-secondary)">MJ提示词生成器</div></div>
+    `},
+    'chat':{title:'选择模型',html:`
+      <div id="chatModelList"></div>
+    `},
+    'compare':{title:'对比设置',html:`
+      <div class="form-group"><label style="font-size:0.8rem">列数</label><select id="colSelect" class="col-select" onchange="updateCompareLayout()" style="width:100%"><option value="2">2列</option><option value="3">3列</option><option value="4">4列</option></select></div>
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.8rem;margin-bottom:6px">快捷预设</div>
+        ${['量子计算通俗解释','写一首春天的诗','Python快速排序'].map(t=>`<div class="filter-tag" style="font-size:0.72rem;margin:2px;cursor:pointer" onclick="setComparePrompt('${t}')">${t}</div>`).join('')}
+      </div>
+    `},
+    'novel':{title:'章节管理',html:`
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.8rem">📚 <span id="rpNovelTitle">未开始</span></div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:4px"><span id="rpChapterCount">0</span> 章 · <span id="rpTotalWords">0</span> 字</div></div>
+      <div style="padding:8px"><button class="btn-sm primary" style="width:100%" onclick="downloadNovel()">⬇ 导出小说</button></div>
+    `},
+    'art':{title:'绘画辅助',html:`
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">📋 MJ 参数速查</div>
+        <div class="prompt-params">
+          <div class="param-chip">--ar 1:1</div><div class="param-chip">--ar 2:3</div><div class="param-chip">--ar 3:2</div><div class="param-chip">--ar 16:9</div>
+          <div class="param-chip">--s 0-1000</div><div class="param-chip">--c 0-100</div><div class="param-chip">--q .25-2</div><div class="param-chip">--no</div>
+          <div class="param-chip">--iw 0-2</div><div class="param-chip">::权重</div><div class="param-chip">--v 6.0</div><div class="param-chip">--niji 6</div>
+        </div>
+      </div>
+      <div id="rpArtPrompt" class="right-panel-card" style="display:none"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">当前提示词</div><div style="font-size:0.76rem;word-break:break-all;color:var(--accent)" id="rpArtPromptText"></div></div>
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">🎯 场景模板</div><div style="display:flex;flex-wrap:wrap;gap:4px">${[...new Set((typeof ART_DATA!=='undefined'?ART_DATA:{templates:[{cat:'人物'},{cat:'场景'},{cat:'科幻'},{cat:'古风'}]}).templates.map(t=>t.cat))].map(c=>`<div class="filter-tag" style="font-size:0.68rem;padding:3px 10px;cursor:pointer" onclick="switchPage('art');document.querySelector('#artTabs .tab-btn[data-tab=builder]').click();renderArtTemplates('${c}')">${c}</div>`).join('')}</div></div>
+      <button class="btn-send" style="width:100%;margin-top:8px" onclick="copyArtPrompt()">📋 复制提示词</button>
+    `},
+    'pricing':{title:'积分信息',html:`
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem">💎 当前积分</div><div style="font-size:1.5rem;font-weight:800;color:var(--accent);margin:8px 0" id="rpCredits">0</div></div>
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">💡 怎么用</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.6">聊天: 1分/次<br>对比: 3分/次<br>写小说: 5分/章<br>漫剧: 8分/次<br>办公/品牌/营销: 3分/次<br>绘画: 免费</div></div>
+    `},
+    'admin':{title:'管理快捷',html:`<div class="right-panel-card" onclick="openAddModel()" style="cursor:pointer"><div style="font-weight:600;font-size:0.82rem">+ 添加模型</div></div><div class="right-panel-card" onclick="openApiSettings()" style="cursor:pointer"><div style="font-weight:600;font-size:0.82rem">🔑 API Key</div></div><div class="right-panel-card" onclick="openSiteSettings()" style="cursor:pointer"><div style="font-weight:600;font-size:0.82rem">⚙ 系统设置</div></div>`}
+  };
+  const p=panels[page]||panels['home'];
+  title.textContent=p.title;
+  content.innerHTML=p.html;
+  if(page==='novel'){updateNovelRightPanel()}
+  if(page==='pricing'){setTimeout(()=>{const e=document.getElementById('rpCredits');if(e)e.textContent=userCredits},100)}
+}
+function updateNovelRightPanel(){
+  const t=document.getElementById('rpNovelTitle');if(t)t.textContent=novelBookTitle;
+  const c=document.getElementById('rpChapterCount');if(c)c.textContent=chapterCountWritten;
+  const w=document.getElementById('rpTotalWords');if(w)w.textContent=totalWordsWritten.toLocaleString();
+}
 
 // === API Config ===
 const API_BASE=(()=>{
-  if(typeof window!=='undefined'&&window.location.hostname&&window.location.hostname!=='localhost')return window.location.origin;
-  return localStorage.getItem('api_base')||'http://localhost:3001';
+  if(typeof window!=='undefined'&&window.location.hostname&&window.location.hostname==='localhost')return 'http://localhost:3001';
+  return localStorage.getItem('api_base')||'https://ai-nexus-server.onrender.com';
 })();
 let apiOnline=false;
 
-// === Models (Latest Versions 2026) ===
+// === Models ===
 const models=[
-  {id:'gpt4o',name:'GPT-4o',provider:'OpenAI',desc:'最新旗舰多模态模型，文本/图像/音频全通，速度极快。',avatar:'#10a37f',tags:['多模态','推理','编程','海外'],context:'128K',inputPrice:'$2.5/M',outputPrice:'$10/M',featured:true,free:false},
-  {id:'gpt4omini',name:'GPT-4o Mini',provider:'OpenAI',desc:'轻量高效版，性价比极高，适合大量调用。',avatar:'#10a37f',tags:['快速','编程','海外'],context:'128K',inputPrice:'$0.15/M',outputPrice:'$0.6/M',featured:false,free:false},
-  {id:'claude4',name:'Claude 4 Sonnet',provider:'Anthropic',desc:'2026最新Claude，编程和深度推理业界顶尖。',avatar:'#d97706',tags:['推理','编程','长文本','海外'],context:'200K',inputPrice:'$3/M',outputPrice:'$15/M',featured:true,free:false},
-  {id:'claude4opus',name:'Claude 4 Opus',provider:'Anthropic',desc:'Anthropic旗舰，最强深度分析和复杂任务处理。',avatar:'#d97706',tags:['深度分析','推理','海外'],context:'200K',inputPrice:'$15/M',outputPrice:'$75/M',featured:false,free:false},
-  {id:'gemini25pro',name:'Gemini 2.5 Pro',provider:'Google',desc:'Google最新旗舰，原生多模态，百万级上下文。',avatar:'#4285f4',tags:['多模态','长文本','推理','海外'],context:'2M',inputPrice:'$1.25/M',outputPrice:'$5/M',featured:true,free:false},
-  {id:'gemini25flash',name:'Gemini 2.5 Flash',provider:'Google',desc:'极速轻量版，高吞吐低延迟，性价比之王。',avatar:'#4285f4',tags:['多模态','快速','海外'],context:'1M',inputPrice:'$0.15/M',outputPrice:'$0.6/M',featured:false,free:false},
-  {id:'deepseekv3',name:'DeepSeek-V3 (0324)',provider:'DeepSeek',desc:'国产最强大模型，671B MoE，写作能力极强。',avatar:'#4f46e5',tags:['开源','推理','编程','写作','国内'],context:'128K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:true,free:false},
-  {id:'deepseekr1',name:'DeepSeek-R1',provider:'DeepSeek',desc:'深度推理专家，思维链超强，数学逻辑拉满。',avatar:'#4f46e5',tags:['推理','数学','开源','国内'],context:'128K',inputPrice:'¥4/M',outputPrice:'¥16/M',featured:true,free:false},
-  {id:'qwen3',name:'通义千问 3.0',provider:'阿里云',desc:'阿里最新旗舰，中文能力顶尖，多模态全面。',avatar:'#ff6a00',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥2/M',outputPrice:'¥8/M',featured:true,free:false},
-  {id:'kimi2',name:'Kimi K2',provider:'月之暗面',desc:'超长上下文200万字，最强长文本处理。',avatar:'#6c5ce7',tags:['长文本','中文优化','国内'],context:'2M',inputPrice:'¥12/M',outputPrice:'¥12/M',featured:true,free:false},
-  {id:'glm4plus',name:'GLM-4 Plus',provider:'智谱AI',desc:'智谱最新，All-Tools智能体，中英双强。',avatar:'#3859ff',tags:['智能体','中文优化','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥0.5/M',featured:false,free:false},
-  {id:'hunyuan',name:'混元 TurboS',provider:'腾讯',desc:'腾讯最快大模型，多模态理解生成出色。',avatar:'#00a4ff',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥1/M',outputPrice:'¥2/M',featured:false,free:false},
-  {id:'doubao15',name:'豆包 1.5 Pro',provider:'字节跳动',desc:'字节旗舰，对话和内容生成表现卓越。',avatar:'#e8426e',tags:['中文优化','内容创作','国内'],context:'256K',inputPrice:'¥0.8/M',outputPrice:'¥2/M',featured:false,free:false},
-  {id:'ernie45',name:'文心一言 4.5',provider:'百度',desc:'百度旗舰，中文理解和知识增强业界领先。',avatar:'#2932e1',tags:['中文优化','知识增强','国内'],context:'128K',inputPrice:'¥60/M',outputPrice:'¥60/M',featured:false,free:false},
-  {id:'minimax1',name:'MiniMax-M1',provider:'MiniMax',desc:'万亿MoE，多模态理解和语音能力卓越。',avatar:'#fd79a8',tags:['多模态','语音','国内'],context:'256K',inputPrice:'¥5/M',outputPrice:'¥15/M',featured:false,free:false},
-  {id:'yi-lightning',name:'Yi-Lightning',provider:'零一万物',desc:'极速推理模型，中文能力出色，性价比高。',avatar:'#e17055',tags:['推理','快速','国内'],context:'200K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:false,free:false},
-  {id:'llama4',name:'Llama 4 Scout',provider:'Meta',desc:'Meta最新开源，109B参数，性能强劲。',avatar:'#0668e1',tags:['开源','通用','海外'],context:'10M',inputPrice:'免费',outputPrice:'免费',featured:false,free:true},
-  {id:'mistral-large2',name:'Mistral Large 2',provider:'Mistral AI',desc:'欧洲最强开源，多语言和推理表现优异。',avatar:'#ff6b35',tags:['开源','多语言','推理','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$6/M',featured:false,free:false},
-  {id:'grok3',name:'Grok-3',provider:'xAI',desc:'马斯克xAI最新，实时信息+深度推理。',avatar:'#1d9bf0',tags:['推理','实时信息','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$8/M',featured:false,free:false},
-  {id:'spark4',name:'讯飞星火 4.0',provider:'科大讯飞',desc:'讯飞最新，语音识别领先，多模态全面。',avatar:'#2563eb',tags:['语音','多模态','国内'],context:'128K',inputPrice:'¥30/M',outputPrice:'¥30/M',featured:false,free:false},
+  {id:'gpt4o',name:'GPT-4o',provider:'OpenAI',desc:'最新旗舰多模态模型，文本/图像/音频全通。',avatar:'#10a37f',tags:['多模态','推理','编程','海外'],context:'128K',inputPrice:'$2.5/M',outputPrice:'$10/M',featured:true,free:false},
+  {id:'claude4',name:'Claude 4 Sonnet',provider:'Anthropic',desc:'Claude最新旗舰，编程和深度推理业界顶尖。',avatar:'#d97706',tags:['推理','编程','长文本','海外'],context:'200K',inputPrice:'$3/M',outputPrice:'$15/M',featured:true,free:false},
+  {id:'gemini25pro',name:'Gemini 2.5 Pro',provider:'Google',desc:'Google最新旗舰，原生多模态。',avatar:'#4285f4',tags:['多模态','长文本','推理','海外'],context:'2M',inputPrice:'$1.25/M',outputPrice:'$5/M',featured:true,free:false},
+  {id:'deepseekv3',name:'DeepSeek-V3 (0324)',provider:'DeepSeek',desc:'国产最强大模型，671B MoE。',avatar:'#4f46e5',tags:['开源','推理','编程','写作','国内'],context:'128K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:true,free:false},
+  {id:'deepseekr1',name:'DeepSeek-R1',provider:'DeepSeek',desc:'深度推理专家，思维链超强。',avatar:'#4f46e5',tags:['推理','数学','开源','国内'],context:'128K',inputPrice:'¥4/M',outputPrice:'¥16/M',featured:true,free:false},
+  {id:'qwen3',name:'通义千问 3.0',provider:'阿里云',desc:'阿里最新旗舰，中文能力顶尖。',avatar:'#ff6a00',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥2/M',outputPrice:'¥8/M',featured:true,free:false},
+  {id:'kimi2',name:'Kimi K2',provider:'月之暗面',desc:'超长上下文200万字。',avatar:'#6c5ce7',tags:['长文本','中文优化','国内'],context:'2M',inputPrice:'¥12/M',outputPrice:'¥12/M',featured:true,free:false},
+  {id:'gpt4omini',name:'GPT-4o Mini',provider:'OpenAI',desc:'轻量高效版，性价比极高。',avatar:'#10a37f',tags:['快速','编程','海外'],context:'128K',inputPrice:'$0.15/M',outputPrice:'$0.6/M',featured:false,free:false},
+  {id:'claude4opus',name:'Claude 4 Opus',provider:'Anthropic',desc:'最强深度分析和复杂任务处理。',avatar:'#d97706',tags:['深度分析','推理','海外'],context:'200K',inputPrice:'$15/M',outputPrice:'$75/M',featured:false,free:false},
+  {id:'gemini25flash',name:'Gemini 2.5 Flash',provider:'Google',desc:'极速轻量版，性价比之王。',avatar:'#4285f4',tags:['多模态','快速','海外'],context:'1M',inputPrice:'$0.15/M',outputPrice:'$0.6/M',featured:false,free:false},
+  {id:'glm4plus',name:'GLM-4 Plus',provider:'智谱AI',desc:'All-Tools智能体，中英双强。',avatar:'#3859ff',tags:['智能体','中文优化','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥0.5/M',featured:false,free:false},
+  {id:'hunyuan',name:'混元 TurboS',provider:'腾讯',desc:'腾讯最快大模型。',avatar:'#00a4ff',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥1/M',outputPrice:'¥2/M',featured:false,free:false},
+  {id:'doubao15',name:'豆包 1.5 Pro',provider:'字节跳动',desc:'字节旗舰对话生成。',avatar:'#e8426e',tags:['中文优化','内容创作','国内'],context:'256K',inputPrice:'¥0.8/M',outputPrice:'¥2/M',featured:false,free:false},
+  {id:'ernie45',name:'文心一言 4.5',provider:'百度',desc:'中文理解和知识增强。',avatar:'#2932e1',tags:['中文优化','知识增强','国内'],context:'128K',inputPrice:'¥60/M',outputPrice:'¥60/M',featured:false,free:false},
+  {id:'minimax1',name:'MiniMax-M1',provider:'MiniMax',desc:'万亿MoE多模态。',avatar:'#fd79a8',tags:['多模态','语音','国内'],context:'256K',inputPrice:'¥5/M',outputPrice:'¥15/M',featured:false,free:false},
+  {id:'yi-lightning',name:'Yi-Lightning',provider:'零一万物',desc:'极速推理模型。',avatar:'#e17055',tags:['推理','快速','国内'],context:'200K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:false,free:false},
+  {id:'llama4',name:'Llama 4 Scout',provider:'Meta',desc:'最新开源，109B参数。',avatar:'#0668e1',tags:['开源','通用','海外'],context:'10M',inputPrice:'免费',outputPrice:'免费',featured:false,free:true},
+  {id:'mistral-large2',name:'Mistral Large 2',provider:'Mistral AI',desc:'欧洲最强开源。',avatar:'#ff6b35',tags:['开源','多语言','推理','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$6/M',featured:false,free:false},
+  {id:'grok3',name:'Grok-3',provider:'xAI',desc:'马斯克xAI实时推理。',avatar:'#1d9bf0',tags:['推理','实时信息','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$8/M',featured:false,free:false},
+  {id:'spark4',name:'讯飞星火 4.0',provider:'科大讯飞',desc:'语音识别领先。',avatar:'#2563eb',tags:['语音','多模态','国内'],context:'128K',inputPrice:'¥30/M',outputPrice:'¥30/M',featured:false,free:false},
 ];
 
-// === Render ===
+// === Render Models ===
 function renderModelCard(m){return`<div class="model-card${m.featured?' featured':''}"><div class="model-header"><div class="model-avatar" style="background:${m.avatar}">${m.name[0]}</div><div><div class="model-name">${m.name}</div><div class="model-provider">${m.provider}</div></div></div><div class="model-desc">${m.desc}</div><div class="model-tags">${m.tags.map(t=>`<span class="tag${t==='免费'?' green':''}${t==='开源'?' orange':''}">${t}</span>`).join('')}</div><div class="model-meta"><span class="model-price">入:${m.inputPrice} | 出:${m.outputPrice}</span><span class="model-context">${m.context}</span></div></div>`}
 function initFeaturedModels(){document.getElementById('featuredModels').innerHTML=models.filter(m=>m.featured).map(renderModelCard).join('')}
 initFeaturedModels();
@@ -600,22 +1117,26 @@ document.getElementById('modelSearch').addEventListener('input',initAllModels);
 document.querySelectorAll('#page-models .filter-tag').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('#page-models .filter-tag').forEach(x=>x.classList.remove('active'));t.classList.add('active');initAllModels()}));
 
 // === Chat ===
-function initChatModels(){document.getElementById('chatModelList').innerHTML=models.map(m=>`<label class="model-checkbox"><input type="checkbox" value="${m.id}" ${m.featured?'checked':''}><div><div class="model-checkbox-label">${m.name}</div><div class="model-checkbox-provider">${m.provider}</div></div></label>`).join('')}
+function initChatModels(){
+  const list=document.getElementById('chatModelList');
+  if(list)list.innerHTML=models.map(m=>`<label class="model-checkbox" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px;font-size:0.8rem;transition:all 0.2s"><input type="checkbox" value="${m.id}" ${m.featured?'checked':''}><span>${m.name}</span></label>`).join('');
+}
 async function sendChatMessage(){
   const msg=document.getElementById('chatInput').value.trim();if(!msg)return;
-  const sel=[...document.querySelectorAll('#chatModelList input:checked')].map(cb=>cb.value);
-  if(!sel.length){showToast('请选模型');return}
+  if(!spendCredits(1,true))return;
+  const selList=document.getElementById('chatModelList');
+  const sel=selList?[...selList.querySelectorAll('input:checked')].map(cb=>cb.value):['deepseekv3','qwen3'];
+  if(!sel.length){showToast('请在右侧面板选择模型');return}
   const md=document.getElementById('chatMessages');if(md.querySelector('[data-p]'))md.innerHTML='';
-  const time=new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
   md.innerHTML+=`<div class="chat-msg user"><div class="chat-msg-header"><span class="chat-msg-model">你</span></div><div class="chat-msg-content">${escapeHtml(msg)}</div></div>`;
   document.getElementById('chatInput').value='';const btn=document.getElementById('btnSend');btn.disabled=true;
-  const ps=sel.map(async id=>{
+  const ps=sel.map(async (id,i)=>{
     const m=models.find(x=>x.id===id);if(!m)return;
-    const pid='m-'+id+'-'+Date.now();
-    md.innerHTML+=`<div class="chat-msg" id="${pid}"><div class="chat-msg-header"><div class="chat-msg-avatar" style="background:${m.avatar}">${m.name[0]}</div><span class="chat-msg-model">${m.name}</span></div><div class="chat-msg-content"><span class="spinner"></span>思考中…</div></div>`;
+    const pid='m-'+id+'-'+i+'-'+Date.now();
+    md.innerHTML+=`<div class="chat-msg" id="${pid}"><div class="chat-msg-header"><div class="chat-msg-avatar" style="background:${m.avatar}">${m.name[0]}</div><span class="chat-msg-model">${m.name}</span><span style="margin-left:auto;font-size:0.7rem;color:var(--text-secondary);cursor:pointer;opacity:0.5" title="举报此回复" onclick="event.stopPropagation();reportContent('${pid}','${escapeAttr(m.name)}')">⚠️</span></div><div class="chat-msg-content"><span class="spinner"></span>思考中…</div></div>`;
     md.scrollTop=md.scrollHeight;
     try{
-      const r=await callModelAPI(id,msg);
+      const r=await callModelAPI(id,msg,'你是诚实有帮助的AI助手。如果不知道就说不知道，不要胡编。给出精准、可验证的答案。如果问题需要推理，展示推理步骤。');
       const el=document.getElementById(pid);if(el){el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if(r.simulated)el.querySelector('.chat-msg-content').style.opacity='0.6'}
     }catch(e){const el=document.getElementById(pid);if(el)el.querySelector('.chat-msg-content').innerHTML=`<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`}
     md.scrollTop=md.scrollHeight;
@@ -623,10 +1144,22 @@ async function sendChatMessage(){
   await Promise.all(ps);btn.disabled=false;
 }
 function escapeHtml(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+function escapeAttr(t){return (t||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function reportContent(pid,modelName){
+  const el=document.getElementById(pid);if(!el)return;
+  const content=el.querySelector('.chat-msg-content')?.textContent?.substring(0,300)||'';
+  const reason=prompt(`举报来自 ${modelName} 的回复：\n\n"${content.substring(0,80)}..."\n\n请选择或输入举报原因：\n1.虚假信息 2.有害内容 3.侵权内容 4.其他（请描述）`);
+  if(!reason)return;
+  const r=JSON.parse(localStorage.getItem('reports')||'[]');
+  r.unshift({pid,model:modelName,reason,content:content.substring(0,200),time:new Date().toISOString(),user:currentUser?currentUser.username:'游客'});
+  localStorage.setItem('reports',JSON.stringify(r.slice(0,50)));
+  el.querySelector('.chat-msg-content').innerHTML='<span style="color:var(--orange)">⚠️ 此内容已被举报，我们将在24小时内审核处理。</span>';
+  showToast('✅ 举报已提交，感谢你的监督');
+}
 
-// === API Call ===
-async function callModelAPI(modelId,question){
-  try{const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:modelId,messages:[{role:'user',content:question}]})});if(r.ok)return await r.json()}catch(e){}
+async function callModelAPI(modelId,question,sysPrompt){
+  const msgs=sysPrompt?[{role:'system',content:sysPrompt},{role:'user',content:question}]:[{role:'user',content:question}];
+  try{const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:modelId,messages:msgs})});if(r.ok)return await r.json()}catch(e){}
   const m=models.find(x=>x.id===modelId);
   return {model:modelId,content:`[${m?.name||modelId} 模拟]\n\n⚠️ API未连接。\n在管理后台→API Key 中配置后获得真实回复。`,simulated:true};
 }
@@ -634,7 +1167,7 @@ async function callModelAPI(modelId,question){
 // === Compare ===
 function initCompareModels(){updateCompareLayout()}
 function updateCompareLayout(){
-  const cols=parseInt(document.getElementById('colSelect').value);
+  const colsEl=document.getElementById('colSelect');const cols=colsEl?parseInt(colsEl.value):2;
   const g=document.getElementById('compareGrid');g.className='compare-grid cols-'+cols;g.innerHTML='';
   const defs=['gpt4o','deepseekv3','qwen3','kimi2'];
   for(let i=0;i<cols;i++){
@@ -645,11 +1178,11 @@ function updateCompareLayout(){
 function updateCompareModel(s,i){const m=models.find(x=>x.id===s.value);const h=s.parentElement;const a=h.querySelector('.compare-panel-avatar');if(a){a.style.background=m.avatar;a.textContent=m.name[0]}}
 async function runCompare(){
   const p=document.getElementById('comparePrompt').value.trim();if(!p){showToast('输入问题');return}
-  const cols=parseInt(document.getElementById('colSelect').value);
+  const colsEl=document.getElementById('colSelect');const cols=colsEl?parseInt(colsEl.value):2;
   const ps=[];
   for(let i=0;i<cols;i++){
     const c=document.getElementById('compareContent'+i);c.innerHTML='<span class="spinner"></span>';const s=document.querySelectorAll('#compareGrid select')[i];
-    ps.push(callModelAPI(s.value,p).then(r=>{c.innerHTML=escapeHtml(r.content);if(r.simulated)c.style.opacity='0.6'}).catch(e=>{c.innerHTML=`❌ ${e.message}`}));
+    ps.push(callModelAPI(s.value,p,'你是客观公正的AI。回答要：1. 直接回答问题，不回避 2. 需要推理的展示逻辑链 3. 不确定的明确说"不确定" 4. 尽量简洁但完整').then(r=>{c.innerHTML=escapeHtml(r.content);if(r.simulated)c.style.opacity='0.6'}).catch(e=>{c.innerHTML=`❌ ${e.message}`}));
   }
   await Promise.all(ps);
 }
@@ -661,7 +1194,7 @@ let totalWordsWritten=parseInt(localStorage.getItem('nw')||'0'),chapterCountWrit
 let novelBookTitle=localStorage.getItem('nbt')||'未开始';
 function renderWizard(){
   const steps=[{id:'type',t:'选小说类型',c:`<div class="feature-card"><select id="wizType" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.95rem"><option>玄幻</option><option>仙侠</option><option>都市</option><option>科幻</option><option>悬疑</option><option>言情</option><option>历史</option><option>游戏</option><option>轻小说</option></select></div>`},
-  {id:'outline',t:'定故事大纲',c:`<div class="feature-card"><textarea id="wizOutline" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="如：废柴少年捡到上古神剑，逆天改命踏上修仙之路...&#10;越详细越好，AI会根据你的大纲创作"></textarea></div>`},
+  {id:'outline',t:'定故事大纲',c:`<div class="feature-card"><textarea id="wizOutline" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="如：废柴少年捡到上古神剑，逆天改命踏上修仙之路...&#10;越详细越好"></textarea></div>`},
   {id:'chars',t:'出人物设定',c:`<div class="feature-card"><textarea id="wizChars" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="主角叫什么、什么性格、有什么能力...&#10;留空让AI自动生成"></textarea></div>`},
   {id:'world',t:'世界观设定',c:`<div class="feature-card"><textarea id="wizWorld" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="修炼体系、势力分布、规则设定...&#10;留空让AI自动构建"></textarea></div>`},
   {id:'write',t:'开始写正文',c:`<div class="feature-card"><textarea id="wizWrite" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="本章要写什么内容？&#10;如：第一章 废柴少年的日常"></textarea><div style="margin-top:8px"><select id="wizModel" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="deepseekv3">DeepSeek-V3 (推荐写作)</option><option value="deepseekr1">DeepSeek-R1 (深度推理)</option><option value="qwen3">通义千问3.0</option></select></div></div>`}];
@@ -673,7 +1206,7 @@ function renderWizard(){
   if(wizardStep==='outline'){const ta=document.getElementById('wizOutline');if(ta)ta.value=novelOutline}
   if(wizardStep==='chars'){const ta=document.getElementById('wizChars');if(ta)ta.value=novelChars}
   if(wizardStep==='world'){const ta=document.getElementById('wizWorld');if(ta)ta.value=novelWorld}
-  updateNovelProgress2();
+  updateNovelProgress2();updateNovelRightPanel();
 }
 async function wizardAction(){
   const order=['type','outline','chars','world','write'];
@@ -686,10 +1219,11 @@ async function wizardAction(){
     if(!content&&!novelOutline){showToast('请输入本章要写的内容');return}
     if(!spendCredits(5))return;
     const modelId=document.getElementById('wizModel')?.value||'deepseekv3';
-    const prompt=`你是专业${novelType}小说家。严格遵循以下设定创作。\n\n【小说大纲】${novelOutline}\n【人物设定】${novelChars||'由你合理设计'}\n【世界观】${novelWorld||'由你合理构建'}\n【前情】${novelHistory||'故事开始'}\n【本章要求】${content}\n\n写一章3500字左右的完整小说。`;
+    const sys=`你是专业${novelType}小说家，擅长${novelType}类型创作。要求：\n1. 文笔生动，多用细节描写而非直白叙述\n2. 对话要符合人物性格，不做作\n3. 节奏紧凑，每500字至少要有一个情节推进\n4. 不要写"未完待续"，本章要有一个完整的剧情段落收尾\n5. 不使用网络流行语和过于现代化的表达（除非是现代背景）`;
+    const prompt=`【小说类型】${novelType}\n【全书大纲】${novelOutline}\n【人物设定】${novelChars||'由你根据类型合理设计'}\n【世界观】${novelWorld||'由你合理构建'}\n【前情提要】${novelHistory||'故事开始'}\n【本章要求】${content}\n\n请写一章3500字左右的完整小说。`;
     const out=document.getElementById('novelOutput');out.innerHTML='<span class="spinner"></span> 创作中...';
     try{
-      const r=await callModelAPI(modelId,prompt);
+      const r=await callModelAPI(modelId,prompt,sys);
       novelHistory+=(novelHistory?'\n':'')+r.content;
       out.innerHTML=escapeHtml(r.content);
       usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
@@ -703,20 +1237,71 @@ function saveChapter(){
   const c=document.getElementById('novelOutput').textContent.trim();if(!c||c.includes('创作中')){showToast('请先完成创作');return}
   if(novelBookTitle==='未开始'){const t=prompt('书名：','');if(!t)return;novelBookTitle=t;localStorage.setItem('nbt',t)}
   chapterCountWritten++;totalWordsWritten+=c.length;localStorage.setItem('nc',chapterCountWritten);localStorage.setItem('nw',totalWordsWritten);
+  localStorage.setItem('novelHistory',novelHistory);
   const ch=JSON.parse(localStorage.getItem('nch')||'[]');ch.push({ch:chapterCountWritten,content:c,time:new Date().toISOString()});localStorage.setItem('nch',JSON.stringify(ch));
-  updateNovelProgress2();showToast(`第${chapterCountWritten}章已保存`);
+  updateNovelProgress2();updateNovelRightPanel();showToast(`第${chapterCountWritten}章已保存`);
 }
 function loadNovelProject(){
   const ch=JSON.parse(localStorage.getItem('nch')||'[]');if(!ch.length){showToast('暂无章节');return}
   const idx=prompt(`${ch.length}章:\n${ch.map((c,i)=>`第${c.ch}章 (${c.content.length}字)`).join('\n')}\n\n输入章节号加载:`);
-  if(idx&&ch[idx-1]){document.getElementById('novelOutput').innerHTML=escapeHtml(ch[idx-1].content);novelHistory=ch[idx-1].content;showToast('已加载')}
+  if(idx&&ch[idx-1]){document.getElementById('novelOutput').innerHTML=escapeHtml(ch[idx-1].content);novelHistory=ch.slice(0,idx).map(c=>c.content).join('\n');localStorage.setItem('novelHistory',novelHistory);showToast('已加载')}
 }
 function copyNovelOutput(){navigator.clipboard.writeText(document.getElementById('novelOutput').textContent).then(()=>showToast('已复制'))}
+// Quality Check: retry with feedback
+async function retryWithFeedback(module,feedback){
+  if(!feedback||!feedback.trim()){showToast('请描述需要调整的地方');return}
+  switch(module){
+    case 'novel': wizardAction(); break;
+    case 'media': aiCreateMedia(); break;
+    case 'office': runAiOffice(); break;
+    case 'brand': runAiBrand(); break;
+    case 'market': runAiMarket(); break;
+    default: showToast('未知模块');return;
+  }
+  showToast('已根据反馈重新生成');
+}
 function downloadNovel(){
   const ch=JSON.parse(localStorage.getItem('nch')||'[]');let t=novelBookTitle+'\n\n';
   if(ch.length)ch.forEach(c=>{t+=`第${c.ch}章\n\n${c.content}\n\n`});else t+=document.getElementById('novelOutput').textContent;
   const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(novelBookTitle!=='未开始'?novelBookTitle:'小说')+'.txt';a.click();
 }
+// Cross-module pipelines
+function novelToMedia(){
+  const txt=document.getElementById('novelOutput').textContent.trim();
+  if(!txt||txt.includes('创作中')||txt.includes('选类型')){showToast('请先完成小说创作');return}
+  switchPage('media');setTimeout(()=>{
+    document.getElementById('mediaInput').value=`将以下小说内容改编为${novelType}风格漫剧：\n\n${txt.substring(0,800)}`;
+    showToast('小说内容已填充到漫剧输入框，选风格后点生成')
+  },300);
+}
+function mediaToNovel(){
+  const txt=document.getElementById('mediaOutput').textContent.trim();
+  if(!txt||txt.includes('输入故事')){showToast('请先生成漫剧内容');return}
+  switchPage('novel');setTimeout(()=>{
+    wizardStep='write';
+    renderWizard();
+    setTimeout(()=>{const ta=document.getElementById('wizWrite');if(ta)ta.value=`基于漫剧脚本扩展：\n\n${txt.substring(0,500)}`},200);
+    showToast('漫剧脚本已填充，设置后点创作')
+  },300);
+}
+function novelToBrand(){
+  const txt=document.getElementById('novelOutput')?.textContent?.trim()||'';
+  if(!txt||txt.includes('创作中')||txt.includes('选类型')){showToast('请先完成小说创作');return}
+  switchPage('brand');setTimeout(()=>{
+    const el=document.getElementById('brandInput');
+    if(el)el.value=`为小说《${novelBookTitle}》（${novelType}类型）设计IP品牌。核心元素：${novelOutline.substring(0,200)}`;
+    showToast('小说信息已填充，选品牌功能后点生成')
+  },300);
+}
+function brandToMarket(){
+  const txt=document.getElementById('brandOutput').textContent.trim();
+  if(!txt||txt==='选择功能开始')switchPage('market');
+  else{switchPage('market');setTimeout(()=>{document.getElementById('marketInput').value='基于以下品牌方案做营销：\n\n'+txt.substring(0,500);showToast('品牌方案已填充到营销页')},300)}
+}
+function marketToBrand(){
+  const txt=document.getElementById('marketOutput').textContent.trim();
+  if(txt&&txt!=='选择功能开始'){switchPage('brand');setTimeout(()=>{document.getElementById('brandInput').value=txt.substring(0,600);showToast('营销内容已填充到品牌页')},300)}
+  else{switchPage('brand')}}
 
 // === Media ===
 let mediaModeType='storyboard';
@@ -725,8 +1310,10 @@ async function aiCreateMedia(){
   const i=document.getElementById('mediaInput').value.trim();if(!i){showToast('输入故事');return}
   if(!spendCredits(8))return;const s=document.getElementById('mediaStyle').value;
   const o=document.getElementById('mediaOutput');o.innerHTML='<span class="spinner"></span> 生成中...';
-  const pm={storyboard:`漫画家(${s})。6格分镜脚本(画面/动作/镜头/对白):\n${i}`,chars:`角色设计师(${s})。3个核心角色(外貌/服装/性格):\n${i}`,scene:`场景设计师(${s})。4个场景(环境/色彩/光影):\n${i}`,dialog:`编剧(${s})。角色对白(语气/情感):\n${i}`};
-  try{const r=await callModelAPI('deepseekv3',pm[mediaModeType]);o.innerHTML=escapeHtml(r.content);usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay()}catch(e){o.innerHTML=`❌ ${e.message}`}
+  const sys=`你是专业${s}漫画家和编剧。要求：\n1. 每个分镜必须包含：编号、景别(特写/中景/全景)、画面描述、角色动作、对白\n2. 画面描述要具象化——读者能根据描述画出分镜图\n3. 对白要自然、有性格区分、推进剧情\n4. 每帧之间有节奏变化，不要全是同一景别\n5. 重要对白用【】标注语气（如【怒吼】【低声】）`;
+  const pm={storyboard:{t:`${s}漫画。6格分镜脚本（编号/景别/画面/动作/对白）：\n${i}`,s:sys},chars:{t:`${s}风格角色设计。3个核心角色（外貌/服装/性格/能力/口头禅）：\n${i}`,s:'你是角色设计专家。每个角色描述要包含：外貌特征、标志性服装、性格标签、特殊能力、经典台词。描述要能让读者在脑中形成清晰形象。'},scene:{t:`${s}风格场景设计。4个场景（环境/色彩/光影/氛围/时代感）：\n${i}`,s:'你是场景设计师。每个场景要包含：环境描述、主色调、光影效果、氛围关键词、时代特征。描述要具有视觉冲击力。'},dialog:{t:`${s}风格角色对白（角色名：对白内容【语气】）：\n${i}`,s:'你是专业编剧。对白要：符合角色性格、推动剧情、有潜台词、口语化自然。避免说教和直白的情感表达。'}};
+  const m=pm[mediaModeType];
+  try{const r=await callModelAPI('deepseekv3',m.t,m.s);o.innerHTML=escapeHtml(r.content);usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay()}catch(e){o.innerHTML=`❌ ${e.message}`}
 }
 function generateComicImage(){
   const s=document.getElementById('mediaOutput').textContent.trim();if(!s.includes('分镜')&&!s.includes('角色')){showToast('先生成内容');return}
@@ -737,10 +1324,11 @@ function copyMediaOutput(){navigator.clipboard.writeText(document.getElementById
 function downloadMedia(){const t=document.getElementById('mediaOutput').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='漫剧_'+new Date().toISOString().slice(0,10)+'.txt';a.click()}
 
 // === Credits ===
-let userCredits=parseInt(localStorage.getItem('cr')||'10'),usedTokensCount=parseInt(localStorage.getItem('utk')||'0'),usedImagesCount=parseInt(localStorage.getItem('uim')||'0');
+let userCredits=parseInt(localStorage.getItem('cr')||'30'),usedTokensCount=parseInt(localStorage.getItem('utk')||'0'),usedImagesCount=parseInt(localStorage.getItem('uim')||'0');
 function updateCreditDisplay(){const e=document.getElementById('creditDisplay');if(e)e.textContent=userCredits;const b=document.getElementById('creditBalance');if(b)b.textContent=userCredits}
-function spendCredits(a){if(userCredits<a){showToast(`积分不足(${userCredits})，请充值`);return false}userCredits-=a;localStorage.setItem('cr',userCredits);updateCreditDisplay();return true}
-function purchaseCredits(a,p){if(confirm(`购买${a}积分(${p})？\n演示版模拟充值`)){userCredits+=a;localStorage.setItem('cr',userCredits);updateCreditDisplay();showToast(`+${a}积分`)}}
+function spendCredits(a,t){if(userCredits<a){const f=document.getElementById('creditLow');if(f){f.querySelector('span').textContent=a;document.getElementById('creditLowBal').textContent=userCredits;f.style.display='flex'};return false}userCredits-=a;localStorage.setItem('cr',userCredits);updateCreditDisplay();if(t)showToast(`-${a}积分，剩余${userCredits}`);return true}
+function closeCreditLow(){document.getElementById('creditLow').style.display='none'}
+function purchaseCredits(a,p){if(confirm(`购买${a}积分(¥${p})？\n将跳转到付款页面`)){window.open('https://mbd.pub','_blank');showToast('付款后联系客服领取积分。面包多审核通过后将自动发货')}}
 
 // === User Auth ===
 let currentUser=JSON.parse(localStorage.getItem('cuser')||'null');
@@ -749,11 +1337,18 @@ function saveUsers(u){localStorage.setItem('users',JSON.stringify(u))}
 function renderUserNav(){
   const el=document.getElementById('userNav');
   if(currentUser){
-    el.innerHTML=`<span style="font-size:0.82rem;cursor:pointer" onclick="switchPage('pricing')">👤 ${escapeHtml(currentUser.username)}</span><button class="btn-sm" onclick="doLogout()">退出</button>`;
+    const ref=currentUser.refCode||genRefCode(currentUser.username);
+    el.innerHTML=`<span style="font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:4px" onclick="showRefCode()">👤 ${escapeHtml(currentUser.username)}</span><button class="btn-sm" onclick="doLogout()">退出</button>`;
   }else{
     el.innerHTML=`<button class="btn-sm primary" onclick="openAuth()">登录</button>`;
   }
+  const su=document.getElementById('sidebarUserName');if(su)su.textContent=currentUser?currentUser.username:'未登录';
 }
+function showRefCode(){
+  if(!currentUser)return;
+  const users=getUsers();const u=users.find(x=>x.username===currentUser.username);
+  const code=u?u.refCode:genRefCode(currentUser.username);
+  prompt('你的推荐码（复制发给朋友）：\n\n'+(u?u.refCode:code)+'\n\n推荐链接：https://j3trisheng.com\n双方各得5积分！');}
 function openAuth(){document.getElementById('authModal').classList.add('show');showLogin()}
 function closeAuth(){document.getElementById('authModal').classList.remove('show')}
 function showLogin(){document.getElementById('authLogin').style.display='block';document.getElementById('authRegister').style.display='none'}
@@ -764,55 +1359,68 @@ function doLogin(){
   const users=getUsers();const found=users.find(x=>(x.username===u||x.email===u)&&x.password===btoa(p));
   if(!found){showToast('用户名或密码错误');return}
   currentUser={username:found.username,email:found.email};localStorage.setItem('cuser',JSON.stringify(currentUser));
-  userCredits=parseInt(localStorage.getItem('cr_'+found.username)||'10');localStorage.setItem('cr',userCredits);
+  userCredits=parseInt(localStorage.getItem('cr_'+found.username)||'30');localStorage.setItem('cr',userCredits);
+  novelHistory=localStorage.getItem('novelHistory')||'';
   closeAuth();renderUserNav();updateCreditDisplay();showToast('登录成功');
 }
 function doRegister(){
-  const u=document.getElementById('regUser').value.trim(),e=document.getElementById('regEmail').value.trim(),p=document.getElementById('regPwd').value;
+  const u=document.getElementById('regUser').value.trim(),e=document.getElementById('regEmail').value.trim(),p=document.getElementById('regPwd').value,ref=document.getElementById('regRefCode').value.trim();
   if(!u||!e||!p){showToast('请填写所有字段');return}
   if(p.length<6){showToast('密码至少6位');return}
+  if(!document.getElementById('regAgree').checked){showToast('请同意服务条款');return}
   const users=getUsers();
   if(users.find(x=>x.username===u)){showToast('用户名已存在');return}
   if(users.find(x=>x.email===e)){showToast('邮箱已被注册');return}
-  users.push({username:u,email:e,password:btoa(p),created:new Date().toISOString()});saveUsers(users);
-  showToast('注册成功，请登录');showLogin();
+  const newUser={username:u,email:e,password:btoa(p),refCode:genRefCode(u),created:new Date().toISOString()};
+  users.push(newUser);saveUsers(users);
+  // Referral reward
+  let bonus=30;
+  if(ref){const refUser=users.find(x=>x.refCode===ref||x.username===ref);if(refUser&&refUser.username!==u){bonus+=5;const rc=parseInt(localStorage.getItem('cr_'+refUser.username)||'30');localStorage.setItem('cr_'+refUser.username,rc+5);showToast('推荐码有效！你和推荐人各得5积分')}}
+  localStorage.setItem('cr_'+u,bonus);userCredits=bonus;localStorage.setItem('cr',bonus);
+  currentUser={username:u,email:e};localStorage.setItem('cuser',JSON.stringify(currentUser));
+  closeAuth();renderUserNav();updateCreditDisplay();
+  switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast(`🎉 注册成功！赠送${bonus}积分。试试第一次AI对话吧~`)},500);
 }
+function genRefCode(u){return 'J3'+u.substring(0,3).toUpperCase()+String(Math.floor(Math.random()*9000+1000))}
 function doLogout(){currentUser=null;localStorage.removeItem('cuser');renderUserNav();showToast('已退出')}
 
 // === AI Office ===
 let officePrompt='';
+const OFFICE_SYS='你是专业商务助理。要求：1. 输出直接可使用，不需要用户再编辑 2. 结构清晰，用标题分段 3. 语言专业但易懂 4. 如果信息不足，在答案结尾列出"需要补充的信息"';
 function aiOffice(type,template){officePrompt=template;document.getElementById('officeInput').value=template;document.getElementById('officeInput').focus()}
 async function runAiOffice(){
   const i=document.getElementById('officeInput').value.trim();if(!i){showToast('输入需求');return}
   if(!spendCredits(3))return;
   const m=document.getElementById('officeModel').value,o=document.getElementById('officeOutput');
   o.innerHTML='<span class="spinner"></span> 生成中...';
-  try{const r=await callModelAPI(m,i);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
+  try{const r=await callModelAPI(m,i,OFFICE_SYS);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
 }
 
 // === AI Brand ===
 let brandPrompt='';
+const BRAND_SYS='你是顶级品牌策略师。要求：1. 每个方案给出3个选项（大胆/稳妥/创新），标注各自适用场景 2. Logo方案用文字描述图形+配色+寓意，不画图 3. 命名方案检查读音（中英文都好念）和商标冲突可能性 4. Slogan不超过12字，好记好传播';
 function aiBrand(type,template){brandPrompt=template;document.getElementById('brandInput').value=template;document.getElementById('brandInput').focus()}
 async function runAiBrand(){
   const i=document.getElementById('brandInput').value.trim();if(!i){showToast('输入品牌信息');return}
   if(!spendCredits(5))return;
   const m=document.getElementById('brandModel').value,o=document.getElementById('brandOutput');
   o.innerHTML='<span class="spinner"></span> 生成中...';
-  try{const r=await callModelAPI(m,i);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
+  try{const r=await callModelAPI(m,i,BRAND_SYS);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
 }
 
 // === AI Marketing ===
 let marketPrompt='';
+const MARKET_SYS='你是资深营销专家。要求：1. 文案直接可发布，包含标题+正文+话题标签+配图建议 2. 根据不同平台风格调整（小红书要口语化有emoji，公众号要深度有排版，广告要抓眼球有痛点）3. 每条文案给2-3个版本供A/B测试 4. 标注每个版本适合的目标人群';
 function aiMarket(type,template){marketPrompt=template;document.getElementById('marketInput').value=template;document.getElementById('marketInput').focus()}
 async function runAiMarket(){
   const i=document.getElementById('marketInput').value.trim();if(!i){showToast('输入产品信息');return}
   if(!spendCredits(3))return;
   const m=document.getElementById('marketModel').value,o=document.getElementById('marketOutput');
   o.innerHTML='<span class="spinner"></span> 生成中...';
-  try{const r=await callModelAPI(m,i);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
+  try{const r=await callModelAPI(m,i,MARKET_SYS);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
 }
 
-// === AI Art ===
+// === AI Art - Enhanced ===
 const ART_DATA={
   styles:[
     {v:'anime style',l:'动漫风'},{v:'cyberpunk',l:'赛博朋克'},{v:'oil painting',l:'油画'},
@@ -869,6 +1477,22 @@ const ART_DATA={
   ]
 };
 
+// Style Gallery data
+const STYLE_GALLERY=[
+  {name:'水墨画',style:'ink wash painting',desc:'中国传统水墨风格，意境深远',gradient:'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460,transparent)'},
+  {name:'赛博朋克',style:'cyberpunk',desc:'霓虹灯、高科技、低生活',gradient:'linear-gradient(135deg,#0d0221,#150734,#3a0ca3,#7209b7)'},
+  {name:'吉卜力',style:'Studio Ghibli',desc:'宫崎骏温暖治愈的动画风',gradient:'linear-gradient(135deg,#e8f5e9,#c8e6c9,#a5d6a7,#4db6ac)'},
+  {name:'新海诚',style:'Makoto Shinkai',desc:'唯美天空和光影渲染',gradient:'linear-gradient(135deg,#e3f2fd,#90caf9,#42a5f5,#1e88e5)'},
+  {name:'油画',style:'oil painting',desc:'古典油画质感，厚重浓郁',gradient:'linear-gradient(135deg,#3e2723,#4e342e,#5d4037,#6d4c41)'},
+  {name:'像素风',style:'pixel art',desc:'复古游戏像素艺术',gradient:'linear-gradient(135deg,#1b5e20,#2e7d32,#388e3c,#4caf50)'},
+  {name:'3D渲染',style:'3D render, C4D',desc:'逼真的三维渲染效果',gradient:'linear-gradient(135deg,#311b92,#4527a0,#5e35b1,#7e57c2)'},
+  {name:'极简',style:'minimalist',desc:'少即是多，简洁优雅',gradient:'linear-gradient(135deg,#fafafa,#f5f5f5,#eeeeee,#e0e0e0)'},
+  {name:'暗黑',style:'dark fantasy',desc:'黑暗幻想，哥特美学',gradient:'linear-gradient(135deg,#000000,#1a1a1a,#2d2d2d,#404040)'},
+  {name:'浮世绘',style:'Ukiyo-e',desc:'日本浮世绘版画风格',gradient:'linear-gradient(135deg,#f9a825,#fdd835,#ffee58,#fff9c4)'},
+  {name:'合成波',style:'synthwave',desc:'80年代复古未来主义',gradient:'linear-gradient(135deg,#1a237e,#283593,#3949ab,#5c6bc0)'},
+  {name:'波普',style:'pop art',desc:'Andy Warhol风格波普艺术',gradient:'linear-gradient(135deg,#c62828,#d32f2f,#e53935,#ef5350)'},
+];
+
 let artPageInit=false;
 function initArtData(){
   if(artPageInit)return;artPageInit=true;
@@ -879,8 +1503,8 @@ function initArtData(){
   });
   ['artStyleTags','artLightTags','artCameraTags','artArtistTags','artQualityTags'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
-    const key=id.replace('art','').replace('Tags','').toLowerCase()+'s';
-    (ART_DATA[key]||[]).forEach(d=>{el.innerHTML+=`<span class="filter-tag" style="font-size:0.72rem;padding:4px 10px;margin:2px;cursor:pointer" onclick="clickArtTag('${id.replace('Tags','')}','${d.v.replace(/'/g,"\\'")}')">${d.l}</span>`});
+    const key=id.replace('art','').replace('Tags','').toLowerCase()+(id.includes('Quality')?'ies':'s');
+    (ART_DATA[key]||[]).forEach(d=>{el.innerHTML+=`<span class="filter-tag" style="font-size:0.7rem;padding:4px 10px;margin:2px;cursor:pointer" onclick="clickArtTag('${id.replace('Tags','')}','${d.v.replace(/'/g,"\\'")}')">${d.l}</span>`});
   });
   const tplF=document.getElementById('artTplFilters');const cats=[...new Set(ART_DATA.templates.map(t=>t.cat))];
   tplF.innerHTML='<button class="filter-tag active" data-tpl="all">全部</button>'+cats.map(c=>`<button class="filter-tag" data-tpl="${c}">${c}</button>`).join('');
@@ -888,39 +1512,179 @@ function initArtData(){
   renderArtTemplates('all');
   document.getElementById('artSubject').addEventListener('input',buildArtPrompt);
   ['artStyle','artLight','artCamera','artQuality','artRatio'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',buildArtPrompt)});
+  initStyleGallery();
+  // Art tabs
+  document.querySelectorAll('#artTabs .tab-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#artTabs .tab-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('#tab-builder,#tab-gallery').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+b.dataset.tab).classList.add('active')})});
 }
 function renderArtTemplates(cat){
   const el=document.getElementById('artTemplates');const f=cat==='all'?ART_DATA.templates:ART_DATA.templates.filter(t=>t.cat===cat);
-  el.innerHTML=f.map(t=>`<div class="feature-card" style="cursor:pointer;padding:14px" onclick="document.getElementById('artSubject').value='';document.getElementById('artSubject').focus();showToast('输入主体后点刷新组合')"><div style="font-weight:600;margin-bottom:4px;font-size:0.85rem">${t.cat}</div><div style="font-size:0.76rem;color:var(--text-secondary)">${t.p}</div></div>`).join('')}
+  el.innerHTML=f.map(t=>`<div class="feature-card" style="cursor:pointer;padding:12px" onclick="document.getElementById('artSubject').value='';document.getElementById('artSubject').focus();showToast('输入主体后点刷新组合')"><div style="font-weight:600;margin-bottom:4px;font-size:0.8rem">${t.cat}</div><div style="font-size:0.72rem;color:var(--text-secondary)">${t.p}</div></div>`).join('')}
 function clickArtTag(type,value){const sel=document.getElementById('art'+type.charAt(0).toUpperCase()+type.slice(1));if(sel)sel.value=value;buildArtPrompt()}
-function buildArtPrompt(){const p=[document.getElementById('artSubject').value,document.getElementById('artStyle').value,document.getElementById('artLight').value,document.getElementById('artCamera').value,document.getElementById('artQuality').value,document.getElementById('artRatio').value].filter(Boolean);document.getElementById('artPrompt').textContent=p.join(', ')||'选择上方选项组合提示词'}
+function buildArtPrompt(){const p=[document.getElementById('artSubject').value,document.getElementById('artStyle').value,document.getElementById('artLight').value,document.getElementById('artCamera').value,document.getElementById('artQuality').value,document.getElementById('artRatio').value].filter(Boolean);const txt=p.join(', ')||'选择上方选项组合提示词';document.getElementById('artPrompt').textContent=txt;const rp=document.getElementById('rpArtPromptText');if(rp)rp.textContent=txt;const rpc=document.getElementById('rpArtPrompt');if(rpc)rpc.style.display=txt.includes('选择')?'none':'block'}
 function copyArtPrompt(){const t=document.getElementById('artPrompt').textContent;if(!t||t.includes('选择')){showToast('请先组合提示词');return}navigator.clipboard.writeText(t).then(()=>showToast('已复制，粘贴到 Midjourney 用 /imagine 发送'))}
 function sendArtToMJ(){copyArtPrompt();window.open('https://www.midjourney.com','_blank')}
 
-// Hook into page switch for art init
-const _origSwitch=switchPage;
-switchPage=function(name){_origSwitch(name);if(name==='art'){setTimeout(initArtData,100)}}
+function initStyleGallery(){
+  const el=document.getElementById('styleGallery');
+  el.innerHTML=STYLE_GALLERY.map(s=>`<div class="gallery-card" onclick="document.getElementById('artStyle').value='${s.style}';buildArtPrompt();document.querySelector('#artTabs .tab-btn[data-tab=builder]').click();showToast('已选择: ${s.name}')"><div class="gallery-preview" style="background:${s.gradient};position:relative"><div style="position:absolute;bottom:10px;left:12px;font-weight:700;font-size:0.9rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.5)">${s.name}</div></div><h4>${s.name}</h4><p>${s.desc}</p></div>`).join('');
+}
+
+// === Daily Checkin ===
+const CHECKIN_REWARDS=[1,1,1,1,2,2,3];// day 1-7: sparse, 8/day total per week
+function dailyCheckin(){const d=openCheckin();updateStreakUI();}
+function openCheckin(){const m=document.getElementById('checkinModal');m.classList.add('show');updateStreakUI();}
+function closeCheckin(){document.getElementById('checkinModal').classList.remove('show')}
+function updateStreakUI(){
+  const today=new Date().toDateString();
+  const last=localStorage.getItem('checkin_date');
+  const streak=localStorage.getItem('checkin_streak');
+  let s=0;if(last===today){s=parseInt(streak||'0')}else{const yesterday=new Date(Date.now()-86400000).toDateString();if(last===yesterday){s=parseInt(streak||'0')}else{s=0}}
+  // Highlight streak dots
+  const dots=document.querySelectorAll('#checkinStreak span');
+  dots.forEach((d,i)=>{d.style.background=i<s?((s-i<=1&&last===today)?'var(--green)':'var(--accent)'):'var(--bg-input)'});
+  if(last===today){
+    document.getElementById('checkinEmoji').textContent='✅';document.getElementById('checkinTitle').textContent='今日已签到';document.getElementById('checkinMsg').textContent=`连续${s}天，明天继续!`;document.getElementById('checkinBtn').textContent='已完成';document.getElementById('checkinBtn').disabled=true;document.getElementById('checkinBadge').textContent='✅';
+  }else{
+    document.getElementById('checkinEmoji').textContent='🎁';document.getElementById('checkinTitle').textContent='每日签到';document.getElementById('checkinMsg').textContent=s>0?`连续${s}天，今天+${CHECKIN_REWARDS[Math.min(s,6)]}积分`:'签到领积分，连续7天额外奖3分';document.getElementById('checkinBtn').textContent=`📅 签到 +${CHECKIN_REWARDS[Math.min(s,6)]}积分`;document.getElementById('checkinBtn').disabled=false;document.getElementById('checkinBadge').textContent='签到';
+  }
+}
+function doCheckin(){
+  const today=new Date().toDateString();const last=localStorage.getItem('checkin_date');if(last===today){showToast('今天已签到');closeCheckin();return}
+  const yesterday=new Date(Date.now()-86400000).toDateString();
+  let s=last===yesterday?parseInt(localStorage.getItem('checkin_streak')||'0'):0;
+  if(isNaN(s))s=0;s=Math.min(s+1,7);
+  const reward=CHECKIN_REWARDS[s-1];
+  userCredits+=reward;localStorage.setItem('cr',userCredits);localStorage.setItem('checkin_date',today);localStorage.setItem('checkin_streak',s.toString());
+  updateCreditDisplay();updateStreakUI();
+  if(s===7){showToast(`🎉 连续7天！获得${reward}积分（包含连签奖励）`)}else{showToast(`签到成功 +${reward}积分 · 连续${s}天`)}
+  setTimeout(closeCheckin,1500);
+}
+
+// === Chat History ===
+function saveChatToHistory(msg,replies){
+  try{const h=JSON.parse(localStorage.getItem('chathist')||'[]');h.unshift({time:new Date().toISOString(),msg,replies:replies.substring(0,200)});localStorage.setItem('chathist',JSON.stringify(h.slice(0,30)))}catch(e){}
+}
+function renderContinue(){const el=document.getElementById('continueContent');if(!el||!currentUser)return;
+  const h=JSON.parse(localStorage.getItem('chathist')||'[]');const ch=JSON.parse(localStorage.getItem('nch')||'[]');
+  let items=[];
+  if(h.length>0)items.push(`<div class="feature-card" style="cursor:pointer" onclick="switchPage('chat');setTimeout(()=>document.getElementById('chatInput').value='${escapeHtml(h[0].msg).substring(0,30)}...',500)"><div>💬</div><div style="font-weight:600;font-size:0.85rem">最近聊天</div><div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">${escapeHtml(h[0].msg).substring(0,60)}${h[0].msg.length>60?'...':''}</div></div>`);
+  if(ch.length>0&&novelBookTitle!=='未开始')items.push(`<div class="feature-card" style="cursor:pointer" onclick="switchPage('novel');loadNovelProject()"><div>📖</div><div style="font-weight:600;font-size:0.85rem">${novelBookTitle}</div><div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">已写${ch.length}章 · ${totalWordsWritten.toLocaleString()}字</div></div>`);
+  const sec=document.getElementById('continueSection');
+  if(items.length){el.innerHTML=items.join('');sec.style.display='block'}else{sec.style.display='none'}
+}
+// Patch sendChatMessage to save history
+const _origSendChat=sendChatMessage;
+sendChatMessage=async function(){const m=document.getElementById('chatInput').value.trim();if(m)saveChatToHistory(m,'');await _origSendChat();setTimeout(renderContinue,1000)}
+
+// === PWA ===
+(function(){
+  if('serviceWorker' in navigator){
+    const swCode='self.addEventListener("install",e=>{e.waitUntil(caches.open("ainexus-v1").then(c=>c.addAll(["/","/index.html"])))});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})';
+    const blob=new Blob([swCode],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob));
+  }
+})();
+
+// === AI Agents ===
+const AGENTS=[
+  {id:'novel-planner',name:'📖 小说大纲规划师',cat:'创作',desc:'输入一句话灵感，输出完整小说大纲含章节规划+人物关系+世界观',placeholder:'例：一个废柴少年在古墓中发现上古神剑，踏上修仙之路...',sys:'你是专业小说策划师。根据用户的灵感，生成完整小说大纲：1. 故事梗概(200字) 2. 章节规划(至少20章，每章一句话概括) 3. 核心人物(5-8个，含外貌性格能力关系) 4. 世界观设定 5. 3种不同展开方向的建议',label:'输入你的灵感或一句话概要'},
+  {id:'brand-planner',name:'🎨 品牌全案策划师',cat:'商业',desc:'输入产品/服务，输出完整品牌全案：命名+Logo方案+VI+Slogan+品牌故事',placeholder:'例：一家主打手工酿造精酿啤酒的品牌，面向25-35岁都市白领...',sys:'你是顶级品牌策略师。输出完整品牌全案：1. 品牌命名(3个方案，含中英文+寓意) 2. Logo设计描述(图形+配色+字体) 3. 视觉识别系统(VI)大纲 4. Slogan(5条，标最适合的) 5. 品牌故事(300字) 6. 目标人群画像+品牌定位一句话',label:'描述你的产品/服务'},
+  {id:'xhs-writer',name:'📕 小红书爆款写手',cat:'营销',desc:'输入产品/话题，输出10条小红书种草笔记，含标题+正文+话题标签+配图建议',placeholder:'例：一款AI智能写作助手工具...',sys:'你是小红书运营专家。输出10条可直接发布的种草笔记：每条含：标题(抓眼球)、正文(口语化+emoji+痛点+解决方案)、话题标签(5-8个)、配图建议。前3条详细写(200-300字)，后7条精简版。不同角度：教程类/测评类/对比类/故事类/清单类。',label:'描述产品/话题'},
+  {id:'comic-director',name:'🎬 漫剧导演',cat:'创作',desc:'输入故事，直接输出完整分镜脚本+角色设定+场景描述+对白',placeholder:'例：一个科幻故事，2077年的东京...',sys:'你是专业漫剧导演。根据输入故事输出：1. 6-8格完整分镜(编号/景别/画面/动作/对白/时长) 2. 3个核心角色(外貌/服装/性格/口头禅) 3. 4个关键场景(环境色/光影/氛围) 4. 关键对白脚本。格式要专业，能直接给画师开工。',label:'输入故事设定'},
+  {id:'business-plan',name:'💼 商业计划书',cat:'商业',desc:'输入项目，输出投资人级别的商业计划书大纲+执行摘要+财务预测框架',placeholder:'例：一个基于AI的远程医疗问诊平台...',sys:'你是资深商业顾问。输出投资人级别的BP：1. 执行摘要(200字) 2. 市场规模分析 3. 竞争格局 4. 商业模式画布 5. 3年财务预测框架 6. 团队构建建议 7. 融资方案建议。每个部分给出具体数据和推理逻辑。',label:'描述你的创业项目'},
+  {id:'seo-researcher',name:'🔍 SEO策略师',cat:'营销',desc:'输入行业/网站，输出关键词策略+内容规划+竞争对手分析',placeholder:'例：AI写作工具行业...',sys:'你是SEO专家。输出：1. 核心关键词(10个，含搜索量/竞争度) 2. 长尾词策略(20个) 3. 内容矩阵规划(分类/频率/形式) 4. Top3竞品分析 5. 3个月关键词排名提升路线图。数据驱动的策略。',label:'输入行业或网站类型'},
+  {id:'email-campaign',name:'📧 邮件营销官',cat:'营销',desc:'输入目标，输出7天自动邮件序列+每封主题/正文/CTA',placeholder:'例：为SaaS工具的新注册用户设计7天激活邮件...',sys:'你是邮件营销专家。设计7天自动化邮件序列：每封含：发送时机(DayX)、主题行(3个版本A/B测试)、正文(个性化变量位置)、CTA按钮文案、预期打开率。策略：Day1欢迎Day3价值展示Day5案例证明Day7限时优惠。',label:'描述邮件营销目标'},
+  {id:'thesis-helper',name:'🎓 论文助手',cat:'研究',desc:'输入主题，输出论文大纲+文献综述框架+研究方法建议+摘要',placeholder:'例：人工智能在医疗影像诊断中的应用研究...',sys:'你是学术研究导师。输出：1. 论文标题(3个备选) 2. 摘要(300字) 3. 详细大纲(6-8章，每章3-5节) 4. 文献综述框架 5. 研究方法建议(定量/定性/混合) 6. 创新点分析 7. 预计字数分配',label:'输入论文主题'},
+  {id:'ad-strategist',name:'🎯 广告投放策略师',cat:'营销',desc:'输入产品/预算，输出跨平台广告投放策略+受众定向+创意方向',placeholder:'例：预算5000元，推广一个在线教育课程...',sys:'你是广告投放专家。输出：1. 平台分配策略(微信/抖音/小红书/百度占比) 2. 每平台受众定向设置 3. 创意方向(3套A/B素材方案) 4. 出价策略 5. 预期KPI(CPM/CTR/CPA) 6. 7天优化计划。预算导向，ROI为核心。',label:'描述产品和预算'},
+  {id:'custom-agent',name:'🤖 通用智能体',cat:'所有',desc:'自定义任务——写任何你想让AI做的事情',placeholder:'例：帮我分析新能源汽车行业2025趋势，给出投资建议...',sys:'你是万能的AI助手。认真理解用户需求，给出专业、精准、详尽的回答。展示你的推理过程。如果不确定，明确说明。',label:'描述你想让AI做什么'},
+];
+let currentAgent=null;
+function renderAgents(filter='all'){
+  const g=document.getElementById('agentGrid');
+  const f=filter==='all'?AGENTS:AGENTS.filter(a=>a.cat===filter);
+  g.innerHTML=f.map(a=>`<div class="model-card" style="cursor:pointer;border:1px solid var(--border)" onclick="openAgent('${a.id}')"><div class="model-header"><div style="font-size:2rem">${a.name.substring(0,2)}</div><div><div class="model-name">${a.name.substring(3)}</div><div class="model-provider">${a.cat} · 智能体</div></div></div><div class="model-desc">${a.desc}</div><div style="font-size:0.7rem;color:var(--accent);margin-top:4px">点击使用 →</div></div>`).join('');
+}
+document.querySelectorAll('#agentFilters .filter-tag').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('#agentFilters .filter-tag').forEach(x=>x.classList.remove('active'));t.classList.add('active');renderAgents(t.dataset.filter)
+}));
+function openAgent(id){
+  const a=AGENTS.find(x=>x.id===id);if(!a)return;
+  currentAgent=a;
+  document.getElementById('agentModalTitle').textContent=a.name;
+  document.getElementById('agentModalDesc').textContent=a.desc;
+  document.getElementById('agentModalLabel').textContent=a.label;
+  document.getElementById('agentInput').value='';
+  document.getElementById('agentInput').placeholder=a.placeholder;
+  document.getElementById('agentOutput').style.display='none';
+  document.getElementById('agentActions').style.display='flex';
+  document.getElementById('agentResultActions').style.display='none';
+  document.getElementById('agentModal').classList.add('show');
+  setTimeout(()=>document.getElementById('agentInput').focus(),200);
+}
+function closeAgent(){document.getElementById('agentModal').classList.remove('show');currentAgent=null}
+async function runAgent(){
+  const i=document.getElementById('agentInput').value.trim();
+  if(!i){showToast('请输入需求');return}
+  if(!currentAgent)return;
+  if(!spendCredits(3))return;
+  const o=document.getElementById('agentOutput');o.style.display='block';o.innerHTML='<span class="spinner"></span> 执行中...';
+  document.getElementById('agentActions').style.display='none';
+  try{
+    const r=await callModelAPI('deepseekv3',i,currentAgent.sys);
+    o.innerHTML=escapeHtml(r.content);
+    document.getElementById('agentResultActions').style.display='flex';
+  }catch(e){o.innerHTML=`<span style="color:var(--red)">❌ ${e.message}</span>`}
+}
+function retryAgent(){runAgent()}
+function copyAgentOutput(){
+  const t=document.getElementById('agentOutput').textContent;
+  navigator.clipboard.writeText(t).then(()=>showToast('已复制'))
+}
+
+// === User Feedback ===
+function submitFeedback(){
+  const t=document.getElementById('fbType').value,c=document.getElementById('fbContent').value.trim(),co=document.getElementById('fbContact').value.trim();
+  if(!c){showToast('请填写反馈内容');return}
+  const fb=JSON.parse(localStorage.getItem('feedback')||'[]');
+  fb.unshift({type:t,content:c,contact:co,user:currentUser?currentUser.username:'游客',time:new Date().toISOString()});
+  localStorage.setItem('feedback',JSON.stringify(fb.slice(0,50)));
+  document.getElementById('fbContent').value='';document.getElementById('fbContact').value='';
+  showToast('✅ 反馈已提交，感谢你的建议！');
+}
 
 // === Admin ===
 const DEFAULT_PASSWORD='admin123',ADMIN_STORAGE_KEY='apwd',MODELS_STORAGE_KEY='amod',API_KEYS_KEY='akeys',SETTINGS_KEY='aset';
 let adminModels=[],editingModelId=null;
-function initAdmin(){const s=localStorage.getItem(MODELS_STORAGE_KEY);if(s){try{adminModels=JSON.parse(s)}catch(e){}}if(!adminModels.length)adminModels=JSON.parse(JSON.stringify(models))}
-function adminLogin(){const p=document.getElementById('adminPwd').value;const s=localStorage.getItem(ADMIN_STORAGE_KEY)||DEFAULT_PASSWORD;if(p===s){document.getElementById('adminLogin').style.display='none';document.getElementById('adminDashboard').style.display='block';renderAdminTable();showToast('登录成功')}else showToast('密码错误')}
+function initAdmin(){const s=localStorage.getItem(MODELS_STORAGE_KEY);adminModels=[];if(s){try{const p=JSON.parse(s);if(Array.isArray(p))adminModels=p}catch(e){}}if(!adminModels.length)adminModels=JSON.parse(JSON.stringify(models))}
+function adminLogin(){const p=document.getElementById('adminPwd').value;const s=localStorage.getItem(ADMIN_STORAGE_KEY)||DEFAULT_PASSWORD;if(p===s){document.getElementById('adminLogin').style.display='none';document.getElementById('adminDashboard').style.display='block';renderAdminTable();renderFeedback();showToast('登录成功')}else showToast('密码错误')}
 function adminLogout(){document.getElementById('adminLogin').style.display='block';document.getElementById('adminDashboard').style.display='none'}
 function renderAdminTable(){document.getElementById('adminModelTbody').innerHTML=adminModels.map(m=>`<tr><td><strong>${m.name}</strong></td><td>${m.provider}</td><td>${m.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</td><td>${m.inputPrice} / ${m.outputPrice}</td><td>${m.context}</td><td>${m.featured?'⭐':'-'}</td><td><button class="btn-sm" onclick="openEditModel('${m.id}')">编辑</button><button class="btn-sm" onclick="toggleFeatured('${m.id}')">${m.featured?'取消热门':'热门'}</button><button class="btn-sm danger" onclick="deleteModelConfirm('${m.id}')">删除</button></td></tr>`).join('')}
 function openAddModel(){editingModelId=null;['modalTitle','editId','editName','editProvider','editDesc','editContext','editInputPrice','editOutputPrice'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});document.getElementById('editId').disabled=false;document.getElementById('editAvatar').value='#6366f1';document.getElementById('editFeatured').checked=false;document.getElementById('btnDeleteModel').style.display='none';document.getElementById('modelModal').classList.add('show')}
 function openEditModel(id){const m=adminModels.find(x=>x.id===id);if(!m)return;editingModelId=id;document.getElementById('modalTitle').textContent='编辑: '+m.name;document.getElementById('editId').value=m.id;document.getElementById('editId').disabled=true;document.getElementById('editName').value=m.name;document.getElementById('editProvider').value=m.provider;document.getElementById('editDesc').value=m.desc;document.getElementById('editAvatar').value=m.avatar;document.getElementById('editContext').value=m.context;document.getElementById('editInputPrice').value=m.inputPrice;document.getElementById('editOutputPrice').value=m.outputPrice;document.getElementById('editFeatured').checked=m.featured;document.getElementById('btnDeleteModel').style.display='inline-block';document.getElementById('modelModal').classList.add('show')}
 function closeModal(){document.getElementById('modelModal').classList.remove('show')}
-function saveModel(){const id=document.getElementById('editId').value.trim(),name=document.getElementById('editName').value.trim(),prov=document.getElementById('editProvider').value.trim();if(!id||!name||!prov){showToast('ID/名称/供应商必填');return}if(!editingModelId&&adminModels.find(m=>m.id===id)){showToast('ID已存在');return}const md={id,name,provider:prov,desc:document.getElementById('editDesc').value.trim(),avatar:document.getElementById('editAvatar').value,tags:[],context:document.getElementById('editContext').value.trim()||'128K',inputPrice:document.getElementById('editInputPrice').value.trim()||'--',outputPrice:document.getElementById('editOutputPrice').value.trim()||'--',featured:document.getElementById('editFeatured').checked,free:false};if(editingModelId){const i=adminModels.findIndex(m=>m.id===editingModelId);if(i>=0)adminModels[i]=md}else adminModels.push(md);saveAndRefresh();closeModal();showToast(editingModelId?'已更新':'已添加')}
+function saveModel(){const id=document.getElementById('editId').value.trim(),name=document.getElementById('editName').value.trim(),prov=document.getElementById('editProvider').value.trim();if(!id||!name||!prov){showToast('ID/名称/供应商必填');return}if(!editingModelId&&adminModels.find(m=>m.id===id)){showToast('ID已存在');return}const md={id,name,provider:prov,desc:document.getElementById('editDesc').value.trim(),avatar:document.getElementById('editAvatar').value,tags:editingModelId?(adminModels.find(m=>m.id===editingModelId)?.tags||[]):[],context:document.getElementById('editContext').value.trim()||'128K',inputPrice:document.getElementById('editInputPrice').value.trim()||'--',outputPrice:document.getElementById('editOutputPrice').value.trim()||'--',featured:document.getElementById('editFeatured').checked,free:false};if(editingModelId){const i=adminModels.findIndex(m=>m.id===editingModelId);if(i>=0)adminModels[i]=md}else adminModels.push(md);saveAndRefresh();closeModal();showToast(editingModelId?'已更新':'已添加')}
 function deleteModelConfirm(id){if(confirm('确定删除？')){adminModels=adminModels.filter(m=>m.id!==id);saveAndRefresh();closeModal();showToast('已删除')}}
 function toggleFeatured(id){const m=adminModels.find(x=>x.id===id);if(m){m.featured=!m.featured;saveAndRefresh()}}
 function saveAndRefresh(){localStorage.setItem(MODELS_STORAGE_KEY,JSON.stringify(adminModels));models.length=0;adminModels.forEach(m=>models.push(m));initFeaturedModels();renderAdminTable()}
+function renderFeedback(){
+  const fb=JSON.parse(localStorage.getItem('feedback')||'[]');
+  document.getElementById('fbCount').textContent=fb.length;
+  document.getElementById('feedbackList').innerHTML=fb.length?fb.map((f,i)=>`<div style="padding:10px;border-bottom:1px solid var(--border);font-size:0.82rem"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-weight:600;color:var(--accent)">${f.type}</span><span style="font-size:0.7rem;color:var(--text-secondary)">${f.user} · ${new Date(f.time).toLocaleDateString('zh-CN')}</span></div><div>${escapeHtml(f.content)}</div>${f.contact?`<div style="font-size:0.7rem;color:var(--cyan);margin-top:2px">📞 ${escapeHtml(f.contact)}</div>`:''}<button class="btn-sm danger" style="float:right;font-size:0.65rem;margin-top:4px" onclick="deleteFeedback(${i})">删除</button></div>`).join(''):'<p style="color:var(--text-secondary);text-align:center;padding:20px">暂无反馈</p>';
+}
+function deleteFeedback(i){const fb=JSON.parse(localStorage.getItem('feedback')||'[]');fb.splice(i,1);localStorage.setItem('feedback',JSON.stringify(fb));renderFeedback()}
+function renderReports(){
+  const r=JSON.parse(localStorage.getItem('reports')||'[]');
+  const el=document.getElementById('reportsList');const fl=document.getElementById('feedbackList');
+  el.style.display='block';fl.style.display='none';
+  el.innerHTML=r.length?r.map((rp,i)=>`<div style="padding:10px;border-bottom:1px solid var(--border);font-size:0.82rem"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-weight:600;color:var(--orange)">⚠️ ${rp.model}</span><span style="font-size:0.7rem;color:var(--text-secondary)">${rp.user} · ${new Date(rp.time).toLocaleDateString('zh-CN')}</span></div><div style="color:var(--text-secondary)">原因：${rp.reason}</div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px">内容：${escapeHtml(rp.content).substring(0,100)}</div><button class="btn-sm danger" style="float:right;font-size:0.65rem" onclick="deleteReport(${i})">删除</button></div>`).join(''):'<p style="color:var(--text-secondary);text-align:center;padding:20px">暂无举报</p>';
+}
+function deleteReport(i){const r=JSON.parse(localStorage.getItem('reports')||'[]');r.splice(i,1);localStorage.setItem('reports',JSON.stringify(r));renderReports()}
 function exportData(){const d=JSON.stringify(adminModels,null,2);const b=new Blob([d],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='models.json';a.click();showToast('已导出')}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d))throw new Error('格式错');if(confirm(`导入${d.length}个模型？`)){adminModels=d;saveAndRefresh();showToast('已导入')}}catch(err){showToast(err.message)}e.target.value=''};r.readAsText(f)}
 function openApiSettings(){document.getElementById('apiModal').classList.add('show')}
 function closeApiModal(){document.getElementById('apiModal').classList.remove('show')}
 function saveApiKeys(){const k={apiBase:document.getElementById('apiBaseInput').value.trim(),openai:document.getElementById('apiOpenAIKey').value.trim(),deepseek:document.getElementById('apiDeepSeekKey').value.trim(),gemini:document.getElementById('apiGeminiKey').value.trim(),dashscope:document.getElementById('apiQwenKey').value.trim()};localStorage.setItem(API_KEYS_KEY,JSON.stringify(k));if(k.apiBase)localStorage.setItem('api_base',k.apiBase);closeApiModal();showToast('已保存')}
-const DEFAULT_SETTINGS={pricePerCredit:0.1,newUserCredits:10,chatCost:1,novelCost:5,port:3001,deepseekMultiplier:20};
+const DEFAULT_SETTINGS={pricePerCredit:10,newUserCredits:30,chatCost:1,novelCost:5,port:3001,deepseekMultiplier:20};
 function getSiteSettings(){try{return JSON.parse(localStorage.getItem(SETTINGS_KEY))||{}}catch(e){return{}}}
 function openSiteSettings(){const s=getSiteSettings();document.getElementById('setPricePerCredit').value=s.pricePerCredit??10;document.getElementById('setNewUserCredits').value=s.newUserCredits??10;document.getElementById('setChatCost').value=s.chatCost??1;document.getElementById('setNovelCost').value=s.novelCost??5;document.getElementById('setPort').value=s.port??3001;document.getElementById('setDeepSeekMultiplier').value=s.deepseekMultiplier??20;document.getElementById('siteSettingsModal').classList.add('show')}
 function closeSiteSettings(){document.getElementById('siteSettingsModal').classList.remove('show')}
@@ -931,7 +1695,7 @@ function closePwdModal(){document.getElementById('pwdModal').classList.remove('s
 function changePassword(){const c=document.getElementById('pwdCurrent').value,n=document.getElementById('pwdNew').value,cf=document.getElementById('pwdConfirm').value;const s=localStorage.getItem(ADMIN_STORAGE_KEY)||DEFAULT_PASSWORD;if(c!==s){showToast('密码错');return}if(!n||n.length<4){showToast('至少4位');return}if(n!==cf){showToast('不一致');return}localStorage.setItem(ADMIN_STORAGE_KEY,n);closePwdModal();showToast('已修改')}
 
 // === Connection ===
-async function checkConnection(){const d=document.querySelector('#connStatus .conn-dot'),l=document.querySelector('#connStatus span:last-child');d.className='conn-dot checking';try{const r=await fetch(API_BASE+'/api/status');if(r.ok){apiOnline=true;d.className='conn-dot online';const data=await r.json();l.textContent='在线'}else throw new Error()}catch{apiOnline=false;d.className='conn-dot offline';l.textContent='离线'}}
+async function checkConnection(){const d=document.querySelector('#connStatus .conn-dot'),l=document.querySelector('#connStatus span:last-child');const sd=document.querySelector('#sidebarConn .conn-dot'),sl=document.querySelector('#sidebarConn span:last-child');d.className='conn-dot checking';try{const r=await fetch(API_BASE+'/api/status');if(r.ok){apiOnline=true;d.className='conn-dot online';sd.className='conn-dot online';l.textContent='在线';if(sl)sl.textContent='API 在线'}else throw new Error()}catch{apiOnline=false;d.className='conn-dot offline';sd.className='conn-dot offline';l.textContent='离线';if(sl)sl.textContent='API 离线'}}
 checkConnection();setInterval(checkConnection,30000);
 
 // === Input events ===
@@ -939,10 +1703,21 @@ const ci=document.getElementById('chatInput');ci.addEventListener('keydown',e=>{
 const cp=document.getElementById('comparePrompt');if(cp)cp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runCompare()}});
 
 // === Init ===
-if(currentUser){userCredits=parseInt(localStorage.getItem('cr_'+currentUser.username)||'10');localStorage.setItem('cr',userCredits)}
+function toggleMobileMenu(){const m=document.getElementById('mobileMenu');m.style.display=m.style.display==='none'||!m.style.display?'block':'none'}
+if(currentUser){userCredits=parseInt(localStorage.getItem('cr_'+currentUser.username)||'30');localStorage.setItem('cr',userCredits);novelHistory=localStorage.getItem('novelHistory')||''}
 updateCreditDisplay();
 renderUserNav();
 initAdmin();
+updateStreakUI();
+setTimeout(renderContinue,500);
+// First visit welcome
+if(!localStorage.getItem('visited')){
+  setTimeout(()=>{
+    const c=parseInt(localStorage.getItem('cr')||'10');
+    if(c>0)showToast(`🎉 欢迎！已赠送您 ${c} 积分免费体验额度`);
+    localStorage.setItem('visited','1');
+  },800);
+}
 </script>
 </body>
 </html>
