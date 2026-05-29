@@ -161,6 +161,73 @@ a{color:var(--accent);text-decoration:none}
 .wizard-step.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
 .wizard-step.done{background:rgba(16,185,129,0.1);color:var(--green);border-color:var(--green)}
 .wizard-num{display:block;font-size:1.3rem;font-weight:800;margin-bottom:3px}
+/* Workshop Tabs */
+.workshop-tabs{display:flex;gap:2px;margin-bottom:20px;background:var(--bg-card);border-radius:12px;padding:4px}
+.workshop-tab{flex:1;padding:10px 8px;border-radius:10px;cursor:pointer;text-align:center;font-size:0.78rem;font-weight:600;transition:all var(--transition);background:transparent;color:var(--text-secondary);border:none;font-family:inherit}
+.workshop-tab:hover{background:var(--accent-soft);color:var(--text)}
+.workshop-tab.active{background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;box-shadow:0 4px 16px var(--accent-glow)}
+.workshop-tab .tab-icon{display:block;font-size:1.1rem;margin-bottom:2px}
+/* Outline Workshop */
+.outline-tree{background:var(--bg-sidebar);border:1px solid var(--border);border-radius:12px;padding:12px;max-height:500px;overflow-y:auto}
+.outline-node{margin-bottom:8px;padding:8px 12px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);transition:all var(--transition);cursor:pointer}
+.outline-node:hover{border-color:var(--accent)}
+.outline-node.level-0{border-left:3px solid var(--accent)}
+.outline-node.level-1{border-left:3px solid var(--cyan);margin-left:16px}
+.outline-node.level-2{border-left:3px solid var(--green);margin-left:32px}
+.outline-node .node-label{font-size:0.7rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px}
+.outline-node .node-content{font-size:0.85rem;margin-top:2px;line-height:1.5}
+.outline-node .node-actions{display:flex;gap:6px;margin-top:4px;opacity:0;transition:opacity 0.2s}
+.outline-node:hover .node-actions{opacity:1}
+/* Refinement Panel */
+.refine-options{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.refine-option{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--bg-card);cursor:pointer;font-size:0.82rem;font-weight:500;transition:all var(--transition);color:var(--text);font-family:inherit}
+.refine-option:hover{border-color:var(--accent);background:var(--accent-soft)}
+.refine-option.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.diff-view{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.diff-col{border:1px solid var(--border);border-radius:10px;padding:14px;overflow-y:auto;max-height:400px;font-size:0.82rem;line-height:1.8;white-space:pre-wrap}
+.diff-col.before{background:rgba(239,68,68,0.04);border-color:rgba(239,68,68,0.2)}
+.diff-col.after{background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.2)}
+.diff-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.diff-label.before{color:var(--red)}.diff-label.after{color:var(--green)}
+/* Chapter List */
+.chapter-list{background:var(--bg-sidebar);border:1px solid var(--border);border-radius:12px;max-height:500px;overflow-y:auto}
+.chapter-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:all var(--transition);gap:12px}
+.chapter-item:hover{background:var(--accent-soft)}
+.chapter-item:last-child{border-bottom:none}
+.chapter-num{width:32px;height:32px;border-radius:8px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:var(--accent);flex-shrink:0}
+.chapter-info{flex:1;min-width:0}
+.chapter-title{font-weight:600;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chapter-meta{font-size:0.72rem;color:var(--text-secondary);margin-top:2px}
+.chapter-actions{display:flex;gap:4px}
+.chapter-actions button{padding:3px 8px;font-size:0.7rem}
+/* Novel Reader Mode */
+.reader-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:200;display:flex;flex-direction:column;overflow-y:auto}
+.reader-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--bg-sidebar);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
+.reader-content{max-width:700px;margin:40px auto;padding:20px 32px;font-size:1rem;line-height:2;color:var(--text);white-space:pre-wrap}
+.reader-content h3{font-size:1.3rem;margin:24px 0 12px;color:var(--accent)}
+.reader-font-sm{font-size:0.9rem;line-height:1.8}
+.reader-font-md{font-size:1rem;line-height:2}
+.reader-font-lg{font-size:1.15rem;line-height:2.2}
+/* Media Enhancement */
+.storyboard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.storyboard-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;transition:all var(--transition)}
+.storyboard-card:hover{border-color:var(--accent);box-shadow:0 4px 20px var(--accent-soft)}
+.sb-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sb-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:0.85rem;flex-shrink:0}
+.sb-camera{font-size:0.7rem;padding:2px 8px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.sb-image{width:100%;height:180px;background:var(--bg-input);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:var(--text-secondary);margin-top:8px}
+.sb-desc{font-size:0.82rem;line-height:1.6;color:var(--text)}
+.sb-dialog{font-size:0.8rem;line-height:1.5;margin-top:8px;padding:8px 12px;background:var(--bg-sidebar);border-radius:8px;border-left:3px solid var(--cyan)}
+.sb-dialog .speaker{font-weight:700;color:var(--cyan);font-size:0.75rem}
+.comic-frame{border:3px solid #1a1a2e;border-radius:4px;background:#fff;color:#222;padding:20px;font-size:0.8rem;line-height:1.5;position:relative;box-shadow:4px 4px 0 rgba(0,0,0,0.3)}
+.comic-frame::before{content:attr(data-num);position:absolute;top:-12px;left:-12px;width:28px;height:28px;border-radius:50%;background:#e63946;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.75rem}
+/* Consistency Manager */
+.consistency-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.consistency-tag{padding:4px 10px;border-radius:12px;font-size:0.7rem;background:var(--accent-soft);color:var(--accent);font-weight:500}
+/* Quick Actions Bar */
+.quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px}
+.quick-action{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);cursor:pointer;font-size:0.8rem;font-weight:500;transition:all var(--transition);color:var(--text);font-family:inherit}
+.quick-action:hover{background:var(--accent-soft);border-color:var(--accent);transform:translateY(-1px)}
 
 /* Tabs */
 .tab-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0}
@@ -243,6 +310,24 @@ a{color:var(--accent);text-decoration:none}
 @media(min-width:769px){
   .mobile-nav,#mobileMenu{display:none!important}
 }
+/* Wizard Panels */
+.wizard-panel{animation:fadeIn 0.3s ease}
+.wizard-panel.active{display:block}
+/* Knowledge Base Folder */
+.know-folder:hover{background:var(--accent-soft);color:var(--text)}
+.know-folder.active{background:var(--accent-light);color:var(--accent);font-weight:600}
+.know-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;transition:all var(--transition);cursor:pointer}
+.know-card:hover{border-color:var(--accent);box-shadow:0 0 16px var(--accent-soft);transform:translateY(-2px)}
+.know-card .know-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.know-card .know-tag{padding:2px 8px;border-radius:10px;font-size:0.68rem;background:var(--accent-soft);color:var(--accent)}
+/* Prompt Cards */
+.prompt-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px;transition:all var(--transition);cursor:pointer;position:relative}
+.prompt-card:hover{border-color:var(--accent);box-shadow:0 0 16px var(--accent-soft);transform:translateY(-2px)}
+.prompt-card .prompt-use{position:absolute;right:14px;bottom:14px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.75rem;font-weight:600;opacity:0;transition:opacity 0.2s}
+.prompt-card:hover .prompt-use{opacity:1}
+/* Studio Tabs */
+.studio-tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border)}
+
 </style>
 </head>
 <body>
@@ -268,14 +353,16 @@ a{color:var(--accent);text-decoration:none}
   <button class="sidebar-link" data-page="models"><span class="sidebar-icon">🤖</span>模型</button>
   <button class="sidebar-link" data-page="chat"><span class="sidebar-icon">💬</span>聊天</button>
   <button class="sidebar-link" data-page="compare"><span class="sidebar-icon">📊</span>对比</button>
-  <button class="sidebar-link primary" data-page="novel"><span class="sidebar-icon">📖</span>写小说</button>
+  <button class="sidebar-link primary" data-page="novel"><span class="sidebar-icon">📖</span>AI 小说</button>
   <button class="sidebar-link" data-page="media"><span class="sidebar-icon">🎬</span>漫剧</button>
   <button class="sidebar-link" data-page="agents"><span class="sidebar-icon">🤖</span>智能体</button>
   <div class="sidebar-divider"></div>
   <button class="sidebar-link" data-page="office"><span class="sidebar-icon">💼</span>办公</button>
   <button class="sidebar-link" data-page="brand"><span class="sidebar-icon">🎨</span>品牌</button>
   <button class="sidebar-link" data-page="market"><span class="sidebar-icon">📢</span>营销</button>
-  <button class="sidebar-link" data-page="art"><span class="sidebar-icon">🖼</span>绘画</button>
+  <button class="sidebar-link" data-page="studio"><span class="sidebar-icon">🎨</span>AI 创作工场</button>
+  <button class="sidebar-link" data-page="prompts"><span class="sidebar-icon">📚</span>提示词库</button>
+  <button class="sidebar-link" data-page="knowledge"><span class="sidebar-icon">🧠</span>知识库</button>
   <div class="sidebar-divider"></div>
   <button class="sidebar-link" data-page="pricing"><span class="sidebar-icon">💎</span>充值</button>
   <button class="sidebar-link" data-page="admin"><span class="sidebar-icon">⚙</span>管理</button>
@@ -329,9 +416,10 @@ a{color:var(--accent);text-decoration:none}
     </div>
     <div class="features" style="margin-top:36px">
       <div class="feature-card" onclick="switchPage('chat')" style="cursor:pointer"><div class="feature-icon">💬</div><h3>AI 聊天</h3><p>多模型同时对话，对比不同AI的回答</p></div>
-      <div class="feature-card" onclick="switchPage('novel')" style="cursor:pointer"><div class="feature-icon">📖</div><h3>AI 写小说</h3><p>向导式创作→一键变漫剧→打造IP品牌</p></div>
+      <div class="feature-card" onclick="switchPage('novel')" style="cursor:pointer"><div class="feature-icon">📖</div><h3>AI 小说</h3><p>大纲生成→创作润色→去AI痕迹→变漫剧</p></div>
       <div class="feature-card" onclick="switchPage('media')" style="cursor:pointer"><div class="feature-icon">🎬</div><h3>AI 漫剧</h3><p>分镜脚本+角色设计→扩展成小说</p></div>
-      <div class="feature-card" onclick="switchPage('art')" style="cursor:pointer"><div class="feature-icon">🖼</div><h3>AI 绘画</h3><p>Midjourney提示词→IP视觉化</p></div>
+      <div class="feature-card" onclick="switchPage('studio')" style="cursor:pointer"><div class="feature-icon">🖼</div><h3>AI 创作工场</h3><p>图片生成+视频创作，一站式视觉创作平台</p></div>
+      <div class="feature-card" onclick="switchPage('prompts')" style="cursor:pointer"><div class="feature-icon">📚</div><h3>提示词库</h3><p>50+写作工具，覆盖小说/办公/品牌/营销</p></div>
       <div class="feature-card" onclick="switchPage('agents')" style="cursor:pointer"><div class="feature-icon">🤖</div><h3>AI 智能体</h3><p>10个预制专家智能体，输入需求直出结果，零配置</p></div>
       <div class="feature-card" onclick="switchPage('brand')" style="cursor:pointer"><div class="feature-icon">🎨</div><h3>品牌设计</h3><p>Logo+命名+Slogan→一键去营销</p></div>
       <div class="feature-card" onclick="switchPage('market')" style="cursor:pointer"><div class="feature-icon">📢</div><h3>智能营销</h3><p>小红书+公众号→打造品牌IP</p></div>
@@ -398,66 +486,339 @@ a{color:var(--accent);text-decoration:none}
 </div>
 
 <div class="page" id="page-novel">
-  <section class="section">
+  <section class="section" style="padding:24px 36px">
     <h2 class="section-title">📖 AI 小说创作</h2>
-    <p class="section-desc">向导模式：选类型→定大纲→出人物→写正文。写完一键变漫剧→设计品牌→去营销，IP全链路打通</p>
-    <div class="wizard-steps" id="wizardSteps">
-      <div class="wizard-step active" data-wstep="type"><span class="wizard-num">1</span>选类型</div>
-      <div class="wizard-step" data-wstep="outline"><span class="wizard-num">2</span>定大纲</div>
-      <div class="wizard-step" data-wstep="chars"><span class="wizard-num">3</span>出人物</div>
-      <div class="wizard-step" data-wstep="world"><span class="wizard-num">4</span>世界观</div>
-      <div class="wizard-step" data-wstep="write"><span class="wizard-num">5</span>写正文</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div>
-        <div id="wizardPanel"></div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn-send" id="wizardActionBtn" onclick="wizardAction()">下一步 →</button>
+    <p class="section-desc">6步创作流程：定方向→搭框架→锁框架→写大纲→确大纲→写正文。全链路打通，写完变漫剧→做品牌→去营销</p>
+    
+    <!-- 创作向导入口 -->
+    <div id="novelWizardHome">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px">
+        <div class="feature-card" style="cursor:pointer;text-align:center;padding:32px 20px;border:2px solid var(--accent)" onclick="NOVEL_START_WIZARD('quick')">
+          <div style="font-size:3rem;margin-bottom:12px">🚀</div>
+          <h3 style="font-size:1.1rem;margin-bottom:8px">快速创作</h3>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">一句话灵感 → 6步自动走完 → 拿到第一章</p>
+          <div style="margin-top:14px;padding:8px 20px;background:var(--accent);border-radius:20px;color:#fff;font-weight:600;font-size:0.85rem;display:inline-block">开始创作</div>
+        </div>
+        <div class="feature-card" style="cursor:pointer;text-align:center;padding:32px 20px" onclick="NOVEL_START_WIZARD('guided')">
+          <div style="font-size:3rem;margin-bottom:12px">🎯</div>
+          <h3 style="font-size:1.1rem;margin-bottom:8px">分步指导</h3>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">每步可调整 → 随时返回修改 → 适合精细打磨</p>
+          <div style="margin-top:14px;padding:8px 20px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text);font-weight:600;font-size:0.85rem;display:inline-block">分步创作</div>
+        </div>
+        <div class="feature-card" style="cursor:pointer;text-align:center;padding:32px 20px" onclick="NOVEL_OPEN_TOOLS()">
+          <div style="font-size:3rem;margin-bottom:12px">✨</div>
+          <h3 style="font-size:1.1rem;margin-bottom:8px">灵感火花</h3>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">随机抽卡 → 类型/世界观/金手指 → 组合创意</p>
+          <div style="margin-top:14px;padding:8px 20px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text);font-weight:600;font-size:0.85rem;display:inline-block">抽取灵感</div>
+        </div>
+        <div class="feature-card" style="cursor:pointer;text-align:center;padding:32px 20px" onclick="switchPage('prompts')">
+          <div style="font-size:3rem;margin-bottom:12px">📚</div>
+          <h3 style="font-size:1.1rem;margin-bottom:8px">提示词库</h3>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">50+写作工具 → 续写/润色/大纲/扩写 → 一键使用</p>
+          <div style="margin-top:14px;padding:8px 20px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text);font-weight:600;font-size:0.85rem;display:inline-block">查看工具</div>
         </div>
       </div>
-      <div>
-        <div class="feature-card" style="min-height:380px;max-height:580px;overflow-y:auto;white-space:pre-wrap;font-size:0.85rem;line-height:1.8" id="novelOutput">
-          <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">📝</div><p>选类型开始创作</p></div>
+      <div class="feature-card" style="padding:20px">
+        <h4 style="margin-bottom:12px;text-align:center">📚 我的作品 <span style="color:var(--accent);font-weight:700" id="novelBookTitle">未开始</span></h4>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap" id="novelProgressBar">
+          <span style="font-size:0.82rem;color:var(--text-secondary)">已写: <b id="chapterCount">0</b> 章</span>
+          <span style="font-size:0.82rem;color:var(--text-secondary)">字数: <b id="totalWords">0</b></span>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end;flex-wrap:wrap">
-          <button class="btn-sm" onclick="saveChapter()">💾 存章节</button>
-          <button class="btn-sm primary" onclick="novelToMedia()" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;border:none">🎬 变成漫剧</button>
-          <button class="btn-sm" onclick="novelToBrand()">🎨 设计IP品牌</button>
-          <button class="btn-sm" onclick="copyNovelOutput()">📋</button>
-          <button class="btn-sm" onclick="downloadNovel()">⬇</button>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+          <button class="btn-sm primary" onclick="NOVEL_CONTINUE()">📝 继续写作</button>
+          <button class="btn-sm" onclick="NOVEL_MANAGE()">📖 章节管理</button>
+          <button class="btn-sm" onclick="exportAllChapters()">📥 导出全书</button>
+          <button class="btn-sm" onclick="openReader()">📖 阅读模式</button>
         </div>
       </div>
     </div>
-    <div class="feature-card" style="margin-top:16px" id="novelProgress"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">📚 <span id="novelBookTitle">未开始</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:0.78rem;color:var(--text-secondary)">已写:</span><span id="chapterCount" style="font-weight:700;color:var(--accent)">0</span><span style="font-size:0.78rem;color:var(--text-secondary)">章</span><span id="totalWords" style="font-weight:700;color:var(--accent)">0</span><span style="font-size:0.78rem;color:var(--text-secondary)">字</span><button class="btn-sm" onclick="loadNovelProject()" style="margin-left:auto">📂 管理</button></div></div>
+
+    <!-- 6步创作向导 -->
+    <div id="novelWizardSteps" style="display:none">
+      <div style="display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap" id="wizardStepsBar">
+        <div class="wizard-step active" data-step="1"><span class="wizard-num">1</span>定方向</div>
+        <div class="wizard-step" data-step="2"><span class="wizard-num">2</span>搭框架</div>
+        <div class="wizard-step" data-step="3"><span class="wizard-num">3</span>锁框架</div>
+        <div class="wizard-step" data-step="4"><span class="wizard-num">4</span>写大纲</div>
+        <div class="wizard-step" data-step="5"><span class="wizard-num">5</span>确大纲</div>
+        <div class="wizard-step" data-step="6"><span class="wizard-num">6</span>写正文</div>
+      </div>
+      <!-- Step 1: 定方向 -->
+      <div class="wizard-panel active" id="wizPanel1">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div class="feature-card" style="margin-bottom:12px"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">📖 小说类型</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px" id="novelTypeTags">
+                <span class="filter-tag active" onclick="NOVEL_SET('type',this,'玄幻')">玄幻</span>
+                <span class="filter-tag" onclick="NOVEL_SET('type',this,'仙侠')">仙侠</span>
+                <span class="filter-tag" onclick="NOVEL_SET('type',this,'都市')">都市</span>
+                <span class="filter-tag" onclick="NOVEL_SET('type',this,'科幻')">科幻</span>
+                <span class="filter-tag" onclick="NOVEL_SET('type',this,'悬疑')">悬疑</span>
+                <span class="filter-tag" onclick="NOVEL_SET('type',this,'言情')">言情</span>
+                <span class="filter-tag" onclick="NOVEL_SET('type',this,'历史')">历史</span>
+                <span class="filter-tag" onclick="NOVEL_SET('type',this,'轻小说')">轻小说</span>
+                <span class="filter-tag" onclick="NOVEL_SET('type',this,'游戏')">游戏</span>
+              </div>
+            </div>
+            <div class="feature-card" style="margin-bottom:12px"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">🎯 写作风格</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px" id="novelStyleTags">
+                <span class="filter-tag active" onclick="NOVEL_SET('style',this,'爽文流')">爽文流</span>
+                <span class="filter-tag" onclick="NOVEL_SET('style',this,'轻松搞笑')">轻松搞笑</span>
+                <span class="filter-tag" onclick="NOVEL_SET('style',this,'热血战斗')">热血战斗</span>
+                <span class="filter-tag" onclick="NOVEL_SET('style',this,'谋略权斗')">谋略权斗</span>
+                <span class="filter-tag" onclick="NOVEL_SET('style',this,'甜宠恋爱')">甜宠恋爱</span>
+                <span class="filter-tag" onclick="NOVEL_SET('style',this,'悬疑探案')">悬疑探案</span>
+                <span class="filter-tag" onclick="NOVEL_SET('style',this,'末日生存')">末日生存</span>
+              </div>
+            </div>
+            <div class="feature-card"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">👥 视角</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px" id="novelPovTags">
+                <span class="filter-tag active" onclick="NOVEL_SET('pov',this,'第三人称')">第三人称</span>
+                <span class="filter-tag" onclick="NOVEL_SET('pov',this,'第一人称')">第一人称</span>
+                <span class="filter-tag" onclick="NOVEL_SET('pov',this,'多视角')">多视角</span>
+              </div>
+            </div>
+          </div>
+          <div class="feature-card" style="padding:22px">
+            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:12px">💡 创意核心（一句话说清楚你的故事）</label>
+            <textarea id="wizCore" rows="4" style="width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.95rem;font-family:inherit;resize:vertical" placeholder="如：一个被逐出师门的废灵根少年，在拍卖行捡到一块黑色石碑，石碑中藏着上古药神传承，从此踏上以药逆天的修仙之路..."></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+          <button class="btn-sm" onclick="NOVEL_BACK_HOME()">← 返回</button>
+          <button class="btn-send" onclick="NOVEL_STEP_1()">下一步：搭框架 →</button>
+        </div>
+      </div>
+      <!-- Step 2: 搭框架 -->
+      <div class="wizard-panel" id="wizPanel2" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div class="feature-card" style="margin-bottom:12px"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">👤 主角设定</label>
+              <textarea id="wizMainChar" rows="2" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="姓名/性别/年龄/外貌/性格/特殊能力（留空AI生成）"></textarea>
+            </div>
+            <div class="feature-card" style="margin-bottom:12px"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">🌍 世界观</label>
+              <textarea id="wizWorld" rows="2" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="时代/地域/势力/规则体系（留空AI构建）"></textarea>
+            </div>
+            <div class="feature-card"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">💎 金手指/核心设定</label>
+              <textarea id="wizCheat" rows="2" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="主角的特殊能力/系统/传承（留空AI设计）"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <select id="wizFrameModel" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="deepseekr1">DeepSeek-R1</option><option value="deepseekv3">DeepSeek-V3</option><option value="qwen3">通义千问3</option></select>
+              <button class="btn-send" onclick="NOVEL_STEP_2()">🤖 AI 生成框架</button>
+            </div>
+          </div>
+          <div class="feature-card" style="min-height:400px;max-height:600px;overflow-y:auto;white-space:pre-wrap;font-size:0.85rem;line-height:1.8" id="wizFrameOutput">
+            <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">🧱</div><p>点击"AI生成框架"</p><p style="font-size:0.75rem">AI将生成完整故事框架：主线/分卷/人物关系/世界观</p></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:space-between">
+          <button class="btn-sm" onclick="NOVEL_GOTO_STEP('1')">← 上一步</button>
+          <button class="btn-send" onclick="NOVEL_STEP_3()">下一步：锁定框架 →</button>
+        </div>
+      </div>
+      <!-- Step 3: 锁框架 -->
+      <div class="wizard-panel" id="wizPanel3" style="display:none">
+        <div class="feature-card" style="margin-bottom:16px"><h4 style="margin-bottom:8px">🔒 确认故事框架</h4><p style="font-size:0.82rem;color:var(--text-secondary)">这里你可以编辑修改框架后再锁定。锁定后生成大纲时将以此框架为基础。</p></div>
+        <textarea id="wizFrameLocked" rows="15" style="width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;line-height:1.8;resize:vertical"></textarea>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:space-between">
+          <button class="btn-sm" onclick="NOVEL_GOTO_STEP('2')">← 上一步</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sm" onclick="NOVEL_STEP_2()">🔄 重新生成</button>
+            <button class="btn-send" onclick="NOVEL_STEP_4()">锁定框架 → 写大纲</button>
+          </div>
+        </div>
+      </div>
+      <!-- Step 4: 写大纲 -->
+      <div class="wizard-panel" id="wizPanel4" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div class="feature-card" style="margin-bottom:12px"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">📐 章节数量</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px" id="chapCountTags">
+                <span class="filter-tag" onclick="NOVEL_SET('chapCount',this,'20')">20章</span>
+                <span class="filter-tag active" onclick="NOVEL_SET('chapCount',this,'30')">30章</span>
+                <span class="filter-tag" onclick="NOVEL_SET('chapCount',this,'50')">50章</span>
+                <span class="filter-tag" onclick="NOVEL_SET('chapCount',this,'100')">100章</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <select id="wizOutlineModel" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="deepseekr1">DeepSeek-R1</option><option value="deepseekv3">DeepSeek-V3</option><option value="qwen3">通义千问3</option></select>
+              <button class="btn-send" onclick="NOVEL_STEP_4_GEN()">🤖 生成大纲</button>
+            </div>
+          </div>
+          <div class="outline-tree" id="wizOutlineTree" style="max-height:600px;overflow-y:auto">
+            <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">📐</div><p>AI 将基于锁定的框架生成三层大纲</p><p style="font-size:0.75rem">全书大纲 → 卷纲 → 章纲</p></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:space-between">
+          <button class="btn-sm" onclick="NOVEL_GOTO_STEP('3')">← 上一步</button>
+          <button class="btn-send" onclick="NOVEL_STEP_5()">下一步：确认大纲 →</button>
+        </div>
+      </div>
+      <!-- Step 5: 确大纲 -->
+      <div class="wizard-panel" id="wizPanel5" style="display:none">
+        <div class="feature-card" style="margin-bottom:16px"><h4 style="margin-bottom:8px">✅ 确认大纲</h4><p style="font-size:0.82rem;color:var(--text-secondary)">检查大纲是否符合预期，确认后才能开始写正文。</p></div>
+        <textarea id="wizOutlineLocked" rows="18" style="width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;line-height:1.8;resize:vertical"></textarea>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:space-between">
+          <button class="btn-sm" onclick="NOVEL_GOTO_STEP('4')">← 上一步</button>
+          <button class="btn-send" onclick="NOVEL_STEP_6_GO()">确认大纲 → 开始写正文</button>
+        </div>
+      </div>
+      <!-- Step 6: 写正文 -->
+      <div class="wizard-panel" id="wizPanel6" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div class="feature-card" style="margin-bottom:12px"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">✍️ 当前章节</label>
+              <input id="wizChapTitle" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit" placeholder="如：第一章 废柴少年">
+            </div>
+            <div class="feature-card" style="margin-bottom:12px"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">📝 本章要点</label>
+              <textarea id="wizChapPoints" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="本章要发生什么？关键情节、冲突、转折..."></textarea>
+            </div>
+            <div style="display:flex;gap:8px">
+              <select id="wizWriteModel" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="deepseekv3">DeepSeek-V3</option><option value="deepseekr1">DeepSeek-R1</option><option value="qwen3">通义千问3</option></select>
+              <button class="btn-send" onclick="NOVEL_STEP_6_WRITE()">✍️ 开始写作</button>
+            </div>
+          </div>
+          <div>
+            <div class="feature-card" style="min-height:400px;max-height:600px;overflow-y:auto;white-space:pre-wrap;font-size:0.85rem;line-height:1.8" id="wizWriteOutput">
+              <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">📝</div><p>填好章节信息，AI 开始创作正文</p></div>
+            </div>
+            <div class="quick-actions" style="margin-top:8px">
+              <button class="quick-action" onclick="NOVEL_SAVE_CHAPTER()">💾 保存</button>
+              <button class="quick-action" onclick="NOVEL_REFINE('polish')">✨ 润色</button>
+              <button class="quick-action" onclick="NOVEL_REFINE('deai')">🔍 去AI</button>
+              <button class="quick-action" onclick="NOVEL_REFINE('expand')">📈 扩写</button>
+              <button class="quick-action" onclick="NOVEL_NEXT_CHAPTER()">📄 下一章</button>
+              <button class="quick-action" onclick="novelToMedia()">🎬 变漫剧</button>
+              <button class="quick-action" onclick="novelToBrand()">🎨 做品牌</button>
+              <button class="quick-action" onclick="NOVEL_COPY()">📋 复制</button>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:space-between">
+          <button class="btn-sm" onclick="NOVEL_GOTO_STEP('5')">← 回大纲</button>
+          <button class="btn-sm" onclick="NOVEL_BACK_HOME()">🏠 完成/返回</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 章节管理 -->
+    <div id="novelManage" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h4>📖 章节管理</h4>
+        <button class="btn-sm" onclick="NOVEL_BACK_HOME()">← 返回</button>
+      </div>
+      <div class="chapter-list" id="chapterList"></div>
+    </div>
+
+    <!-- 炼字熔炉 -->
+    <div id="novelRefinePanel" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h4>🔧 炼字熔炉</h4>
+        <button class="btn-sm" onclick="document.getElementById('novelRefinePanel').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP('6')">← 返回</button>
+      </div>
+      <div class="refine-options">
+        <button class="refine-option active" onclick="NOVEL_REF_MODE('polish',this)" data-rmode="polish">✨ 润色文笔</button>
+        <button class="refine-option" onclick="NOVEL_REF_MODE('deai',this)" data-rmode="deai">🔍 去AI痕迹</button>
+        <button class="refine-option" onclick="NOVEL_REF_MODE('expand',this)" data-rmode="expand">📈 扩写内容</button>
+        <button class="refine-option" onclick="NOVEL_REF_MODE('shorten',this)" data-rmode="shorten">📉 精简缩写</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <textarea id="refineInput" rows="10" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <select id="refineModel" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="deepseekv3">DeepSeek-V3</option><option value="deepseekr1">DeepSeek-R1</option></select>
+            <button class="btn-send" onclick="NOVEL_REFINE_EXEC()">🔧 开始炼字</button>
+          </div>
+        </div>
+        <div class="diff-view">
+          <div class="diff-col before"><div class="diff-label before">📄 原文</div><div id="refineBefore" style="color:var(--text-secondary)"></div></div>
+          <div class="diff-col after"><div class="diff-label after">✨ 炼字后</div><div id="refineAfter" style="color:var(--text)"><span class="spinner"></span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 灵感火花抽卡 -->
+    <div id="novelSpark" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h4>✨ 灵感火花</h4>
+        <button class="btn-sm" onclick="NOVEL_BACK_HOME()">← 返回</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:20px">
+        <div class="feature-card" style="text-align:center;padding:20px;cursor:pointer" onclick="NOVEL_SPARK_CARD('type')"><div style="font-size:2rem;margin-bottom:8px">🎲</div><div style="font-weight:700;font-size:0.9rem" id="sparkType">抽 类型</div></div>
+        <div class="feature-card" style="text-align:center;padding:20px;cursor:pointer" onclick="NOVEL_SPARK_CARD('world')"><div style="font-size:2rem;margin-bottom:8px">🌍</div><div style="font-weight:700;font-size:0.9rem" id="sparkWorld">抽 世界观</div></div>
+        <div class="feature-card" style="text-align:center;padding:20px;cursor:pointer" onclick="NOVEL_SPARK_CARD('cheat')"><div style="font-size:2rem;margin-bottom:8px">💎</div><div style="font-weight:700;font-size:0.9rem" id="sparkCheat">抽 金手指</div></div>
+        <div class="feature-card" style="text-align:center;padding:20px;cursor:pointer" onclick="NOVEL_SPARK_CARD('char')"><div style="font-size:2rem;margin-bottom:8px">👤</div><div style="font-weight:700;font-size:0.9rem" id="sparkChar">抽 主角</div></div>
+      </div>
+      <div class="feature-card" style="padding:20px;margin-bottom:12px;min-height:100px" id="sparkResult">
+        <div style="text-align:center;color:var(--text-secondary);padding:40px"><div style="font-size:2rem">✨</div><p>点击上方卡片抽取灵感元素</p></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-send" onclick="NOVEL_SPARK_USE()" style="flex:1">🚀 用此灵感开始创作</button>
+        <button class="btn-sm" onclick="NOVEL_SPARK_ALL()">🔄 全部重抽</button>
+      </div>
+    </div>
   </section>
 </div>
 
 <div class="page" id="page-media">
   <section class="section">
-    <h2 class="section-title">🎬 AI 漫剧</h2>
-    <p class="section-desc">输入故事 → 选风格 → 出分镜脚本/角色/场景/对白</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <h2 class="section-title">🎬 AI 漫剧工厂</h2>
+    <p class="section-desc">从故事到分镜、从角色到对白——专业漫画/动画制作流水线。支持多风格、保持角色一致性</p>
+    <div class="workshop-tabs" id="mediaTabs">
+      <button class="workshop-tab active" onclick="switchMediaTab('create')"><span class="tab-icon">🎨</span>创作</button>
+      <button class="workshop-tab" onclick="switchMediaTab('storyboard')"><span class="tab-icon">🎞</span>分镜板</button>
+      <button class="workshop-tab" onclick="switchMediaTab('chars')"><span class="tab-icon">👥</span>角色库</button>
+    </div>
+    <!-- Tab: Create -->
+    <div id="mediaTabCreate">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div>
         <div class="feature-card" style="margin-bottom:10px">
-          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:8px">创作类型</label>
+          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:8px">创作模式</label>
           <div style="display:flex;gap:6px;flex-wrap:wrap" id="mediaModes">
-            <button class="filter-tag active" data-mode="storyboard" onclick="mediaMode(this)">分镜脚本</button>
-            <button class="filter-tag" data-mode="chars" onclick="mediaMode(this)">角色设计</button>
-            <button class="filter-tag" data-mode="scene" onclick="mediaMode(this)">场景描述</button>
-            <button class="filter-tag" data-mode="dialog" onclick="mediaMode(this)">对白生成</button>
+            <button class="filter-tag active" data-mode="storyboard" onclick="mediaMode(this)">🎞 分镜脚本</button>
+            <button class="filter-tag" data-mode="chars" onclick="mediaMode(this)">👥 角色设计</button>
+            <button class="filter-tag" data-mode="scene" onclick="mediaMode(this)">🏞 场景构建</button>
+            <button class="filter-tag" data-mode="dialog" onclick="mediaMode(this)">💬 对白生成</button>
+            <button class="filter-tag" data-mode="batch" onclick="mediaMode(this)">⚡ 批量生成</button>
           </div>
         </div>
-        <textarea id="mediaInput" rows="5" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical;margin-bottom:10px" placeholder="描述你的故事场景..."></textarea>
-        <div style="display:flex;gap:8px">
-          <select id="mediaStyle" class="col-select"><option>日系动漫</option><option>国风水墨</option><option>写实电影</option><option>Q版可爱</option><option>暗黑哥特</option></select>
-          <button class="btn-send" onclick="aiCreateMedia()">生成</button>
+        <textarea id="mediaInput" rows="5" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical;margin-bottom:10px" placeholder="描述你的故事场景、世界观或已有小说内容..."></textarea>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="mediaStyle" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option>日系动漫</option><option>国风水墨</option><option>写实电影</option><option>Q版可爱</option><option>暗黑哥特</option><option>美式漫画</option><option>韩系条漫</option></select>
+          <button class="btn-send" onclick="aiCreateMedia()" style="flex-shrink:0">🎬 生成</button>
         </div>
       </div>
       <div>
-        <div class="feature-card" style="min-height:380px;max-height:580px;overflow-y:auto;white-space:pre-wrap;font-size:0.85rem;line-height:1.8" id="mediaOutput">
-          <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">🎬</div><p>输入故事开始</p></div>
+        <div class="feature-card" style="min-height:400px;max-height:580px;overflow-y:auto;white-space:pre-wrap;font-size:0.85rem;line-height:1.8" id="mediaOutput">
+          <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">🎬</div><p>输入故事后点"生成"</p></div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn-sm primary" onclick="generateComicImage()">🖼 生成画面提示词</button><button class="btn-sm" onclick="mediaToNovel()" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none">📖 扩展成小说</button><button class="btn-sm" onclick="copyMediaOutput()">📋</button><button class="btn-sm" onclick="downloadMedia()">⬇</button></div>
+        <div class="quick-actions">
+          <button class="quick-action" onclick="renderStoryboardCards()">🎞 分镜卡片</button>
+          <button class="quick-action" onclick="generateComicImage()">🖼 出图提示词</button>
+          <button class="quick-action" onclick="mediaToNovel()">📖 扩展小说</button>
+          <button class="quick-action" onclick="saveToCharLib()">👥 存角色库</button>
+          <button class="quick-action" onclick="copyMediaOutput()">📋 复制</button>
+          <button class="quick-action" onclick="downloadMedia()">⬇ 下载</button>
+        </div>
+      </div>
+      </div>
+    </div>
+    <!-- Tab: Storyboard Board -->
+    <div id="mediaTabStoryboard" style="display:none">
+      <div class="storyboard-grid" id="storyboardGrid">
+        <div style="text-align:center;color:var(--text-secondary);padding:60px 20px;grid-column:1/-1">
+          <div style="font-size:3rem">🎞</div><p>在"创作"页生成分镜脚本后，这里会显示可视化分镜卡片</p>
+        </div>
+      </div>
+    </div>
+    <!-- Tab: Character Library -->
+    <div id="mediaTabChars" style="display:none">
+      <div class="storyboard-grid" id="charLibGrid">
+        <div style="text-align:center;color:var(--text-secondary);padding:60px 20px;grid-column:1/-1">
+          <div style="font-size:3rem">👥</div><p>生成角色设计后点击"存角色库"，角色会在这里统一管理</p>
+          <p style="font-size:0.78rem;margin-top:8px">保持多集漫剧角色一致性</p>
+        </div>
       </div>
     </div>
   </section>
@@ -550,89 +911,206 @@ a{color:var(--accent);text-decoration:none}
 </div>
 </section></div>
 
-<!-- AI Art Page - Enhanced -->
-<div class="page" id="page-art">
-  <section class="section">
-    <h2 class="section-title">🎨 AI 绘画工坊</h2>
-    <p class="section-desc">Midjourney 提示词生成器——像搭积木一样组合专业 Prompt</p>
+<!-- AI 创作工场 (图片+视频融合) -->
+<div class="page" id="page-studio">
+  <section class="section" style="padding:24px 36px">
+    <h2 class="section-title">🎨 AI 创作工场</h2>
+    <p class="section-desc">图片生成 · 视频创作 · 风格迁移 —— 一站式视觉创作平台</p>
 
-    <div class="tab-bar" id="artTabs">
-      <button class="tab-btn active" data-tab="builder">提示词组装器</button>
-      <button class="tab-btn" data-tab="gallery">风格灵感画廊</button>
+    <div class="tab-bar" id="studioTabs">
+      <button class="tab-btn active" data-tab="image">🖼 图片生成</button>
+      <button class="tab-btn" data-tab="video">🎬 视频创作</button>
+      <button class="tab-btn" data-tab="gallery">🎨 创意画廊</button>
     </div>
 
-    <!-- Tab 1: Prompt Builder -->
-    <div class="tab-content active" id="tab-builder">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-        <div class="feature-card">
-          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">🎯 主体/内容</label>
-          <input id="artSubject" placeholder="输入你想要的画面主体..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none">
-        </div>
-        <div class="feature-card">
-          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">🎨 风格</label>
-          <select id="artStyle" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
-        </div>
-        <div class="feature-card">
-          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">💡 光照</label>
-          <select id="artLight" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
-        </div>
-        <div class="feature-card">
-          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">📷 镜头/构图</label>
-          <select id="artCamera" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
-        </div>
-        <div class="feature-card">
-          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">✨ 画质</label>
-          <select id="artQuality" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
-        </div>
-        <div class="feature-card">
-          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">📐 比例</label>
-          <select id="artRatio" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"><option value="">不限制</option></select>
-        </div>
-      </div>
-      <div class="prompt-preview" id="artPrompt" style="margin-bottom:12px">选择上方选项组合提示词</div>
-      <div style="display:flex;gap:8px;margin-bottom:20px">
-        <button class="btn-send" onclick="buildArtPrompt()">🔄 刷新组合</button>
-        <button class="btn-send" style="background:linear-gradient(135deg,#06b6d4,#0891b2)" onclick="copyArtPrompt()">📋 复制提示词</button>
-        <button class="btn-send" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="sendArtToMJ()">🚀 去MJ生成</button>
-      </div>
+    <!-- 图片生成 -->
+    <div class="tab-content active" id="studioTabImage">
+      <div style="display:grid;grid-template-columns:340px 1fr;gap:20px">
+        <div>
+          <div class="feature-card" style="margin-bottom:10px">
+            <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">💡 创作描述</label>
+            <textarea id="stuPrompt" rows="3" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="描述你想要的画面..."></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div class="feature-card" style="padding:12px"><label style="font-weight:600;font-size:0.78rem;display:block;margin-bottom:4px">🎨 风格</label>
+              <select id="stuStyle" style="width:100%;padding:7px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.8rem">
+                <option value="">不限</option><option>写实摄影</option><option>赛博朋克</option><option>日系动漫</option><option>油画</option><option>水彩</option><option>水墨画</option><option>3D渲染</option><option>像素风</option><option>极简</option><option>暗黑幻想</option><option>新海诚风</option>
+              </select>
+            </div>
+            <div class="feature-card" style="padding:12px"><label style="font-weight:600;font-size:0.78rem;display:block;margin-bottom:4px">📐 画幅</label>
+              <select id="stuRatio" style="width:100%;padding:7px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.8rem">
+                <option value="1:1">1:1 方形</option><option value="16:9">16:9 宽屏</option><option value="9:16">9:16 竖屏</option><option value="4:3">4:3 标准</option><option value="3:2">3:2 横版</option>
+              </select>
+            </div>
+            <div class="feature-card" style="padding:12px"><label style="font-weight:600;font-size:0.78rem;display:block;margin-bottom:4px">💡 光照</label>
+              <select id="stuLight" style="width:100%;padding:7px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.8rem">
+                <option value="">不限</option><option>电影光</option><option>霓虹灯</option><option>黄金时刻</option><option>柔光</option><option>逆光</option><option>月光</option>
+              </select>
+            </div>
+            <div class="feature-card" style="padding:12px"><label style="font-weight:600;font-size:0.78rem;display:block;margin-bottom:4px">📷 镜头</label>
+              <select id="stuCamera" style="width:100%;padding:7px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.8rem">
+                <option value="">不限</option><option>特写</option><option>全景</option><option>俯瞰</option><option>微距</option><option>鱼眼</option>
+              </select>
+            </div>
+          </div>
+          <div class="feature-card" style="padding:12px;margin-bottom:10px">
+            <label style="font-weight:600;font-size:0.78rem;display:block;margin-bottom:4px">🏷️ 参考图（粘贴URL或描述参考风格）</label>
+            <input id="stuRef" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.8rem;font-family:inherit" placeholder="可选：参考图URL">
+          </div>
 
-      <!-- Keyword Library -->
-      <div class="feature-card" style="margin-bottom:14px">
-        <h4 style="margin-bottom:10px">🎨 风格关键词</h4>
-        <div id="artStyleTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
-      </div>
-      <div class="feature-card" style="margin-bottom:14px">
-        <h4 style="margin-bottom:10px">💡 光照关键词</h4>
-        <div id="artLightTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
-      </div>
-      <div class="feature-card" style="margin-bottom:14px">
-        <h4 style="margin-bottom:10px">📷 镜头关键词</h4>
-        <div id="artCameraTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
-      </div>
-      <div class="feature-card" style="margin-bottom:14px">
-        <h4 style="margin-bottom:10px">👨‍🎨 艺术家风格</h4>
-        <div id="artArtistTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
-      </div>
-      <div class="feature-card" style="margin-bottom:14px">
-        <h4 style="margin-bottom:10px">✨ 画质增强词</h4>
-        <div id="artQualityTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
-      </div>
-
-      <!-- Scene Templates -->
-      <div class="feature-card">
-        <h4 style="margin-bottom:10px">📋 场景模板</h4>
-        <div id="artTplFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>
-        <div id="artTemplates" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px"></div>
+          <div id="stuPromptPreview" class="feature-card" style="padding:12px;margin-bottom:10px;background:var(--accent-soft);font-size:0.82rem;min-height:50px;color:var(--text);word-break:break-all;font-family:monospace;display:none">
+            <span style="font-weight:700;color:var(--accent);font-size:0.7rem">当前提示词:</span><br>
+            <span id="stuPromptText"></span>
+          </div>
+          <button class="btn-send" onclick="STUDIO_GENERATE_IMAGE()" style="width:100%;margin-bottom:6px">🖼 生成图像</button>
+          <div style="display:flex;gap:6px">
+            <button class="btn-sm" onclick="STUDIO_COPY_PROMPT()" style="flex:1">📋 复制提示词</button>
+            <button class="btn-sm" onclick="STUDIO_BUILD_PROMPT()" style="flex:1">🔄 刷新组合</button>
+          </div>
+        </div>
+        <div>
+          <div class="feature-card" style="min-height:400px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+            <div id="stuResult" style="text-align:center;width:100%">
+              <div style="font-size:4rem;margin-bottom:12px;opacity:0.2">🎨</div>
+              <p style="color:var(--text-secondary);font-size:0.9rem">输入创意描述，选择风格，一键出图</p>
+              <div id="stuLoading" style="display:none;margin-top:16px"><span class="spinner"></span><span style="margin-left:8px;color:var(--accent)">AI 创作中...</span></div>
+              <img id="stuImage" src="" style="display:none;max-width:100%;max-height:500px;border-radius:12px;margin:0 auto">
+            </div>
+          </div>
+          <div id="stuImgActions" style="display:none;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+            <button class="btn-sm" onclick="STUDIO_GENERATE_IMAGE()">🔄 生成变体</button>
+            <button class="btn-sm" onclick="STUDIO_SAVE_IMAGE()">💾 保存图片</button>
+            <button class="btn-sm primary" onclick="STUDIO_ADD_TO_GALLERY()">📌 加入画廊</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Tab 2: Style Gallery -->
-    <div class="tab-content" id="tab-gallery">
-      <p class="section-desc">点击风格卡片，自动填充对应风格关键词到组装器</p>
-      <div class="gallery-grid" id="styleGallery"></div>
+    <!-- 视频创作 -->
+    <div class="tab-content" id="studioTabVideo" style="display:none">
+      <div style="display:grid;grid-template-columns:340px 1fr;gap:20px">
+        <div>
+          <div class="feature-card" style="margin-bottom:10px">
+            <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px">💡 视频描述</label>
+            <textarea id="stuVidPrompt" rows="3" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="描述你想要的视频内容...&#10;如：一只白猫在雨中的霓虹街道漫步，慢镜头，电影感"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div class="feature-card" style="padding:12px"><label style="font-weight:600;font-size:0.78rem;display:block;margin-bottom:4px">⏱ 时长</label>
+              <select id="stuVidDur" style="width:100%;padding:7px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.8rem"><option value="2">2秒</option><option value="4">4秒</option><option value="6">6秒</option></select>
+            </div>
+            <div class="feature-card" style="padding:12px"><label style="font-weight:600;font-size:0.78rem;display:block;margin-bottom:4px">🎨 风格</label>
+              <select id="stuVidStyle" style="width:100%;padding:7px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.8rem"><option>电影感</option><option>动漫</option><option>写实</option><option>科幻</option><option>水彩</option><option>暗黑</option></select>
+            </div>
+          </div>
+          <button class="btn-send" onclick="STUDIO_GENERATE_VIDEO()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706)">🎬 生成视频</button>
+          <button class="btn-sm" onclick="STUDIO_SAVE_VIDEO()" style="width:100%;margin-top:6px">💾 下载</button>
+        </div>
+        <div>
+          <div class="feature-card" style="min-height:400px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+            <div id="stuVidResult" style="text-align:center;width:100%">
+              <div style="font-size:4rem;margin-bottom:12px;opacity:0.2">🎬</div>
+              <p style="color:var(--text-secondary)">输入描述，选择参数，点击生成</p>
+              <div id="stuVidLoading" style="display:none;margin-top:16px"><span class="spinner"></span><span style="margin-left:8px;color:var(--accent)">AI 生成视频中...</span></div>
+              <img id="stuVideoImg" src="" style="display:none;max-width:100%;max-height:400px;border-radius:12px;margin:0 auto">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 创意画廊 -->
+    <div class="tab-content" id="studioTabGallery" style="display:none">
+      <div class="feature-card" style="margin-bottom:16px">
+        <p style="font-size:0.85rem;color:var(--text-secondary)">🎨 历史生成记录和精选风格。点击任意作品可查看完整提示词，一键同款生成。</p>
+      </div>
+      <div id="studioGalleryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
+        <div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1">
+          <div style="font-size:3rem">🎨</div><p>生成图像后点"加入画廊"，所有作品在这里管理</p>
+        </div>
+      </div>
     </div>
   </section>
 </div>
+
+<!-- 全站提示词库 -->
+<div class="page" id="page-prompts">
+  <section class="section" style="padding:24px 36px">
+    <h2 class="section-title">📚 提示词库</h2>
+    <p class="section-desc">50+精选写作工具，分类检索，一键填充使用。覆盖小说写作、漫剧创作、办公、品牌、营销全场景</p>
+    <div class="filter-bar" style="margin-bottom:16px">
+      <input class="search-input" id="promptSearch" placeholder="搜索提示词工具..." oninput="filterPromptCards()">
+      <button class="filter-tag active" data-pcat="all" onclick="filterPromptByCat('all',this)">全部</button>
+      <button class="filter-tag" data-pcat="writing" onclick="filterPromptByCat('writing',this)">✍️ 写作</button>
+      <button class="filter-tag" data-pcat="novel" onclick="filterPromptByCat('novel',this)">📖 小说</button>
+      <button class="filter-tag" data-pcat="media" onclick="filterPromptByCat('media',this)">🎬 漫剧</button>
+      <button class="filter-tag" data-pcat="work" onclick="filterPromptByCat('work',this)">💼 办公</button>
+      <button class="filter-tag" data-pcat="brand" onclick="filterPromptByCat('brand',this)">🎨 品牌</button>
+      <button class="filter-tag" data-pcat="market" onclick="filterPromptByCat('market',this)">📢 营销</button>
+      <button class="filter-tag" data-pcat="ai-art" onclick="filterPromptByCat('ai-art',this)">🖼 图像</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px" id="promptCardsGrid"></div>
+    <div id="promptNoResults" style="display:none;text-align:center;padding:60px;color:var(--text-secondary)"><div style="font-size:3rem">🔍</div><p>没找到，试试其他关键词</p></div>
+  </section>
+</div>
+
+<!-- 全站知识库 -->
+<div class="page" id="page-knowledge">
+  <section class="section" style="padding:24px 36px">
+    <h2 class="section-title">🧠 知识库</h2>
+    <p class="section-desc">集中管理所有创作知识：设定、笔记、大纲、章节纲要。文件夹分类，卡片展示，快速检索</p>
+    <div style="display:grid;grid-template-columns:240px 1fr;gap:20px">
+      <div>
+        <div class="feature-card" style="margin-bottom:10px">
+          <input class="search-input" id="knowSearch" placeholder="搜索知识..." oninput="KNOWLEDGE_SEARCH()" style="width:100%;margin-bottom:10px">
+          <button class="btn-sm primary" onclick="KNOWLEDGE_ADD()" style="width:100%;margin-bottom:6px">➕ 新建知识</button>
+        </div>
+        <div class="feature-card" style="padding:12px">
+          <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:8px;font-weight:600">📂 文件夹</div>
+          <div id="knowledgeFolderTree">
+            <div class="know-folder active" data-folder="all" onclick="KNOWLEDGE_SELECT_FOLDER('all',this)" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.82rem;margin-bottom:2px;transition:all 0.2s"><span>📁</span> 全部</div>
+            <div class="know-folder" data-folder="settings" onclick="KNOWLEDGE_SELECT_FOLDER('settings',this)" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.82rem;margin-bottom:2px;transition:all 0.2s"><span>📐</span> 故事设定</div>
+            <div class="know-folder" data-folder="notes" onclick="KNOWLEDGE_SELECT_FOLDER('notes',this)" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.82rem;margin-bottom:2px;transition:all 0.2s"><span>📝</span> 创作笔记</div>
+            <div class="know-folder" data-folder="outline" onclick="KNOWLEDGE_SELECT_FOLDER('outline',this)" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.82rem;margin-bottom:2px;transition:all 0.2s"><span>📋</span> 故事大纲</div>
+            <div class="know-folder" data-folder="chapters" onclick="KNOWLEDGE_SELECT_FOLDER('chapters',this)" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.82rem;margin-bottom:2px;transition:all 0.2s"><span>📖</span> 章节纲要</div>
+            <div class="know-folder" data-folder="chars" onclick="KNOWLEDGE_SELECT_FOLDER('chars',this)" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.82rem;margin-bottom:2px;transition:all 0.2s"><span>👥</span> 人物设定</div>
+            <div class="know-folder" data-folder="brand" onclick="KNOWLEDGE_SELECT_FOLDER('brand',this)" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.82rem;margin-bottom:2px;transition:all 0.2s"><span>🎨</span> 品牌资料</div>
+            <div class="know-folder" data-folder="other" onclick="KNOWLEDGE_SELECT_FOLDER('other',this)" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.82rem;margin-bottom:2px;transition:all 0.2s"><span>📦</span> 其他</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:0.82rem;font-weight:600" id="knowledgeCurrentFolder">📁 全部</span>
+          <span style="font-size:0.75rem;color:var(--text-secondary)" id="knowledgeStats">0 个知识点</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px" id="knowledgeCardGrid">
+          <div style="grid-column:1/-1;text-align:center;color:var(--text-secondary);padding:80px 20px">
+            <div style="font-size:4rem;margin-bottom:12px;opacity:0.3">🧠</div>
+            <p>知识库是空的。点击"新建知识"添加你的第一个知识点！</p>
+            <p style="font-size:0.78rem;margin-top:8px">支持：故事设定、角色资料、世界观、创作笔记、大纲、品牌信息等</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Knowledge Add Modal -->
+<div class="modal-overlay" id="knowModal"><div class="modal" style="max-width:600px">
+  <h3 id="knowModalTitle">新建知识</h3>
+  <div class="form-group"><label>标题</label><input id="knowTitle" placeholder="知识标题"></div>
+  <div class="form-group"><label>文件夹</label><select id="knowFolder" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="settings">故事设定</option><option value="notes">创作笔记</option><option value="outline">故事大纲</option><option value="chapters">章节纲要</option><option value="chars">人物设定</option><option value="brand">品牌资料</option><option value="other">其他</option></select></div>
+  <div class="form-group"><label>标签（逗号分隔）</label><input id="knowTags" placeholder="如：修炼体系,境界,功法"></div>
+  <div class="form-group"><label>内容</label><textarea id="knowContent" rows="8" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="知识内容..."></textarea></div>
+  <input type="hidden" id="knowEditId">
+  <div class="form-actions">
+    <button class="btn-sm danger" id="knowDeleteBtn" style="display:none" onclick="KNOWLEDGE_DELETE()">🗑 删除</button>
+    <button class="btn-sm primary" onclick="KNOWLEDGE_SAVE()">💾 保存</button>
+    <button class="btn-sm" onclick="document.getElementById('knowModal').classList.remove('show')">取消</button>
+  </div>
+</div></div>
+
+<!-- Page separator -->
 
 <div class="page" id="page-pricing">
   <section class="section">
@@ -866,7 +1344,7 @@ a{color:var(--accent);text-decoration:none}
 
 <div class="modal-overlay" id="apiModal"><div class="modal">
   <h3>API Key 配置</h3>
-  <div class="form-group"><label>API 地址</label><input id="apiBaseInput" placeholder="http://localhost:3001"></div>
+  <div class="form-group"><label>API 地址</label><input id="apiBaseInput" placeholder="http://120.79.17.184:3001"></div>
   <div class="form-group"><label>OpenAI</label><input id="apiOpenAIKey" type="password" placeholder="sk-..."></div>
   <div class="form-group"><label>DeepSeek</label><input id="apiDeepSeekKey" type="password" placeholder="sk-..."></div>
   <div class="form-group"><label>Gemini</label><input id="apiGeminiKey" type="password" placeholder="AIza..."></div>
@@ -916,7 +1394,7 @@ a{color:var(--accent);text-decoration:none}
   <div class="right-panel-title" id="rightPanelTitle">快捷操作</div>
   <div id="rightPanelContent">
     <div class="right-panel-card" onclick="switchPage('chat')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">💬</div><div style="font-weight:600;font-size:0.82rem">AI 聊天</div><div style="font-size:0.72rem;color:var(--text-secondary)">多模型同时对话</div></div>
-    <div class="right-panel-card" onclick="switchPage('novel')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">📖</div><div style="font-weight:600;font-size:0.82rem">写小说</div><div style="font-size:0.72rem;color:var(--text-secondary)">向导式创作</div></div>
+    <div class="right-panel-card" onclick="switchPage('novel')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">📖</div><div style="font-weight:600;font-size:0.82rem">AI 小说</div><div style="font-size:0.72rem;color:var(--text-secondary)">大纲→创作→润色</div></div>
     <div class="right-panel-card" onclick="switchPage('art')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">🖼</div><div style="font-weight:600;font-size:0.82rem">AI 绘画</div><div style="font-size:0.72rem;color:var(--text-secondary)">MJ提示词生成器</div></div>
   </div>
 </aside>
@@ -941,13 +1419,15 @@ a{color:var(--accent);text-decoration:none}
   <button onclick="switchPage('home')"><span class="mn-icon">🏠</span><span>首页</span></button>
   <button onclick="switchPage('chat')"><span class="mn-icon">💬</span><span>聊天</span></button>
   <button onclick="switchPage('novel')"><span class="mn-icon">📖</span><span>写作</span></button>
-  <button onclick="switchPage('art')"><span class="mn-icon">🖼</span><span>绘画</span></button>
+  <button onclick="switchPage('studio')"><span class="mn-icon">🎨</span><span>创作</span></button>
+  <button onclick="switchPage('prompts')"><span class="mn-icon">📚</span><span>提示词</span></button>
   <button onclick="toggleMobileMenu()"><span class="mn-icon">☰</span><span>更多</span></button>
 </nav>
 <div id="mobileMenu" style="display:none;position:fixed;bottom:70px;left:0;right:0;z-index:500;background:var(--bg-card);border-top:1px solid var(--border);padding:12px;backdrop-filter:blur(20px)">
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-    <button class="btn-sm" onclick="switchPage('compare');toggleMobileMenu()">📊 对比</button>
-    <button class="btn-sm" onclick="switchPage('media');toggleMobileMenu()">🎬 漫剧</button>
+    <button class="btn-sm" onclick="switchPage('studio');toggleMobileMenu()">🎨 创作</button>
+    <button class="btn-sm" onclick="switchPage('prompts');toggleMobileMenu()">📚 提示词</button>
+    <button class="btn-sm" onclick="switchPage('knowledge');toggleMobileMenu()">🧠 知识库</button>
     <button class="btn-sm" onclick="switchPage('office');toggleMobileMenu()">💼 办公</button>
     <button class="btn-sm" onclick="switchPage('agents');toggleMobileMenu()">🤖 智能体</button>
     <button class="btn-sm" onclick="switchPage('brand');toggleMobileMenu()">🎨 品牌</button>
@@ -1005,12 +1485,17 @@ function switchPage(name){
   if(name==='models')initAllModels();
   if(name==='chat'){updateRightPanel('chat');setTimeout(initChatModels,200)}
   if(name==='compare')initCompareModels();
-  if(name==='novel')renderWizard();
+  if(name==='novel'){loadSavedOutline();switchNovelTab(novelTab)}
+  if(name==='media'){loadSavedOutline()}
   if(name==='admin'){document.getElementById('adminLogin').style.display='block';document.getElementById('adminDashboard').style.display='none'}
   if(name==='agents')renderAgents('all');
-  if(name!='chat'&&name!='art')updateRightPanel(name);
-  if(name==='art'){updateRightPanel('art');setTimeout(initArtData,100)}
-  window.scrollTo({top:0,behavior:'smooth'});
+  if(name!='chat'&&name!='studio'&&name!='prompts'&&name!='knowledge')updateRightPanel(name);
+  if(name==='studio'){updateRightPanel('studio');setTimeout(initStudioData,100)}
+  if(name==='prompts'){updateRightPanel('prompts');setTimeout(renderPromptCards,100)}
+  if(name==='knowledge'){updateRightPanel('knowledge');setTimeout(renderKnowledgeTree,100)}
+  // 重置所有滚动位置
+  setTimeout(()=>{window.scrollTo(0,0);const mc=document.querySelector('.main-content');if(mc)mc.scrollTop=0},50);
+  // Force CDN refresh v2
 }
 document.querySelectorAll('.sidebar-link[data-page]').forEach(l=>l.addEventListener('click',()=>switchPage(l.dataset.page)));
 
@@ -1021,8 +1506,8 @@ function updateRightPanel(page){
   const panels={
     'home':{title:'快捷操作',html:`
       <div class="right-panel-card" onclick="switchPage('chat')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">💬</div><div style="font-weight:600;font-size:0.82rem">AI 聊天</div><div style="font-size:0.72rem;color:var(--text-secondary)">多模型同时对话</div></div>
-      <div class="right-panel-card" onclick="switchPage('novel')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">📖</div><div style="font-weight:600;font-size:0.82rem">写小说</div><div style="font-size:0.72rem;color:var(--text-secondary)">向导式创作</div></div>
-      <div class="right-panel-card" onclick="switchPage('art')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">🖼</div><div style="font-weight:600;font-size:0.82rem">AI 绘画</div><div style="font-size:0.72rem;color:var(--text-secondary)">MJ提示词生成器</div></div>
+      <div class="right-panel-card" onclick="switchPage('novel')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">📖</div><div style="font-weight:600;font-size:0.82rem">AI 小说</div><div style="font-size:0.72rem;color:var(--text-secondary)">大纲→创作→润色</div></div>
+      <div class="right-panel-card" onclick="switchPage('studio')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">🖼</div><div style="font-weight:600;font-size:0.82rem">AI 创作工场</div><div style="font-size:0.72rem;color:var(--text-secondary)">图片+视频生成</div></div>
     `},
     'chat':{title:'选择模型',html:`
       <div id="chatModelList"></div>
@@ -1037,17 +1522,63 @@ function updateRightPanel(page){
       <div class="right-panel-card"><div style="font-weight:600;font-size:0.8rem">📚 <span id="rpNovelTitle">未开始</span></div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:4px"><span id="rpChapterCount">0</span> 章 · <span id="rpTotalWords">0</span> 字</div></div>
       <div style="padding:8px"><button class="btn-sm primary" style="width:100%" onclick="downloadNovel()">⬇ 导出小说</button></div>
     `},
-    'art':{title:'绘画辅助',html:`
-      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">📋 MJ 参数速查</div>
-        <div class="prompt-params">
-          <div class="param-chip">--ar 1:1</div><div class="param-chip">--ar 2:3</div><div class="param-chip">--ar 3:2</div><div class="param-chip">--ar 16:9</div>
-          <div class="param-chip">--s 0-1000</div><div class="param-chip">--c 0-100</div><div class="param-chip">--q .25-2</div><div class="param-chip">--no</div>
-          <div class="param-chip">--iw 0-2</div><div class="param-chip">::权重</div><div class="param-chip">--v 6.0</div><div class="param-chip">--niji 6</div>
+    'media':{title:'漫剧工具',html:`
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">🎬 风格参考</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mediaStyle').value='日系动漫'">日系</div>
+          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mediaStyle').value='美式漫画'">美式</div>
+          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mediaStyle').value='国风水墨'">国风</div>
+          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mediaStyle').value='韩系条漫'">韩系</div>
         </div>
       </div>
-      <div id="rpArtPrompt" class="right-panel-card" style="display:none"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">当前提示词</div><div style="font-size:0.76rem;word-break:break-all;color:var(--accent)" id="rpArtPromptText"></div></div>
-      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">🎯 场景模板</div><div style="display:flex;flex-wrap:wrap;gap:4px">${[...new Set((typeof ART_DATA!=='undefined'?ART_DATA:{templates:[{cat:'人物'},{cat:'场景'},{cat:'科幻'},{cat:'古风'}]}).templates.map(t=>t.cat))].map(c=>`<div class="filter-tag" style="font-size:0.68rem;padding:3px 10px;cursor:pointer" onclick="switchPage('art');document.querySelector('#artTabs .tab-btn[data-tab=builder]').click();renderArtTemplates('${c}')">${c}</div>`).join('')}</div></div>
-      <button class="btn-send" style="width:100%;margin-top:8px" onclick="copyArtPrompt()">📋 复制提示词</button>
+      <div class="right-panel-card" style="cursor:pointer" onclick="renderStoryboardCards();switchMediaTab('storyboard')">
+        <div style="font-size:1.2rem;margin-bottom:2px">🎞</div><div style="font-weight:600;font-size:0.82rem">分镜板</div><div style="font-size:0.72rem;color:var(--text-secondary)">可视化卡片</div>
+      </div>
+      <div class="right-panel-card" style="cursor:pointer" onclick="renderCharLibrary();switchMediaTab('chars')">
+        <div style="font-size:1.2rem;margin-bottom:2px">👥</div><div style="font-weight:600;font-size:0.82rem">角色库</div><div style="font-size:0.72rem;color:var(--text-secondary)">保持角色一致性</div>
+      </div>
+    `},
+    'studio':{title:'创作工场',html:`
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">🎯 快速预设</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="STUDIO_QUICK('cyberpunk')">赛博朋克</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="STUDIO_QUICK('anime')">动漫角色</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="STUDIO_QUICK('landscape')">风景大片</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="STUDIO_QUICK('product')">产品展示</div>
+        </div>
+      </div>
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">📐 画幅比例</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="STUDIO_SET('ratio','1:1')">1:1</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="STUDIO_SET('ratio','16:9')">16:9</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="STUDIO_SET('ratio','9:16')">9:16</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="STUDIO_SET('ratio','4:3')">4:3</div>
+        </div>
+      </div>
+      <div id="studioHistory" class="right-panel-card" style="display:none"><div style="font-weight:600;font-size:0.82rem">🕐 历史记录</div></div>
+    `},
+    'prompts':{title:'提示词分类',html:`
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">🔍 搜索</div>
+        <input class="search-input" id="promptSearch" placeholder="搜索提示词..." oninput="filterPromptCards()" style="width:100%">
+      </div>
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">📂 快速跳转</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px" id="promptCatJump">
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="scrollToCategory('writing')">写作</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="scrollToCategory('novel')">小说</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="scrollToCategory('media')">漫剧</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="scrollToCategory('work')">办公</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="scrollToCategory('brand')">品牌</div>
+          <div class="filter-tag" style="font-size:0.7rem;cursor:pointer" onclick="scrollToCategory('market')">营销</div>
+        </div>
+      </div>
+    `},
+    'knowledge':{title:'知识库',html:`
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">➕ 快速添加</div>
+        <button class="btn-sm primary" style="width:100%" onclick="KNOWLEDGE_ADD()">📝 新建知识点</button>
+      </div>
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">📊 统计</div>
+        <div style="font-size:0.78rem;color:var(--text-secondary)" id="knowledgeStats">加载中...</div>
+      </div>
     `},
     'pricing':{title:'积分信息',html:`
       <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem">💎 当前积分</div><div style="font-size:1.5rem;font-weight:800;color:var(--accent);margin:8px 0" id="rpCredits">0</div></div>
@@ -1065,12 +1596,16 @@ function updateNovelRightPanel(){
   const t=document.getElementById('rpNovelTitle');if(t)t.textContent=novelBookTitle;
   const c=document.getElementById('rpChapterCount');if(c)c.textContent=chapterCountWritten;
   const w=document.getElementById('rpTotalWords');if(w)w.textContent=totalWordsWritten.toLocaleString();
+  // Also update the novel page progress if visible
+  const tc=document.getElementById('totalWords');if(tc)tc.textContent=totalWordsWritten.toLocaleString();
+  const cc=document.getElementById('chapterCount');if(cc)cc.textContent=chapterCountWritten;
+  const bt=document.getElementById('novelBookTitle');if(bt)bt.textContent=novelBookTitle;
 }
 
 // === API Config ===
 const API_BASE=(()=>{
   if(typeof window!=='undefined'&&window.location.hostname&&window.location.hostname==='localhost')return 'http://localhost:3001';
-  return localStorage.getItem('api_base')||'https://ai-nexus-server.onrender.com';
+  return localStorage.getItem('api_base')||'http://120.79.17.184:3001';
 })();
 let apiOnline=false;
 
@@ -1096,6 +1631,11 @@ const models=[
   {id:'mistral-large2',name:'Mistral Large 2',provider:'Mistral AI',desc:'欧洲最强开源。',avatar:'#ff6b35',tags:['开源','多语言','推理','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$6/M',featured:false,free:false},
   {id:'grok3',name:'Grok-3',provider:'xAI',desc:'马斯克xAI实时推理。',avatar:'#1d9bf0',tags:['推理','实时信息','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$8/M',featured:false,free:false},
   {id:'spark4',name:'讯飞星火 4.0',provider:'科大讯飞',desc:'语音识别领先。',avatar:'#2563eb',tags:['语音','多模态','国内'],context:'128K',inputPrice:'¥30/M',outputPrice:'¥30/M',featured:false,free:false},
+  {id:'qiniu_claude37',name:'Claude 3.7 Sonnet',provider:'七牛云·合规',desc:'编程和深度推理顶尖，国内直连。',avatar:'#d97706',tags:['推理','编程','长文本','合规'],context:'200K',inputPrice:'按七牛云',outputPrice:'按七牛云',featured:true,free:false},
+  {id:'qiniu_claudeopus4',name:'Claude Opus 4',provider:'七牛云·合规',desc:'最强深度分析，国内直连。',avatar:'#d97706',tags:['深度分析','推理','合规'],context:'200K',inputPrice:'按七牛云',outputPrice:'按七牛云',featured:false,free:false},
+  {id:'qiniu_gpt4o',name:'GPT-4o',provider:'七牛云·合规',desc:'OpenAI旗舰多模态，国内直连。',avatar:'#10a37f',tags:['多模态','推理','编程','合规'],context:'128K',inputPrice:'按七牛云',outputPrice:'按七牛云',featured:true,free:false},
+  {id:'qiniu_o3',name:'O3',provider:'七牛云·合规',desc:'最强深度推理，国内直连。',avatar:'#10a37f',tags:['推理','数学','合规'],context:'200K',inputPrice:'按七牛云',outputPrice:'按七牛云',featured:false,free:false},
+  {id:'qiniu_gemini25pro',name:'Gemini 2.5 Pro',provider:'七牛云·合规',desc:'Google旗舰原生多模态，国内直连。',avatar:'#4285f4',tags:['多模态','长文本','推理','合规'],context:'2M',inputPrice:'按七牛云',outputPrice:'按七牛云',featured:false,free:false},
 ];
 
 // === Render Models ===
@@ -1188,140 +1728,488 @@ async function runCompare(){
 }
 function setComparePrompt(t){document.getElementById('comparePrompt').value=t;runCompare()}
 
-// === Novel Wizard ===
-let wizardStep='type',novelType='玄幻',novelOutline='',novelChars='',novelWorld='',novelHistory='';
+// === 炼字工坊 (Novel Workshop) ===
+let novelType='玄幻',novelOutline='',novelChars='',novelWorld='',novelHistory='';
 let totalWordsWritten=parseInt(localStorage.getItem('nw')||'0'),chapterCountWritten=parseInt(localStorage.getItem('nc')||'0');
 let novelBookTitle=localStorage.getItem('nbt')||'未开始';
-function renderWizard(){
-  const steps=[{id:'type',t:'选小说类型',c:`<div class="feature-card"><select id="wizType" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.95rem"><option>玄幻</option><option>仙侠</option><option>都市</option><option>科幻</option><option>悬疑</option><option>言情</option><option>历史</option><option>游戏</option><option>轻小说</option></select></div>`},
-  {id:'outline',t:'定故事大纲',c:`<div class="feature-card"><textarea id="wizOutline" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="如：废柴少年捡到上古神剑，逆天改命踏上修仙之路...&#10;越详细越好"></textarea></div>`},
-  {id:'chars',t:'出人物设定',c:`<div class="feature-card"><textarea id="wizChars" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="主角叫什么、什么性格、有什么能力...&#10;留空让AI自动生成"></textarea></div>`},
-  {id:'world',t:'世界观设定',c:`<div class="feature-card"><textarea id="wizWorld" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="修炼体系、势力分布、规则设定...&#10;留空让AI自动构建"></textarea></div>`},
-  {id:'write',t:'开始写正文',c:`<div class="feature-card"><textarea id="wizWrite" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical" placeholder="本章要写什么内容？&#10;如：第一章 废柴少年的日常"></textarea><div style="margin-top:8px"><select id="wizModel" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="deepseekv3">DeepSeek-V3 (推荐写作)</option><option value="deepseekr1">DeepSeek-R1 (深度推理)</option><option value="qwen3">通义千问3.0</option></select></div></div>`}];
-  const s=steps.find(s=>s.id===wizardStep);
-  document.getElementById('wizardPanel').innerHTML=`<h4 style="margin-bottom:12px">${s.t}</h4>${s.c}`;
-  document.querySelectorAll('.wizard-step').forEach(el=>{el.classList.remove('active','done');if(el.dataset.wstep===wizardStep)el.classList.add('active');const o=['type','outline','chars','world','write'];if(o.indexOf(el.dataset.wstep)<o.indexOf(wizardStep))el.classList.add('done')});
-  document.getElementById('wizardActionBtn').textContent=wizardStep==='write'?'开始创作 ✍️':'下一步 →';
-  if(wizardStep==='type'){const sel=document.getElementById('wizType');if(sel)sel.value=novelType}
-  if(wizardStep==='outline'){const ta=document.getElementById('wizOutline');if(ta)ta.value=novelOutline}
-  if(wizardStep==='chars'){const ta=document.getElementById('wizChars');if(ta)ta.value=novelChars}
-  if(wizardStep==='world'){const ta=document.getElementById('wizWorld');if(ta)ta.value=novelWorld}
-  updateNovelProgress2();updateNovelRightPanel();
+let novelTab='outline';
+// Initiative (hierarchical outline storage)
+let outlineData={grand:'',volumes:[],chapters:[]};
+
+function switchNovelTab(tab){
+  novelTab=tab;
+  document.querySelectorAll('#novelTabs .workshop-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`#novelTabs .workshop-tab[onclick*="${tab}"]`)?.classList.add('active');
+  ['outline','write','refine','manage'].forEach(t=>{const el=document.getElementById('novelTab'+t.charAt(0).toUpperCase()+t.slice(1));if(el)el.style.display=t===tab?'grid':'none'});
+  if(tab==='manage')renderChapterList();
+  if(tab==='outline'&&outlineData.grand)renderOutlineTree();
+  updateNovelRightPanel();
 }
-async function wizardAction(){
-  const order=['type','outline','chars','world','write'];
-  if(wizardStep==='type'){novelType=document.getElementById('wizType')?.value||'玄幻';wizardStep='outline'}
-  else if(wizardStep==='outline'){novelOutline=document.getElementById('wizOutline')?.value||'';wizardStep='chars'}
-  else if(wizardStep==='chars'){novelChars=document.getElementById('wizChars')?.value||'';wizardStep='world'}
-  else if(wizardStep==='world'){novelWorld=document.getElementById('wizWorld')?.value||'';wizardStep='write'}
-  else if(wizardStep==='write'){
-    const content=document.getElementById('wizWrite')?.value||'';
-    if(!content&&!novelOutline){showToast('请输入本章要写的内容');return}
-    if(!spendCredits(5))return;
-    const modelId=document.getElementById('wizModel')?.value||'deepseekv3';
-    const sys=`你是专业${novelType}小说家，擅长${novelType}类型创作。要求：\n1. 文笔生动，多用细节描写而非直白叙述\n2. 对话要符合人物性格，不做作\n3. 节奏紧凑，每500字至少要有一个情节推进\n4. 不要写"未完待续"，本章要有一个完整的剧情段落收尾\n5. 不使用网络流行语和过于现代化的表达（除非是现代背景）`;
-    const prompt=`【小说类型】${novelType}\n【全书大纲】${novelOutline}\n【人物设定】${novelChars||'由你根据类型合理设计'}\n【世界观】${novelWorld||'由你合理构建'}\n【前情提要】${novelHistory||'故事开始'}\n【本章要求】${content}\n\n请写一章3500字左右的完整小说。`;
-    const out=document.getElementById('novelOutput');out.innerHTML='<span class="spinner"></span> 创作中...';
-    try{
-      const r=await callModelAPI(modelId,prompt,sys);
-      novelHistory+=(novelHistory?'\n':'')+r.content;
-      out.innerHTML=escapeHtml(r.content);
-      usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
-    }catch(e){out.innerHTML=`<span style="color:var(--red)">❌ ${e.message}</span>`}
-    return;
+
+function loadSavedOutline(){
+  const saved=localStorage.getItem('nOutline');
+  if(saved){try{outlineData=JSON.parse(saved)}catch(e){outlineData={grand:'',volumes:[],chapters:[]}}}
+  const savedRaw=localStorage.getItem('nOutlineRaw');
+  if(savedRaw)novelOutline=savedRaw;
+  if(outlineData.grand)renderOutlineTree();
+}
+
+async function generateOutline(){
+  const idea=document.getElementById('wizIdea')?.value?.trim();
+  if(!idea){showToast('请先输入创意灵感');return}
+  if(!spendCredits(3))return;
+  const type=document.getElementById('wizType')?.value||'玄幻';
+  novelType=type;
+  const modelId=document.getElementById('wizOutlineModel')?.value||'deepseekr1';
+  const tree=document.getElementById('outlineTree');
+  tree.innerHTML='<div style="text-align:center;padding:60px"><span class="spinner"></span><p style="margin-top:8px">AI 正在规划三层大纲...</p></div>';
+  const sys='你是顶级小说架构师。请按以下格式生成三层大纲:\n\n【全书大纲】(100-200字概括全书核心主线)\n\n【卷纲】(3-5卷,每卷标题+50字概要,格式:第一卷·卷名 | 概要)\n\n【章纲】(每卷3-5章,每章标题+20字概要,格式:第一章·章名 | 概要)';
+  const prompt=`小说类型:${type}\n创意灵感:${idea}\n\n请生成完整的三层大纲结构。`;
+  try{
+    const r=await callModelAPI(modelId,prompt,sys);
+    parseOutline(r.content);
+    renderOutlineTree();
+    usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
+  }catch(e){tree.innerHTML=`<span style="color:var(--red)">❌ ${e.message}</span>`}
+}
+
+function parseOutline(text){
+  outlineData={grand:'',volumes:[],chapters:[]};
+  const lines=text.split('\n');
+  let section='',currentVol='';
+  for(const l of lines){
+    const t=l.trim();
+    if(!t)continue;
+    if(t.includes('全书大纲')||t.includes('总体大纲')){section='grand';continue}
+    if(t.includes('卷纲')){section='vol';continue}
+    if(t.includes('章纲')){section='chap';continue}
+    if(section==='grand'&&!outlineData.grand){outlineData.grand=t.replace(/^[【\[\s\d\.、]+/,'').replace(/[】\]\s]+$/,'');continue}
+    if(section==='vol'&&(t.includes('卷')||t.includes('·'))){
+      const parts=t.split(/[|｜]/);currentVol=parts[0].trim();outlineData.volumes.push({name:currentVol,summary:parts[1]?.trim()||''});
+      continue;
+    }
+    if(section==='chap'&&(t.includes('章')||t.includes('·'))){
+      const parts=t.split(/[|｜]/);outlineData.chapters.push({name:parts[0].trim(),vol:currentVol,summary:parts[1]?.trim()||''});
+      continue;
+    }
   }
-  renderWizard();
+  if(!outlineData.grand)outlineData.grand=text.substring(0,200);
+  // Save to localStorage
+  localStorage.setItem('nOutline',JSON.stringify(outlineData));
+  novelOutline=text;localStorage.setItem('nOutlineRaw',novelOutline);
 }
-function updateNovelProgress2(){document.getElementById('totalWords').textContent=totalWordsWritten.toLocaleString();document.getElementById('chapterCount').textContent=chapterCountWritten;document.getElementById('novelBookTitle').textContent=novelBookTitle}
+
+function renderOutlineTree(){
+  const tree=document.getElementById('outlineTree');
+  let html='';
+  if(outlineData.grand){
+    html+=`<div class="outline-node level-0"><div class="node-label">📐 全书大纲</div><div class="node-content">${escapeHtml(outlineData.grand)}</div><div class="node-actions"><button class="btn-sm" onclick="editOutlineNode('grand')">✏️</button></div></div>`;
+  }
+  for(const v of outlineData.volumes){
+    html+=`<div class="outline-node level-1"><div class="node-label">📚 ${escapeHtml(v.name)}</div><div class="node-content">${escapeHtml(v.summary)}</div><div class="node-actions"><button class="btn-sm" onclick="editOutlineNode('vol','${escapeHtml(v.name)}')">✏️</button></div></div>`;
+  }
+  for(const c of outlineData.chapters){
+    html+=`<div class="outline-node level-2"><div class="node-label">📝 ${escapeHtml(c.name)}</div><div class="node-content">${escapeHtml(c.summary)}</div></div>`;
+  }
+  if(!html)html='<div style="text-align:center;color:var(--text-secondary);padding:60px"><div style="font-size:3rem">📐</div><p>输入创意灵感，AI 自动生成三层大纲</p><p style="font-size:0.75rem;margin-top:8px">大纲 → 卷纲 → 章纲</p></div>';
+  tree.innerHTML=html;
+}
+
+function editOutlineNode(type,name){
+  const t=type==='grand'?'全书大纲':(type==='vol'?`卷纲: ${name}`:'章纲');
+  const old=type==='grand'?outlineData.grand:(type==='vol'?outlineData.volumes.find(v=>v.name===name)?.summary||'':'');
+  const nv=prompt(`编辑 ${t}:`,old);
+  if(nv!==null){
+    if(type==='grand')outlineData.grand=nv;
+    else if(type==='vol'){const v=outlineData.volumes.find(v=>v.name===name);if(v)v.summary=nv}
+    localStorage.setItem('nOutline',JSON.stringify(outlineData));
+    renderOutlineTree();showToast('已更新');
+  }
+}
+
+// Chapter Writing
+async function wizardAction(){
+  const content=document.getElementById('wizWrite')?.value||'';
+  if(!content){showToast('请输入本章要写的内容');return}
+  if(!spendCredits(5))return;
+  const modelId=document.getElementById('wizModel')?.value||'deepseekv3';
+  novelChars=document.getElementById('wizChars')?.value||novelChars;
+  novelWorld=document.getElementById('wizWorld')?.value||novelWorld;
+  const type=document.getElementById('wizType')?.value||novelType;
+  novelType=type;
+  // Load outline if exists
+  if(!novelOutline){
+    const saved=localStorage.getItem('nOutlineRaw');
+    if(saved)novelOutline=saved;
+  }
+  const sys=`你是专业${novelType}小说家。核心要求：
+1. 文笔生动细腻，多用动作、神态、环境描写替代直白叙述
+2. 对话自然不做作，有潜台词，符合人物性格
+3. 节奏张弛有度，紧张场景与舒缓场景交替
+4. 本章收尾要有完整段落感，不要"未完待续"
+5. 避免AI腔：不滥用"然而""不过""可以看出来"等套话,多用具体描写
+6. 不使用网络流行语和过于现代化的表达（现代背景除外）`;
+  const prompt=`【小说类型】${novelType}
+【全书大纲】${novelOutline||'根据类型自由发挥'}
+【人物设定】${novelChars||'由你根据类型合理设计'}
+【世界观】${novelWorld||'由你合理构建'}
+【前情提要】${novelHistory||'故事开始'}
+【本章要求】${content}
+
+请写一章3500字左右的完整小说章节。`;
+  const out=document.getElementById('novelOutput');out.innerHTML='<span class="spinner"></span> 创作中...';
+  try{
+    const r=await callModelAPI(modelId,prompt,sys);
+    novelHistory+=(novelHistory?'\n':'')+r.content;
+    out.innerHTML=escapeHtml(r.content);
+    usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
+  }catch(e){out.innerHTML=`<span style="color:var(--red)">❌ ${e.message}</span>`}
+}
+
+// Refinement System
+let refineMode='polish';
+function switchRefineMode(mode){
+  refineMode=mode;
+  document.querySelectorAll('.refine-option').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.refine-option[data-rmode="${mode}"]`)?.classList.add('active');
+}
+function refineText(mode){
+  const txt=document.getElementById('novelOutput')?.textContent?.trim();
+  if(!txt||txt.includes('创作中')){showToast('请先生成内容');return}
+  switchNovelTab('refine');
+  refineMode=mode;
+  document.querySelectorAll('.refine-option').forEach(b=>{b.classList.remove('active');if(b.dataset.rmode===mode)b.classList.add('active')});
+  document.getElementById('refineInput').value=txt;
+  document.getElementById('refineBefore').textContent=txt;
+}
+
+async function executeRefine(){
+  const input=document.getElementById('refineInput')?.value?.trim();
+  if(!input){showToast('请粘贴需要润色的文本');return}
+  if(!spendCredits(3))return;
+  const modelId=document.getElementById('refineModel')?.value||'deepseekv3';
+  document.getElementById('refineBefore').textContent=input;
+  document.getElementById('refineAfter').innerHTML='<span class="spinner"></span> 炼字中...';
+  const sysMap={
+    polish:'你是顶级文学编辑。润色要求：1. 保留原文核心情节和角色语气 2. 提升文笔：增加细节描写,消除平铺直叙 3. 优化句式节奏,长短句交替 4. 删除冗余形容词和副词 5. 直接返回润色后文本,不解释修改',
+    deai:'你是反AI检测专家。去AI痕迹要求：1. 删除"总的来说""值得注意的是""可以说"等AI高频词 2. 打碎过于工整的排比和对称结构 3. 插入口语化表达和不规则句式 4. 让段落长短不一,模仿人类写作节奏 5. 偶尔留一些小瑕疵(如口语化重复)增加人味 6. 直接返回处理后的文本',
+    expand:'你是小说家。扩写要求：1. 在关键情节处增加细节描写 2. 丰富人物心理活动 3. 扩展环境氛围渲染 4. 字数扩充约50% 5. 直接返回扩写后文本',
+    shorten:'你是精简编辑。缩写要求：1. 删除冗余描写但保留精华 2. 合并重复信息 3. 保持核心情节和情感不变 4. 字数缩减约40% 5. 直接返回缩写后文本'
+  };
+  try{
+    const r=await callModelAPI(modelId,input,sysMap[refineMode]||sysMap.polish);
+    document.getElementById('refineAfter').innerHTML=`<div style="margin-bottom:8px;display:flex;gap:6px"><button class="btn-sm primary" onclick="acceptRefine()">✅ 采用</button><button class="btn-sm" onclick="executeRefine()">🔄 重新炼字</button></div>`+escapeHtml(r.content);
+    window._lastRefineResult=r.content;
+    usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
+  }catch(e){document.getElementById('refineAfter').innerHTML=`❌ ${e.message}`}
+}
+function acceptRefine(){
+  if(window._lastRefineResult){
+    document.getElementById('novelOutput').innerHTML=escapeHtml(window._lastRefineResult);
+    document.getElementById('refineInput').value=window._lastRefineResult;
+    document.getElementById('refineBefore').textContent=window._lastRefineResult;
+    document.getElementById('refineAfter').innerHTML='<span style="color:var(--green)">✅ 已采用！切换到"章节创作"标签页查看</span>';
+    showToast('润色结果已应用到创作区');
+  }
+}
+
+// Chapter Management
 function saveChapter(){
   const c=document.getElementById('novelOutput').textContent.trim();if(!c||c.includes('创作中')){showToast('请先完成创作');return}
   if(novelBookTitle==='未开始'){const t=prompt('书名：','');if(!t)return;novelBookTitle=t;localStorage.setItem('nbt',t)}
   chapterCountWritten++;totalWordsWritten+=c.length;localStorage.setItem('nc',chapterCountWritten);localStorage.setItem('nw',totalWordsWritten);
   localStorage.setItem('novelHistory',novelHistory);
-  const ch=JSON.parse(localStorage.getItem('nch')||'[]');ch.push({ch:chapterCountWritten,content:c,time:new Date().toISOString()});localStorage.setItem('nch',JSON.stringify(ch));
-  updateNovelProgress2();updateNovelRightPanel();showToast(`第${chapterCountWritten}章已保存`);
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');ch.push({ch:chapterCountWritten,title:'',content:c,time:new Date().toISOString()});localStorage.setItem('nch',JSON.stringify(ch));
+  updateNovelProgress2();updateNovelRightPanel();showToast(`第${chapterCountWritten}章已保存 (${c.length}字)`);
 }
-function loadNovelProject(){
-  const ch=JSON.parse(localStorage.getItem('nch')||'[]');if(!ch.length){showToast('暂无章节');return}
-  const idx=prompt(`${ch.length}章:\n${ch.map((c,i)=>`第${c.ch}章 (${c.content.length}字)`).join('\n')}\n\n输入章节号加载:`);
-  if(idx&&ch[idx-1]){document.getElementById('novelOutput').innerHTML=escapeHtml(ch[idx-1].content);novelHistory=ch.slice(0,idx).map(c=>c.content).join('\n');localStorage.setItem('novelHistory',novelHistory);showToast('已加载')}
+
+function renderChapterList(){
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');
+  const container=document.getElementById('chapterList');
+  if(!ch.length){container.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:40px 20px"><p>还没有章节，先去创作吧~</p></div>';return}
+  let html='';
+  ch.forEach((c,i)=>{
+    const preview=c.content.substring(0,60).replace(/\n/g,' ');
+    html+=`<div class="chapter-item" onclick="previewChapter(${i})">
+      <div class="chapter-num">${c.ch}</div>
+      <div class="chapter-info">
+        <div class="chapter-title">${escapeHtml(c.title||`第${c.ch}章`)}</div>
+        <div class="chapter-meta">${c.content.length}字 · ${new Date(c.time).toLocaleDateString()}</div>
+      </div>
+      <div class="chapter-actions">
+        <button class="btn-sm" onclick="event.stopPropagation();loadChapter(${i})">📖</button>
+        <button class="btn-sm danger" onclick="event.stopPropagation();deleteChapter(${i})">🗑</button>
+      </div>
+    </div>`;
+  });
+  container.innerHTML=html;
 }
-function copyNovelOutput(){navigator.clipboard.writeText(document.getElementById('novelOutput').textContent).then(()=>showToast('已复制'))}
-// Quality Check: retry with feedback
-async function retryWithFeedback(module,feedback){
-  if(!feedback||!feedback.trim()){showToast('请描述需要调整的地方');return}
-  switch(module){
-    case 'novel': wizardAction(); break;
-    case 'media': aiCreateMedia(); break;
-    case 'office': runAiOffice(); break;
-    case 'brand': runAiBrand(); break;
-    case 'market': runAiMarket(); break;
-    default: showToast('未知模块');return;
+
+function previewChapter(idx){
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');
+  if(ch[idx]){
+    document.getElementById('chapterPreview').innerHTML=`<h3 style="margin-bottom:8px">第${ch[idx].ch}章</h3><div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:12px">${ch[idx].content.length}字 · ${new Date(ch[idx].time).toLocaleString()}</div>`+escapeHtml(ch[idx].content);
   }
-  showToast('已根据反馈重新生成');
 }
+
+function loadChapter(idx){
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');
+  if(ch[idx]){
+    document.getElementById('novelOutput').innerHTML=escapeHtml(ch[idx].content);
+    novelHistory=ch.slice(0,idx+1).map(c=>c.content).join('\n');
+    localStorage.setItem('novelHistory',novelHistory);
+    switchNovelTab('write');
+    showToast('已加载到创作区');
+  }
+}
+
+function deleteChapter(idx){
+  if(!confirm('确定删除这一章？'))return;
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');
+  const removed=ch.splice(idx,1)[0];
+  if(removed){totalWordsWritten=Math.max(0,totalWordsWritten-removed.content.length);chapterCountWritten--}
+  localStorage.setItem('nch',JSON.stringify(ch));
+  localStorage.setItem('nc',chapterCountWritten);localStorage.setItem('nw',totalWordsWritten);
+  renderChapterList();updateNovelProgress2();
+  document.getElementById('chapterPreview').innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px"><div style="font-size:3rem">📖</div><p>点击章节查看内容</p></div>';
+  showToast('已删除');
+}
+
+function exportAllChapters(){
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');
+  if(!ch.length){showToast('暂无章节');return}
+  let txt=`《${novelBookTitle}》\n\n`;
+  // Add outline if available
+  const outline=localStorage.getItem('nOutlineRaw');
+  if(outline){txt+=`【全书大纲】\n${outline}\n\n---\n\n`}
+  ch.forEach(c=>{txt+=`第${c.ch}章\n\n${c.content}\n\n`});
+  const b=new Blob([txt],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);a.download=(novelBookTitle!=='未开始'?novelBookTitle:'小说')+'.txt';a.click();
+  showToast('全书已导出');
+}
+
+// Reader Mode
+function openReader(){
+  const ch=JSON.parse(localStorage.getItem('nch')||'[]');
+  if(!ch.length){showToast('暂无章节');return}
+  let html=`<div class="reader-overlay" id="readerOverlay" onclick="if(event.target===this)closeReader()">
+    <div class="reader-toolbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <strong style="font-size:1rem">📖 《${escapeHtml(novelBookTitle)}》</strong>
+        <span style="font-size:0.78rem;color:var(--text-secondary)">${ch.length}章 · ${totalWordsWritten.toLocaleString()}字</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" onclick="changeReaderFont('sm')">A-</button>
+        <button class="btn-sm" onclick="changeReaderFont('md')">A</button>
+        <button class="btn-sm" onclick="changeReaderFont('lg')">A+</button>
+        <button class="btn-sm" onclick="closeReader()">✕ 关闭</button>
+      </div>
+    </div>
+    <div class="reader-content reader-font-md" id="readerContent">`;
+  ch.forEach(c=>{html+=`<h3>第${c.ch}章</h3>${escapeHtml(c.content)}\n\n`});
+  html+=`</div></div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+  document.body.style.overflow='hidden';
+}
+
+function closeReader(){const el=document.getElementById('readerOverlay');if(el)el.remove();document.body.style.overflow=''}
+function changeReaderFont(size){
+  const el=document.getElementById('readerContent');
+  if(el){el.className='reader-content reader-font-'+size}
+}
+
+function copyNovelOutput(){navigator.clipboard.writeText(document.getElementById('novelOutput').textContent).then(()=>showToast('已复制'))}
 function downloadNovel(){
   const ch=JSON.parse(localStorage.getItem('nch')||'[]');let t=novelBookTitle+'\n\n';
   if(ch.length)ch.forEach(c=>{t+=`第${c.ch}章\n\n${c.content}\n\n`});else t+=document.getElementById('novelOutput').textContent;
   const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(novelBookTitle!=='未开始'?novelBookTitle:'小说')+'.txt';a.click();
 }
+
+function updateNovelProgress2(){
+  const tc=document.getElementById('totalWords');if(tc)tc.textContent=totalWordsWritten.toLocaleString();
+  const cc=document.getElementById('chapterCount');if(cc)cc.textContent=chapterCountWritten;
+  const bt=document.getElementById('novelBookTitle');if(bt)bt.textContent=novelBookTitle;
+}
+
 // Cross-module pipelines
 function novelToMedia(){
   const txt=document.getElementById('novelOutput').textContent.trim();
-  if(!txt||txt.includes('创作中')||txt.includes('选类型')){showToast('请先完成小说创作');return}
+  if(!txt||txt.includes('创作中')){showToast('请先完成小说创作');return}
   switchPage('media');setTimeout(()=>{
     document.getElementById('mediaInput').value=`将以下小说内容改编为${novelType}风格漫剧：\n\n${txt.substring(0,800)}`;
     showToast('小说内容已填充到漫剧输入框，选风格后点生成')
   },300);
 }
+
 function mediaToNovel(){
   const txt=document.getElementById('mediaOutput').textContent.trim();
   if(!txt||txt.includes('输入故事')){showToast('请先生成漫剧内容');return}
-  switchPage('novel');setTimeout(()=>{
-    wizardStep='write';
-    renderWizard();
-    setTimeout(()=>{const ta=document.getElementById('wizWrite');if(ta)ta.value=`基于漫剧脚本扩展：\n\n${txt.substring(0,500)}`},200);
+  switchPage('novel');switchNovelTab('write');setTimeout(()=>{
+    const ta=document.getElementById('wizWrite');if(ta)ta.value=`基于漫剧脚本扩展：\n\n${txt.substring(0,500)}`;
     showToast('漫剧脚本已填充，设置后点创作')
   },300);
 }
+
 function novelToBrand(){
   const txt=document.getElementById('novelOutput')?.textContent?.trim()||'';
-  if(!txt||txt.includes('创作中')||txt.includes('选类型')){showToast('请先完成小说创作');return}
+  if(!txt||txt.includes('创作中')){showToast('请先完成小说创作');return}
   switchPage('brand');setTimeout(()=>{
     const el=document.getElementById('brandInput');
     if(el)el.value=`为小说《${novelBookTitle}》（${novelType}类型）设计IP品牌。核心元素：${novelOutline.substring(0,200)}`;
     showToast('小说信息已填充，选品牌功能后点生成')
   },300);
 }
+
 function brandToMarket(){
   const txt=document.getElementById('brandOutput').textContent.trim();
   if(!txt||txt==='选择功能开始')switchPage('market');
   else{switchPage('market');setTimeout(()=>{document.getElementById('marketInput').value='基于以下品牌方案做营销：\n\n'+txt.substring(0,500);showToast('品牌方案已填充到营销页')},300)}
 }
+
 function marketToBrand(){
   const txt=document.getElementById('marketOutput').textContent.trim();
   if(txt&&txt!=='选择功能开始'){switchPage('brand');setTimeout(()=>{document.getElementById('brandInput').value=txt.substring(0,600);showToast('营销内容已填充到品牌页')},300)}
   else{switchPage('brand')}}
 
-// === Media ===
-let mediaModeType='storyboard';
+// === 漫剧工厂 (Media Workshop) ===
+let mediaModeType='storyboard',mediaTab='create';
+let charLibrary=JSON.parse(localStorage.getItem('charLib')||'[]');
+
+function switchMediaTab(tab){
+  mediaTab=tab;
+  document.querySelectorAll('#mediaTabs .workshop-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`#mediaTabs .workshop-tab[onclick*="${tab}"]`)?.classList.add('active');
+  ['create','storyboard','chars'].forEach(t=>{const el=document.getElementById('mediaTab'+t.charAt(0).toUpperCase()+t.slice(1));if(el)el.style.display=t===tab?'block':'none'});
+  if(tab==='storyboard')renderStoryboardCards();
+  if(tab==='chars')renderCharLibrary();
+}
+
 function mediaMode(b){document.querySelectorAll('#mediaModes .filter-tag').forEach(x=>x.classList.remove('active'));b.classList.add('active');mediaModeType=b.dataset.mode}
+
 async function aiCreateMedia(){
   const i=document.getElementById('mediaInput').value.trim();if(!i){showToast('输入故事');return}
-  if(!spendCredits(8))return;const s=document.getElementById('mediaStyle').value;
+  const cost=mediaModeType==='batch'?15:8;
+  if(!spendCredits(cost))return;const s=document.getElementById('mediaStyle').value;
   const o=document.getElementById('mediaOutput');o.innerHTML='<span class="spinner"></span> 生成中...';
-  const sys=`你是专业${s}漫画家和编剧。要求：\n1. 每个分镜必须包含：编号、景别(特写/中景/全景)、画面描述、角色动作、对白\n2. 画面描述要具象化——读者能根据描述画出分镜图\n3. 对白要自然、有性格区分、推进剧情\n4. 每帧之间有节奏变化，不要全是同一景别\n5. 重要对白用【】标注语气（如【怒吼】【低声】）`;
-  const pm={storyboard:{t:`${s}漫画。6格分镜脚本（编号/景别/画面/动作/对白）：\n${i}`,s:sys},chars:{t:`${s}风格角色设计。3个核心角色（外貌/服装/性格/能力/口头禅）：\n${i}`,s:'你是角色设计专家。每个角色描述要包含：外貌特征、标志性服装、性格标签、特殊能力、经典台词。描述要能让读者在脑中形成清晰形象。'},scene:{t:`${s}风格场景设计。4个场景（环境/色彩/光影/氛围/时代感）：\n${i}`,s:'你是场景设计师。每个场景要包含：环境描述、主色调、光影效果、氛围关键词、时代特征。描述要具有视觉冲击力。'},dialog:{t:`${s}风格角色对白（角色名：对白内容【语气】）：\n${i}`,s:'你是专业编剧。对白要：符合角色性格、推动剧情、有潜台词、口语化自然。避免说教和直白的情感表达。'}};
-  const m=pm[mediaModeType];
+  if(mediaModeType==='batch'){
+    // Batch mode: generate all 4 modes at once
+    const modes=[
+      {t:`${s}漫画。8格分镜脚本（编号/景别/画面/动作/对白）：\n${i}`,s:`你是专业${s}漫画家和编剧。每个分镜必须包含：编号、景别(特写/中景/全景)、画面描述、角色动作、对白。画面描述要具象化。对白标注语气【】`},
+      {t:`${s}风格角色设计。3个核心角色（外貌/服装/性格/能力/口头禅）：\n${i}`,s:'你是角色设计专家。每个角色描述要包含：外貌特征、标志性服装、性格标签、特殊能力、经典台词。'},
+      {t:`${s}风格场景设计。4个场景（环境/色彩/光影/氛围）：\n${i}`,s:'你是场景设计师。每个场景包含：环境描述、主色调、光影效果、氛围关键词。'},
+      {t:`${s}风格角色对白（角色名：对白内容【语气】）：\n${i}`,s:'你是专业编剧。对白要：符合角色性格、推动剧情、有潜台词、口语化自然。'}
+    ];
+    let result='';
+    for(let m=0;m<modes.length;m++){
+      const labels=['🎞 分镜脚本','👥 角色设计','🏞 场景构建','💬 对白生成'];
+      o.innerHTML=`<span class="spinner"></span> 批量生成中 (${m+1}/4) ${labels[m]}...`;
+      try{
+        const r=await callModelAPI('deepseekv3',modes[m].t,modes[m].s);
+        result+=`\n\n${'='.repeat(30)}\n${labels[m]}\n${'='.repeat(30)}\n\n${r.content}`;
+        usedTokensCount+=r.content.length;
+      }catch(e){result+=`\n\n${labels[m]}\n❌ ${e.message}`}
+    }
+    o.innerHTML=escapeHtml(result.trim());
+    localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
+    return;
+  }
+  const sys=`你是专业${s}漫画家和编剧。要求：\n1. 每个分镜必须包含：编号、景别(特写/中景/全景/远景)、画面描述、角色动作、对白\n2. 画面描述要具象化——读者能根据描述画出分镜图\n3. 对白要自然、有性格区分、推进剧情\n4. 每帧之间有节奏变化，不要全是同一景别\n5. 重要对白用【】标注语气（如【怒吼】【低声】）`;
+  const pm={
+    storyboard:{t:`${s}漫画。8格分镜脚本（编号/景别/画面/动作/对白）：\n${i}`,s:sys},
+    chars:{t:`${s}风格角色设计。3个核心角色（外貌/服装/性格/能力/口头禅）：\n${i}`,s:'你是角色设计专家。每个角色描述要包含：外貌特征、标志性服装、性格标签、特殊能力、经典台词。描述要能让读者在脑中形成清晰形象。格式：角色名 | 外貌 | 服装 | 性格 | 能力 | 口头禅'},
+    scene:{t:`${s}风格场景设计。4个场景（环境/色彩/光影/氛围/时代感）：\n${i}`,s:'你是场景设计师。每个场景要包含：环境描述、主色调、光影效果、氛围关键词、时代特征。描述要具有视觉冲击力。'},
+    dialog:{t:`${s}风格角色对白（角色名：对白内容【语气】）：\n${i}`,s:'你是专业编剧。对白要：符合角色性格、推动剧情、有潜台词、口语化自然。避免说教和直白的情感表达。'}
+  };
+  const m=pm[mediaModeType]||pm.storyboard;
   try{const r=await callModelAPI('deepseekv3',m.t,m.s);o.innerHTML=escapeHtml(r.content);usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay()}catch(e){o.innerHTML=`❌ ${e.message}`}
 }
-function generateComicImage(){
-  const s=document.getElementById('mediaOutput').textContent.trim();if(!s.includes('分镜')&&!s.includes('角色')){showToast('先生成内容');return}
-  if(!spendCredits(10))return;const st=document.getElementById('mediaStyle').value;usedImagesCount++;localStorage.setItem('uim',usedImagesCount);updateCreditDisplay();
-  document.getElementById('mediaOutput').innerHTML+=`\n\n--- 🖼️ (${st}) ---\n${st}, ${s.substring(0,300)}, professional comic, --ar 16:9`;
+
+function renderStoryboardCards(){
+  const txt=document.getElementById('mediaOutput').textContent.trim();
+  const grid=document.getElementById('storyboardGrid');
+  if(!txt||txt.includes('输入故事')){grid.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎞</div><p>先在"创作"页生成分镜脚本</p></div>';return}
+  // Parse storyboard content into cards
+  const scenes=txt.split(/\n(?=\d+[\.\)、]\s*)/g).filter(s=>s.trim());
+  if(scenes.length<2){grid.innerHTML=`<div style="text-align:center;color:var(--text-secondary);padding:40px;grid-column:1/-1"><p>无法解析分镜格式，请先在创作页生成分镜脚本</p></div>`;return}
+  let html='';
+  scenes.forEach((s,i)=>{
+    const lines=s.trim().split('\n');
+    const title=lines[0]||'';
+    const rest=lines.slice(1).join('\n');
+    // Extract camera info
+    let camera='中景';
+    if(title.includes('特写'))camera='特写';
+    else if(title.includes('全景'))camera='全景';
+    else if(title.includes('远景'))camera='远景';
+    else if(title.includes('中景'))camera='中景';
+    html+=`<div class="storyboard-card">
+      <div class="sb-header">
+        <div class="sb-num">${i+1}</div>
+        <div class="sb-camera">${camera}</div>
+      </div>
+      <div class="sb-desc">${escapeHtml(title)}</div>
+      <div class="sb-desc" style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px">${escapeHtml(rest.substring(0,150))}${rest.length>150?'...':''}</div>
+      <div class="sb-image">🎬 画面生成区域</div>
+    </div>`;
+  });
+  grid.innerHTML=html;
 }
+
+function saveToCharLib(){
+  const txt=document.getElementById('mediaOutput').textContent.trim();
+  if(!txt||!txt.includes('角色')){showToast('请先生成角色设计');return}
+  const entry={content:txt,style:document.getElementById('mediaStyle').value,time:new Date().toISOString()};
+  charLibrary.push(entry);localStorage.setItem('charLib',JSON.stringify(charLibrary));
+  showToast('已保存到角色库');
+}
+
+function renderCharLibrary(){
+  const grid=document.getElementById('charLibGrid');
+  if(!charLibrary.length){grid.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">👥</div><p>还没有角色，去创作页生成后保存吧~</p></div>';return}
+  let html='';
+  charLibrary.forEach((c,i)=>{
+    html+=`<div class="storyboard-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span class="sb-camera">${escapeHtml(c.style)}</span>
+        <span style="font-size:0.7rem;color:var(--text-secondary)">${new Date(c.time).toLocaleDateString()}</span>
+      </div>
+      <div class="sb-desc" style="max-height:200px;overflow-y:auto">${escapeHtml(c.content.substring(0,300))}</div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn-sm" onclick="loadFromCharLib(${i})">📋 加载</button>
+        <button class="btn-sm danger" onclick="deleteFromCharLib(${i})">🗑</button>
+      </div>
+    </div>`;
+  });
+  grid.innerHTML=html;
+}
+
+function loadFromCharLib(idx){
+  if(charLibrary[idx]){
+    document.getElementById('mediaInput').value=charLibrary[idx].content.substring(0,500);
+    document.getElementById('mediaStyle').value=charLibrary[idx].style;
+    switchMediaTab('create');showToast('已加载到创作区');
+  }
+}
+
+function deleteFromCharLib(idx){
+  if(!confirm('删除该角色？'))return;
+  charLibrary.splice(idx,1);localStorage.setItem('charLib',JSON.stringify(charLibrary));
+  renderCharLibrary();showToast('已删除');
+}
+
+function generateComicImage(){
+  const s=document.getElementById('mediaOutput').textContent.trim();
+  if(!s||s.includes('输入故事')){showToast('先生成内容');return}
+  if(!spendCredits(10))return;const st=document.getElementById('mediaStyle').value;
+  usedImagesCount++;localStorage.setItem('uim',usedImagesCount);updateCreditDisplay();
+  document.getElementById('mediaOutput').innerHTML+=`\n\n--- 🖼️ 画面提示词 (${st}) ---\n${st}, ${s.substring(0,300)}, professional comic art, detailed linework, --ar 16:9`;
+}
+
 function copyMediaOutput(){navigator.clipboard.writeText(document.getElementById('mediaOutput').textContent).then(()=>showToast('已复制'))}
-function downloadMedia(){const t=document.getElementById('mediaOutput').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='漫剧_'+new Date().toISOString().slice(0,10)+'.txt';a.click()}
+function downloadMedia(){
+  const t=document.getElementById('mediaOutput').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='漫剧_'+new Date().toISOString().slice(0,10)+'.txt';a.click()
+}
 
 // === Credits ===
 let userCredits=parseInt(localStorage.getItem('cr')||'30'),usedTokensCount=parseInt(localStorage.getItem('utk')||'0'),usedImagesCount=parseInt(localStorage.getItem('uim')||'0');
@@ -1521,12 +2409,24 @@ function renderArtTemplates(cat){
   el.innerHTML=f.map(t=>`<div class="feature-card" style="cursor:pointer;padding:12px" onclick="document.getElementById('artSubject').value='';document.getElementById('artSubject').focus();showToast('输入主体后点刷新组合')"><div style="font-weight:600;margin-bottom:4px;font-size:0.8rem">${t.cat}</div><div style="font-size:0.72rem;color:var(--text-secondary)">${t.p}</div></div>`).join('')}
 function clickArtTag(type,value){const sel=document.getElementById('art'+type.charAt(0).toUpperCase()+type.slice(1));if(sel)sel.value=value;buildArtPrompt()}
 function buildArtPrompt(){const p=[document.getElementById('artSubject').value,document.getElementById('artStyle').value,document.getElementById('artLight').value,document.getElementById('artCamera').value,document.getElementById('artQuality').value,document.getElementById('artRatio').value].filter(Boolean);const txt=p.join(', ')||'选择上方选项组合提示词';document.getElementById('artPrompt').textContent=txt;const rp=document.getElementById('rpArtPromptText');if(rp)rp.textContent=txt;const rpc=document.getElementById('rpArtPrompt');if(rpc)rpc.style.display=txt.includes('选择')?'none':'block'}
-function copyArtPrompt(){const t=document.getElementById('artPrompt').textContent;if(!t||t.includes('选择')){showToast('请先组合提示词');return}navigator.clipboard.writeText(t).then(()=>showToast('已复制，粘贴到 Midjourney 用 /imagine 发送'))}
-function sendArtToMJ(){copyArtPrompt();window.open('https://www.midjourney.com','_blank')}
+function copyArtPrompt(){const t=document.getElementById('artPrompt').textContent;if(!t||t.includes('选择')){showToast('请先组合提示词');return}navigator.clipboard.writeText(t).then(()=>showToast('已复制提示词'))}let lastGeneratedImage='';async function generateImage(){const p=document.getElementById('artPrompt').textContent.trim();if(!p||p.includes('选择')){showToast('请先输入创意描述');return}const sub=document.getElementById('artSubject')?.value?.trim();const prompt=sub||p;const loading=document.getElementById('artLoading');const img=document.getElementById('artResultImage');const area=document.getElementById('artResultArea');loading.style.display='block';img.style.display='none';try{const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=768&nologo=true&seed=${Math.floor(Math.random()*99999)}`;img.src=url;img.onload=()=>{loading.style.display='none';img.style.display='block';lastGeneratedImage=url;document.getElementById('artActions').style.display='flex'};img.onerror=()=>{loading.style.display='none';showToast('生成失败，请重试')}}catch(e){loading.style.display='none';showToast('生成失败: '+e.message)}}function downloadGeneratedImage(){if(!lastGeneratedImage){showToast('请先生成图像');return}const a=document.createElement('a');a.href=lastGeneratedImage;a.download='ai-nexus-image.png';a.click()}function generateVariation(){const sub=document.getElementById('artSubject')?.value?.trim();if(sub)document.getElementById('artSubject').value=sub+' （变体）';generateImage()}async function generateVideo(){const p=document.getElementById('videoPrompt').value.trim();if(!p){showToast('请输入视频描述');return}const loading=document.getElementById('videoLoading');const vid=document.getElementById('videoResult');loading.style.display='block';vid.style.display='none';const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(p+' cinematic motion blur')}?width=768&height=432&nologo=true&seed=${Math.floor(Math.random()*99999)}`;vid.src=url;vid.onload=()=>{loading.style.display='none';vid.style.display='block';showToast('静态预览已生成（视频API接入中）')};vid.onerror=()=>{loading.style.display='none';showToast('生成失败')}}function downloadVideo(){const v=document.getElementById('videoResult');if(!v.src||v.style.display==='none'){showToast('请先生成视频');return}const a=document.createElement('a');a.href=v.src;a.download='ai-nexus-video.png';a.click()}
 
 function initStyleGallery(){
   const el=document.getElementById('styleGallery');
-  el.innerHTML=STYLE_GALLERY.map(s=>`<div class="gallery-card" onclick="document.getElementById('artStyle').value='${s.style}';buildArtPrompt();document.querySelector('#artTabs .tab-btn[data-tab=builder]').click();showToast('已选择: ${s.name}')"><div class="gallery-preview" style="background:${s.gradient};position:relative"><div style="position:absolute;bottom:10px;left:12px;font-weight:700;font-size:0.9rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.5)">${s.name}</div></div><h4>${s.name}</h4><p>${s.desc}</p></div>`).join('');
+  el.innerHTML=STYLE_GALLERY.map(s=>`<div class="feature-card" style="cursor:pointer;padding:0;overflow:hidden" onclick="applyStyle('${s.style}','${s.name}')">
+    <div style="height:140px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:${s.gradient}">🎨</div>
+    <div style="padding:14px"><div style="font-weight:700;font-size:0.9rem;color:var(--text)">${s.name}</div><div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">${s.desc}</div><div style="font-size:0.68rem;color:var(--accent);margin-top:6px">点击使用 →</div></div>
+  </div>`).join('');
+}
+function applyStyle(style,name){
+  switchPage('art');setTimeout(()=>{
+    document.querySelectorAll('#artTabs .tab-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelector('#artTabs .tab-btn[data-tab="builder"]').classList.add('active');
+    document.querySelector('#tab-builder').classList.add('active');
+    if(document.querySelector('#tab-gallery'))document.querySelector('#tab-gallery').classList.remove('active');
+    const sel=document.getElementById('artStyle');if(sel){sel.value=style;buildArtPrompt()}
+    showToast(name+' 风格已应用')
+  },200);
 }
 
 // === Daily Checkin ===
@@ -1568,13 +2468,13 @@ function renderContinue(){const el=document.getElementById('continueContent');if
   const h=JSON.parse(localStorage.getItem('chathist')||'[]');const ch=JSON.parse(localStorage.getItem('nch')||'[]');
   let items=[];
   if(h.length>0)items.push(`<div class="feature-card" style="cursor:pointer" onclick="switchPage('chat');setTimeout(()=>document.getElementById('chatInput').value='${escapeHtml(h[0].msg).substring(0,30)}...',500)"><div>💬</div><div style="font-weight:600;font-size:0.85rem">最近聊天</div><div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">${escapeHtml(h[0].msg).substring(0,60)}${h[0].msg.length>60?'...':''}</div></div>`);
-  if(ch.length>0&&novelBookTitle!=='未开始')items.push(`<div class="feature-card" style="cursor:pointer" onclick="switchPage('novel');loadNovelProject()"><div>📖</div><div style="font-weight:600;font-size:0.85rem">${novelBookTitle}</div><div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">已写${ch.length}章 · ${totalWordsWritten.toLocaleString()}字</div></div>`);
+  if(ch.length>0&&novelBookTitle!=='未开始')items.push(`<div class="feature-card" style="cursor:pointer" onclick="switchPage('novel');switchNovelTab('manage')"><div>📖</div><div style="font-weight:600;font-size:0.85rem">${novelBookTitle}</div><div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">已写${ch.length}章 · ${totalWordsWritten.toLocaleString()}字</div></div>`);
   const sec=document.getElementById('continueSection');
   if(items.length){el.innerHTML=items.join('');sec.style.display='block'}else{sec.style.display='none'}
 }
 // Patch sendChatMessage to save history
 const _origSendChat=sendChatMessage;
-sendChatMessage=async function(){const m=document.getElementById('chatInput').value.trim();if(m)saveChatToHistory(m,'');await _origSendChat();setTimeout(renderContinue,1000)}
+sendChatMessage=async function(){const m=document.getElementById('chatInput').value.trim();if(m)saveChatToHistory(m,'');await _origSendChat();setTimeout(renderContinue,1000)};
 
 // === PWA ===
 (function(){
@@ -1602,7 +2502,7 @@ let currentAgent=null;
 function renderAgents(filter='all'){
   const g=document.getElementById('agentGrid');
   const f=filter==='all'?AGENTS:AGENTS.filter(a=>a.cat===filter);
-  g.innerHTML=f.map(a=>`<div class="model-card" style="cursor:pointer;border:1px solid var(--border)" onclick="openAgent('${a.id}')"><div class="model-header"><div style="font-size:2rem">${a.name.substring(0,2)}</div><div><div class="model-name">${a.name.substring(3)}</div><div class="model-provider">${a.cat} · 智能体</div></div></div><div class="model-desc">${a.desc}</div><div style="font-size:0.7rem;color:var(--accent);margin-top:4px">点击使用 →</div></div>`).join('');
+  g.innerHTML=f.map(a=>`<div class="feature-card" style="cursor:pointer;padding:20px" onclick="openAgent('${a.id}')"><div style="display:flex;align-items:center;gap:14px;margin-bottom:10px"><div style="font-size:2.2rem">${a.name.substring(0,2)}</div><div><div style="font-weight:700;font-size:0.95rem;color:var(--text)">${a.name.substring(3)}</div><div style="font-size:0.72rem;color:var(--text-secondary)">${a.cat} · 智能体</div></div></div><p style="color:var(--text-secondary);font-size:0.82rem;line-height:1.6;margin:0">${a.desc}</p><div style="font-size:0.7rem;color:var(--accent);margin-top:10px;font-weight:600">点击使用 →</div></div>`).join('');
 }
 document.querySelectorAll('#agentFilters .filter-tag').forEach(t=>t.addEventListener('click',()=>{
   document.querySelectorAll('#agentFilters .filter-tag').forEach(x=>x.classList.remove('active'));t.classList.add('active');renderAgents(t.dataset.filter)
@@ -1698,11 +2598,220 @@ function changePassword(){const c=document.getElementById('pwdCurrent').value,n=
 async function checkConnection(){const d=document.querySelector('#connStatus .conn-dot'),l=document.querySelector('#connStatus span:last-child');const sd=document.querySelector('#sidebarConn .conn-dot'),sl=document.querySelector('#sidebarConn span:last-child');d.className='conn-dot checking';try{const r=await fetch(API_BASE+'/api/status');if(r.ok){apiOnline=true;d.className='conn-dot online';sd.className='conn-dot online';l.textContent='在线';if(sl)sl.textContent='API 在线'}else throw new Error()}catch{apiOnline=false;d.className='conn-dot offline';sd.className='conn-dot offline';l.textContent='离线';if(sl)sl.textContent='API 离线'}}
 checkConnection();setInterval(checkConnection,30000);
 
+// Studio tabs init
+(function(){
+  const btns=document.querySelectorAll('#studioTabs .tab-btn');
+  if(btns.length)btns.forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#studioTabs .tab-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    ['Image','Video','Gallery'].forEach(t=>{
+      const el=document.getElementById('studioTab'+t);
+      if(el)el.style.display='none';
+    });
+    const active=document.getElementById('studioTab'+b.dataset.tab.charAt(0).toUpperCase()+b.dataset.tab.slice(1));
+    if(active)active.style.display='block';
+    if(b.dataset.tab==='gallery')renderStudioGallery();
+  }));
+})();
+
 // === Input events ===
 const ci=document.getElementById('chatInput');ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage()}});
 const cp=document.getElementById('comparePrompt');if(cp)cp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runCompare()}});
 
-// === Init ===
+// ==== NOVEL WIZARD ====
+let NOVEL_STATE={step:1,mode:'guided',type:'玄幻',style:'爽文流',pov:'第三人称',core:'',frame:'',outline:'',chapCount:'30',currentChap:1,chapTitle:'',refineMode:'polish'};
+let NOVEL_SPARK={type:'',world:'',cheat:'',char:''};
+const SPARK_DATA={
+  types:['玄幻','仙侠','都市','科幻','悬疑','言情','历史','游戏','轻小说','末日','无限流','重生','穿越','盗墓','系统流'],
+  worlds:['上古修仙世界','赛博朋克未来都市','末日废土','异界魔法大陆','蒸汽朋克工业时代','星际殖民时代','东方神话世界','西幻剑与魔法','现代都市异能','深海文明'],
+  cheats:['签到打卡系统','万界交易系统','血脉觉醒','上古大能传承','时间回溯','读心术','无限储物空间','炼药宗师传承','神级悟性','AI芯片植入'],
+  chars:['被逐出师门的废柴少年','重生归来的仙尊','穿越成炮灰的现代人','身负血海深仇的孤儿','意外获得系统的普通学生','失忆的上古神帝','双魂共体的少年','被家族抛弃的私生子']
+};
+function NOVEL_START_WIZARD(mode){NOVEL_STATE.mode=mode;NOVEL_STATE.step=1;document.getElementById('novelWizardHome').style.display='none';document.getElementById('novelWizardSteps').style.display='block';document.getElementById('novelManage').style.display='none';document.getElementById('novelRefinePanel').style.display='none';document.getElementById('novelSpark').style.display='none';NOVEL_GOTO_STEP(1)}
+function NOVEL_BACK_HOME(){document.getElementById('novelWizardHome').style.display='block';document.getElementById('novelWizardSteps').style.display='none';document.getElementById('novelManage').style.display='none';document.getElementById('novelRefinePanel').style.display='none';document.getElementById('novelSpark').style.display='none'}
+function NOVEL_OPEN_TOOLS(){document.getElementById('novelWizardHome').style.display='none';document.getElementById('novelWizardSteps').style.display='none';document.getElementById('novelSpark').style.display='block';NOVEL_SPARK_ALL()}
+function NOVEL_MANAGE(){document.getElementById('novelWizardHome').style.display='none';document.getElementById('novelWizardSteps').style.display='none';document.getElementById('novelManage').style.display='block';renderChapterList();updateNovelRightPanel()}
+function NOVEL_CONTINUE(){NOVEL_STATE.step=6;document.getElementById('novelWizardHome').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(6)}
+function NOVEL_SPARK_ALL(){NOVEL_SPARK={type:SPARK_DATA.types[Math.floor(Math.random()*SPARK_DATA.types.length)],world:SPARK_DATA.worlds[Math.floor(Math.random()*SPARK_DATA.worlds.length)],cheat:SPARK_DATA.cheats[Math.floor(Math.random()*SPARK_DATA.cheats.length)],char:SPARK_DATA.chars[Math.floor(Math.random()*SPARK_DATA.chars.length)]};document.getElementById('sparkType').textContent=NOVEL_SPARK.type;document.getElementById('sparkWorld').textContent=NOVEL_SPARK.world;document.getElementById('sparkCheat').textContent=NOVEL_SPARK.cheat;document.getElementById('sparkChar').textContent=NOVEL_SPARK.char;document.getElementById('sparkResult').innerHTML=`<h4 style="margin-bottom:12px;color:var(--accent)">🎲 抽取结果</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.85rem"><div>📖 类型: <b style="color:var(--accent)">${NOVEL_SPARK.type}</b></div><div>🌍 世界观: <b style="color:var(--accent)">${NOVEL_SPARK.world}</b></div><div>💎 金手指: <b style="color:var(--accent)">${NOVEL_SPARK.cheat}</b></div><div>👤 主角: <b style="color:var(--accent)">${NOVEL_SPARK.char}</b></div></div>`}
+function NOVEL_SPARK_CARD(type){NOVEL_SPARK[type]=SPARK_DATA[type==='type'?'types':(type==='world'?'worlds':(type==='cheat'?'cheats':'chars'))][Math.floor(Math.random()*SPARK_DATA[type==='type'?'types':(type==='world'?'worlds':(type==='cheat'?'cheats':'chars'))].length)];NOVEL_SPARK_ALL()}
+function NOVEL_SPARK_USE(){const core=`${NOVEL_SPARK.type}小说。世界观：${NOVEL_SPARK.world}。主角设定：${NOVEL_SPARK.char}。金手指：${NOVEL_SPARK.cheat}`;NOVEL_STATE.type=NOVEL_SPARK.type;NOVEL_STATE.core=core;NOVEL_STATE.step=1;document.getElementById('novelSpark').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(1);document.getElementById('wizCore').value=core}
+function NOVEL_SET(tag,el,val){document.querySelectorAll('#novel'+tag.charAt(0).toUpperCase()+tag.slice(1)+'Tags .filter-tag').forEach(x=>x.classList.remove('active'));el.classList.add('active');NOVEL_STATE[tag]=val}
+function NOVEL_GOTO_STEP(s){NOVEL_STATE.step=parseInt(s);const stepNames={'1':'定方向','2':'搭框架','3':'锁框架','4':'写大纲','5':'确大纲','6':'写正文'};for(let i=1;i<=6;i++){const p=document.getElementById('wizPanel'+i);const sb=document.querySelector(`.wizard-step[data-step="${i}"]`);if(i===parseInt(s)){p.style.display='block';sb.classList.add('active');sb.classList.remove('done')}else if(i<parseInt(s)){p.style.display='none';sb.classList.add('done');sb.classList.remove('active')}else{p.style.display='none';sb.classList.remove('active','done')}}}
+async function NOVEL_STEP_1(){const core=document.getElementById('wizCore').value.trim();if(!core){showToast('请输入创意核心描述');return}NOVEL_STATE.core=core;NOVEL_GOTO_STEP(2)}
+async function NOVEL_STEP_2(){const core=NOVEL_STATE.core,type=NOVEL_STATE.type,style=NOVEL_STATE.style,pov=NOVEL_STATE.pov;const mc=document.getElementById('wizMainChar').value,world=document.getElementById('wizWorld').value,cheat=document.getElementById('wizCheat').value;const modelId=document.getElementById('wizFrameModel')?.value||'deepseekr1';const out=document.getElementById('wizFrameOutput');out.innerHTML='<span class="spinner"></span> AI 正在搭建故事框架...';if(!spendCredits(5))return;const sys='你是顶级小说架构师。请为以下小说构建完整故事框架。输出格式：\n\n【故事主线】200字核心主线\n【分卷规划】3-5卷，每卷标题+概要+关键事件\n【人物关系网】主角+5个关键配角，含外貌/性格/关系/成长弧\n【世界观架构】时代背景/势力分布/规则体系\n【爽点设计】每卷2-3个核心爽点或高潮\n【读者期待管理】开篇钩子/每卷悬念/最终结局的情感基调';try{const r=await callModelAPI(modelId,`小说类型：${type} 写作风格：${style} 视角：${pov} 核心创意：${core} 主角设定：${mc||'由AI设计'} 世界观：${world||'由AI构建'} 金手指：${cheat||'由AI设计'}`,sys);NOVEL_STATE.frame=r.content;out.innerHTML=escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
+function NOVEL_STEP_3(){if(!NOVEL_STATE.frame){showToast('请先生成框架');return}document.getElementById('wizFrameLocked').value=NOVEL_STATE.frame;NOVEL_GOTO_STEP(3)}
+async function NOVEL_STEP_4(){NOVEL_STATE.frame=document.getElementById('wizFrameLocked').value;NOVEL_GOTO_STEP(4)}
+async function NOVEL_STEP_4_GEN(){if(!NOVEL_STATE.frame){showToast('请先锁定框架');return}if(!spendCredits(3))return;const modelId=document.getElementById('wizOutlineModel')?.value||'deepseekr1';const tree=document.getElementById('wizOutlineTree');tree.innerHTML='<span class="spinner"></span> 生成大纲...';const sys='你是小说大纲专家。基于故事框架生成三层大纲。格式：\n\n【全书大纲】100-200字\n【卷纲】3-5卷，格式"第X卷·卷名 | 概要"\n【章纲】每卷4-8章，格式"第X章·章名 | 概要"';try{const r=await callModelAPI(modelId,`基于以下框架生成完整大纲：\n${NOVEL_STATE.frame}`,sys);NOVEL_STATE.outline=r.content;parseOutline(r.content);renderOutlineTree();document.getElementById('wizOutlineLocked').value=r.content}catch(e){tree.innerHTML=`❌ ${e.message}`}}
+function NOVEL_STEP_5(){if(!NOVEL_STATE.outline){showToast('请先生成大纲');return}document.getElementById('wizOutlineLocked').value=NOVEL_STATE.outline;NOVEL_GOTO_STEP(5)}
+function NOVEL_STEP_6_GO(){NOVEL_STATE.outline=document.getElementById('wizOutlineLocked').value;NOVEL_GOTO_STEP(6)}
+async function NOVEL_STEP_6_WRITE(){const points=document.getElementById('wizChapPoints').value.trim(),title=document.getElementById('wizChapTitle').value.trim()||`第${NOVEL_STATE.currentChap}章`;if(!points){showToast('请输入本章要点');return}if(!spendCredits(5))return;const modelId=document.getElementById('wizWriteModel')?.value||'deepseekv3';const out=document.getElementById('wizWriteOutput');out.innerHTML='<span class="spinner"></span> 创作中...';const sys=`你是专业${NOVEL_STATE.type}小说家。要求：1.文笔生动 2.对话自然 3.节奏张弛有度 4.本章收尾完整 5.避免AI腔 6.不使用网络流行语`;try{const r=await callModelAPI(modelId,`小说类型：${NOVEL_STATE.type} 写作风格：${NOVEL_STATE.style}\n框架：${NOVEL_STATE.frame}\n大纲：${NOVEL_STATE.outline}\n本章：${title} 要点：${points}`,sys);out.innerHTML=escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
+function NOVEL_SAVE_CHAPTER(){const c=document.getElementById('wizWriteOutput').textContent.trim();if(!c||c.includes('创作中')){showToast('请先完成写作');return}if(novelBookTitle==='未开始'){const t=prompt('书名：','');if(!t)return;novelBookTitle=t;localStorage.setItem('nbt',t)}chapterCountWritten++;totalWordsWritten+=c.length;localStorage.setItem('nc',chapterCountWritten);localStorage.setItem('nw',totalWordsWritten);const ch=JSON.parse(localStorage.getItem('nch')||'[]');ch.push({ch:chapterCountWritten,title:NOVEL_STATE.chapTitle||`第${chapterCountWritten}章`,content:c,time:new Date().toISOString()});localStorage.setItem('nch',JSON.stringify(ch));NOVEL_STATE.currentChap++;document.getElementById('wizChapTitle').value=`第${NOVEL_STATE.currentChap}章`;document.getElementById('wizChapPoints').value='';updateNovelProgress2();updateNovelRightPanel();showToast(`第${chapterCountWritten}章已保存`)}
+function NOVEL_NEXT_CHAPTER(){NOVEL_STATE.currentChap++;document.getElementById('wizChapTitle').value=`第${NOVEL_STATE.currentChap}章`;document.getElementById('wizChapPoints').value='';document.getElementById('wizWriteOutput').innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">📝</div><p>填好章节信息，开始下一章</p></div>'}
+function NOVEL_REFINE(mode){const txt=document.getElementById('wizWriteOutput').textContent.trim();if(!txt||txt.includes('创作中')){showToast('请先完成写作');return}NOVEL_STATE.refineMode=mode;document.getElementById('novelWizardSteps').style.display='none';document.getElementById('novelRefinePanel').style.display='block';document.getElementById('refineInput').value=txt;document.getElementById('refineBefore').textContent=txt;document.getElementById('refineAfter').innerHTML='<span class="spinner"></span>';document.querySelectorAll('.refine-option').forEach(b=>{b.classList.remove('active');if(b.dataset.rmode===mode)b.classList.add('active')})}
+function NOVEL_REF_MODE(mode,el){NOVEL_STATE.refineMode=mode;document.querySelectorAll('.refine-option').forEach(b=>b.classList.remove('active'));el.classList.add('active')}
+async function NOVEL_REFINE_EXEC(){const input=document.getElementById('refineInput').value.trim();if(!input){showToast('请粘贴文本');return}if(!spendCredits(3))return;const modelId=document.getElementById('refineModel').value;const sysMap={polish:'你是顶级编辑。润色要求：保留核心情节，提升文笔，删除冗余。直接返回润色后文本。',deai:'去掉AI写作痕迹：删除"总的来说""值得注意的是"等AI高频词，打碎过于工整的句式，增加口语化表达和人类写作的不完美。直接返回处理后的文本。',expand:'扩写文本：在关键情节处增加细节，丰富人物心理，扩展环境渲染，字数扩充约50%。直接返回。',shorten:'精简文本：删除冗余但保留精华，保持核心情节，字数缩减约40%。直接返回。'};const out=document.getElementById('refineAfter');out.innerHTML='<span class="spinner"></span> 炼字中...';try{const r=await callModelAPI(modelId,input,sysMap[NOVEL_STATE.refineMode]||sysMap.polish);window._lr=r.content;out.innerHTML=`<div style="margin-bottom:8px;display:flex;gap:6px"><button class="btn-sm primary" onclick="NOVEL_REFINE_ACCEPT()">✅ 采用</button><button class="btn-sm" onclick="NOVEL_REFINE_EXEC()">🔄 重炼</button></div>`+escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
+function NOVEL_REFINE_ACCEPT(){if(window._lr){document.getElementById('wizWriteOutput').innerHTML=escapeHtml(window._lr);document.getElementById('refineInput').value=window._lr;document.getElementById('refineBefore').textContent=window._lr;document.getElementById('refineAfter').innerHTML='<span style="color:var(--green)">✅ 已采用！</span>';document.getElementById('novelRefinePanel').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(6);showToast('润色结果已应用')}}
+function NOVEL_COPY(){const t=document.getElementById('wizWriteOutput').textContent;navigator.clipboard.writeText(t).then(()=>showToast('已复制'))}
+
+// ==== AI STUDIO 创作工场 ====
+let STUDIO_GALLERY=JSON.parse(localStorage.getItem('stuGallery')||'[]');
+function initStudioData(){
+  document.querySelectorAll('#studioTabs .tab-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#studioTabs .tab-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('#studioTabImage,#studioTabVideo,#studioTabGallery').forEach(t=>t.style.display='none');document.getElementById('studioTab'+b.dataset.tab.charAt(0).toUpperCase()+b.dataset.tab.slice(1)).style.display='block';if(b.dataset.tab==='gallery')renderStudioGallery()})});
+  ['stuPrompt','stuStyle','stuLight','stuCamera','stuRatio','stuRef'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',STUDIO_BUILD_PROMPT)});
+  STUDIO_BUILD_PROMPT();
+}
+function STUDIO_BUILD_PROMPT(){const p=[document.getElementById('stuPrompt')?.value,document.getElementById('stuStyle')?.value,document.getElementById('stuLight')?.value,document.getElementById('stuCamera')?.value,document.getElementById('stuRatio')?.value?'--ar '+document.getElementById('stuRatio').value:'',document.getElementById('stuRef')?.value?'reference: '+document.getElementById('stuRef').value:''].filter(Boolean);const txt=p.join(', ');const el=document.getElementById('stuPromptPreview'),ts=document.getElementById('stuPromptText');if(txt&&txt!=='不限制'){el.style.display='block';ts.textContent=txt}else{el.style.display='none'}}
+function STUDIO_COPY_PROMPT(){const t=document.getElementById('stuPromptText').textContent;if(!t){showToast('请先输入描述');return}navigator.clipboard.writeText(t).then(()=>showToast('已复制'))}
+function STUDIO_QUICK(type){const prompts={cyberpunk:'赛博朋克城市夜景,霓虹灯,雨雾,未来科技感',anime:'动漫风格角色,精致线条,柔和色调,日系',landscape:'壮丽自然风景,电影级光影,超广角,8K',product:'产品摄影,极简背景,柔和棚拍光线,高质量'};document.getElementById('stuPrompt').value=prompts[type]||'';STUDIO_BUILD_PROMPT()}
+function STUDIO_SET(k,v){if(k==='ratio')document.getElementById('stuRatio').value=v;STUDIO_BUILD_PROMPT()}
+async function STUDIO_GENERATE_IMAGE(){const prompt=document.getElementById('stuPromptText').textContent.trim();const subj=document.getElementById('stuPrompt').value.trim();const p=subj||prompt;if(!p){showToast('请输入创作描述');return}const load=document.getElementById('stuLoading'),img=document.getElementById('stuImage');load.style.display='block';img.style.display='none';document.getElementById('stuImgActions').style.display='none';try{const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=768&height=768&nologo=true&seed=${Math.floor(Math.random()*99999)}`;img.src=url;img.onload=()=>{load.style.display='none';img.style.display='block';document.getElementById('stuImgActions').style.display='flex';window._stuLastImage={url,prompt:document.getElementById('stuPrompt').value,full:p,time:new Date().toISOString()}};img.onerror=()=>{load.style.display='none';showToast('生成失败')}}catch(e){load.style.display='none';showToast('出错')}}
+function STUDIO_SAVE_IMAGE(){if(!window._stuLastImage){showToast('请先生成图像');return}const a=document.createElement('a');a.href=window._stuLastImage.url;a.download='ai-creation.png';a.click()}
+function STUDIO_ADD_TO_GALLERY(){if(!window._stuLastImage){showToast('请先生成图像');return}STUDIO_GALLERY.unshift(window._stuLastImage);STUDIO_GALLERY=STUDIO_GALLERY.slice(0,50);localStorage.setItem('stuGallery',JSON.stringify(STUDIO_GALLERY));showToast('已加入画廊')}
+function renderStudioGallery(){const g=document.getElementById('studioGalleryGrid');if(!STUDIO_GALLERY.length){g.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎨</div><p>还没有作品</p></div>';return}g.innerHTML=STUDIO_GALLERY.map((s,i)=>`<div class="feature-card" style="cursor:pointer;padding:0;overflow:hidden" onclick="STUDIO_GALLERY_USE(${i})"><div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--bg-input)"><img src="${s.url}" style="max-width:100%;max-height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🎨'"></div><div style="padding:12px"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">${escapeHtml(s.prompt.substring(0,40))}...</div><div style="font-size:0.68rem;color:var(--text-secondary)">${new Date(s.time).toLocaleString('zh-CN')}</div></div></div>`).join('')}
+function STUDIO_GALLERY_USE(i){if(!STUDIO_GALLERY[i])return;document.getElementById('stuPrompt').value=STUDIO_GALLERY[i].prompt;document.getElementById('studioTabs').querySelector('[data-tab=image]').click();document.getElementById('studioTabImage').style.display='block';document.getElementById('studioTabVideo').style.display='none';document.getElementById('studioTabGallery').style.display='none';STUDIO_BUILD_PROMPT();showToast('已加载到创作区')}
+async function STUDIO_GENERATE_VIDEO(){const p=document.getElementById('stuVidPrompt').value.trim();if(!p){showToast('请输入视频描述');return}const load=document.getElementById('stuVidLoading'),img=document.getElementById('stuVideoImg');load.style.display='block';img.style.display='none';const style=document.getElementById('stuVidStyle').value;try{const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(p+' '+style+' cinematic motion blur')}?width=768&height=432&nologo=true&seed=${Math.floor(Math.random()*99999)}`;img.src=url;img.onload=()=>{load.style.display='none';img.style.display='block'};img.onerror=()=>{load.style.display='none';showToast('生成失败')}}catch(e){load.style.display='none'}}
+function STUDIO_SAVE_VIDEO(){const img=document.getElementById('stuVideoImg');if(!img.src||img.style.display==='none'){showToast('请先生成视频');return}const a=document.createElement('a');a.href=img.src;a.download='ai-video-preview.png';a.click()}
+
+// ==== PROMPT LIBRARY ====
+const PROMPTS=[
+  {cat:'writing',icon:'📝',name:'续写',desc:'根据前文智能续写，保持文风一致',prompt:'请续写以下内容，保持一致的文风、人物和语气：\n\n{text}'},
+  {cat:'writing',icon:'✨',name:'润色',desc:'提升文笔，优化用词和句式',prompt:'请润色以下文本，提升文学性：保留核心内容，优化用词和句式，增强描写。\n\n{text}'},
+  {cat:'writing',icon:'🔍',name:'去AI痕迹',desc:'消除机器味，增加人类写作特点',prompt:'请消除以下文本的AI痕迹：删除AI高频词、打碎过于工整的句式、增加口语化和不规则表达、偶尔留小瑕疵增加"人味"。\n\n{text}'},
+  {cat:'writing',icon:'📈',name:'扩写',desc:'增加细节，扩充内容和字数',prompt:'请将以下内容扩写约50%：增加细节描写、丰富心理活动、扩展环境渲染，保持原有风格。\n\n{text}'},
+  {cat:'writing',icon:'📉',name:'缩写',desc:'精简内容，保留精华',prompt:'请将以下内容缩减约40%：删除冗余但保留精华，保持核心情节和情感不变。\n\n{text}'},
+  {cat:'writing',icon:'💎',name:'金句提炼',desc:'从文本中提炼金句和经典语录',prompt:'请从以下小说中提炼5-10条具有传播价值的金句，每条标注章节和角色。\n\n{text}'},
+  {cat:'writing',icon:'🎭',name:'对话生成',desc:'根据人物性格生成自然对话',prompt:'请为以下情节生成一段自然对话：\n人物设定：{chars}\n场景：{scene}\n情节要点：{plot}\n\n要求：对话有潜台词，符合人物性格，推动情节发展。'},
+  {cat:'writing',icon:'📄',name:'小说简介',desc:'根据大纲生成吸引人的书简介',prompt:'请为以下小说生成200字简介：\n类型：{genre} 大纲：{outline}\n\n要求：抓人眼球、设置悬念、突出看点、展示金手指。'},
+  {cat:'novel',icon:'📐',name:'大纲生成',desc:'输入灵感，AI自动生成三层大纲',prompt:'请为以下创意生成完整三层大纲（全书纲要→卷纲→章纲）：\n小说类型：{genre}\n核心创意：{idea}\n预计字数：{words}字'},
+  {cat:'novel',icon:'📋',name:'细纲生成',desc:'明细到每章情节点的详细大纲',prompt:'请为以下章节生成详细纲要：\n全书框架：{frame}\n本章要求：{req}\n\n输出：时间线、场景切换点、关键对话节点、情感弧线。'},
+  {cat:'novel',icon:'🔖',name:'书名生成',desc:'生成多个有吸引力的备用书名',prompt:'请为以下小说生成5个书名（3-8字），每个附解析：\n类型：{genre} 核心设定：{core}\n\n要求：好记、有意境、有记忆点。'},
+  {cat:'novel',icon:'📖',name:'开篇写法',desc:'生成抓人眼球的小说黄金开篇',prompt:'请为以下小说生成"黄金三章"：\n类型：{genre} 设定：{settings}\n\n要求：第一章建立悬念、第二章展示金手指、第三章确立故事方向。每章3000字纲要。'},
+  {cat:'novel',icon:'👤',name:'角色生成',desc:'AI帮你设计鲜活的人物形象',prompt:'请为以下小说设计5-8个核心角色：\n类型：{genre} 世界观：{world}\n\n每个角色包含：姓名、年龄、外貌、性格标签、背景故事、成长弧线、人际关系。'},
+  {cat:'novel',icon:'⚔️',name:'金手指设计',desc:'为小说主角设计独特能力系统',prompt:'请为{genre}小说设计3个独特的金手指/系统方案：\n\n每个方案包含：名称、能力等级体系、升级条件、限制/代价、成长潜力。要求有创意、不重复市面常见设定。'},
+  {cat:'novel',icon:'🗺️',name:'世界观构建',desc:'设计完整的异世界体系',prompt:'请为{genre}构建完整世界观：\n\n1. 时代背景 2. 地理/版图 3. 势力分布 4. 力量体系/规则 5. 种族/职业 6. 历史关键事件 7. 社会阶层。'},
+  {cat:'novel',icon:'📚',name:'拆书分析',desc:'分析热门网文的成功要素',prompt:'请分析以下小说的成功要素：\n书名：{book}\n\n输出：1.核心卖点 2.节奏设计 3.爽点分布 4.人物塑造手法 5.可借鉴的写作技巧。'},
+  {cat:'novel',icon:'🎯',name:'爽点设计',desc:'规划全书的高潮与爽点分布',prompt:'请为{genre}小说设计爽点分布图：\n\n每卷列出2-3个核心爽点（装逼打脸/逆袭翻盘/扮猪吃虎/宝藏发现/实力突破等），标注触发条件和读者期待值。'},
+  {cat:'novel',icon:'🖋',name:'文风模仿',desc:'模仿知名作家的写作风格',prompt:'请用{t}的风格重写/仿写以下段落：{text}。'},
+  {cat:'media',icon:'🎞',name:'分镜脚本',desc:'将文字转化为漫画分镜',prompt:'请将以下内容转为6-8格漫画分镜脚本：\n{text}\n\n格式：格号 | 景别 | 画面描述 | 角色动作 | 对白 | 时长'},
+  {cat:'media',icon:'👥',name:'角色外观',desc:'为角色设计可视化外观描述',prompt:'请为以下角色设计详细外观（供画师参考）：\n{text}\n\n包含：身高体型、面部特征、发型发色、服装风格、标志性配饰、配色方案。'},
+  {cat:'media',icon:'🏞',name:'场景设计',desc:'设计漫画/动画场景描述',prompt:'请设计{name}的场景（供画师参考）：\n\n环境色调、光影氛围、空间结构、关键道具、画面构图建议。'},
+  {cat:'media',icon:'💬',name:'对白润色',desc:'让角色对话更生动自然',prompt:'请润色以下角色对白，使对话更有潜台词和性格色彩：\n{text}'},
+  {cat:'work',icon:'📄',name:'文章写作',desc:'报告、方案、合同起草',prompt:'请写一篇专业文章：{text}\n\n要求：结构清晰、语言专业、可直接使用。'},
+  {cat:'work',icon:'📧',name:'邮件起草',desc:'商务/求职/客户邮件',prompt:'请写一封专业邮件：{text}\n\n要求：语气得体、格式规范、重点突出。'},
+  {cat:'work',icon:'📊',name:'PPT大纲',desc:'结构化演示文稿大纲',prompt:'请为以下主题设计PPT大纲：{text}\n\n输出：每页标题+要点+演讲备注。'},
+  {cat:'work',icon:'🌐',name:'翻译',desc:'中英日韩多语言互译',prompt:'请将以下内容翻译：{text}'},
+  {cat:'work',icon:'📋',name:'会议纪要',desc:'自动整理会议重点',prompt:'请整理以下会议内容：{text}\n\n输出：讨论主题、关键决策、待办事项、责任人。'},
+  {cat:'work',icon:'📝',name:'工作总结',desc:'周报/月报/年终总结',prompt:'请根据以下要点生成工作总结：{text}\n\n要求：数据量化、成果突出、下步计划清晰。'},
+  {cat:'brand',icon:'🔣',name:'Logo方案',desc:'AI生成Logo创意描述',prompt:'请为品牌{text}设计3个Logo方案：\n\n每个方案包含：图形描述、配色方案、字体建议、设计寓意。'},
+  {cat:'brand',icon:'✏️',name:'品牌命名',desc:'中英文品牌名称生成',prompt:'请为以下业务起10个品牌名（中英文各5个）：{text}\n\n每个名称附含义解析和读音检查。'},
+  {cat:'brand',icon:'💬',name:'Slogan',desc:'朗朗上口的品牌口号',prompt:'请为品牌{text}创作5条Slogan（不超过12字）：\n\n每条标注适用场景和记忆度评分。'},
+  {cat:'brand',icon:'🎨',name:'配色方案',desc:'主色辅色点缀色设计',prompt:'请为品牌{text}设计配色方案：\n\n主色/辅色/点缀色 + 色值 + 应用场景 + 情感联想。'},
+  {cat:'brand',icon:'📖',name:'品牌故事',desc:'有温度的品牌叙事',prompt:'请为品牌{text}创作300字品牌故事：\n\n要求：有温度、有情怀、能引发共鸣。'},
+  {cat:'market',icon:'📕',name:'小红书',desc:'小红书种草笔记',prompt:'请为{text}创作小红书种草笔记：\n\n标题（抓眼球）+ 正文（口语化+emoji）+ 话题标签（5-8个）+ 配图建议。'},
+  {cat:'market',icon:'💚',name:'公众号',desc:'公众号推文生成',prompt:'请为{text}写一篇公众号推文：\n\n标题+摘要+正文(深度有排版)+尾部CTA。'},
+  {cat:'market',icon:'📺',name:'广告文案',desc:'多版本投放广告文案',prompt:'请为{text}撰写广告文案：\n\n输出3个版本（痛点/情感/数据），每版本含标题+正文+CTA。'},
+  {cat:'market',icon:'🔍',name:'SEO优化',desc:'搜索优化内容生成',prompt:'请为{text}生成SEO优化内容：\n\n核心关键词(5个) + 长尾词(10个) + Meta描述(3版) + 标题优化建议。'},
+  {cat:'market',icon:'🛒',name:'电商详情',desc:'产品详情页文案',prompt:'请为{text}写电商详情页文案：\n\n卖点提炼+使用场景+用户痛点+规格参数+售后保障。'},
+  {cat:'ai-art',icon:'🖼',name:'图片提示词',desc:'优化图片生成提示词',prompt:'请将以下创意转化为高质量的图片生成提示词（英文）：\n{text}\n\n包含：主体描述、风格、光照、构图、画质关键词。'},
+  {cat:'ai-art',icon:'🎬',name:'视频提示词',desc:'视频生成提示词优化',prompt:'请将以下创意转化为视频生成提示词：\n{text}\n\n包含：动态描述、运镜方式、节奏、光影变化、氛围。'},
+  {cat:'ai-art',icon:'🎯',name:'风格迁移',desc:'将创意转化为指定风格',prompt:'请用{style}风格重新描述以下画面：{text}'},
+  {cat:'writing',icon:'📋',name:'书名生成',desc:'根据大纲生成小说书名',prompt:navigator=>null},
+  {cat:'writing',icon:'✨',name:'封面文案',desc:'一书封面的吸引人文案',prompt:'请为以下小说生成封面文案（20字内）：\n{text}\n\n要求：一句话吸引读者点开。'},
+];
+const PROMPT_TEMPLATES={
+  '玄幻':{type:'玄幻',style:'爽文流',idea:'废柴逆袭、扮猪吃虎、上古传承'},
+  '仙侠':{type:'仙侠',style:'热血战斗',idea:'剑道飞升、因果轮回、道心试炼'},
+  '都市':{type:'都市',style:'权谋',idea:'商战、家族恩怨、隐藏身份'},
+  '科幻':{type:'科幻',style:'硬核',idea:'星际殖民、AI觉醒、基因改造'},
+  '悬疑':{type:'悬疑',style:'推理',idea:'密室杀人、人格分裂、连环案件'},
+};
+function renderPromptCards(cat='all'){
+  const s=document.getElementById('promptSearch')?.value?.toLowerCase()||'';
+  let f=PROMPTS;
+  if(cat!=='all')f=f.filter(p=>p.cat===cat);
+  if(s)f=f.filter(p=>p.name.includes(s)||p.desc.includes(s)||p.cat.includes(s));
+  const grid=document.getElementById('promptCardsGrid');const nr=document.getElementById('promptNoResults');
+  if(!f.length){grid.innerHTML='';nr.style.display='block';return}
+  nr.style.display='none';
+  grid.innerHTML=f.map(p=>`<div class="prompt-card" data-cat="${p.cat}">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:1.3rem">${p.icon}</span><div><div style="font-weight:700;font-size:0.9rem">${p.name}</div><div style="font-size:0.7rem;color:var(--text-secondary)">${({'writing':'写作','novel':'小说','media':'漫剧','work':'办公','brand':'品牌','market':'营销','ai-art':'图像'})[p.cat]||p.cat}</div></div></div>
+    <p style="font-size:0.8rem;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">${p.desc}</p>
+    <button class="prompt-use" onclick="event.stopPropagation();PROMPT_USE('${escapeHtml(p.name)}')">使用</button>
+  </div>`).join('')}
+function PROMPT_USE(name){
+  const p=PROMPTS.find(x=>x.name===name);if(!p)return;
+  const catMap={writing:'novel',novel:'novel',media:'media',work:'office',brand:'brand',market:'market','ai-art':'studio'};
+  const page=catMap[p.cat]||'chat';
+  const promptText=p.prompt.replace(/{text}/g,'[请在此输入内容]').replace(/{genre}/g,'').replace(/{idea}/g,'').replace(/{style}/g,'').replace(/{t}/g,'[目标风格]').replace(/{book}/g,'[书名]');
+  switchPage(page);
+  setTimeout(()=>{
+    if(page==='novel'){NOVEL_START_WIZARD('quick');document.getElementById('wizCore').value=promptText}
+    else if(page==='office'){document.getElementById('officeInput').value=promptText;document.getElementById('officeInput').focus()}
+    else if(page==='brand'){document.getElementById('brandInput').value=promptText;document.getElementById('brandInput').focus()}
+    else if(page==='market'){document.getElementById('marketInput').value=promptText;document.getElementById('marketInput').focus()}
+    else if(page==='studio'){document.getElementById('stuPrompt').value=promptText;STUDIO_BUILD_PROMPT()}
+    else if(page==='media'){document.getElementById('mediaInput').value=promptText;document.getElementById('mediaInput').focus()}
+    else{document.getElementById('chatInput').value=promptText;document.getElementById('chatInput').focus()}
+    showToast(`已加载「${name}」工具`)
+  },300)
+}
+function filterPromptCards(){renderPromptCards(document.querySelector('#page-prompts .filter-tag.active')?.dataset?.pcat||'all')}
+function filterPromptByCat(cat,el){document.querySelectorAll('#page-prompts .filter-tag[data-pcat]').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderPromptCards(cat)}
+function scrollToCategory(cat){document.querySelector('#page-prompts .filter-tag[data-pcat="'+cat+'"]')?.click();setTimeout(()=>{const g=document.getElementById('promptCardsGrid');g.scrollIntoView({behavior:'smooth'})},100)}
+
+// ==== KNOWLEDGE BASE ====
+let KNOWLEDGE_ITEMS=JSON.parse(localStorage.getItem('knowledge')||'[]');
+let KNOWLEDGE_FOLDER='all';
+function KNOWLEDGE_SELECT_FOLDER(name,el){
+  KNOWLEDGE_FOLDER=name;
+  document.querySelectorAll('.know-folder').forEach(x=>x.classList.remove('active'));el.classList.add('active');
+  document.getElementById('knowledgeCurrentFolder').textContent='📁 '+(name==='all'?'全部':({'settings':'故事设定','notes':'创作笔记','outline':'故事大纲','chapters':'章节纲要','chars':'人物设定','brand':'品牌资料','other':'其他'})[name]||name);
+  renderKnowledgeCards()
+}
+function renderKnowledgeCards(){
+  let items=KNOWLEDGE_ITEMS;const s=document.getElementById('knowSearch')?.value?.toLowerCase()||'';
+  if(KNOWLEDGE_FOLDER!=='all')items=items.filter(i=>i.folder===KNOWLEDGE_FOLDER);
+  if(s)items=items.filter(i=>i.title.toLowerCase().includes(s)||i.content.toLowerCase().includes(s)||(i.tags||'').toLowerCase().includes(s));
+  const grid=document.getElementById('knowledgeCardGrid');
+  document.getElementById('knowledgeStats').textContent=items.length+' 个知识点';
+  if(!items.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--text-secondary);padding:60px"><div style="font-size:3rem">📭</div><p>还没有知识点</p><button class="btn-sm primary" style="margin-top:10px" onclick="KNOWLEDGE_ADD()">新建知识点</button></div>';return}
+  grid.innerHTML=items.map((k,i)=>{
+    const idx=KNOWLEDGE_ITEMS.indexOf(k);
+    const tags=(k.tags||'').split(',').filter(Boolean);
+    const preview=k.content.substring(0,120);
+    return `<div class="know-card" onclick="KNOWLEDGE_EDIT(${idx})">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+        <div style="font-weight:700;font-size:0.85rem">${escapeHtml(k.title)}</div>
+        <span style="font-size:0.68rem;color:var(--text-secondary)">${new Date(k.time).toLocaleDateString('zh-CN')}</span>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.5;margin-bottom:6px">${escapeHtml(preview)}${k.content.length>120?'...':''}</div>
+      ${tags.length?`<div class="know-tags">${tags.map(t=>`<span class="know-tag">${t.trim()}</span>`).join('')}</div>`:''}
+    </div>`;
+  }).join('')}
+function KNOWLEDGE_ADD(){document.getElementById('knowModalTitle').textContent='新建知识';document.getElementById('knowTitle').value='';document.getElementById('knowContent').value='';document.getElementById('knowTags').value='';document.getElementById('knowEditId').value='';document.getElementById('knowDeleteBtn').style.display='none';document.getElementById('knowModal').classList.add('show')}
+function KNOWLEDGE_EDIT(idx){const k=KNOWLEDGE_ITEMS[idx];if(!k)return;document.getElementById('knowModalTitle').textContent='编辑知识';document.getElementById('knowTitle').value=k.title;document.getElementById('knowFolder').value=k.folder;document.getElementById('knowContent').value=k.content;document.getElementById('knowTags').value=k.tags||'';document.getElementById('knowEditId').value=idx;document.getElementById('knowDeleteBtn').style.display='inline-block';document.getElementById('knowModal').classList.add('show')}
+function KNOWLEDGE_SAVE(){
+  const title=document.getElementById('knowTitle').value.trim(),folder=document.getElementById('knowFolder').value,content=document.getElementById('knowContent').value.trim(),tags=document.getElementById('knowTags').value.trim(),editId=document.getElementById('knowEditId').value;
+  if(!title||!content){showToast('标题和内容必填');return}
+  const item={title,folder,content,tags,time:new Date().toISOString()};
+  if(editId!==''){KNOWLEDGE_ITEMS[parseInt(editId)]=item}else{KNOWLEDGE_ITEMS.unshift(item)}
+  KNOWLEDGE_ITEMS=KNOWLEDGE_ITEMS.slice(0,100);localStorage.setItem('knowledge',JSON.stringify(KNOWLEDGE_ITEMS));
+  document.getElementById('knowModal').classList.remove('show');renderKnowledgeCards();showToast(editId!==''?'已更新':'已创建')
+}
+function KNOWLEDGE_DELETE(){const editId=document.getElementById('knowEditId').value;if(editId===''||!confirm('确定删除？'))return;KNOWLEDGE_ITEMS.splice(parseInt(editId),1);localStorage.setItem('knowledge',JSON.stringify(KNOWLEDGE_ITEMS));document.getElementById('knowModal').classList.remove('show');renderKnowledgeCards();showToast('已删除')}
+function KNOWLEDGE_SEARCH(){renderKnowledgeCards()}
+function renderKnowledgeTree(){renderKnowledgeCards()}
+
+// === Patch old novel functions ===
+const _origSwitchNovelTab=switchNovelTab;
+switchNovelTab=function(){/* deprecated: using wizard system */};
+const _origWizardAction=wizardAction;
+wizardAction=function(){/* use NOVEL_STEP_6_WRITE instead */};
+const _origRefineText=refineText;
+refineText=function(mode){NOVEL_REFINE(mode)};
+const _origExecuteRefine=executeRefine;
+executeRefine=function(){NOVEL_REFINE_EXEC()};
+
 function toggleMobileMenu(){const m=document.getElementById('mobileMenu');m.style.display=m.style.display==='none'||!m.style.display?'block':'none'}
 if(currentUser){userCredits=parseInt(localStorage.getItem('cr_'+currentUser.username)||'30');localStorage.setItem('cr',userCredits);novelHistory=localStorage.getItem('novelHistory')||''}
 updateCreditDisplay();
