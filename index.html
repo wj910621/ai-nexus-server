@@ -1746,7 +1746,7 @@ const models=[
 ];
 
 // === Render Models ===
-function renderModelCard(m){return`<div class="model-card${m.featured?' featured':''}"><div class="model-header"><div class="model-avatar" style="background:${m.avatar}">${m.name[0]}</div><div><div class="model-name">${m.name}</div><div class="model-provider">${m.provider}</div></div></div><div class="model-desc">${m.desc}</div><div class="model-tags">${m.tags.map(t=>`<span class="tag${t==='免费'?' green':''}${t==='开源'?' orange':''}">${t}</span>`).join('')}</div><div class="model-meta"><span class="model-price">入:${m.inputPrice} | 出:${m.outputPrice}</span><span class="model-context">${m.context}</span></div></div>`}
+function renderModelCard(m){return`<div class="model-card${m.featured?' featured':''}" onclick="switchPage('chat');setTimeout(()=>{const cb=document.querySelector('#chatModelList input[value=\\'${m.id}\\']');if(cb)cb.checked=true},100)" style="cursor:pointer"><div class="model-header"><div class="model-avatar" style="background:${m.avatar}">${m.name[0]}</div><div><div class="model-name">${m.name}</div><div class="model-provider">${m.provider}</div></div></div><div class="model-desc">${m.desc}</div><div class="model-tags">${m.tags.map(t=>`<span class="tag${t==='免费'?' green':''}${t==='开源'?' orange':''}">${t}</span>`).join('')}</div><div class="model-meta"><span class="model-price">入:${m.inputPrice} | 出:${m.outputPrice}</span><span class="model-context">${m.context}</span></div></div>`}
 function initFeaturedModels(){document.getElementById('featuredModels').innerHTML=models.filter(m=>m.featured).map(renderModelCard).join('')}
 initFeaturedModels();
 
@@ -1797,9 +1797,11 @@ function renderPlanet(){
       n.innerHTML=`<div class="pn-icon" style="background:${c}">${icon}</div><div class="pn-name">${m.name}</div>`;
       n.title=m.name;
       n.addEventListener('click',()=>{
-        document.getElementById('modelSearch').value=m.name;
-        initAllModels();
-        document.getElementById('allModels').querySelector('.model-card')?.scrollIntoView({behavior:'smooth',block:'center'});
+        switchPage('chat');
+        setTimeout(()=>{
+          const cb=document.querySelector(`#chatModelList input[value="${m.id}"]`);
+          if(cb)cb.checked=true;
+        },100);
       });
       ring.appendChild(n);
     });
