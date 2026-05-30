@@ -412,6 +412,8 @@ a{color:var(--accent);text-decoration:none}
 }
 .model-planet-section .p-node:hover .pn-name{opacity:1}
 @keyframes n-glow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.12)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeOutDown{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(20px)}}
 @media(max-width:640px){
   .model-planet-section{min-height:300px}
   .model-planet-section .planet-scene{width:300px;height:300px;transform:scale(0.75)}
@@ -1342,7 +1344,11 @@ a{color:var(--accent);text-decoration:none}
   <section class="section" style="max-width:800px;margin:0 auto">
     <h2 class="section-title">🔒 隐私政策</h2>
     <div class="feature-card" style="font-size:0.88rem;line-height:2;white-space:pre-line">
-      <p style="color:var(--text-secondary);margin-bottom:16px"><b>生效日期：</b>2026年5月28日<br><b>最后更新：</b>2026年5月28日</p>
+      <p style="color:var(--text-secondary);margin-bottom:16px"><b>生效日期：</b>2026年5月28日<br><b>最后更新：</b>2026年5月28日<br><b>版本：</b>v1.0</p>
+      <div id="policyChangelog" style="margin-bottom:16px;display:none;background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;padding:12px;font-size:0.82rem">
+        <b style="color:var(--accent)">📢 更新内容</b>
+        <div id="changelogContent" style="margin-top:6px;color:var(--text);line-height:1.6"></div>
+      </div>
 
       <h3>一、我们收集的信息</h3>
       <p>1.1 <b>账号信息：</b>您注册时提供的用户名、邮箱地址。邮箱用于密码找回和重要通知。</p>
@@ -1603,8 +1609,100 @@ function switchPage(name){
   // 重置所有滚动位置
   setTimeout(()=>{window.scrollTo(0,0);const mc=document.querySelector('.main-content');if(mc)mc.scrollTop=0},50);
   // Force CDN refresh v2
+  // 隐私政策更新检测
+  if(name==='privacy')markPolicyRead();
 }
 document.querySelectorAll('.sidebar-link[data-page]').forEach(l=>l.addEventListener('click',()=>switchPage(l.dataset.page)));
+
+// ===== 隐私政策版本通知 =====
+const POLICY_VERSION='v1.0';
+const POLICY_STORAGE_KEY='ppv';
+const POLICY_CHANGELOG_KEY='pcl';
+
+// 更新日志
+const policyChangelogs={
+  'v1.0':'初始版本 - 2026年5月28日发布',
+};
+// 发布后添加新版本：
+// 'v1.1':'更新内容：优化数据保护条款 - 2026年6月xx日',
+
+function getPolicyReadVersion(){return localStorage.getItem(POLICY_STORAGE_KEY)||''}
+function setPolicyReadVersion(v){localStorage.setItem(POLICY_STORAGE_KEY,v)}
+
+function markPolicyRead(){
+  setPolicyReadVersion(POLICY_VERSION);
+  // 显示更新日志
+  const el=document.getElementById('policyChangelog');
+  const ct=document.getElementById('changelogContent');
+  if(el&&ct){
+    const updates=[];
+    const readVer=getPolicyReadVersion();
+    // 收集所有未读的更新日志
+    let showUpTo=false;
+    Object.entries(policyChangelogs).reverse().forEach(([v,desc])=>{
+      if(v===POLICY_VERSION)showUpTo=true;
+      if(showUpTo){
+        if(!readVer||!isVersionAtLeast(readVer,v)){
+          updates.push(`<div style="margin:4px 0"><b>${v}</b>: ${desc}</div>`);
+        }
+      }
+    });
+    if(updates.length){
+      el.style.display='block';
+      ct.innerHTML=updates.join('');
+    }
+  }
+}
+
+function isVersionAtLeast(base,target){
+  const b=base.replace('v','').split('.').map(Number);
+  const t=target.replace('v','').split('.').map(Number);
+  for(let i=0;i<Math.max(b.length,t.length);i++){
+    const bn=b[i]||0,tn=t[i]||0;
+    if(bn>tn)return true;
+    if(bn<tn)return false;
+  }
+  return true;
+}
+
+function checkPolicyUpdate(){
+  const readVer=getPolicyReadVersion();
+  if(!readVer||!isVersionAtLeast(readVer,POLICY_VERSION)){
+    // 有新版本，弹通知
+    const verList=Object.keys(policyChangelogs);
+    const latestChange=policyChangelogs[POLICY_VERSION]||'';
+    setTimeout(()=>{
+      const banner=document.createElement('div');
+      banner.id='policyBanner';
+      banner.style.cssText='position:fixed;bottom:80px;right:20px;z-index:1000;background:var(--bg-card);border:1px solid var(--accent);border-radius:12px;padding:14px 18px;max-width:320px;box-shadow:var(--shadow-lg);animation:fadeInUp 0.4s ease';
+      banner.innerHTML=`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:1.3rem">📢</span>
+          <b>隐私政策已更新</b>
+          <span style="margin-left:auto;font-size:0.72rem;color:var(--text-secondary);background:var(--accent-soft);padding:2px 8px;border-radius:10px">${POLICY_VERSION}</span>
+        </div>
+        <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">
+          ${latestChange.substring(0,60)}${latestChange.length>60?'…':''}
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-send" style="flex:1;font-size:0.78rem;padding:8px 0" onclick="switchPage('privacy');this.closest('#policyBanner').remove()">查看详情</button>
+          <button class="btn-sm" style="font-size:0.78rem" onclick="markPolicyRead();this.closest('#policyBanner').remove()">我知道了</button>
+        </div>
+      `;
+      // 确保不重复
+      if(!document.getElementById('policyBanner')){
+        document.body.appendChild(banner);
+        setTimeout(()=>{
+          const b=document.getElementById('policyBanner');
+          if(b)b.style.animation='fadeOutDown 0.4s ease forwards';
+          setTimeout(()=>b?.remove(),500);
+        },10000); // 10秒后自动消失
+      }
+    },3000); // 页面加载3秒后弹出
+  }
+}
+// 页面加载时检测
+setTimeout(checkPolicyUpdate,1000);
 
 // Right Panel update
 function updateRightPanel(page){
