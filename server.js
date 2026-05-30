@@ -49,7 +49,9 @@ const MODEL_CONFIG = {
   yi:           { provider: 'openai',   model: 'yi-lightning',       baseUrl: 'https://api.lingyiwanwu.com/v1' },
 
   // === 硅基流动 SiliconFlow ===
-  sf_deepseek_v32:  { provider: 'openai', model: 'deepseek-ai/DeepSeek-V3.2',      baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_qwen3_8b:       { provider: 'openai', model: 'Qwen/Qwen3-8B',                 baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_deepseek_v3_free:{ provider: 'openai', model: 'deepseek-ai/DeepSeek-V3',       baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_deepseek_v32:   { provider: 'openai', model: 'deepseek-ai/DeepSeek-V3.2',      baseUrl: 'https://api.siliconflow.cn/v1' },
   sf_glm5:          { provider: 'openai', model: 'Pro/zai-org/GLM-5',              baseUrl: 'https://api.siliconflow.cn/v1' },
   sf_glm47:         { provider: 'openai', model: 'Pro/zai-org/GLM-4.7',            baseUrl: 'https://api.siliconflow.cn/v1' },
   sf_qwen3_32b:     { provider: 'openai', model: 'Qwen/Qwen3-32B',                 baseUrl: 'https://api.siliconflow.cn/v1' },
