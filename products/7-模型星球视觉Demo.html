@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Nexus · 模型星球</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#0a0a1a;
+  color:#fff;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  overflow:hidden;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+}
+
+/* ============ 星空背景 ============ */
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{
+  position:absolute;
+  width:2px;height:2px;
+  background:#fff;
+  border-radius:50%;
+  opacity:0.3;
+  animation:twinkle 2s ease-in-out infinite alternate;
+}
+@keyframes twinkle{0%{opacity:0.1}100%{opacity:0.8}}
+
+/* ============ 3D场景容器 ============ */
+.scene{
+  position:relative;
+  width:600px;height:600px;
+  perspective:1000px;
+  z-index:1;
+}
+.center-logo{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  z-index:10;
+  text-align:center;
+}
+.center-logo .icon{
+  width:90px;height:90px;
+  margin:0 auto 8px;
+  background:linear-gradient(135deg,#7c3aed,#a855f7,#06b6d4);
+  border-radius:22px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;font-weight:900;color:#fff;
+  box-shadow:0 0 50px rgba(124,58,237,0.5);
+  animation:pulse 3s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 40px rgba(124,58,237,0.4)}
+  50%{box-shadow:0 0 70px rgba(124,58,237,0.8),0 0 120px rgba(6,182,212,0.3)}
+}
+.center-logo .tagline{
+  font-size:1.2rem;font-weight:600;
+  background:linear-gradient(135deg,#c4b5fd,#a855f7,#06b6d4);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-top:4px;
+}
+.center-logo .sub{
+  font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:2px;
+}
+
+/* ============ 轨道容器 ============ */
+.orbit-ring{
+  position:absolute;
+  top:50%;left:50%;
+  transform-style:preserve-3d;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.06);
+  animation:rotate-var var(--speed,20s) linear infinite;
+}
+.orbit-ring::after{
+  content:'';
+  position:absolute;inset:-1px;
+  border-radius:50%;
+  border:1px solid transparent;
+  background:linear-gradient(90deg,transparent,rgba(124,58,237,0.08),transparent) border-box;
+  -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+}
+
+/* ============ 模型节点 ============ */
+.model-node{
+  position:absolute;
+  width:64px;height:64px;
+  border-radius:16px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  font-size:0.6rem;color:rgba(255,255,255,0.7);
+  cursor:pointer;
+  transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  backface-visibility:hidden;
+  animation:node-glow 4s ease-in-out infinite;
+}
+.model-node .node-icon{
+  width:40px;height:40px;
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;font-weight:700;
+  color:#fff;margin-bottom:4px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  transition:transform 0.3s;
+}
+.model-node:hover{
+  transform:scale(1.25)!important;
+  z-index:100;
+}
+.model-node:hover .node-icon{transform:scale(1.1)}
+.model-node .node-name{
+  white-space:nowrap;
+  font-size:0.55rem;
+  opacity:0;
+  transition:opacity 0.3s;
+  background:rgba(0,0,0,0.6);
+  padding:2px 6px;
+  border-radius:6px;
+}
+.model-node:hover .node-name{opacity:1}
+@keyframes node-glow{
+  0%,100%{filter:brightness(1)}
+  50%{filter:brightness(1.15)}
+}
+
+/* ============ 轨道旋转方向 ============ */
+.ring-inner{--speed:25s}
+.ring-mid{--speed:35s}
+.ring-outer{--speed:45s}
+@keyframes rotate-var{from{transform:rotateX(75deg) rotateZ(0deg)}to{transform:rotateX(75deg) rotateZ(360deg)}}
+
+/* ============ 底部信息 ============ */
+.stats-bar{
+  position:fixed;bottom:30px;left:50%;
+  transform:translateX(-50%);
+  display:flex;gap:32px;
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(20px);
+  padding:12px 32px;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.06);
+  z-index:20;
+  font-size:0.82rem;
+}
+.stat-item{text-align:center}
+.stat-item .num{font-size:1.1rem;font-weight:700;color:#a855f7}
+.stat-item .label{color:rgba(255,255,255,0.5);font-size:0.72rem;margin-top:2px}
+
+/* ============ Hover标签 ============ */
+.tooltip{
+  position:fixed;
+  z-index:100;
+  background:rgba(10,10,26,0.95);
+  backdrop-filter:blur(12px);
+  padding:8px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.1);
+  font-size:0.78rem;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.2s;
+}
+.tooltip.show{opacity:1}
+
+/* ============ 响应式 ============ */
+@media(max-width:640px){
+  .scene{width:340px;height:340px;transform:scale(0.8)}
+  .center-logo .icon{width:60px;height:60px;font-size:1.6rem}
+  .model-node{width:48px;height:48px}
+  .model-node .node-icon{width:32px;height:32px;font-size:0.9rem}
+  .stats-bar{gap:16px;padding:10px 20px;font-size:0.72rem}
+}
+</style>
+</head>
+<body>
+
+<!-- 星空 -->
+<div class="stars" id="stars"></div>
+
+<!-- 3D场景 -->
+<div class="scene" id="scene">
+  <!-- 中心LOGO -->
+  <div class="center-logo">
+    <div class="icon">⚡</div>
+    <div class="tagline">AI Nexus</div>
+    <div class="sub">30+ 顶级模型 · 一站式创作</div>
+  </div>
+
+  <!-- 内层轨道（8个核心模型） -->
+  <div class="orbit-ring ring-inner" id="innerRing" style="width:260px;height:260px;margin:-130px 0 0 -130px"></div>
+
+  <!-- 中层轨道（12个模型） -->
+  <div class="orbit-ring ring-mid" id="midRing" style="width:400px;height:400px;margin:-200px 0 0 -200px"></div>
+
+  <!-- 外层轨道（其他模型） -->
+  <div class="orbit-ring ring-outer" id="outerRing" style="width:520px;height:520px;margin:-260px 0 0 -260px"></div>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- 底部统计 -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="num" id="totalModels">25</div><div class="label">接入模型</div></div>
+  <div class="stat-item"><div class="num">12</div><div class="label">模型供应商</div></div>
+  <div class="stat-item"><div class="num" style="color:#06b6d4">免费</div><div class="label">开源免费模型</div></div>
+  <div class="stat-item"><div class="num">24/7</div><div class="label">在线服务</div></div>
+</div>
+
+<script>
+// ============ 模型数据 ============
+const models = [
+  // === 内层轨道：核心旗舰模型 ===
+  {name:'GPT-4o',    color:'#10a37f',icon:'G'},
+  {name:'Claude 4',  color:'#d97706',icon:'C'},
+  {name:'Gemini 2.5',color:'#4285f4',icon:'G'},
+  {name:'DeepSeek',  color:'#4f46e5',icon:'D'},
+  {name:'通义千问',  color:'#ff6a00',icon:'Q'},
+  {name:'Kimi',      color:'#6c5ce7',icon:'K'},
+  {name:'GLM-4',    color:'#3859ff',icon:'G'},
+  {name:'混元',     color:'#00a4ff',icon:'H'},
+
+  // === 中层轨道 ===
+  {name:'Llama 4',  color:'#0668e1',icon:'L'},
+  {name:'Yi',       color:'#e17055',icon:'Y'},
+  {name:'豆包',     color:'#e8426e',icon:'豆'},
+  {name:'文心',     color:'#2932e1',icon:'文'},
+  {name:'Mistral',  color:'#ff6b35',icon:'M'},
+  {name:'Grok',     color:'#1d9bf0',icon:'G'},
+  {name:'星火',     color:'#2563eb',icon:'星'},
+  {name:'MiniMax',  color:'#fd79a8',icon:'M'},
+  {name:'Claude Opus',color:'#b45309',icon:'C'},
+  {name:'O3',       color:'#059669',icon:'O'},
+  {name:'CodeGeeX', color:'#8b5cf6',icon:'C'},
+  {name:'Suno',     color:'#f43f5e',icon:'S'},
+
+  // === 外层轨道 ===
+  {name:'Perplexity',color:'#1e3a5f',icon:'P'},
+  {name:'Cohere',    color:'#d33b3b',icon:'C'},
+  {name:'FLUX',      color:'#ff6b00',icon:'F'},
+  {name:'SD3',       color:'#8b5cf6',icon:'S'},
+  {name:'Runway',    color:'#e63946',icon:'R'},
+  {name:'Llama 3',   color:'#0369a1',icon:'L'},
+  {name:'Qwen2.5',   color:'#ea580c',icon:'Q'},
+  {name:'可灵',      color:'#0891b2',icon:'可'},
+  {name:'StepFun',   color:'#7c3aed',icon:'阶'},
+  {name:'Spark',     color:'#0284c7',icon:'火'},
+  {name:'Sora',      color:'#6366f1',icon:'S'},
+  {name:'Grok 3',    color:'#0ea5e9',icon:'G'},
+  {name:'Mochi',     color:'#e11d48',icon:'M'},
+  {name:'Stability', color:'#6b21a8',icon:'S'},
+  {name:'Hugging',   color:'#fbbf24',icon:'H'},
+];
+
+// ============ 生成星空 ============
+const starsEl = document.getElementById('stars');
+for(let i=0;i<100;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.style.left=Math.random()*100+'%';
+  s.style.top=Math.random()*100+'%';
+  s.style.width=s.style.height=Math.random()*2+1+'px';
+  s.style.animationDelay=Math.random()*4+'s';
+  s.style.animationDuration=(Math.random()*2+1.5)+'s';
+  starsEl.appendChild(s);
+}
+
+// ============ 生成模型节点 ============
+function createNodes(container, modelList, radius, startAngle){
+  const count=modelList.length;
+  const angleStep=(2*Math.PI)/count;
+  container.innerHTML='';
+
+  modelList.forEach((m,i)=>{
+    const angle=startAngle+i*angleStep;
+    const x=radius+radius*Math.sin(angle);
+    const y=radius-radius*Math.cos(angle);
+
+    const node=document.createElement('div');
+    node.className='model-node';
+    node.style.left=(x-32)+'px';
+    node.style.top=(y-32)+'px';
+
+    node.innerHTML=`
+      <div class="node-icon" style="background:${m.color}">${m.icon}</div>
+      <div class="node-name">${m.name}</div>
+    `;
+
+    node.addEventListener('mouseenter',(e)=>{
+      const tip=document.getElementById('tooltip');
+      tip.textContent=m.name;
+      tip.className='tooltip show';
+      tip.style.left=(e.clientX-40)+'px';
+      tip.style.top=(e.clientY-50)+'px';
+    });
+    node.addEventListener('mousemove',(e)=>{
+      const tip=document.getElementById('tooltip');
+      tip.style.left=(e.clientX-40)+'px';
+      tip.style.top=(e.clientY-50)+'px';
+    });
+    node.addEventListener('mouseleave',()=>{
+      document.getElementById('tooltip').className='tooltip';
+    });
+
+    // 随机延迟动画
+    node.style.animationDelay=(Math.random()*4)+'s';
+
+    container.appendChild(node);
+  });
+}
+
+// ============ 分轨道放置 ============
+const innerModels=models.slice(0,8);      // 8个
+const midModels=models.slice(8,20);        // 12个
+const outerModels=models.slice(20);        // 15个
+
+createNodes(document.getElementById('innerRing'), innerModels, 130, 0);
+createNodes(document.getElementById('midRing'), midModels, 200, Math.PI/6);
+createNodes(document.getElementById('outerRing'), outerModels, 260, Math.PI/4);
+
+document.getElementById('totalModels').textContent=models.length;
+
+// ============ 鼠标交互：旋转场景 ============
+let isDragging=false;
+let prevX,prevY;
+let rotX=75, rotZ=0;
+const scene=document.getElementById('scene');
+
+function pauseAnimations(pause){
+  document.querySelectorAll('.orbit-ring').forEach(el=>{
+    el.style.animationPlayState=pause?'paused':'running';
+  });
+}
+
+scene.addEventListener('mousedown',(e)=>{
+  if(e.target.closest('.model-node')) return;
+  isDragging=true;
+  prevX=e.clientX;prevY=e.clientY;
+  pauseAnimations(true);
+});
+document.addEventListener('mousemove',(e)=>{
+  if(!isDragging) return;
+  const dx=e.clientX-prevX;
+  const dy=e.clientY-prevY;
+  rotZ+=dx*0.3;
+  rotX=Math.max(60,Math.min(90,rotX-dy*0.2));
+  document.querySelectorAll('.orbit-ring').forEach(el=>{
+    el.style.transform=`rotateX(${rotX}deg) rotateZ(${rotZ}deg)`;
+  });
+  prevX=e.clientX;prevY=e.clientY;
+});
+document.addEventListener('mouseup',()=>{
+  if(isDragging){
+    isDragging=false;
+    pauseAnimations(false);
+  }
+});
+
+// ============ 触摸支持 ============
+scene.addEventListener('touchstart',(e)=>{
+  isDragging=true;
+  const t=e.touches[0];
+  prevX=t.clientX;prevY=t.clientY;
+  pauseAnimations(true);
+});
+scene.addEventListener('touchmove',(e)=>{
+  e.preventDefault();
+  if(!isDragging) return;
+  const t=e.touches[0];
+  const dx=t.clientX-prevX;
+  const dy=t.clientY-prevY;
+  rotZ+=dx*0.3;
+  rotX=Math.max(60,Math.min(90,rotX-dy*0.2));
+  document.querySelectorAll('.orbit-ring').forEach(el=>{
+    el.style.transform=`rotateX(${rotX}deg) rotateZ(${rotZ}deg)`;
+  });
+  prevX=t.clientX;prevY=t.clientY;
+},{passive:false});
+scene.addEventListener('touchend',()=>{
+  isDragging=false;
+  pauseAnimations(false);
+});
+</script>
+</body>
+</html>
