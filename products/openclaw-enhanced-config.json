@@ -1,0 +1,31 @@
+{
+  "gateway": {
+    "mode": "local",
+    "port": 18789
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "deepseek": {
+        "apiKey": "sk-a22cee0465fd437a92b5cc7fb86bd0c1",
+        "baseUrl": "https://api.deepseek.com"
+      },
+      "moonshot": {
+        "apiKey": "sk-um2CpZvj0eeWrlIHEE1IoCxN5zY9Es01djqEM90yByVD3Ek3",
+        "baseUrl": "https://api.moonshot.cn"
+      },
+      "qwen": {
+        "apiKey": "sk-4e378b4f0a54474185f9546c3adc4f58",
+        "baseUrl": "https://dashscope.aliyuncs.com"
+      },
+      "glm": {
+        "apiKey": "4b8d3ac9fa3f35f13c2e6e9358192f00.kBNPdnq7CAkcYgs0",
+        "baseUrl": "https://open.bigmodel.cn/api/paas/v4"
+      },
+      "hunyuan": {
+        "apiKey": "sk-ynABYu3w3qbN8JClHoUDEy5UBtQk0vUKrVPoo3skLpLVC7yt",
+        "baseUrl": "https://api.hunyuan.cloud.tencent.com"
+      }
+    }
+  }
+}
