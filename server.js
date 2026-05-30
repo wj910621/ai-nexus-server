@@ -47,6 +47,29 @@ const MODEL_CONFIG = {
   glm4plus:     { provider: 'openai',   model: 'glm-4-plus',         baseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
   hunyuan:      { provider: 'openai',   model: 'hunyuan-turbos-latest', baseUrl: 'https://api.hunyuan.cloud.tencent.com/v1' },
   yi:           { provider: 'openai',   model: 'yi-lightning',       baseUrl: 'https://api.lingyiwanwu.com/v1' },
+
+  // === 硅基流动 SiliconFlow ===
+  sf_deepseek_v32:  { provider: 'openai', model: 'deepseek-ai/DeepSeek-V3.2',      baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_glm5:          { provider: 'openai', model: 'Pro/zai-org/GLM-5',              baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_glm47:         { provider: 'openai', model: 'Pro/zai-org/GLM-4.7',            baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_qwen3_32b:     { provider: 'openai', model: 'Qwen/Qwen3-32B',                 baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_qwen35_397b:   { provider: 'openai', model: 'Qwen/Qwen3.5-397B-A17B',         baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_qwq_32b:       { provider: 'openai', model: 'Qwen/QwQ-32B',                   baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_hunyuan_a13b:  { provider: 'openai', model: 'tencent/Hunyuan-A13B-Instruct',  baseUrl: 'https://api.siliconflow.cn/v1' },
+
+  // === 阿里云百炼 ===
+  ali_qwen37_max:        { provider: 'openai', model: 'qwen3.7-max',          baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+  ali_qwen36_plus:       { provider: 'openai', model: 'qwen3.6-plus',         baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+  ali_qwen36_flash:      { provider: 'openai', model: 'qwen3.6-flash',        baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+  ali_deepseek_v4_pro:   { provider: 'openai', model: 'deepseek-v4-pro',      baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+  ali_deepseek_v4_flash: { provider: 'openai', model: 'deepseek-v4-flash',    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+  ali_glm51:             { provider: 'openai', model: 'glm-5.1',              baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+  ali_kimi_k26:          { provider: 'openai', model: 'kimi-k2.6',            baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+
+  // === DMXAPI ===
+  dmx_gpt52_pro:     { provider: 'openai', model: 'gpt-5.2-pro',            baseUrl: 'https://www.dmxapi.cn/v1' },
+  dmx_gemini3:       { provider: 'openai', model: 'gemini-3',               baseUrl: 'https://www.dmxapi.cn/v1' },
+  dmx_minimax_m27:   { provider: 'openai', model: 'MiniMax-M2.7',           baseUrl: 'https://www.dmxapi.cn/v1' },
 };
 
 // 那些我们还没接入真实 API 但有模型的（Claude, Llama, Baichuan 等）
@@ -63,6 +86,9 @@ function getApiKey(provider, modelId) {
   if (modelId.startsWith('glm'))      return process.env.ZHIPU_API_KEY;
   if (modelId.startsWith('yi'))       return process.env.YI_API_KEY;
   if (modelId.startsWith('hunyuan'))  return process.env.HUNYUAN_API_KEY;
+  if (modelId.startsWith('sf_'))     return process.env.SILICONFLOW_API_KEY;
+  if (modelId.startsWith('ali_'))    return process.env.DASHSCOPE_API_KEY;  // 百炼共用阿里云Key
+  if (modelId.startsWith('dmx_'))    return process.env.DMXAPI_API_KEY;
 
   switch (provider) {
     case 'openai':  return process.env.OPENAI_API_KEY;
