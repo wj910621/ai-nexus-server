@@ -90,11 +90,37 @@ a{color:var(--accent);text-decoration:none}
 .section{padding:48px 36px}.section-title{font-size:1.5rem;font-weight:700;margin-bottom:6px}.section-desc{color:var(--text-secondary);margin-bottom:28px;font-size:0.9rem}
 
 /* Hero */
-.hero{text-align:center;padding:70px 28px 50px}
+.hero{text-align:center;padding:30px 28px 50px}
 .hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.2;background:linear-gradient(135deg,#c4b5fd,#a855f7,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px}
 .hero p{color:var(--text-secondary);font-size:1.05rem;max-width:600px;margin:0 auto 32px;line-height:1.7}
 .hero-stats{display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
 .stat{text-align:center}.stat-num{font-size:2rem;font-weight:800;color:var(--accent)}.stat-label{font-size:0.8rem;color:var(--text-secondary);margin-top:4px}
+
+/* Hero Planet */
+.hero-planet{position:relative;width:100%;height:480px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:-20px}
+.hero-planet-scene{position:relative;width:500px;height:500px;perspective:900px}
+.hero-planet-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;text-align:center;pointer-events:none}
+.hero-planet-center .hp-icon{width:80px;height:80px;margin:0 auto;background:linear-gradient(135deg,#7c3aed,#a855f7,#06b6d4);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;box-shadow:0 0 50px rgba(124,58,237,0.5);animation:hero-pulse 3s ease-in-out infinite}
+@keyframes hero-pulse{0%,100%{box-shadow:0 0 40px rgba(124,58,237,0.4)}50%{box-shadow:0 0 80px rgba(124,58,237,0.7),0 0 120px rgba(6,182,212,0.3)}}
+.hero-planet-center .hp-tag{font-size:0.8rem;color:var(--text-secondary);margin-top:6px}
+.hero-planet .hp-ring{position:absolute;top:50%;left:50%;transform-style:preserve-3d;border-radius:50%;border:1px solid rgba(255,255,255,0.04);animation:hero-ring-spin var(--speed,20s) linear infinite}
+.hero-planet .hp-ring-1{width:240px;height:240px;margin:-120px 0 0 -120px;--speed:24s}
+.hero-planet .hp-ring-2{width:360px;height:360px;margin:-180px 0 0 -180px;--speed:36s;animation-direction:reverse}
+.hero-planet .hp-ring-3{width:480px;height:480px;margin:-240px 0 0 -240px;--speed:50s}
+@keyframes hero-ring-spin{from{transform:rotateX(70deg) rotateZ(0deg)}to{transform:rotateX(70deg) rotateZ(360deg)}}
+.hero-planet .hp-node{position:absolute;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.35s;backface-visibility:hidden}
+.hero-planet .hp-node .hp-ni{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:#fff;box-shadow:0 3px 14px rgba(0,0,0,0.4)}
+.hero-planet .hp-node:hover{transform:scale(1.4)!important;z-index:50}
+.hero-planet .hp-node .hp-nn{position:absolute;top:-20px;white-space:nowrap;font-size:0.55rem;color:var(--text);opacity:0;transition:opacity 0.25s;background:rgba(0,0,0,0.7);padding:2px 6px;border-radius:4px}
+.hero-planet .hp-node:hover .hp-nn{opacity:1}
+@media(max-width:640px){
+  .hero-planet{height:320px}.hero-planet-scene{width:320px;height:320px}
+  .hero-planet-center .hp-icon{width:55px;height:55px;font-size:1.5rem;border-radius:16px}
+  .hero-planet .hp-ring-1{width:170px;height:170px;margin:-85px 0 0 -85px}
+  .hero-planet .hp-ring-2{width:250px;height:250px;margin:-125px 0 0 -125px}
+  .hero-planet .hp-ring-3{width:320px;height:320px;margin:-160px 0 0 -160px}
+  .hero-planet .hp-node{width:38px;height:38px}.hero-planet .hp-node .hp-ni{width:26px;height:26px;font-size:0.7rem}
+}
 
 /* Cards */
 .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
@@ -473,6 +499,18 @@ a{color:var(--accent);text-decoration:none}
 <main class="main-content">
 
 <div class="page active" id="page-home">
+  <!-- 模型星球 Hero -->
+  <div class="hero-planet" id="heroPlanet">
+    <div class="hero-planet-scene">
+      <div class="hero-planet-center">
+        <div class="hp-icon">⚡</div>
+        <div class="hp-tag">AI Nexus · 模型星云</div>
+      </div>
+      <div class="hp-ring hp-ring-1" id="hpRing1"></div>
+      <div class="hp-ring hp-ring-2" id="hpRing2"></div>
+      <div class="hp-ring hp-ring-3" id="hpRing3"></div>
+    </div>
+  </div>
   <section class="hero">
     <h1>AI Nexus 智能创作平台</h1>
     <p>不需要买7个AI订阅，不需要学提示词，不需要搭智能体——一个网站，全搞定。对话30+顶级模型、写小说变漫剧做品牌去营销、10个预制智能体一键使用。</p>
@@ -536,7 +574,7 @@ a{color:var(--accent);text-decoration:none}
       <div class="planet-center">
         <div class="p-icon">⚡</div>
         <div class="p-tagline">AI Nexus · 模型星云</div>
-        <div class="p-sub">30+ 顶级模型 · 点击探索</div>
+        <div class="p-sub">45+ 顶级模型 · 点击探索</div>
       </div>
       <div class="p-ring p-ring-small" id="pRing1"></div>
       <div class="p-ring p-ring-mid" id="pRing2"></div>
@@ -1873,6 +1911,36 @@ const models=[
 function renderModelCard(m){return`<div class="model-card${m.featured?' featured':''}" onclick="switchPage('chat');setTimeout(()=>{const cb=document.querySelector('#chatModelList input[value=\\'${m.id}\\']');if(cb)cb.checked=true},100)" style="cursor:pointer"><div class="model-header"><div class="model-avatar" style="background:${m.avatar}">${m.name[0]}</div><div><div class="model-name">${m.name}</div></div></div><div class="model-desc">${m.desc}</div><div class="model-tags">${m.tags.map(t=>`<span class="tag${t==='免费'?' green':''}${t==='开源'?' orange':''}">${t}</span>`).join('')}</div><div class="model-meta"><span class="model-price">入:${m.inputPrice} | 出:${m.outputPrice}</span><span class="model-context">${m.context}</span></div></div>`}
 function initFeaturedModels(){document.getElementById('featuredModels').innerHTML=models.filter(m=>m.featured).map(renderModelCard).join('')}
 initFeaturedModels();
+
+// ===== 首页 Hero 模型星球 =====
+function initHeroPlanet(){
+  const ids=['hpRing1','hpRing2','hpRing3'];
+  if(!document.getElementById(ids[0]))return;
+  if(document.getElementById(ids[0]).children.length>0)return;
+  const featured=models.filter(m=>m.featured);
+  const allM=featured.length>=24?featured:models.slice(0,24);
+  const ring1=allM.slice(0,8);
+  const ring2=allM.slice(8,16);
+  const ring3=allM.slice(16,24);
+  const colorMap={'#10a37f':'#10a37f','#d97706':'#d97706','#4285f4':'#4285f4','#4f46e5':'#4f46e5','#ff6a00':'#ff6a00','#6c5ce7':'#6c5ce7','#3859ff':'#3859ff','#00a4ff':'#00a4ff','#0668e1':'#0668e1','#e17055':'#e17055','#e8426e':'#e8426e','#2932e1':'#2932e1','#ff6b35':'#ff6b35','#1d9bf0':'#1d9bf0','#2563eb':'#2563eb','#fd79a8':'#fd79a8','#f43f5e':'#f43f5e','#059669':'#059669','#8b5cf6':'#8b5cf6','#ea580c':'#ea580c','#0891b2':'#0891b2','#7c3aed':'#7c3aed','#0284c7':'#0284c7','#0369a1':'#0369a1','#ff6b00':'#ff6b00','#e63946':'#e63946','#6366f1':'#6366f1','#0ea5e9':'#0ea5e9','#e11d48':'#e11d48','#6b21a8':'#6b21a8'};
+  const radii=[120,180,240];
+  const rings=[ring1,ring2,ring3];
+  rings.forEach((items,ri)=>{
+    const ring=document.getElementById(ids[ri]);if(!ring)return;
+    const r=radii[ri];const count=items.length;const step=2*Math.PI/count;
+    items.forEach((m,i)=>{
+      const a=i*step;const x=r+r*Math.sin(a);const y=r-r*Math.cos(a);
+      const n=document.createElement('div');n.className='hp-node';
+      n.style.cssText=`left:${x-24}px;top:${y-24}px`;
+      const c=colorMap[m.avatar]||m.avatar;const icon=m.name.charAt(0);
+      n.innerHTML=`<div class="hp-ni" style="background:${c}">${icon}</div><div class="hp-nn">${m.name}</div>`;
+      n.title=m.name;
+      n.addEventListener('click',()=>{switchPage('chat');setTimeout(()=>{const cb=document.querySelector('#chatModelList input[value="${m.id}"]');if(cb)cb.checked=true},100)});
+      ring.appendChild(n);
+    });
+  });
+}
+initHeroPlanet();
 
 function initAllModels(){
   renderPlanet();
