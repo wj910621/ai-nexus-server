@@ -491,6 +491,126 @@ app.get('/api/openrouter-models', async (req, res) => {
 });
 
 // ============================================================
+// 可灵 Kling 视频生成 API
+// ============================================================
+const crypto = require('crypto');
+
+async function getKlingToken() {
+  const accessKey = process.env.KLING_ACCESS_KEY;
+  const secretKey = process.env.KLING_SECRET_KEY;
+  if (!accessKey || !secretKey) return null;
+
+  const jwtHeader = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const now = Math.floor(Date.now() / 1000);
+  const payload = Buffer.from(JSON.stringify({
+    iss: accessKey,
+    exp: now + 1800,
+    nbf: now - 5
+  })).toString('base64url');
+
+  const signature = crypto
+    .createHmac('sha256', secretKey)
+    .update(jwtHeader + '.' + payload)
+    .digest('base64url');
+
+  return jwtHeader + '.' + payload + '.' + signature;
+}
+
+app.post('/api/kling/txt2video', async (req, res) => {
+  try {
+    const token = await getKlingToken();
+    if (!token) return res.json({ ok: false, error: '可灵 API Key 未配置' });
+
+    const { prompt, duration = 5, aspectRatio = '16:9' } = req.body;
+    if (!prompt) return res.json({ ok: false, error: '请输入视频描述' });
+
+    const r = await fetch('https://api.klingai.com/v1/videos/text2video', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+      },
+      body: JSON.stringify({
+        model_name: 'kling-v1-6',
+        prompt,
+        duration: String(duration),
+        mode: 'std',
+        aspect_ratio: aspectRatio,
+        cfg_scale: 0.5,
+      }),
+    });
+
+    const data = await r.json();
+    if (data.code === 0 && data.data) {
+      res.json({ ok: true, taskId: data.data.task_id });
+    } else {
+      res.json({ ok: false, error: data.message || '生成失败' });
+    }
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+app.get('/api/kling/result/:taskId', async (req, res) => {
+  try {
+    const token = await getKlingToken();
+    if (!token) return res.json({ ok: false, error: '未配置' });
+
+    const r = await fetch('https://api.klingai.com/v1/videos/text2video/' + req.params.taskId, {
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// ============================================================
+// Meshy 3D 模型生成 API
+// ============================================================
+app.post('/api/meshy/txt2d', async (req, res) => {
+  try {
+    const apiKey = process.env.MESHY_API_KEY;
+    if (!apiKey) return res.json({ ok: false, error: 'Meshy API Key 未配置' });
+
+    const { prompt, style = 'realistic' } = req.body;
+    if (!prompt) return res.json({ ok: false, error: '请输入3D模型描述' });
+
+    const r = await fetch('https://api.meshy.ai/openapi/v2/text-to-3d', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey,
+      },
+      body: JSON.stringify({
+        object_prompt: prompt,
+        style_prompt: style,
+        enable_pbr: true,
+      }),
+    });
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+app.get('/api/meshy/result/:taskId', async (req, res) => {
+  try {
+    const apiKey = process.env.MESHY_API_KEY;
+    if (!apiKey) return res.json({ ok: false });
+
+    const r = await fetch('https://api.meshy.ai/openapi/v2/text-to-3d/' + req.params.taskId, {
+      headers: { 'Authorization': 'Bearer ' + apiKey },
+    });
+    res.json(await r.json());
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// ============================================================
 // SQLite 数据库
 // ============================================================
 let db = null;
