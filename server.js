@@ -573,15 +573,15 @@ app.post('/api/auth/register', (req, res) => {
       return res.json({ ok: false, error: '用户名或邮箱已被注册' });
     }
     const refCodeGen = 'J3' + username.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) + Math.random().toString(36).slice(2, 5).toUpperCase();
-    let bonus = 30;
+    let bonus = 50;
     let referrer = null;
     if (refCode) {
       const refUser = db.exec("SELECT username FROM users WHERE ref_code=? OR username=?", [refCode, refCode]);
       if (refUser.length && refUser[0].values.length) {
-        bonus += 5;
+        bonus += 20;
         referrer = refUser[0].values[0][0];
-        db.run("UPDATE users SET credits=credits+5 WHERE username=?", [referrer]);
-        db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?, ?, ?)", [referrer, 5, '推荐奖励']);
+        db.run("UPDATE users SET credits=credits+20 WHERE username=?", [referrer]);
+        db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?, ?, ?)", [referrer, 20, '推荐奖励']);
       }
     }
     db.run("INSERT INTO users (username, email, password, credits, ref_code, referrer) VALUES (?,?,?,?,?,?)",
@@ -589,7 +589,7 @@ app.post('/api/auth/register', (req, res) => {
     db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, bonus, '注册赠送']);
     saveDB();
     const token = Buffer.from(JSON.stringify({ username, role: 'user', ts: Date.now() })).toString('base64');
-    res.json({ ok: true, token, user: { username, email, credits: bonus, refCode: refCodeGen }, bonus, referrerBonus: refCode ? 5 : 0 });
+    res.json({ ok: true, token, user: { username, email, credits: bonus, refCode: refCodeGen }, bonus, referrerBonus: refCode ? 20 : 0 });
   } catch(e) {
     res.json({ ok: false, error: '注册失败: ' + e.message });
   }

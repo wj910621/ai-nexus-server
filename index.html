@@ -623,6 +623,7 @@ a{color:var(--accent);text-decoration:none}
   <div class="top-actions">
     <span class="top-credit" onclick="dailyCheckin()" title="每日签到">📅 <span id="checkinBadge">签到</span></span>
     <span class="top-credit" onclick="switchPage('pricing')" title="积分">💎 <span id="creditDisplay">0</span></span>
+    <span class="top-credit" onclick="DAILY_CHECKIN()" id="checkinBtn" title="每日签到" style="background:linear-gradient(135deg,#f59e0b,#d97706);display:none">📅 签到 +3</span>
     <span id="userNav" style="display:flex;align-items:center;gap:6px"></span>
     <button class="theme-toggle" id="themeToggle">☀️</button>
     <span class="conn-status" id="connStatus"><span class="conn-dot checking"></span><span>检测</span></span>
@@ -1893,10 +1894,10 @@ a{color:var(--accent);text-decoration:none}
     <h2 class="section-title">💎 积分充值</h2>
     <p class="section-desc">积分用于 AI 聊天、小说创作、绘画生成等功能</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px">
-      <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">☕</div><h3>体验套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">100 积分 · 了解平台</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">单模型聊天×100<br>或办公×33次</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥9.9</div><button class="btn-send" onclick="purchaseCredits(100,'¥9.9')">购买</button></div>
-      <div class="feature-card" style="text-align:center;border:2px solid var(--accent);padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">⭐</div><h3>标准套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">500 积分 · 推荐</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">日常写作办公够用<br>¥0.08/次，超值</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥39</div><button class="btn-send" onclick="purchaseCredits(500,'¥39')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">💎</div><h3>进阶套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">1500 积分 · 重度用户</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">畅享对比+小说+漫剧<br>¥0.046/次</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥69</div><button class="btn-send" onclick="purchaseCredits(1500,'¥69')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">🚀</div><h3>专业套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">4000 积分 · 最划算</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">团队或专业创作者<br>¥0.032/次</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥129</div><button class="btn-send" onclick="purchaseCredits(4000,'¥129')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">☕</div><h3>体验套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">100 积分 · 了解平台</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">单模型聊天×100<br>或AI写小说×12章</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥9.9</div><button class="btn-send" onclick="purchaseCredits(100,'¥9.9')">购买</button></div>
+      <div class="feature-card" style="text-align:center;border:2px solid var(--accent);padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">⭐</div><h3>标准套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">600 积分 · 推荐</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">日常写作办公够用<br>¥0.065/积分，超值</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥39</div><button class="btn-send" onclick="purchaseCredits(600,'¥39')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">💎</div><h3>进阶套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">2000 积分 · 重度用户</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">狂写小说+生成漫剧+视频<br>¥0.035/积分</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥69</div><button class="btn-send" onclick="purchaseCredits(2000,'¥69')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">🚀</div><h3>专业套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">6000 积分 · 最划算</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">团队或专业创作者<br>¥0.022/积分</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥129</div><button class="btn-send" onclick="purchaseCredits(6000,'¥129')">购买</button></div>
     </div>
     <div class="feature-card" style="margin-top:20px">
       <h4 style="margin-bottom:12px;text-align:center">📊 使用说明（API成本+50%利润定价）</h4>
@@ -3383,6 +3384,35 @@ function spendCredits(a,t){if(userCredits<a){const f=document.getElementById('cr
 function closeCreditLow(){document.getElementById('creditLow').style.display='none'}
 function purchaseCredits(a,p){if(confirm(`购买${a}积分(¥${p})？\n将跳转到付款页面`)){window.open('https://mbd.pub','_blank');showToast('付款后联系客服领取积分。面包多审核通过后将自动发货')}}
 
+// === 每日签到 ===
+function DAILY_CHECKIN(){
+  if(!currentUser){showToast('请先登录');return}
+  const today=new Date().toDateString();
+  const streak=JSON.parse(localStorage.getItem('checkin_streak')||'{"date":"","count":0}');
+  if(streak.date===today){showToast('今天已经签到过了，明天再来吧~');return}
+  const yesterday=new Date(Date.now()-86400000).toDateString();
+  if(streak.date===yesterday)streak.count++; else streak.count=1;
+  streak.date=today;
+  // 连续签到奖励
+  let bonus=3;
+  if(streak.count%7===0)bonus+=5; // 每7天额外+5
+  if(streak.count%30===0)bonus+=20; // 每30天额外+20
+  localStorage.setItem('checkin_streak',JSON.stringify(streak));
+  userCredits+=bonus;localStorage.setItem('cr',userCredits);updateCreditDisplay();
+  const bonusMsg=streak.count%7===0?'🎉 连续7天! +8':streak.count%30===0?'🔥 连续30天! +23':`+${bonus}`;
+  showToast(`✅ 签到成功! ${bonusMsg}积分 · 连续${streak.count}天 · 余额${userCredits}`);
+  updateCheckinBtn();
+}
+function updateCheckinBtn(){
+  const btn=document.getElementById('checkinBtn');
+  if(!currentUser){btn.style.display='none';return}
+  btn.style.display='inline-flex';
+  const today=new Date().toDateString();
+  const streak=JSON.parse(localStorage.getItem('checkin_streak')||'{"date":"","count":0}');
+  if(streak.date===today){btn.textContent='✅ 已签到';btn.style.background='var(--bg-card)';btn.style.opacity='0.6'}
+  else{btn.textContent='📅 签到 +3';btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)';btn.style.opacity='1'}
+}
+
 // === User Auth ===
 let currentUser=JSON.parse(localStorage.getItem('cuser')||'null');
 function getUsers(){try{return JSON.parse(localStorage.getItem('users')||'[]')}catch(e){return[]}}
@@ -3449,7 +3479,7 @@ function doLoginNew(){
       setAuthToken(d.token);currentUser=d.user||{username:u};
       localStorage.setItem('cuser',JSON.stringify(currentUser));
       if(d.user&&d.user.credits!==undefined){userCredits=d.user.credits;localStorage.setItem('cr',userCredits)}
-      closeAuth();renderUserNav();updateCreditDisplay();showToast('👋 欢迎回来，'+(d.user?.name||u));
+      closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();updateCheckinBtn();showToast('👋 欢迎回来，'+(d.user?.name||u));
       syncUserData();
     }else{
       // 后端不可用时降级到本地登录
@@ -3457,7 +3487,7 @@ function doLoginNew(){
       if(!found){showToast(d.error||'用户名或密码错误');return}
       currentUser={username:found.username,email:found.email};localStorage.setItem('cuser',JSON.stringify(currentUser));
       userCredits=parseInt(localStorage.getItem('cr_'+found.username)||'30');localStorage.setItem('cr',userCredits);
-      closeAuth();renderUserNav();updateCreditDisplay();showToast('👋 欢迎回来，'+found.username);
+      closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();showToast('👋 欢迎回来，'+found.username);
     }
   });
 }
@@ -3476,7 +3506,7 @@ function doRegisterNew(){
       setAuthToken(d.token);currentUser=d.user||{username:u};
       localStorage.setItem('cuser',JSON.stringify(currentUser));
       if(d.user&&d.user.credits!==undefined){userCredits=d.user.credits;localStorage.setItem('cr',userCredits)}
-      closeAuth();renderUserNav();updateCreditDisplay();
+      closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();
       switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 AI Nexus')},500);
       syncUserData();
     }else{
@@ -3490,7 +3520,7 @@ function doRegisterNew(){
       if(ref){const refUser=users.find(x=>x.refCode===ref||x.username===ref);if(refUser&&refUser.username!==u){bonus+=5;const rc=parseInt(localStorage.getItem('cr_'+refUser.username)||'30');localStorage.setItem('cr_'+refUser.username,rc+5);showToast('推荐码有效！你和推荐人各得5积分')}}
       localStorage.setItem('cr_'+u,bonus);userCredits=bonus;localStorage.setItem('cr',bonus);
       currentUser={username:u,email:e};localStorage.setItem('cuser',JSON.stringify(currentUser));
-      closeAuth();renderUserNav();updateCreditDisplay();
+      closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();
       switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast(`🎉 注册成功！赠送${bonus}积分。试试第一次AI对话吧~`)},500);
     }
   });
@@ -3505,7 +3535,7 @@ function doLogin(){doLoginNew()}
 function doRegister(){doRegisterNew()}
 function showRegister(){document.getElementById('authModal').classList.add('show');switchAuthTab('register')}
 function genRefCode(u){return 'J3'+u.substring(0,3).toUpperCase()+String(Math.floor(Math.random()*9000+1000))}
-function doLogout(){currentUser=null;setAuthToken(null);localStorage.removeItem('cuser');localStorage.removeItem('cr');renderUserNav();updateCreditDisplay();showToast('已退出')}
+function doLogout(){currentUser=null;setAuthToken(null);localStorage.removeItem('cuser');localStorage.removeItem('cr');renderUserNav();updateCreditDisplay();updateCheckinBtn();showToast('已退出')}
 
 // === AI Office ===
 let officePrompt='';
