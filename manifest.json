@@ -1,0 +1,58 @@
+{
+  "name": "AI Nexus - 智能创作平台",
+  "short_name": "AI Nexus",
+  "description": "一站式AI大模型聚合平台，接入DeepSeek、通义千问、Kimi、GLM、混元、硅基流动、OpenRouter等700+模型，跨设备同步",
+  "start_url": "/?pwa=1",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0d0721",
+  "theme_color": "#0d0721",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "zh-CN",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "AI 聊天",
+      "short_name": "聊天",
+      "description": "开始多模型对话",
+      "url": "/?page=chat",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "AI 写小说",
+      "short_name": "写小说",
+      "description": "6步创作流程",
+      "url": "/?page=novel",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "提示词库",
+      "short_name": "提示词",
+      "description": "50+写作工具",
+      "url": "/?page=prompts",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
