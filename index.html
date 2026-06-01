@@ -687,12 +687,11 @@ a{color:var(--accent);text-decoration:none}
       <button class="btn-send" onclick="switchPage('chat');showToast('首次聊天不扣积分，试试吧~')" style="font-size:1rem;padding:14px 36px">🚀 免费体验</button>
       <button class="btn-send" onclick="switchPage('pricing')" style="font-size:1rem;padding:14px 36px;background:linear-gradient(135deg,#f59e0b,#d97706)">💎 查看套餐</button>
     </div>
-    <div style="display:inline-block;background:rgba(16,185,129,0.15);color:var(--green);padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;margin-bottom:24px">✨ 新用户注册即送 <span style="font-size:1rem">30积分</span> 免费体验</div>
+    <div style="display:inline-block;background:rgba(16,185,129,0.15);color:var(--green);padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;margin-bottom:24px">✨ 新用户注册即送 <span style="font-size:1rem">50积分</span> 免费体验</div>
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num" id="modelCount">45</div><div class="stat-label">收录模型</div></div>
-      <div class="stat"><div class="stat-num">10</div><div class="stat-label">供应商</div></div>
-      <div class="stat"><div class="stat-num" style="font-size:1.5rem">¥39起</div><div class="stat-label">基础套餐</div></div>
-      <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">在线服务</div></div>
+      <div class="stat"><div class="stat-num" id="modelCount">72</div><div class="stat-label">收录模型</div></div>
+      <div class="stat"><div class="stat-num" id="providerCount">9</div><div class="stat-label">供应商/API</div></div>
+      <div class="stat"><div class="stat-num" id="usedCount">0</div><div class="stat-label">今日使用</div></div>
     </div>
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:24px">
       <span style="background:var(--accent-soft);color:var(--accent);padding:4px 12px;border-radius:16px;font-size:0.72rem">🔒 数据加密传输</span>
@@ -752,7 +751,7 @@ a{color:var(--accent);text-decoration:none}
       <div class="planet-center">
         <div class="p-icon">⚡</div>
         <div class="p-tagline">AI Nexus · 模型星云</div>
-        <div class="p-sub">45+ 顶级模型 · 点击探索</div>
+        <div class="p-sub">700+ 顶级模型 · 点击探索</div>
       </div>
       <div class="p-ring p-ring-small" id="pRing1"></div>
       <div class="p-ring p-ring-mid" id="pRing2"></div>
@@ -1892,7 +1891,10 @@ a{color:var(--accent);text-decoration:none}
 <div class="page" id="page-pricing">
   <section class="section">
     <h2 class="section-title">💎 积分充值</h2>
-    <p class="section-desc">积分用于 AI 聊天、小说创作、绘画生成等功能</p>
+    <p class="section-desc">积分用于 AI 聊天、小说创作、绘画生成等功能。💡 <b>套餐比单充划算 2-4 倍</b>，但也可以自由选择少量充值。</p>
+    <div style="text-align:center;margin-bottom:16px">
+      <span style="background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(217,119,6,0.1));color:#f59e0b;padding:8px 24px;border-radius:20px;font-size:0.82rem;font-weight:600">🎁 邀请好友双方各得 20 积分 · 每日签到 +3 积分 · 连续签到额外奖励</span>
+    </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px">
       <div class="feature-card" style="text-align:center;padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">☕</div><h3>体验套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">100 积分 · 了解平台</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">单模型聊天×100<br>或AI写小说×12章</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥9.9</div><button class="btn-send" onclick="purchaseCredits(100,'¥9.9')">购买</button></div>
       <div class="feature-card" style="text-align:center;border:2px solid var(--accent);padding:28px 20px"><div style="font-size:2rem;margin-bottom:6px">⭐</div><h3>标准套餐</h3><p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:4px">600 积分 · 推荐</p><p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5">日常写作办公够用<br>¥0.065/积分，超值</p><div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:10px 0">¥39</div><button class="btn-send" onclick="purchaseCredits(600,'¥39')">购买</button></div>
