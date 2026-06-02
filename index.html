@@ -118,6 +118,9 @@ a{color:var(--accent);text-decoration:none}
 .hero-planet .hp-ring-3{width:480px;height:480px;margin:-240px 0 0 -240px;--speed:50s}
 @keyframes hero-ring-spin{from{transform:rotateX(70deg) rotateZ(0deg)}to{transform:rotateX(70deg) rotateZ(360deg)}}
 @keyframes vidShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes vidSpin{to{transform:rotate(360deg)}}
+@keyframes vidReveal{0%{opacity:0;transform:translateY(20px) scale(0.95)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes vidPulse{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,0.4)}50%{box-shadow:0 0 0 12px rgba(124,58,237,0)}}
 .hero-planet .hp-node{position:absolute;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.35s;backface-visibility:hidden}
 .hero-planet .hp-node .hp-ni{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:#fff;box-shadow:0 3px 14px rgba(0,0,0,0.4)}
 .hero-planet .hp-node:hover{transform:scale(1.4)!important;z-index:50}
@@ -333,7 +336,7 @@ a{color:var(--accent);text-decoration:none}
 .auth-field input.error{border-color:var(--red);animation:shake 0.4s}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .auth-field .field-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.9rem;opacity:0.5}
-.auth-field .field-hint{font-size:0.68rem;color:var(--red);margin-top:4px;display:none}
+.auth-field .field-hint{font-size:0.68rem;color:var(--red);margin-top:4px;display:none;padding:4px 8px;background:rgba(239,68,68,0.08);border-radius:4px;font-weight:500}
 .auth-field .pwd-strength{height:3px;border-radius:2px;margin-top:6px;transition:all 0.3s;background:#333}
 .auth-field .pwd-strength.weak{background:var(--red);width:30%}
 .auth-field .pwd-strength.medium{background:var(--orange);width:60%}
@@ -660,7 +663,10 @@ a{color:var(--accent);text-decoration:none}
   <button class="sidebar-link" data-page="feedback"><span class="sidebar-icon" style="background:linear-gradient(135deg,#0284c7,#38bdf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>反馈</button>
   <div class="sidebar-bottom">
     <div class="sidebar-conn" id="sidebarConn"><span class="conn-dot checking"></span><span>检查连接</span></div>
-    <div class="sidebar-user" id="sidebarUser"><span>👤</span><span id="sidebarUserName">未登录</span></div>
+    <div class="sidebar-user" id="sidebarUser" onclick="openUserSettings()" style="cursor:pointer" title="点击修改密码">
+      <span>👤</span><span id="sidebarUserName">未登录</span>
+      <span style="margin-left:auto;font-size:0.7rem;opacity:0.5">⚙️</span>
+    </div>
   </div>
 </aside>
 
@@ -691,7 +697,7 @@ a{color:var(--accent);text-decoration:none}
       <button class="btn-send" onclick="switchPage('chat');showToast('首次聊天不扣积分，试试吧~')" style="font-size:1rem;padding:14px 36px">🚀 免费体验</button>
       <button class="btn-send" onclick="switchPage('pricing')" style="font-size:1rem;padding:14px 36px;background:linear-gradient(135deg,#f59e0b,#d97706)">💎 查看套餐</button>
     </div>
-    <div style="display:inline-block;background:rgba(16,185,129,0.15);color:var(--green);padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;margin-bottom:24px">✨ 新用户注册即送 <span style="font-size:1rem">50积分</span> 免费体验</div>
+    <div style="display:inline-block;background:rgba(16,185,129,0.15);color:var(--green);padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;margin-bottom:24px">✨ 新用户注册即送 <span style="font-size:1rem">10积分</span> 免费体验</div>
     <div class="hero-stats">
       <div class="stat"><div class="stat-num" id="modelCount">72</div><div class="stat-label">收录模型</div></div>
       <div class="stat"><div class="stat-num" id="providerCount">9</div><div class="stat-label">供应商/API</div></div>
@@ -734,7 +740,7 @@ a{color:var(--accent);text-decoration:none}
       <div class="feature-card" onclick="switchPage('brand')" style="cursor:pointer"><div class="feature-icon" style="background:linear-gradient(135deg,#f97316,#ef4444)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg></div><h3>品牌设计</h3><p>Logo+命名+Slogan→一键去营销</p></div>
       <div class="feature-card" onclick="switchPage('market')" style="cursor:pointer"><div class="feature-icon" style="background:linear-gradient(135deg,#22c55e,#10b981)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><h3>智能营销</h3><p>小红书+公众号→打造品牌IP</p></div>
       <div class="feature-card" onclick="switchPage('tools')" style="cursor:pointer"><div class="feature-icon" style="background:linear-gradient(135deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><h3>工具箱</h3><p>去水印/图片拼接/压缩/取色器/LSB隐写</p></div>
-      <div class="feature-card" onclick="switchPage('3d')" style="cursor:pointer"><div class="feature-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><h3>3D生成</h3><p>文本转3D/图生3D，Meshy AI驱动</p></div>
+      <div class="feature-card" onclick="switchPage('3d')" style="cursor:pointer"><div class="feature-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><h3>3D生成</h3><p>文本转3D/图生3D，AI驱动</p></div>
       <div class="feature-card" onclick="switchPage('music')" style="cursor:pointer"><div class="feature-icon" style="background:linear-gradient(135deg,#ef4444,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h3>AI音乐</h3><p>歌词创作/风格选择，AI生成独特旋律</p></div>
     </div>
   </section>
@@ -1382,9 +1388,25 @@ a{color:var(--accent);text-decoration:none}
       </div>
     </div>
 
-    <!-- 视频创作 - 重构版（可灵/即梦风格） -->
+    <!-- 视频创作 -->
     <div class="tab-content" id="studioTabVideo" style="display:none">
-      <div style="display:inline-block;background:rgba(16,185,129,0.15);color:var(--green);padding:4px 14px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-bottom:12px">🔑 平台已配置可灵 Key · 即开即用</div>
+      <!-- API Key 接入 -->
+      <div class="feature-card" style="margin-bottom:14px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--accent-soft)">
+        <span style="font-size:0.82rem;font-weight:600">🎬 视频生成 API</span>
+        <div style="display:flex;gap:8px;align-items:center" id="vidApiRow">
+          <select id="vidApiPlatform" style="padding:6px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem" onchange="VID_PLATFORM_CHANGE()">
+            <option value="agnes">Agnes (平台免费)</option>
+            <option value="kling">可灵 Kling</option>
+            <option value="luma">Luma Dream Machine</option>
+            <option value="pika">Pika</option>
+            <option value="runway">Runway</option>
+            <option value="custom">自定义</option>
+          </select>
+          <input id="vidApiKey" type="password" style="width:240px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem" placeholder="输入 API Key">
+          <button class="btn-sm primary" onclick="VID_SAVE_KEY()">保存</button>
+        </div>
+        <div id="vidAgnesHint" style="display:none;font-size:0.72rem;color:#10b981;font-weight:600">🚀 使用平台免费额度，无需配置</div>
+      </div>
       <div style="display:grid;grid-template-columns:360px 1fr;gap:20px">
         <!-- 左侧控制面板 -->
         <div>
@@ -1435,10 +1457,8 @@ a{color:var(--accent);text-decoration:none}
             </div>
           </div>
           <div class="feature-card" style="padding:12px;margin-bottom:10px">
-            <label style="font-weight:600;font-size:0.72rem;display:block;margin-bottom:4px">🎬 视频模型</label>
-            <select id="vidModel" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem">
-              <option value="kling-1.6">标准模型（推荐）</option><option value="kling-1.5">极速模型</option>
-            </select>
+            <label style="font-weight:600;font-size:0.72rem;display:block;margin-bottom:4px">🎬 创作模型</label>
+            <div id="modelBar_studio"></div>
           </div>
           <button class="btn-send" onclick="STUDIO_GENERATE_VIDEO()" style="width:100%;background:linear-gradient(135deg,#7c3aed,#6366f1);font-size:0.9rem;padding:12px">🎬 立即生成 <span id="vidCostLabel" style="font-size:0.72rem;opacity:0.8;margin-left:6px">⚡3积分</span></button>
           <div style="display:flex;gap:6px;margin-top:6px">
@@ -1453,10 +1473,25 @@ a{color:var(--accent);text-decoration:none}
               <h4 style="font-size:0.9rem">🎬 视频广场</h4>
               <span style="font-size:0.7rem;color:var(--text-secondary)">点击"使用此提示"快速创作</span>
             </div>
-            <div id="vidResultArea" style="text-align:center;min-height:200px">
-              <div style="font-size:3rem;margin-bottom:8px;opacity:0.2">🎬</div>
-              <p style="color:var(--text-secondary);font-size:0.82rem">输入描述，选择参数，点击生成</p>
-              <div id="stuVidLoading" style="display:none;margin-top:10px"><span class="spinner"></span><span style="margin-left:8px;color:var(--accent);font-size:0.82rem">AI 生成视频中...</span></div>
+            <div id="vidResultArea" style="text-align:center;min-height:200px;position:relative;overflow:hidden">
+              <div id="stuVidPlaceholder">
+                <div style="font-size:3rem;margin-bottom:8px;opacity:0.2">🎬</div>
+                <p style="color:var(--text-secondary);font-size:0.82rem">输入描述，选择参数，点击生成</p>
+              </div>
+              <!-- 加载动画 -->
+              <div id="stuVidLoading" style="display:none;padding:40px 20px">
+                <div style="width:48px;height:48px;margin:0 auto 16px;position:relative">
+                  <div style="width:48px;height:48px;border-radius:50%;background:conic-gradient(#7c3aed,#6366f1,#a855f7,#7c3aed);animation:vidSpin 1s linear infinite"></div>
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.2rem">🎬</div>
+                </div>
+                <p id="vidStatusText" style="font-size:0.85rem;font-weight:600;margin-bottom:4px">🎨 AI 正在创作视频...</p>
+                <p id="vidStatusSub" style="font-size:0.7rem;color:var(--text-secondary)">预计需要 1-3 分钟</p>
+                <div style="width:80%;max-width:300px;height:4px;background:var(--bg-input);border-radius:2px;margin:16px auto 0;overflow:hidden">
+                  <div id="vidProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#6366f1,#a855f7);border-radius:2px;transition:width 0.5s ease"></div>
+                </div>
+              </div>
+              <!-- 视频结果 -->
+              <div id="stuVidResult" style="display:none;animation:vidReveal 0.6s ease"></div>
               <img id="stuVideoImg" src="" style="display:none;max-width:100%;max-height:280px;border-radius:10px;margin:0 auto">
             </div>
           </div>
@@ -1683,7 +1718,7 @@ a{color:var(--accent);text-decoration:none}
 <div class="page" id="page-3d">
   <section class="section" style="padding:24px 36px">
     <h2 class="section-title">🧊 3D 模型生成</h2>
-    <p class="section-desc">文本转3D / 图生3D，由 Meshy AI 驱动 · 平台已配置 Key，即开即用</p>
+    <p class="section-desc">文本转3D / 图生3D，AI 驱动 · 平台已配置，即开即用</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
       <div class="feature-card" style="padding:20px">
         <div style="font-size:2rem;margin-bottom:8px">📝</div>
@@ -1742,7 +1777,7 @@ a{color:var(--accent);text-decoration:none}
     <h3 style="margin-bottom:12px">❓ 常见问题</h3>
     <div style="display:grid;gap:8px" id="d3Faq">
       <div class="feature-card" style="padding:14px;cursor:pointer" onclick="D3_TOGGLE_FAQ(this)">
-        <div style="display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:0.85rem"><span>什么是 Meshy？需要自己申请 Key 吗？</span><span style="font-size:0.7rem">▼</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:0.85rem"><span>如何使用 3D 生成功能？</span><span style="font-size:0.7rem">▼</span></div>
         <div class="d3FaqAnswer" style="display:none;font-size:0.78rem;color:var(--text-secondary);line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">Meshy 是 AI 3D 内容生成平台，平台已配置 API Key，您无需单独申请，输入描述即可生成 3D 模型。</div>
       </div>
       <div class="feature-card" style="padding:14px;cursor:pointer" onclick="D3_TOGGLE_FAQ(this)">
@@ -1981,14 +2016,19 @@ a{color:var(--accent);text-decoration:none}
   <!-- 注册表单 -->
   <div class="auth-form" id="authFormRegister">
     <div class="auth-field">
-      <input id="regUser" placeholder="用户名（4-20位字母数字）" autocomplete="username" oninput="checkUsername()">
+      <input id="regUser" placeholder="用户名（2-20位字母/数字/下划线/中文）" autocomplete="username" oninput="checkUsername()">
       <span class="field-icon">👤</span>
-      <div class="field-hint" id="regUserHint">用户名格式：2-20位字母/数字/下划线</div>
+      <div class="field-hint" id="regUserHint">用户名格式：2-20位字母/数字/下划线/中文</div>
     </div>
     <div class="auth-field">
-      <input id="regEmail" type="email" placeholder="邮箱地址" autocomplete="email" oninput="checkEmail()">
+      <input id="regEmail" type="email" placeholder="邮箱地址（选填，用于找回账号）" autocomplete="email" oninput="checkEmail()">
       <span class="field-icon">📧</span>
-      <div class="field-hint" id="regEmailHint">请输入有效的邮箱地址</div>
+      <div class="field-hint" id="regEmailHint">请输入有效的邮箱地址（如 name@qq.com）</div>
+    </div>
+    <div class="auth-field">
+      <input id="regPhone" placeholder="手机号（必填，一人一号的凭证）" autocomplete="tel" oninput="checkPhone()">
+      <span class="field-icon">📱</span>
+      <div class="field-hint" id="regPhoneHint">手机号是唯一身份凭证，一个手机号只能注册一个账号</div>
     </div>
     <div class="auth-field">
       <input id="regPwd" type="password" placeholder="密码（至少6位，包含字母+数字更安全）" autocomplete="new-password" oninput="checkPwdStrength()">
@@ -1999,6 +2039,27 @@ a{color:var(--accent);text-decoration:none}
     <div class="auth-field">
       <input id="regRefCode" placeholder="推荐码（选填，双方各得5积分）">
       <span class="field-icon">🎁</span>
+    </div>
+    <div class="auth-field">
+      <select id="regSecQ" style="width:100%;padding:10px 36px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;appearance:none">
+        <option value="">选择密保问题（找回账号用）</option>
+        <option value="母亲的名字">母亲的名字是？</option>
+        <option value="小学班主任">小学班主任的名字是？</option>
+        <option value="宠物的名字">第一只宠物的名字是？</option>
+        <option value="出生的城市">在哪里出生的？</option>
+        <option value="喜欢的书">最喜欢的书是？</option>
+        <option value="自定义">自定义问题</option>
+      </select>
+      <span class="field-icon">🔐</span>
+    </div>
+    <div class="auth-field" id="regCustomQField" style="display:none">
+      <input id="regCustomQ" placeholder="输入你的自定义密保问题">
+      <span class="field-icon">❓</span>
+    </div>
+    <div class="auth-field">
+      <input id="regSecA" placeholder="密保答案（牢记，用于找回账号）">
+      <span class="field-icon">✍️</span>
+      <div class="field-hint" id="regSecAHint">密保问题+答案是找回账号的唯一凭证，请牢记</div>
     </div>
     <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:14px;font-size:0.72rem;color:var(--text-secondary)">
       <input type="checkbox" id="regAgree" style="margin-top:3px">
@@ -2380,7 +2441,7 @@ function switchPage(name){
   if(name==='admin'){document.getElementById('adminLogin').style.display='block';document.getElementById('adminDashboard').style.display='none'}
   if(name==='agents'){renderAgents('all');setTimeout(()=>renderModelBar('agents','modelBar_agents'),50)}
   if(name!='chat'&&name!='studio'&&name!='prompts'&&name!='knowledge')updateRightPanel(name);
-  if(name==='studio'){updateRightPanel('studio');setTimeout(initStudioData,100)}
+  if(name==='studio'){updateRightPanel('studio');setTimeout(initStudioData,100);setTimeout(()=>renderModelBar('studio','modelBar_studio'),50)}
   if(name==='prompts'){updateRightPanel('prompts');setTimeout(renderPromptCards,100)}
   if(name==='knowledge'){updateRightPanel('knowledge');setTimeout(renderKnowledgeTree,100)}
   if(name==='tools'){updateRightPanel('tools')}
@@ -2531,9 +2592,22 @@ function updateRightPanel(page){
         ${['量子计算通俗解释','写一首春天的诗','Python快速排序'].map(t=>`<div class="filter-tag" style="font-size:0.72rem;margin:2px;cursor:pointer" onclick="setComparePrompt('${t}')">${t}</div>`).join('')}
       </div>
     `},
-    'novel':{title:'章节管理',html:`
+    'novel':{title:'创作面板',html:`
       <div class="right-panel-card"><div style="font-weight:600;font-size:0.8rem">📚 <span id="rpNovelTitle">未开始</span></div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:4px"><span id="rpChapterCount">0</span> 章 · <span id="rpTotalWords">0</span> 字</div></div>
-      <div style="padding:8px"><button class="btn-sm primary" style="width:100%" onclick="downloadNovel()">⬇ 导出小说</button></div>
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.78rem;margin-bottom:8px">📝 快捷操作</div>
+        <button class="btn-sm primary" style="width:100%;margin-bottom:6px" onclick="downloadNovel()">⬇ 导出全书 (TXT)</button>
+        <button class="btn-sm" style="width:100%;margin-bottom:6px" onclick="openReader()">📖 阅读模式</button>
+        <button class="btn-sm" style="width:100%" onclick="exportAllChapters()">📋 复制全部章节</button>
+      </div>
+      <div class="right-panel-card"><div style="font-weight:600;font-size:0.78rem;margin-bottom:6px">💡 写作技巧</div>
+        <div style="font-size:0.68rem;color:var(--text-secondary);line-height:1.6">
+          • 每章设2-3个情节要点<br>
+          • 对话占比 > 30% 更生动<br>
+          • 结尾留悬念 > 读者追更<br>
+          • 写完用"去AI痕迹"润色<br>
+          • 章节字数 1500-3000 最佳
+        </div>
+      </div>
     `},
     'media':{title:'漫剧工具',html:`
       <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">🎬 风格参考</div>
@@ -2599,7 +2673,7 @@ function updateRightPanel(page){
     `},
     'admin':{title:'管理快捷',html:`<div class="right-panel-card" onclick="openAddModel()" style="cursor:pointer"><div style="font-weight:600;font-size:0.82rem">+ 添加模型</div></div><div class="right-panel-card" onclick="openApiSettings()" style="cursor:pointer"><div style="font-weight:600;font-size:0.82rem">🔑 API Key</div></div><div class="right-panel-card" onclick="openSiteSettings()" style="cursor:pointer"><div style="font-weight:600;font-size:0.82rem">⚙ 系统设置</div></div>`},
     'tools':{title:'工具提示',html:`<div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">🔧 使用说明</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.6">🎬 去水印：粘贴短视频链接解析<br>🖼 图片拼接：多图拼接长图<br>📦 图片压缩：调整质量减少文件体积<br>🎨 取色器：点击图片提取颜色<br>🟦 纯色图：生成指定纯色图片<br>🔐 LSB隐写：图片中隐藏秘密文本</div></div>`},
-    '3d':{title:'3D生成',html:`<div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">🧊 使用指南</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.6">1. 申请 Meshy API Key<br>2. 配置 Key 到输入框保存<br>3. 输入文字或上传图片<br>4. 提交等待生成<br>5. 在 Meshy 官网查看结果</div></div><div class="right-panel-card"><a href="https://meshy.ai" target="_blank" style="color:var(--accent);font-size:0.78rem">🌐 前往 Meshy.ai →</a></div>`},
+    '3d':{title:'3D生成',html:`<div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">🧊 使用指南</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.6">1. 输入文字描述或上传参考图<br>2. 选择生成参数和风格<br>3. 点击生成等待完成<br>4. 下载 3D 模型文件</div></div><div class="right-panel-card"><a href="https://meshy.ai" target="_blank" style="color:var(--accent);font-size:0.78rem">🌐 了解更多 →</a></div>`},
     'music':{title:'音乐信息',html:`<div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">💎 当前积分</div><div style="font-size:1.3rem;font-weight:800;color:var(--accent)" id="rpMusicCredits">0</div></div><div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">🎵 创作提示</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.6">• 歌词模式：输入完整歌词<br>• 创意模式：描述想要的氛围<br>• 歌词生成：AI自动写词<br>• 可多选风格混合<br>• 纯音乐模式生成伴奏</div></div>`}
   };
   const p=panels[page]||panels['home'];
@@ -2719,7 +2793,7 @@ const models=[
 ];
 
 // === Render Models ===
-function renderModelCard(m){return`<div class="model-card${m.featured?' featured':''}" onclick="switchPage('chat');setTimeout(()=>{const cb=document.querySelector('#chatModelList input[value=\\'${m.id}\\']');if(cb)cb.checked=true},100)" style="cursor:pointer"><div class="model-header"><div class="model-avatar" style="background:${m.avatar}">${m.name[0]}</div><div><div class="model-name">${m.name}</div></div></div><div class="model-desc">${m.desc}</div><div class="model-tags">${m.tags.map(t=>`<span class="tag${t==='免费'?' green':''}${t==='开源'?' orange':''}">${t}</span>`).join('')}</div><div class="model-meta"><span class="model-price">入:${m.inputPrice} | 出:${m.outputPrice}</span><span class="model-context">${m.context}</span></div></div>`}
+function renderModelCard(m){const avatar=m.avatar||('#'+Math.floor(Math.random()*16777215).toString(16));const desc=m.desc||`${m.provider} · 大语言模型`;return`<div class="model-card${m.featured?' featured':''}" onclick="switchPage('chat');setTimeout(()=>{const cb=document.querySelector('#chatModelList input[value=\\'${m.id}\\']');if(cb)cb.checked=true},100)" style="cursor:pointer"><div class="model-header"><div class="model-avatar" style="background:${avatar}">${m.name[0]}</div><div><div class="model-name">${m.name}</div></div></div><div class="model-desc">${desc}</div><div class="model-tags">${(m.tags||[]).map(t=>`<span class="tag${t==='免费'?' green':''}${t==='开源'?' orange':''}">${t}</span>`).join('')}</div><div class="model-meta"><span class="model-price">入:${m.inputPrice||'?'} | 出:${m.outputPrice||'?'}</span><span class="model-context">${m.context||'?'}</span></div></div>`}
 function initFeaturedModels(){document.getElementById('featuredModels').innerHTML=models.filter(m=>m.featured).map(renderModelCard).join('')}
 initFeaturedModels();
 
@@ -2883,8 +2957,10 @@ function reportContent(pid,modelName){
 
 async function callModelAPI(modelId,question,sysPrompt){
   const msgs=sysPrompt?[{role:'system',content:sysPrompt},{role:'user',content:question}]:[{role:'user',content:question}];
-  try{const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:modelId,messages:msgs})});if(r.ok)return await r.json()}catch(e){}
   const m=models.find(x=>x.id===modelId);
+  const body={model:modelId,messages:msgs};
+  if(m&&m.rawModel) body.rawModel=m.rawModel;
+  try{const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(r.ok)return await r.json()}catch(e){}
   return {model:modelId,content:`[${m?.name||modelId} 模拟]\n\n⚠️ API未连接。\n在管理后台→API Key 中配置后获得真实回复。`,simulated:true};
 }
 
@@ -3433,6 +3509,30 @@ function updateCheckinBtn(){
 
 // === User Auth ===
 let currentUser=JSON.parse(localStorage.getItem('cuser')||'null');
+// === 设备指纹（防多账号核心） ===
+function getDeviceFingerprint(){
+  const fp=localStorage.getItem('device_fp');
+  if(fp)return fp;
+  const comps=[
+    screen.width+'x'+screen.height,
+    screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.language,
+    navigator.hardwareConcurrency||'?',
+    navigator.platform||'?',
+    !!navigator.webdriver,
+  ];
+  const raw=comps.join('|')+'|'+Math.random().toString(36).substring(2,8);
+  const hash=btoa(raw).substring(0,20);
+  localStorage.setItem('device_fp',hash);
+  return hash;
+}
+// 检查本设备是否已有绑定账号
+function getDeviceBoundUser(){
+  const fp=getDeviceFingerprint();
+  const users=getUsers();
+  return users.find(u=>u.deviceFp===fp)||null;
+}
 function getUsers(){try{return JSON.parse(localStorage.getItem('users')||'[]')}catch(e){return[]}}
 function saveUsers(u){localStorage.setItem('users',JSON.stringify(u))}
 function renderUserNav(){
@@ -3469,9 +3569,15 @@ function checkUsername(){
 }
 function checkEmail(){
   const v=document.getElementById('regEmail').value.trim();
-  if(!v){document.getElementById('regEmailHint').style.display='none';return false}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){showFieldError(document.getElementById('regEmail'),'请输入有效的邮箱地址');return false}
+  if(!v){document.getElementById('regEmailHint').style.display='none';return true} // 邮箱选填
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){showFieldError(document.getElementById('regEmail'),'⚠️ 邮箱格式错误（如 name@qq.com）');return false}
   document.getElementById('regEmailHint').style.display='none';return true;
+}
+function checkPhone(){
+  const v=document.getElementById('regPhone').value.trim();
+  if(!v){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号必填，是您账号的唯一身份凭证');return false}
+  if(!/^1[3-9]\d{9}$/.test(v)){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号格式不正确（11位数字）');return false}
+  document.getElementById('regPhoneHint').style.display='none';return true;
 }
 function checkPwdStrength(){
   const v=document.getElementById('regPwd').value,bar=document.getElementById('pwdBar'),txt=document.getElementById('pwdStrengthText');
@@ -3514,11 +3620,29 @@ function doRegisterNew(){
   let valid=true;
   if(!checkUsername())valid=false;
   if(!checkEmail())valid=false;
+  const phone=document.getElementById('regPhone').value.trim();
+  if(!phone){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号必填');valid=false}
+  if(phone&&!/^1[3-9]\d{9}$/.test(phone)){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号格式不正确');valid=false}
   if(p.length<6){showFieldError(document.getElementById('regPwd'),'密码至少6位');valid=false}
+  const secQ=document.getElementById('regSecQ').value;
+  const customQ=document.getElementById('regCustomQ').value.trim();
+  const secA=document.getElementById('regSecA').value.trim();
+  const securityQuestion=secQ==='自定义'?customQ:secQ;
+  if(!securityQuestion||securityQuestion==='自定义'){showToast('请选择密保问题');valid=false}
+  if(!secA){showFieldError(document.getElementById('regSecA'),'请输入密保答案');valid=false}
   if(!document.getElementById('regAgree').checked){showToast('请同意服务条款');valid=false}
   if(!valid)return;
+
+  // === 强防薅：设备指纹绑定 ===
+  const deviceFp=getDeviceFingerprint();
+  const existingDeviceUser=getDeviceBoundUser();
+  if(existingDeviceUser){showToast(`⚠️ 本设备已绑定账号「${existingDeviceUser.username}」，无法重复注册。请使用该账号登录。`);return}
+  // 邮箱唯一性检查
+  if(e){const users=getUsers();if(users.find(x=>x.email===e)){showFieldError(document.getElementById('regEmail'),'该邮箱已被注册');return}}
+
   const btn=document.querySelector('.auth-btn');btn.textContent='注册中...';btn.disabled=true;
-  apiFetch('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,email:e,password:p,refCode:ref||undefined})}).then(d=>{
+  const phone=document.getElementById('regPhone').value.trim();
+  apiFetch('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,email:e||undefined,password:p,phone:phone||undefined,deviceFp,refCode:ref||undefined})}).then(d=>{
     btn.textContent='注 册';btn.disabled=false;
     if(d.ok&&d.token){
       setAuthToken(d.token);currentUser=d.user||{username:u};
@@ -3532,19 +3656,39 @@ function doRegisterNew(){
       const users=getUsers();
       if(users.find(x=>x.username===u)){showFieldError(document.getElementById('regUser'),'用户名已存在');return}
       if(users.find(x=>x.email===e)){showFieldError(document.getElementById('regEmail'),'邮箱已被注册');return}
-      const newUser={username:u,email:e,password:btoa(p),refCode:genRefCode(u),created:new Date().toISOString()};
+      const newUser={username:u,email:e,phone:phone||'',password:btoa(p),refCode:genRefCode(u),created:new Date().toISOString(),securityQ:securityQuestion,securityA:btoa(secA),deviceFp};
       users.push(newUser);saveUsers(users);
-      let bonus=30;
+      let bonus=10;
       if(ref){const refUser=users.find(x=>x.refCode===ref||x.username===ref);if(refUser&&refUser.username!==u){bonus+=5;const rc=parseInt(localStorage.getItem('cr_'+refUser.username)||'30');localStorage.setItem('cr_'+refUser.username,rc+5);showToast('推荐码有效！你和推荐人各得5积分')}}
       localStorage.setItem('cr_'+u,bonus);userCredits=bonus;localStorage.setItem('cr',bonus);
-      currentUser={username:u,email:e};localStorage.setItem('cuser',JSON.stringify(currentUser));
+      currentUser={username:u,email:e,phone:phone||''};localStorage.setItem('cuser',JSON.stringify(currentUser));
       closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();
       switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast(`🎉 注册成功！赠送${bonus}积分。试试第一次AI对话吧~`)},500);
     }
   });
 }
 function showForgotPwd(){switchAuthTab('forgot')}
-function doForgotPwd(){showToast('📧 如果邮箱已注册，重置链接将发送到您的邮箱（演示功能）'); switchAuthTab('login')}
+function doForgotPwd(){
+  const input=document.getElementById('forgotEmail').value.trim();
+  if(!input){showToast('请输入注册邮箱或用户名');return}
+  const users=getUsers();
+  const user=users.find(x=>x.email===input||x.username===input);
+  if(!user){showToast('未找到该邮箱或用户名对应的账号');return}
+  if(!user.securityQ){showToast('该账号未设置密保，无法找回。请联系管理员');return}
+  // 显示密保验证
+  const answer=prompt(`密保问题：${atobFix(user.securityQ)}\n\n请输入你的答案：`);
+  if(!answer)return;
+  if(atobFix(user.securityA).toLowerCase() !== answer.toLowerCase()){showToast('❌ 密保答案错误！');return}
+  const np=prompt('密保验证通过！请输入新密码（至少6位）：');
+  if(!np||np.length<6){showToast('密码至少6位');return}
+  user.password=btoa(np);saveUsers(users);
+  showToast('✅ 密码已重置，请用新密码登录');
+  switchAuthTab('login');
+}
+// 密保问题切换
+document.getElementById('regSecQ').addEventListener('change',function(){
+  document.getElementById('regCustomQField').style.display=this.value==='自定义'?'block':'none';
+});
 function closeAuth(){document.getElementById('authModal').classList.remove('show')}
 function showLogin(){document.getElementById('authModal').classList.add('show');switchAuthTab('login');document.getElementById('loginUser').focus()}
 
@@ -3553,7 +3697,20 @@ function doLogin(){doLoginNew()}
 function doRegister(){doRegisterNew()}
 function showRegister(){document.getElementById('authModal').classList.add('show');switchAuthTab('register')}
 function genRefCode(u){return 'J3'+u.substring(0,3).toUpperCase()+String(Math.floor(Math.random()*9000+1000))}
+function atobFix(s){try{return decodeURIComponent(escape(atob(s)))}catch(e){try{return atob(s)}catch(e2){return s}}}
 function doLogout(){currentUser=null;setAuthToken(null);localStorage.removeItem('cuser');localStorage.removeItem('cr');renderUserNav();updateCreditDisplay();updateCheckinBtn();showToast('已退出')}
+function openUserSettings(){
+  if(!currentUser){showToast('请先登录');return}
+  const oldPwd=prompt('当前密码（验证身份）：');
+  if(!oldPwd)return;
+  const users=getUsers();
+  const user=users.find(x=>x.username===currentUser.username||x.email===currentUser.email);
+  if(!user||user.password!==btoa(oldPwd)){showToast('❌ 当前密码错误');return}
+  const np=prompt('请输入新密码（至少6位）：');
+  if(!np||np.length<6){showToast('密码至少6位');return}
+  user.password=btoa(np);saveUsers(users);
+  showToast('✅ 密码修改成功');
+}
 
 // === AI Office ===
 let officePrompt='';
@@ -4083,7 +4240,7 @@ function NOVEL_CONTINUE(){NOVEL_STATE.step=6;document.getElementById('novelWizar
 function NOVEL_SPARK_ALL(){NOVEL_SPARK={type:SPARK_DATA.types[Math.floor(Math.random()*SPARK_DATA.types.length)],world:SPARK_DATA.worlds[Math.floor(Math.random()*SPARK_DATA.worlds.length)],cheat:SPARK_DATA.cheats[Math.floor(Math.random()*SPARK_DATA.cheats.length)],char:SPARK_DATA.chars[Math.floor(Math.random()*SPARK_DATA.chars.length)]};document.getElementById('sparkType').textContent=NOVEL_SPARK.type;document.getElementById('sparkWorld').textContent=NOVEL_SPARK.world;document.getElementById('sparkCheat').textContent=NOVEL_SPARK.cheat;document.getElementById('sparkChar').textContent=NOVEL_SPARK.char;document.getElementById('sparkResult').innerHTML=`<h4 style="margin-bottom:12px;color:var(--accent)">🎲 抽取结果</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.85rem"><div>📖 类型: <b style="color:var(--accent)">${NOVEL_SPARK.type}</b></div><div>🌍 世界观: <b style="color:var(--accent)">${NOVEL_SPARK.world}</b></div><div>💎 金手指: <b style="color:var(--accent)">${NOVEL_SPARK.cheat}</b></div><div>👤 主角: <b style="color:var(--accent)">${NOVEL_SPARK.char}</b></div></div>`}
 function NOVEL_SPARK_CARD(type){NOVEL_SPARK[type]=SPARK_DATA[type==='type'?'types':(type==='world'?'worlds':(type==='cheat'?'cheats':'chars'))][Math.floor(Math.random()*SPARK_DATA[type==='type'?'types':(type==='world'?'worlds':(type==='cheat'?'cheats':'chars'))].length)];NOVEL_SPARK_ALL()}
 function NOVEL_SPARK_USE(){const core=`${NOVEL_SPARK.type}小说。世界观：${NOVEL_SPARK.world}。主角设定：${NOVEL_SPARK.char}。金手指：${NOVEL_SPARK.cheat}`;NOVEL_STATE.type=NOVEL_SPARK.type;NOVEL_STATE.core=core;NOVEL_STATE.step=1;document.getElementById('novelSpark').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(1);document.getElementById('wizCore').value=core}
-function NOVEL_SET(tag,el,val){document.querySelectorAll('#novel'+tag.charAt(0).toUpperCase()+tag.slice(1)+'Tags .filter-tag').forEach(x=>x.classList.remove('active'));el.classList.add('active');NOVEL_STATE[tag]=val}
+function NOVEL_SET(tag,el,val){if(el.classList.contains('active')){el.classList.remove('active');NOVEL_STATE[tag]=null;return}document.querySelectorAll('#novel'+tag.charAt(0).toUpperCase()+tag.slice(1)+'Tags .filter-tag').forEach(x=>x.classList.remove('active'));el.classList.add('active');NOVEL_STATE[tag]=val}
 function NOVEL_GOTO_STEP(s){NOVEL_STATE.step=parseInt(s);const stepNames={'1':'定方向','2':'搭框架','3':'锁框架','4':'写大纲','5':'确大纲','6':'写正文'};for(let i=1;i<=6;i++){const p=document.getElementById('wizPanel'+i);const sb=document.querySelector(`.wizard-step[data-step="${i}"]`);if(i===parseInt(s)){p.style.display='block';sb.classList.add('active');sb.classList.remove('done')}else if(i<parseInt(s)){p.style.display='none';sb.classList.add('done');sb.classList.remove('active')}else{p.style.display='none';sb.classList.remove('active','done')}}}
 async function NOVEL_STEP_1(){const core=document.getElementById('wizCore').value.trim();if(!core){showToast('请输入创意核心描述');return}NOVEL_STATE.core=core;NOVEL_GOTO_STEP(2)}
 async function NOVEL_STEP_2(){const core=NOVEL_STATE.core,type=NOVEL_STATE.type,style=NOVEL_STATE.style,pov=NOVEL_STATE.pov;const mc=document.getElementById('wizMainChar').value,world=document.getElementById('wizWorld').value,cheat=document.getElementById('wizCheat').value;const modelId=document.getElementById('wizFrameModel')?.value||'deepseekr1';const out=document.getElementById('wizFrameOutput');out.innerHTML='<span class="spinner"></span> AI 正在搭建故事框架...';if(!spendCredits(5))return;const sys='你是顶级小说架构师。请为以下小说构建完整故事框架。输出格式：\n\n【故事主线】200字核心主线\n【分卷规划】3-5卷，每卷标题+概要+关键事件\n【人物关系网】主角+5个关键配角，含外貌/性格/关系/成长弧\n【世界观架构】时代背景/势力分布/规则体系\n【爽点设计】每卷2-3个核心爽点或高潮\n【读者期待管理】开篇钩子/每卷悬念/最终结局的情感基调';try{const r=await callModelAPI(modelId,`小说类型：${type} 写作风格：${style} 视角：${pov} 核心创意：${core} 主角设定：${mc||'由AI设计'} 世界观：${world||'由AI构建'} 金手指：${cheat||'由AI设计'}`,sys);NOVEL_STATE.frame=r.content;out.innerHTML=escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
@@ -4191,6 +4348,24 @@ function initStudioData(){
   document.querySelectorAll('#studioTabs .tab-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#studioTabs .tab-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('#studioTabImage,#studioTabVideo,#studioTabGallery').forEach(t=>t.style.display='none');document.getElementById('studioTab'+b.dataset.tab.charAt(0).toUpperCase()+b.dataset.tab.slice(1)).style.display='block';if(b.dataset.tab==='gallery')renderStudioGallery()})});
   ['stuPrompt','stuStyle','stuLight','stuCamera','stuRatio','stuRef'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',STUDIO_BUILD_PROMPT)});
   STUDIO_BUILD_PROMPT();
+  // 加载已保存的视频 API Key 和平台
+  const savedKey=localStorage.getItem('vid_api_key');
+  const savedPlatform=localStorage.getItem('vid_api_platform')||'agnes';
+  const pe=document.getElementById('vidApiPlatform');
+  if(pe)pe.value=savedPlatform;
+  if(savedPlatform==='agnes'){
+    // Agnes 模式：隐藏 Key 输入框
+    document.getElementById('vidApiKey').style.display='none';
+    document.getElementById('vidAgnesHint').style.display='block';
+    // 隐藏保存按钮（Agnes 用平台 Key，无需用户操作）
+    const saveBtn=document.querySelector('#vidApiRow .btn-sm');
+    if(saveBtn)saveBtn.style.display='none';
+    const costLabel=document.getElementById('vidCostLabel');
+    if(costLabel)costLabel.textContent='⚡5积分';
+  }else{
+    document.getElementById('vidAgnesHint').style.display='none';
+    if(savedKey){const ke=document.getElementById('vidApiKey');if(ke)ke.value=savedKey}
+  }
 }
 function GALLERY_FILTER(cat,el){
   GALLERY_FILTER_CURRENT=cat;
@@ -4228,12 +4403,14 @@ function STUDIO_SAVE_IMAGE(){if(!window._stuLastImage){showToast('请先生成�
 function STUDIO_ADD_TO_GALLERY(){if(!window._stuLastImage){showToast('请先生成图像');return}STUDIO_GALLERY.unshift({...window._stuLastImage,cat:'绘画'});STUDIO_GALLERY=STUDIO_GALLERY.slice(0,100);localStorage.setItem('stuGallery',JSON.stringify(STUDIO_GALLERY));showToast('已加入画廊')}
 function renderStudioGallery(){const g=document.getElementById('studioGalleryGrid');let items=STUDIO_GALLERY;if(GALLERY_FILTER_CURRENT!=='all')items=items.filter(i=>i.cat===GALLERY_FILTER_CURRENT);if(!items.length){g.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎨</div><p>没有找到作品</p></div>';return}g.innerHTML=items.map((s,i)=>`<div class="feature-card" style="cursor:pointer;padding:0;overflow:hidden" onclick="STUDIO_GALLERY_USE(${STUDIO_GALLERY.indexOf(s)})"><div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--bg-input)"><img src="${s.url}" style="max-width:100%;max-height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🎨'"></div><div style="padding:12px"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">${escapeHtml(s.prompt.substring(0,40))}...</div><div style="font-size:0.68rem;color:var(--text-secondary)">${s.cat||'绘画'} · ${new Date(s.time).toLocaleString('zh-CN')}</div></div></div>`).join('')}
 function STUDIO_GALLERY_USE(i){if(!STUDIO_GALLERY[i])return;document.getElementById('stuPrompt').value=STUDIO_GALLERY[i].prompt;document.getElementById('studioTabs').querySelector('[data-tab=image]').click();document.getElementById('studioTabImage').style.display='block';document.getElementById('studioTabVideo').style.display='none';document.getElementById('studioTabGallery').style.display='none';STUDIO_BUILD_PROMPT();showToast('已加载到创作区')}
-async function STUDIO_GENERATE_VIDEO(){const p=document.getElementById('stuVidPrompt').value.trim();if(!p){showToast('请输入视频描述');return}const load=document.getElementById('stuVidLoading'),img=document.getElementById('stuVideoImg');load.style.display='block';img.style.display='none';const style=document.getElementById('vidStyle').value;const model=document.getElementById('vidModel').value;const dur=document.getElementById('vidDuration').value;const ratio=document.getElementById('vidRatio').value;const quality=document.getElementById('vidQuality').value;if(!spendCredits(10)){load.style.display='none';return}try{const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(p+' '+style+', cinematic, '+quality+', '+ratio)}?width=768&height=432&nologo=true&seed=${Math.floor(Math.random()*99999)}`;img.src=url;img.onload=()=>{load.style.display='none';img.style.display='block';showToast(`🎬 视频生成完成（${dur}秒, ${model}, ${quality}）`)};img.onerror=()=>{load.style.display='none';showToast('生成失败')}}catch(e){load.style.display='none'}}
-function STUDIO_SAVE_VIDEO(){const img=document.getElementById('stuVideoImg');if(!img.src||img.style.display==='none'){showToast('请先生成视频');return}const a=document.createElement('a');a.href=img.src;a.download='ai-video-preview.png';a.click()}
-function VID_SAVE_KEY(){const key=document.getElementById('vidApiKey').value.trim();const platform=document.getElementById('vidApiPlatform').value;if(!key){showToast('请输入 API Key');return}localStorage.setItem('vid_api_key',key);localStorage.setItem('vid_api_platform',platform);showToast(`✅ ${platform} API Key 已保存`)}
+async function STUDIO_GENERATE_VIDEO(){const p=document.getElementById('stuVidPrompt').value.trim();if(!p){showToast('请输入视频描述');return}const platform=localStorage.getItem('vid_api_platform')||'agnes';const load=document.getElementById('stuVidLoading'),ph=document.getElementById('stuVidPlaceholder'),res=document.getElementById('stuVidResult'),img=document.getElementById('stuVideoImg'),bar=document.getElementById('vidProgressBar'),txt=document.getElementById('vidStatusText'),sub=document.getElementById('vidStatusSub');if(ph)ph.style.display='none';load.style.display='block';if(bar)bar.style.width='0%';if(txt)txt.textContent='🎨 AI 正在创作视频...';if(sub)sub.textContent='预计需要 1-3 分钟';if(img)img.style.display='none';if(res){res.style.display='none';res.innerHTML=''}const style=document.getElementById('vidStyle').value;const dur=document.getElementById('vidDuration').value;const ratio=document.getElementById('vidRatio').value;const quality=document.getElementById('vidQuality').value;if(!spendCredits(platform==='agnes'?5:10)){load.style.display='none';if(ph)ph.style.display='block';return}try{if(platform==='agnes'){const fullPrompt=p+(style&&style!=='不限制'?', '+style:'')+', cinematic, '+quality+', '+ratio;const body={prompt:fullPrompt,width:1152,height:768,num_frames:Math.min(81+Math.floor(parseInt(dur)/5)*40,241),frame_rate:24};if(style==='赛博朋克'){body.negative_prompt='blurry, low quality, cartoon, anime, pixelated'}const r=await fetch('/api/agnes-video',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!d.ok||!d.id){load.style.display='none';if(ph)ph.style.display='block';showToast('❌ 提交失败: '+(d.error||'未知错误'));return}const taskId=d.id;const statusMsgs=['🎬 正在构思画面...','🎨 绘制关键帧中...','✨ 渲染视频细节...','🎵 合成音频轨道...','🔮 即将完成...'];if(txt)txt.textContent=statusMsgs[0];if(bar)bar.style.width='10%';let result=null;for(let i=0;i<60;i++){await new Promise(rv=>setTimeout(rv,3000));const sr=await fetch('/api/agnes-video/'+taskId);const sd=await sr.json();const pct=Math.min(95,Math.floor((i+1)/60*95));if(bar)bar.style.width=pct+'%';const msgIdx=Math.min(4,Math.floor(i/12));if(txt&&(i===0||i%12===0))txt.textContent=statusMsgs[msgIdx];if(sub)sub.textContent='已等待 '+Math.floor((i+1)*3)+' 秒...';if(sd.status==='completed'){result=sd;if(bar)bar.style.width='100%';if(txt)txt.textContent='✅ 生成完成！';break}if(sd.status==='failed'){load.style.display='none';if(ph)ph.style.display='block';showToast('❌ 生成失败: '+(sd.error||'未知错误'));return}}if(!result){load.style.display='none';if(ph)ph.style.display='block';showToast('⏰ 生成超时，请稍后重试');return}const videoUrl=result.video_url||result.url||result.remixed_from_video_id;if(!videoUrl){load.style.display='none';if(ph)ph.style.display='block';showToast('❌ 未获取到视频链接');return}await new Promise(rv=>setTimeout(rv,400));load.style.display='none';res.style.display='block';res.innerHTML='<div style="padding:8px"><video id="stuVidPlayer" controls autoplay loop playsinline style="width:100%;max-height:400px;border-radius:12px;animation:vidPulse 2s ease 1" src="'+videoUrl+'" onloadeddata="this.closest(\'#stuVidResult\').querySelector(\'.vid-loading-overlay\').style.display=\'none\'"><div class="vid-loading-overlay" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);border-radius:12px;pointer-events:none"><div class="spinner"></div></div></video><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn-sm primary" onclick="window.open(\''+videoUrl+'\')" style="animation:vidReveal 0.4s ease 0.1s both">🔗 新窗口打开</button><button class="btn-sm" onclick="STUDIO_ADD_VIDEO_TO_GALLERY(\''+videoUrl+'\',\''+escapeHtml(p.substring(0,60))+'\')" style="animation:vidReveal 0.4s ease 0.2s both">💾 加入画廊</button><button class="btn-sm" onclick="STUDIO_SAVE_VIDEO()" style="animation:vidReveal 0.4s ease 0.3s both">📥 下载视频</button></div></div>';showToast('🎉 视频生成成功！')}else{const savedKey=localStorage.getItem('vid_api_key');if(!savedKey){showToast('⚠️ 请先在上方切换为自配模式并输入 '+platform+' API Key');load.style.display='none';if(ph)ph.style.display='block';return}const url='https://image.pollinations.ai/prompt/'+encodeURIComponent(p+' '+style+', cinematic, '+quality+', '+ratio)+'?width=768&height=432&nologo=true&seed='+Math.floor(Math.random()*99999);img.src=url;img.onload=()=>{load.style.display='none';img.style.display='block';showToast('🎬 视频预览生成完成（'+dur+'秒, '+platform+', '+quality+'）')};img.onerror=()=>{load.style.display='none';showToast('生成失败')}}}catch(e){load.style.display='none';if(ph)ph.style.display='block';showToast('出错: '+e.message)}}
+function STUDIO_ADD_VIDEO_TO_GALLERY(url,prompt){STUDIO_GALLERY.unshift({url:url,prompt:prompt||'AI 视频',full:prompt||'',cat:'视频',time:new Date().toISOString()});STUDIO_GALLERY=STUDIO_GALLERY.slice(0,100);localStorage.setItem('stuGallery',JSON.stringify(STUDIO_GALLERY));showToast('✅ 已加入画廊')}
+function VID_SAVE_KEY(){const platform=document.getElementById('vidApiPlatform').value;if(platform==='agnes'){localStorage.setItem('vid_api_platform','agnes');localStorage.removeItem('vid_api_key');showToast('✅ 已切换为平台免费模式');return}const key=document.getElementById('vidApiKey').value.trim();if(!key){showToast('请输入 API Key');return}localStorage.setItem('vid_api_key',key);localStorage.setItem('vid_api_platform',platform);showToast('✅ '+platform+' API Key 已保存')}
+function VID_PLATFORM_CHANGE(){const platform=document.getElementById('vidApiPlatform').value;const keyEl=document.getElementById('vidApiKey');const hintEl=document.getElementById('vidAgnesHint');const saveBtn=document.querySelector('#vidApiRow .btn-sm');const costLabel=document.getElementById('vidCostLabel');if(platform==='agnes'){keyEl.style.display='none';hintEl.style.display='block';if(saveBtn)saveBtn.style.display='none';if(costLabel)costLabel.textContent='⚡5积分';localStorage.setItem('vid_api_platform','agnes')}else{keyEl.style.display='inline-block';hintEl.style.display='none';if(saveBtn)saveBtn.style.display='inline-block';if(costLabel)costLabel.textContent='⚡10积分';localStorage.setItem('vid_api_platform',platform);const savedKey=localStorage.getItem('vid_api_key');if(savedKey)keyEl.value=savedKey;else keyEl.value=''}}
+function STUDIO_SAVE_VIDEO(){const v=document.getElementById('stuVidPlayer');if(v&&v.src){const a=document.createElement('a');a.href=v.src;a.download='ai-video.mp4';a.click();return}const img=document.getElementById('stuVideoImg');if(!img.src||img.style.display==='none'){showToast('请先生成视频');return}const a=document.createElement('a');a.href=img.src;a.download='ai-video-preview.png';a.click()}
 function VID_SET_MODE(mode,el){document.querySelectorAll('#studioTabVideo .workshop-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('vidTextMode').style.display=mode==='text'?'block':'none';document.getElementById('vidImageMode').style.display=mode==='image'?'block':'none'}
 function VID_PREVIEW_IMAGE(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=function(e){const preview=document.getElementById('vidImagePreview');preview.style.display='block';preview.querySelector('img').src=e.target.result;document.getElementById('vidImageDrop').style.display='none'};r.readAsDataURL(f)}
-function VID_CLEAR(){document.getElementById('stuVidPrompt').value='';document.getElementById('stuVideoImg').style.display='none';document.getElementById('stuVidLoading').style.display='none';document.getElementById('vidImagePreview').style.display='none';document.getElementById('vidImageDrop').style.display='flex'}
+function VID_CLEAR(){document.getElementById('stuVidPrompt').value='';document.getElementById('stuVideoImg').style.display='none';document.getElementById('stuVidLoading').style.display='none';const r=document.getElementById('stuVidResult');if(r){r.style.display='none';r.innerHTML=''}document.getElementById('stuVidPlaceholder').style.display='block';document.getElementById('vidImagePreview').style.display='none';document.getElementById('vidImageDrop').style.display='flex';const bar=document.getElementById('vidProgressBar');if(bar)bar.style.width='0%'}
 function VID_USE_TEMPLATE(i){const templates=[{p:'赛博朋克城市夜景，霓虹灯闪烁，雨夜街道倒影，未来感，电影级画质',s:'赛博朋克'},{p:'壮丽自然风景航拍，雪山湖泊，日出金色光芒，无人机视角，8K',s:'写实'},{p:'古风武侠打斗，竹林深处，剑光闪烁，衣袂翻飞，慢动作特写',s:'电影感'},{p:'机械动物特写，金属质感，齿轮转动，蒸汽朋克风格，细节丰富',s:'科幻'}];const t=templates[i];if(!t)return;document.getElementById('stuVidPrompt').value=t.p;document.getElementById('vidStyle').value=t.s;showToast('✅ 已加载模板提示词')}
 
 // ==== PROMPT LIBRARY ====
@@ -4433,6 +4610,17 @@ executeRefine=function(){NOVEL_REFINE_EXEC()};
 
 function toggleMobileMenu(){const m=document.getElementById('mobileMenu');m.style.display=m.style.display==='none'||!m.style.display?'block':'none'}
 if(currentUser){userCredits=parseInt(localStorage.getItem('cr_'+currentUser.username)||'30');localStorage.setItem('cr',userCredits);novelHistory=localStorage.getItem('novelHistory')||''}
+// 设备自动登录：如果本设备已有绑定账号，直接登录
+if(!currentUser){
+  const boundUser=getDeviceBoundUser();
+  if(boundUser){
+    currentUser={username:boundUser.username,email:boundUser.email||'',phone:boundUser.phone||''};
+    localStorage.setItem('cuser',JSON.stringify(currentUser));
+    userCredits=parseInt(localStorage.getItem('cr_'+boundUser.username)||'30');
+    localStorage.setItem('cr',userCredits);
+    setTimeout(()=>showToast(`👋 欢迎回来，${boundUser.username}！设备已自动登录`),1500);
+  }
+}
 updateCreditDisplay();
 renderUserNav();
 initAdmin();
@@ -4617,7 +4805,7 @@ async function D3_TEXT_TO_3D(){
   if(!prompt){showToast('请输入3D描述');return}
   if(!spendCredits(12))return;
   r.style.display='block';
-  r.innerHTML='<span class="spinner"></span> 正在提交到 Meshy AI...<p style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">生成需要5-15分钟，请在 Meshy 官网查看进度</p>';
+  r.innerHTML='<span class="spinner"></span> 正在生成 3D 模型...<p style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">生成需要5-15分钟，请耐心等待</p>';
   try{
     const resp=await fetch(API_BASE+'/api/meshy/txt2d',{
       method:'POST',
@@ -4784,7 +4972,7 @@ const PAGE_MODEL_RECOMMEND={
   agents:{id:'deepseekr1',name:'DeepSeek R1',reason:'复杂推理任务首选'},
   studio:{id:'qwen_max',name:'Qwen Max',reason:'生成任务最好配合'},
   music:{id:'chirp-v5',name:'Chirp V5',reason:'音乐生成专用模型'},
-  d3:{id:'meshy',name:'Meshy AI',reason:'3D生成专用'},
+  d3:{id:'meshy',name:'AI 3D',reason:'3D模型生成'},
 };
 function renderModelBar(pageId,containerId){
   const rec=PAGE_MODEL_RECOMMEND[pageId];
@@ -4819,7 +5007,7 @@ const PAGE_MODEL_RECOMMEND_OPTIONS=[
   {id:'deepseekv3',name:'DeepSeek V3'},{id:'deepseekr1',name:'DeepSeek R1'},
   {id:'qwen_max',name:'Qwen Max'},{id:'qwen_turbo',name:'Qwen Turbo'},
   {id:'kimi_k2',name:'Kimi K2'},{id:'glm_4',name:'GLM-4'},
-  {id:'yi_light',name:'Yi Lightning'},{id:'hunyuan',name:'腾讯混元'},
+  {id:'hunyuan',name:'腾讯混元'},
   {id:'sf_deepseek_v32',name:'DeepSeek V3（硅基）'},
 ];
 </script>

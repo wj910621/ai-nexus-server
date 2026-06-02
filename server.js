@@ -180,41 +180,43 @@ async function callOpenAICompatible(config, messages, apiKey) {
 }
 
 // ============================================================
-// Google Gemini 请求
+// Google Gemini 请求 (使用 REST API，避免 SDK 兼容问题)
 // ============================================================
 async function callGemini(config, messages, apiKey) {
-  // 动态加载 Google SDK
-  const { GoogleGenerativeAI } = require('@google/generative-ai');
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: config.model });
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${apiKey}`;
 
-  // 转换消息格式
-  const history = [];
-  let lastUserContent = '';
+  // 转换消息格式为 Gemini API 格式
+  const contents = [];
+  let systemInstruction = '';
 
   for (const msg of messages) {
-    if (msg.role === 'user') {
-      if (history.length > 0 && history[history.length - 1].role === 'user') {
-        history[history.length - 1].parts[0].text += '\n' + msg.content;
-      } else {
-        history.push({ role: 'user', parts: [{ text: msg.content }] });
-      }
-      lastUserContent = msg.content;
+    if (msg.role === 'system') {
+      systemInstruction = msg.content;
+    } else if (msg.role === 'user') {
+      contents.push({ role: 'user', parts: [{ text: msg.content }] });
     } else if (msg.role === 'assistant') {
-      history.push({ role: 'model', parts: [{ text: msg.content }] });
+      contents.push({ role: 'model', parts: [{ text: msg.content }] });
     }
   }
 
-  // 最后一条是当前问题
-  if (history.length > 0 && history[history.length - 1].role === 'user') {
-    const currentMsg = history.pop();
-    const chat = model.startChat({ history });
-    const result = await chat.sendMessage(currentMsg.parts[0].text);
-    return result.response.text();
-  } else {
-    const result = await model.generateContent(lastUserContent || 'Hello');
-    return result.response.text();
+  const body = { contents };
+  if (systemInstruction) {
+    body.systemInstruction = { parts: [{ text: systemInstruction }] };
   }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gemini API 调用失败 [${res.status}]: ${err}`);
+  }
+
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '(Gemini 返回为空)';
 }
 
 // ============================================================
@@ -248,9 +250,40 @@ app.post('/api/chat', async (req, res) => {
     return res.status(400).json({ error: '缺少 model 或 messages 参数' });
   }
 
-  const config = MODEL_CONFIG[modelId];
+  let config = MODEL_CONFIG[modelId];
+
+  // 动态模型路由：根据前缀匹配对应的 API 源
   if (!config) {
-    return res.status(400).json({ error: `不支持的模型: ${modelId}` });
+    const rawModel = req.body.rawModel || modelId; // 优先用前端传来的原始模型 ID
+    if (modelId.startsWith('or_')) {
+      const apiKey = process.env.OPENROUTER_API_KEY;
+      if (apiKey) {
+        const m = rawModel.startsWith('or_') ? rawModel.replace(/^or_/, '') : rawModel;
+        config = { provider: 'openai', model: m, baseUrl: 'https://openrouter.ai/api/v1' };
+      }
+    } else if (modelId.startsWith('sf_')) {
+      const apiKey = process.env.SILICONFLOW_API_KEY;
+      if (apiKey) {
+        const m = rawModel.startsWith('sf_') ? rawModel.replace(/^sf_/, '') : rawModel;
+        config = { provider: 'openai', model: m, baseUrl: 'https://api.siliconflow.cn/v1' };
+      }
+    } else if (modelId.startsWith('ali_')) {
+      const apiKey = process.env.DASHSCOPE_API_KEY;
+      if (apiKey) {
+        const m = rawModel.startsWith('ali_') ? rawModel.replace(/^ali_/, '') : rawModel;
+        config = { provider: 'openai', model: m, baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' };
+      }
+    }
+  }
+
+  if (!config) {
+    // 完全未知的模型 → 模拟回复
+    const question = messages[messages.length - 1]?.content || '';
+    return res.json({
+      model: modelId,
+      content: `[${modelId} 模拟回复]\n\n⚠️ 该模型暂未配置 API，当前为模拟回复。\n\n---\n模拟内容：这是一个很好的问题。从技术角度分析，这涉及到多个因素的综合考量。建议从以下几个方面入手：\n\n1. 明确需求和目标\n2. 评估可行方案\n3. 选择最优路径并持续迭代\n\n如需更深入的分析，请配置真实 API。`,
+      simulated: true,
+    });
   }
 
   const apiKey = getApiKey(config.provider, modelId);
@@ -344,19 +377,34 @@ function beautifyModelName(rawId, platform) {
   let name = rawId;
   // 阿里百炼命名规则
   if (platform === 'bailian') {
+    // 第一步：剥离第三方组织前缀
+    name = name.replace(/^vanchin\//, '')
+               .replace(/^ZHIPU\//, '智谱 ')
+               .replace(/^kimi\//, '')
+               .replace(/^moonshotai\//, '月之暗面 ')
+               .replace(/^deepseek-ai\//, '')
+               .replace(/^[a-z0-9][a-z0-9_.-]*\//i, '');
+    // 第二步：统一格式（下划线转点/横线）
+    name = name.replace(/_/g, '-');
+    // 第三步：美化模型名
     name = name.replace(/^qwen3\.([0-9]+)-max/i, '通义千问 3.$1 Max')
                .replace(/^qwen3\.([0-9]+)-plus/i, '通义千问 3.$1 Plus')
                .replace(/^qwen3\.([0-9]+)-flash/i, '通义千问 3.$1 Flash')
                .replace(/^qwen3\.([0-9]+)-coder/i, '通义千问 3.$1 Coder')
+               .replace(/^qwen3\.([0-9]+)-([a-z].*)/i, 'Qwen 3.$1 $2')
                .replace(/^qwen3-([0-9a-z]+)/i, '通义千问 3 $1')
                .replace(/^qwen2\.5-([0-9a-z]+)/i, '通义千问 2.5 $1')
                .replace(/^qwen2-([0-9a-z]+)/i, '通义千问 2 $1')
+               .replace(/^qwen-(image|video|audio)(.*)/i, 'Qwen $1$2')
                .replace(/^deepseek-v([0-9]+)-pro/i, 'DeepSeek V$1 Pro')
                .replace(/^deepseek-v([0-9]+)-flash/i, 'DeepSeek V$1 Flash')
-               .replace(/^deepseek-v([0-9]+)/i, 'DeepSeek V$1')
+               .replace(/^deepseek-v([0-9.]+)/i, 'DeepSeek V$1')
                .replace(/^deepseek-r([0-9]+)/i, 'DeepSeek R$1')
+               .replace(/^deepseek-ocr/i, 'DeepSeek OCR')
+               .replace(/^deepseek-chat/i, 'DeepSeek Chat')
+               .replace(/^deepseek-coder/i, 'DeepSeek Coder')
                .replace(/^glm-([0-9.]+)/i, '智谱 GLM-$1')
-               .replace(/^kimi-k([0-9.]+)/i, 'Kimi K$1')
+               .replace(/^kimi-k?([0-9.]+)/i, 'Kimi K$1')
                .replace(/^moonshot/i, '月之暗面')
                .replace(/^doubao/i, '豆包')
                .replace(/^minimax/i, 'MiniMax')
@@ -372,8 +420,9 @@ function beautifyModelName(rawId, platform) {
                .replace(/^llama/i, 'Llama')
                .replace(/^mistral/i, 'Mistral');
   }
-  // 硅基流动命名规则：格式通常是 "deepseek-ai/DeepSeek-V3" 或 "Qwen/Qwen3-8B"
+  // 硅基流动命名规则
   if (platform === 'siliconflow') {
+    // 第一步：剥离组织前缀
     name = name.replace(/^deepseek-ai\//, '')
                .replace(/^Qwen\//, '')
                .replace(/^Pro\//, '')
@@ -386,10 +435,53 @@ function beautifyModelName(rawId, platform) {
                .replace(/^01-ai\//, '零一万物 ')
                .replace(/^THUDM\//, '智谱 ')
                .replace(/^internlm\//, '书生 ')
-               .replace(/^deepseek\b/i, 'DeepSeek')
-               .replace(/^glm/i, 'GLM');
+               .replace(/^moonshotai\//, '月之暗面 ')
+               .replace(/^minimax\//, 'MiniMax ')
+               .replace(/^stepfun-ai\//, 'Step ')
+               .replace(/^nvidia\//, 'NVIDIA ')
+               .replace(/^microsoft\//, '微软 ')
+               .replace(/^x-ai\//, 'xAI ')
+               .replace(/^bytedance\//, '字节 ')
+               .replace(/^alibaba\//, '阿里 ')
+               .replace(/^baichuan-inc\//, '百川 ')
+               .replace(/^cohere\//, 'Cohere ')
+               .replace(/^stabilityai\//, 'Stability ')
+               .replace(/^tiiuae\//, '')
+               .replace(/^ai21labs\//, '')
+               .replace(/^inclusionai\//, '')
+               .replace(/^zhipuai\//, '智谱 ')
+               .replace(/^infini\//, '')
+               .replace(/^lingyiwanwu\//, '零一万物 ')
+               .replace(/^pengcheng\//, '鹏城 ')
+               .replace(/^shanghai_ai\//, '')
+               .replace(/^togethercomputer\//, '')
+               // 通用兜底：匹配任何 org/ 前缀
+               .replace(/^[a-z0-9][a-z0-9_.-]*\//i, '');
+    // 第二步：美化模型名本身
+    name = name.replace(/^deepseek[-_ ]?v([0-9]+)/i, 'DeepSeek V$1')
+               .replace(/^deepseek[-_ ]?r([0-9]+)/i, 'DeepSeek R$1')
+               .replace(/^deepseek[-_]?coder/i, 'DeepSeek Coder')
+               .replace(/^deepseek[-_]?chat/i, 'DeepSeek Chat')
+               .replace(/^(DeepSeek)\b\s*$/i, 'DeepSeek')
+               .replace(/^glm[-_ ]?([0-9]+[a-z]*)/i, 'GLM-$1')
+               .replace(/^glm([0-9]+)/i, 'GLM-$1')
+               .replace(/^qwen([0-9]+(?:\.[0-9]+)?)[-_ ]?([a-z].*)/i, 'Qwen $1 $2')
+               .replace(/^qwen([0-9]+(?:\.[0-9]+)?)/i, 'Qwen $1')
+               .replace(/^hunyuan[-_ ]?(.*)/i, '混元 $1')
+               .replace(/^gpt[-_ ]?(.*)/i, 'GPT $1')
+               .replace(/^claude[-_ ]?(.*)/i, 'Claude $1')
+               .replace(/^gemini[-_ ]?(.*)/i, 'Gemini $1')
+               .replace(/^llama[-_ ]?(.*)/i, 'Llama $1')
+               .replace(/^mistral[-_ ]?(.*)/i, 'Mistral $1')
+               .replace(/^doubao[-_ ]?(.*)/i, '豆包 $1')
+               .replace(/^ernie[-_ ]?(.*)/i, '文心一言 $1')
+               .replace(/^baichuan[-_ ]?(.*)/i, '百川 $1')
+               .replace(/^step[-_ ]?(.*)/i, 'Step $1')
+               .replace(/^kimi[-_ ]?k([0-9.]+)/i, 'Kimi K$1')
+               .replace(/^moonshot[-_ ]?(.*)/i, '月之暗面 $1')
+               .replace(/^minimax[-_ ]?(.*)/i, 'MiniMax $1');
   }
-  // OpenRouter 命名规则：格式为 "provider/model-name"
+  // OpenRouter 命名规则
   if (platform === 'openrouter') {
     const slashIdx = name.indexOf('/');
     if (slashIdx > 0) name = name.substring(slashIdx + 1);
@@ -401,9 +493,35 @@ function beautifyModelName(rawId, platform) {
                .replace(/\bLlm\b/i, 'LLM')
                .replace(/\bR1\b/i, 'R1')
                .replace(/\bV3\b/i, 'V3')
-               .replace(/\bV4\b/i, 'V4');
+               .replace(/\bV4\b/i, 'V4')
+               // 还原中文品牌名
+               .replace(/^Qwen\b/i, '通义千问')
+               .replace(/^Deepseek\b/i, 'DeepSeek')
+               .replace(/^Gemma\b/i, 'Gemma')
+               .replace(/^Mistral\b/i, 'Mistral')
+               .replace(/^Claude\b/i, 'Claude')
+               .replace(/^Llama\b/i, 'Llama')
+               .replace(/^Gemini\b/i, 'Gemini');
+  }
+  // Fallback: 去掉产商前缀（通用）
+  if (name.includes('/') && name !== rawId) {
+    name = name.split('/').pop();
   }
   return name;
+}
+
+// ============================================================
+// 动态模型辅助：生成头像颜色和描述
+// ============================================================
+const AVATAR_COLORS = ['#10a37f','#d97706','#4285f4','#4f46e5','#ff6a00','#6c5ce7','#6366f1','#e11d48','#059669','#8b5cf6','#ea580c','#0891b2','#7c3aed','#0ea5e9','#e63946','#6b21a8'];
+function genAvatarColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+function genModelDesc(name, provider) {
+  const descMap = { '阿里百炼':'阿里云大模型，中文优化', '硅基流动':'硅基流动开源模型，按量付费', 'OpenRouter':'OpenRouter 聚合模型，全球200+模型' };
+  return descMap[provider] || provider + '模型';
 }
 
 // ============================================================
@@ -417,17 +535,23 @@ app.get('/api/bailian-models', async (req, res) => {
       headers: { 'Authorization': `Bearer ${apiKey}` }
     });
     const data = await r.json();
-    const models = (data.data || []).map(m => ({
-      id: 'ali_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
-      name: beautifyModelName(m.id, 'bailian'),
-      provider: '阿里百炼',
-      context: '128K',
-      inputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
-      outputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
-      tags: [],
-      platform: 'bailian',
-      free: (m.id || '').includes('免费'),
-    }));
+    const models = (data.data || []).map(m => {
+      const name = beautifyModelName(m.id, 'bailian');
+      return {
+        id: 'ali_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
+        name,
+        rawModel: m.id,
+        avatar: genAvatarColor(name),
+        desc: genModelDesc(name, '阿里百炼'),
+        provider: '阿里百炼',
+        context: '128K',
+        inputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
+        outputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
+        tags: [],
+        platform: 'bailian',
+        free: (m.id || '').includes('免费'),
+      };
+    });
     res.json({ ok: true, count: models.length, models });
   } catch(e) {
     res.json({ ok: false, models: [] });
@@ -445,17 +569,23 @@ app.get('/api/siliconflow-models', async (req, res) => {
       headers: { 'Authorization': `Bearer ${apiKey}` }
     });
     const data = await r.json();
-    const models = (data.data || []).map(m => ({
-      id: 'sf_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
-      name: beautifyModelName(m.id, 'siliconflow'),
-      provider: '硅基流动',
-      context: '64K',
-      inputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
-      outputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
-      tags: [],
-      platform: 'siliconflow',
-      free: (m.id || '').includes('free') || (m.id || '').includes('免费'),
-    }));
+    const models = (data.data || []).map(m => {
+      const name = beautifyModelName(m.id, 'siliconflow');
+      return {
+        id: 'sf_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
+        name,
+        rawModel: m.id,
+        avatar: genAvatarColor(name),
+        desc: genModelDesc(name, '硅基流动'),
+        provider: '硅基流动',
+        context: '64K',
+        inputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
+        outputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
+        tags: [],
+        platform: 'siliconflow',
+        free: (m.id || '').includes('free') || (m.id || '').includes('免费'),
+      };
+    });
     res.json({ ok: true, count: models.length, models });
   } catch(e) {
     res.json({ ok: false, models: [] });
@@ -473,17 +603,23 @@ app.get('/api/openrouter-models', async (req, res) => {
       headers: { 'Authorization': `Bearer ${apiKey}` }
     });
     const data = await r.json();
-    const models = (data.data || []).map(m => ({
-      id: 'or_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
-      name: beautifyModelName(m.id, 'openrouter'),
-      provider: 'OpenRouter',
-      context: (m.context_length || '128K') + '',
-      inputPrice: m.pricing ? (m.pricing.prompt || '?') : '?',
-      outputPrice: m.pricing ? (m.pricing.completion || '?') : '?',
-      tags: [],
-      platform: 'openrouter',
-      free: false,
-    }));
+    const models = (data.data || []).map(m => {
+      const name = beautifyModelName(m.id, 'openrouter');
+      return {
+        id: 'or_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
+        name,
+        rawModel: m.id,
+        avatar: genAvatarColor(name),
+        desc: genModelDesc(name, 'OpenRouter'),
+        provider: 'OpenRouter',
+        context: (m.context_length || '128K') + '',
+        inputPrice: m.pricing ? (m.pricing.prompt || '?') : '?',
+        outputPrice: m.pricing ? (m.pricing.completion || '?') : '?',
+        tags: [],
+        platform: 'openrouter',
+        free: false,
+      };
+    });
     res.json({ ok: true, count: models.length, models });
   } catch(e) {
     res.json({ ok: false, models: [] });
@@ -491,88 +627,6 @@ app.get('/api/openrouter-models', async (req, res) => {
 });
 
 // ============================================================
-// 可灵 Kling 视频生成 API
-// ============================================================
-const crypto = require('crypto');
-
-function toBase64Url(s) {
-  return Buffer.from(s).toString('base64')
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-async function getKlingToken() {
-  const accessKey = process.env.KLING_ACCESS_KEY;
-  const secretKey = process.env.KLING_SECRET_KEY;
-  if (!accessKey || !secretKey) return null;
-
-  const jwtHeader = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const now = Math.floor(Date.now() / 1000);
-  const payload = toBase64Url(JSON.stringify({
-    iss: accessKey,
-    exp: now + 1800,
-    nbf: now - 5
-  }));
-
-  const signature = crypto
-    .createHmac('sha256', secretKey)
-    .update(jwtHeader + '.' + payload)
-    .digest('base64')
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
-  return jwtHeader + '.' + payload + '.' + signature;
-}
-
-app.post('/api/kling/txt2video', async (req, res) => {
-  try {
-    const accessKey = process.env.KLING_ACCESS_KEY;
-    const secretKey = process.env.KLING_SECRET_KEY;
-    if (!accessKey || !secretKey) return res.json({ ok: false, error: '可灵 API Key 未配置' });
-
-    const token = await getKlingToken();
-    const { prompt, duration = 5, aspectRatio = '16:9' } = req.body;
-    if (!prompt) return res.json({ ok: false, error: '请输入视频描述' });
-
-    const r = await fetch('https://api.klingai.com/v1/videos/text2video', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      body: JSON.stringify({
-        model_name: 'kling-v1',
-        prompt,
-        duration: String(duration),
-        mode: 'std',
-        aspect_ratio: aspectRatio,
-        cfg_scale: 0.5,
-      }),
-    });
-
-    const data = await r.json();
-    if (data.code === 0 && data.data) {
-      res.json({ ok: true, taskId: data.data.task_id });
-    } else {
-      res.json({ ok: false, error: data.message || '生成失败' });
-    }
-  } catch (e) {
-    res.json({ ok: false, error: e.message });
-  }
-});
-
-app.get('/api/kling/result/:taskId', async (req, res) => {
-  try {
-    const token = await getKlingToken();
-    if (!token) return res.json({ ok: false, error: '未配置' });
-
-    const r = await fetch('https://api.klingai.com/v1/videos/text2video/' + req.params.taskId, {
-      headers: { 'Authorization': 'Bearer ' + token },
-    });
-    const data = await r.json();
-    res.json(data);
-  } catch (e) {
-    res.json({ ok: false, error: e.message });
-  }
-});
-
 // ============================================================
 // Meshy 3D 模型生成 API
 // ============================================================
@@ -619,6 +673,60 @@ app.get('/api/meshy/result/:taskId', async (req, res) => {
 });
 
 // ============================================================
+// Agnes AI 视频生成代理（异步：提交 → 轮询）
+// ============================================================
+app.post('/api/agnes-video', async (req, res) => {
+  try {
+    const apiKey = process.env.AGNES_API_KEY;
+    if (!apiKey) return res.json({ ok: false, error: 'Agnes API Key 未配置' });
+
+    const { prompt, width, height, num_frames, frame_rate, negative_prompt, seed, image, mode } = req.body;
+    if (!prompt) return res.json({ ok: false, error: '缺少视频描述' });
+
+    const body = {
+      model: 'agnes-video-v2.0',
+      prompt: prompt,
+      width: width || 1152,
+      height: height || 768,
+      num_frames: num_frames || 121,
+      frame_rate: frame_rate || 24,
+    };
+    if (negative_prompt) body.negative_prompt = negative_prompt;
+    if (seed != null) body.seed = seed;
+    if (image) body.image = image;
+    if (mode) body.mode = mode;
+
+    const r = await fetch('https://apihub.agnes-ai.com/v1/videos', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json();
+    res.json({ ok: true, ...data });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+app.get('/api/agnes-video/:taskId', async (req, res) => {
+  try {
+    const apiKey = process.env.AGNES_API_KEY;
+    if (!apiKey) return res.json({ ok: false, error: 'Agnes API Key 未配置' });
+
+    const r = await fetch('https://apihub.agnes-ai.com/v1/videos/' + req.params.taskId, {
+      headers: { 'Authorization': 'Bearer ' + apiKey },
+    });
+    const data = await r.json();
+    res.json({ ok: true, ...data });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// ============================================================
 // SQLite 数据库
 // ============================================================
 let db = null;
@@ -639,6 +747,10 @@ async function initDB() {
     role TEXT DEFAULT 'user',
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
   )`);
+  // 数据库迁移：添加新字段（兼容已有数据库）
+  try { db.run(`ALTER TABLE users ADD COLUMN phone TEXT DEFAULT ''`); } catch(e) {}
+  try { db.run(`ALTER TABLE users ADD COLUMN register_ip TEXT DEFAULT ''`); } catch(e) {}
+  try { db.run(`ALTER TABLE users ADD COLUMN device_fp TEXT DEFAULT ''`); } catch(e) {}
   db.run(`CREATE TABLE IF NOT EXISTS credit_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -682,26 +794,39 @@ function saveDB() {
 // 认证 API
 // ============================================================
 app.post('/api/auth/register', (req, res) => {
-  const { username, email, password, refCode } = req.body;
-  if (!username || !email || !password) {
-    return res.json({ ok: false, error: '请填写完整信息' });
+  const { username, email, password, refCode, deviceFp } = req.body;
+  if (!username || !password) {
+    return res.json({ ok: false, error: '请填写用户名和密码' });
+  }
+  const phone = (req.body.phone || '').trim();
+  if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
+    return res.json({ ok: false, error: '请填写正确的手机号' });
   }
   if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]{2,20}$/.test(username)) {
     return res.json({ ok: false, error: '用户名格式不正确（2-20位字母/数字/中文/下划线）' });
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.json({ ok: false, error: '邮箱格式不正确' });
   }
   if (password.length < 6) {
     return res.json({ ok: false, error: '密码至少6位' });
   }
+  // === 防多账号：同一IP永久最多注册2个账号 ===
+  const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+  const ipCount = db.exec("SELECT COUNT(*) FROM users WHERE register_ip=?", [clientIP]);
+  const currentCount = (ipCount.length && ipCount[0].values.length) ? ipCount[0].values[0][0] : 0;
+  if (currentCount >= 2) {
+    return res.json({ ok: false, error: '本网络已注册过 2 个账号，已达到上限' });
+  }
   try {
-    const existing = db.exec("SELECT id FROM users WHERE username=? OR email=?", [username, email]);
+    const existing = db.exec("SELECT id FROM users WHERE username=? " + (email ? "OR email=?" : "") + " OR phone=?", 
+      email ? [username, email, phone] : [username, phone]);
     if (existing.length && existing[0].values.length) {
-      return res.json({ ok: false, error: '用户名或邮箱已被注册' });
+      return res.json({ ok: false, error: '用户名、邮箱或手机号已被注册' });
     }
     const refCodeGen = 'J3' + username.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) + Math.random().toString(36).slice(2, 5).toUpperCase();
-    let bonus = 50;
+    const userEmail = email || ('noemail_' + username + '@ai-nexus.local');
+    let bonus = 10; // 注册赠送 10 积分（防薅：不够成本的量）
     let referrer = null;
     if (refCode) {
       const refUser = db.exec("SELECT username FROM users WHERE ref_code=? OR username=?", [refCode, refCode]);
@@ -712,8 +837,8 @@ app.post('/api/auth/register', (req, res) => {
         db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?, ?, ?)", [referrer, 20, '推荐奖励']);
       }
     }
-    db.run("INSERT INTO users (username, email, password, credits, ref_code, referrer) VALUES (?,?,?,?,?,?)",
-      [username, email, btoaPwd(password), bonus, refCodeGen, referrer]);
+    db.run("INSERT INTO users (username, email, password, credits, ref_code, referrer, register_ip, phone, device_fp) VALUES (?,?,?,?,?,?,?,?,?)",
+      [username, userEmail, btoaPwd(password), bonus, refCodeGen, referrer, clientIP, phone||'', deviceFp||'']);
     db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, bonus, '注册赠送']);
     saveDB();
     const token = Buffer.from(JSON.stringify({ username, role: 'user', ts: Date.now() })).toString('base64');
