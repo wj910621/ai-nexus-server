@@ -1708,12 +1708,42 @@ a{color:var(--accent);text-decoration:none}
     </div>
     <h3 style="margin-bottom:12px">🎎 角色展示库</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px" id="d3Showcase">
-      <div class="feature-card" style="padding:14px;text-align:center"><div style="font-size:3rem;margin-bottom:6px">🐉</div><div style="font-weight:600;font-size:0.85rem">中国龙</div><div style="font-size:0.72rem;color:var(--text-secondary)">卡通风格 · 低面数</div></div>
-      <div class="feature-card" style="padding:14px;text-align:center"><div style="font-size:3rem;margin-bottom:6px">🤖</div><div style="font-weight:600;font-size:0.85rem">机甲战士</div><div style="font-size:0.72rem;color:var(--text-secondary)">写实风格 · 高模</div></div>
-      <div class="feature-card" style="padding:14px;text-align:center"><div style="font-size:3rem;margin-bottom:6px">🏯</div><div style="font-weight:600;font-size:0.85rem">古代建筑</div><div style="font-size:0.72rem;color:var(--text-secondary)">低多边形 · 场景</div></div>
-      <div class="feature-card" style="padding:14px;text-align:center"><div style="font-size:3rem;margin-bottom:6px">🦊</div><div style="font-weight:600;font-size:0.85rem">九尾狐</div><div style="font-size:0.72rem;color:var(--text-secondary)">卡通风格 · 可动</div></div>
-      <div class="feature-card" style="padding:14px;text-align:center"><div style="font-size:3rem;margin-bottom:6px">🚀</div><div style="font-weight:600;font-size:0.85rem">星际飞船</div><div style="font-size:0.72rem;color:var(--text-secondary)">科幻 · 高细节</div></div>
-      <div class="feature-card" style="padding:14px;text-align:center"><div style="font-size:3rem;margin-bottom:6px">👾</div><div style="font-weight:600;font-size:0.85rem">像素角色</div><div style="font-size:0.72rem;color:var(--text-secondary)">体素风格 · 游戏</div></div>
+      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='一只威武的中国龙，东方神话风格，盘旋姿态，鳞片细节丰富，低面数优化'">
+        <div style="height:80px;background:linear-gradient(135deg,#7c2d12,#b45309,#d97706,#f59e0b);animation:vidShimmer 4s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="36" height="36" opacity="0.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">中国龙</div><div style="font-size:0.72rem;color:var(--text-secondary)">卡通风格 · 低面数</div></div>
+      </div>
+      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='未来机甲战士，合金装甲，蓝色能量核心，战斗姿态，高精度模型'">
+        <div style="height:80px;background:linear-gradient(135deg,#1e3a5f,#1d4ed8,#3b82f6,#06b6d4);animation:vidShimmer 3.5s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="36" height="36" opacity="0.8"><path d="M12 2a4 4 0 0 1 4 4v1h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
+        </div>
+        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">机甲战士</div><div style="font-size:0.72rem;color:var(--text-secondary)">写实风格 · 高模</div></div>
+      </div>
+      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='中国古代宫殿建筑群，唐代风格，红墙金瓦，对称布局，低多边形场景'">
+        <div style="height:80px;background:linear-gradient(135deg,#4a1d96,#6d28d9,#8b5cf6,#a78bfa);animation:vidShimmer 4.5s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="36" height="36" opacity="0.8"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">古代建筑</div><div style="font-size:0.72rem;color:var(--text-secondary)">低多边形 · 场景</div></div>
+      </div>
+      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='九尾狐妖，白色毛发，九条尾巴飘逸，灵动的眼睛，卡通渲染风格'">
+        <div style="height:80px;background:linear-gradient(135deg,#9d174d,#db2777,#f472b6,#f9a8d4);animation:vidShimmer 3.8s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="36" height="36" opacity="0.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">九尾狐</div><div style="font-size:0.72rem;color:var(--text-secondary)">卡通风格 · 可动</div></div>
+      </div>
+      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='科幻星际飞船，流线型设计，金属光泽，引擎喷口发光，高精度细节'">
+        <div style="height:80px;background:linear-gradient(135deg,#0f172a,#1e40af,#2563eb,#38bdf8);animation:vidShimmer 3.2s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="36" height="36" opacity="0.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">星际飞船</div><div style="font-size:0.72rem;color:var(--text-secondary)">科幻 · 高细节</div></div>
+      </div>
+      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='像素风格游戏角色，8-bit复古风格，色彩鲜艳，体素方块构建，Q版可爱'">
+        <div style="height:80px;background:linear-gradient(135deg,#064e3b,#059669,#10b981,#6ee7b7);animation:vidShimmer 4.2s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="36" height="36" opacity="0.8"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg>
+        </div>
+        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">像素角色</div><div style="font-size:0.72rem;color:var(--text-secondary)">体素风格 · 游戏</div></div>
+      </div>
     </div>
     <h3 style="margin-bottom:12px">⭐ 用户评价</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:24px">
