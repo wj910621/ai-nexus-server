@@ -523,9 +523,11 @@ async function getKlingToken() {
 
 app.post('/api/kling/txt2video', async (req, res) => {
   try {
-    const token = await getKlingToken();
-    if (!token) return res.json({ ok: false, error: '可灵 API Key 未配置' });
+    const accessKey = process.env.KLING_ACCESS_KEY;
+    const secretKey = process.env.KLING_SECRET_KEY;
+    if (!accessKey || !secretKey) return res.json({ ok: false, error: '可灵 API Key 未配置' });
 
+    const token = await getKlingToken();
     const { prompt, duration = 5, aspectRatio = '16:9' } = req.body;
     if (!prompt) return res.json({ ok: false, error: '请输入视频描述' });
 
@@ -536,7 +538,7 @@ app.post('/api/kling/txt2video', async (req, res) => {
         'Authorization': 'Bearer ' + token,
       },
       body: JSON.stringify({
-        model_name: 'kling-v1-6',
+        model_name: 'kling-v1',
         prompt,
         duration: String(duration),
         mode: 'std',
