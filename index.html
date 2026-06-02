@@ -117,6 +117,7 @@ a{color:var(--accent);text-decoration:none}
 .hero-planet .hp-ring-2{width:360px;height:360px;margin:-180px 0 0 -180px;--speed:36s;animation-direction:reverse}
 .hero-planet .hp-ring-3{width:480px;height:480px;margin:-240px 0 0 -240px;--speed:50s}
 @keyframes hero-ring-spin{from{transform:rotateX(70deg) rotateZ(0deg)}to{transform:rotateX(70deg) rotateZ(360deg)}}
+@keyframes vidShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .hero-planet .hp-node{position:absolute;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.35s;backface-visibility:hidden}
 .hero-planet .hp-node .hp-ni{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:#fff;box-shadow:0 3px 14px rgba(0,0,0,0.4)}
 .hero-planet .hp-node:hover{transform:scale(1.4)!important;z-index:50}
@@ -1462,20 +1463,32 @@ a{color:var(--accent);text-decoration:none}
           <h4 style="font-size:0.85rem;margin-bottom:10px">🔥 精选示例</h4>
           <div id="vidShowcaseGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
             <div class="feature-card" style="padding:0;overflow:hidden;cursor:pointer" onclick="VID_USE_TEMPLATE(0)">
-              <div style="height:110px;background:linear-gradient(135deg,#1e1b4b,#312e81);display:flex;align-items:center;justify-content:center;font-size:2.5rem">🌆</div>
-              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">赛博朋克城市夜景</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">可灵 1.6</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 2.3k</span></div></div>
+              <div style="height:110px;background:linear-gradient(135deg,#1e1b4b,#312e81,#6366f1,#06b6d4);animation:vidShimmer 3s ease infinite;background-size:400% 400%;display:flex;align-items:center;justify-content:center;position:relative">
+                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid white;margin-left:3px"></div></div>
+                <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px">5s</div>
+              </div>
+              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">赛博朋克城市夜景</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">可灵 Kling</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 2.3k</span></div></div>
             </div>
             <div class="feature-card" style="padding:0;overflow:hidden;cursor:pointer" onclick="VID_USE_TEMPLATE(1)">
-              <div style="height:110px;background:linear-gradient(135deg,#064e3b,#047857);display:flex;align-items:center;justify-content:center;font-size:2.5rem">🏔️</div>
-              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">壮丽自然风光航拍</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">即梦 2.0</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 1.8k</span></div></div>
+              <div style="height:110px;background:linear-gradient(135deg,#064e3b,#047857,#10b981,#34d399);animation:vidShimmer 3.5s ease infinite;background-size:400% 400%;display:flex;align-items:center;justify-content:center;position:relative">
+                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid white;margin-left:3px"></div></div>
+                <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px">5s</div>
+              </div>
+              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">壮丽自然风光航拍</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">可灵 Kling</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 1.8k</span></div></div>
             </div>
             <div class="feature-card" style="padding:0;overflow:hidden;cursor:pointer" onclick="VID_USE_TEMPLATE(2)">
-              <div style="height:110px;background:linear-gradient(135deg,#1c1917,#292524);display:flex;align-items:center;justify-content:center;font-size:2.5rem">⚔️</div>
-              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">古风武侠打斗</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">可灵 1.5</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 3.1k</span></div></div>
+              <div style="height:110px;background:linear-gradient(135deg,#1c1917,#292524,#f59e0b,#ef4444);animation:vidShimmer 4s ease infinite;background-size:400% 400%;display:flex;align-items:center;justify-content:center;position:relative">
+                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid white;margin-left:3px"></div></div>
+                <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px">10s</div>
+              </div>
+              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">古风武侠打斗</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">可灵 Kling</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 3.1k</span></div></div>
             </div>
             <div class="feature-card" style="padding:0;overflow:hidden;cursor:pointer" onclick="VID_USE_TEMPLATE(3)">
-              <div style="height:110px;background:linear-gradient(135deg,#1e1b4b,#4c1d95);display:flex;align-items:center;justify-content:center;font-size:2.5rem">🤖</div>
-              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">机械动物特写</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">Pika 2.0</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 980</span></div></div>
+              <div style="height:110px;background:linear-gradient(135deg,#1e1b4b,#4c1d95,#a855f7,#d946ef);animation:vidShimmer 3.2s ease infinite;background-size:400% 400%;display:flex;align-items:center;justify-content:center;position:relative">
+                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid white;margin-left:3px"></div></div>
+                <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px">5s</div>
+              </div>
+              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">机械动物特写</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">可灵 Kling</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 980</span></div></div>
             </div>
           </div>
         </div>
