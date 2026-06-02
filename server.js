@@ -495,23 +495,28 @@ app.get('/api/openrouter-models', async (req, res) => {
 // ============================================================
 const crypto = require('crypto');
 
+function toBase64Url(s) {
+  return Buffer.from(s).toString('base64')
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
 async function getKlingToken() {
   const accessKey = process.env.KLING_ACCESS_KEY;
   const secretKey = process.env.KLING_SECRET_KEY;
   if (!accessKey || !secretKey) return null;
 
-  const jwtHeader = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const jwtHeader = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const now = Math.floor(Date.now() / 1000);
-  const payload = Buffer.from(JSON.stringify({
+  const payload = toBase64Url(JSON.stringify({
     iss: accessKey,
     exp: now + 1800,
     nbf: now - 5
-  })).toString('base64url');
+  }));
 
   const signature = crypto
     .createHmac('sha256', secretKey)
     .update(jwtHeader + '.' + payload)
-    .digest('base64url');
+    .digest('base64')
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
   return jwtHeader + '.' + payload + '.' + signature;
 }
@@ -584,7 +589,8 @@ app.post('/api/meshy/txt2d', async (req, res) => {
         'Authorization': 'Bearer ' + apiKey,
       },
       body: JSON.stringify({
-        object_prompt: prompt,
+        mode: 'preview',
+        prompt,
         style_prompt: style,
         enable_pbr: true,
       }),
