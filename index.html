@@ -69,7 +69,7 @@ a{color:var(--accent);text-decoration:none}
 .app-layout{display:grid;grid-template-columns:220px 1fr 300px;min-height:calc(100vh - 56px);position:relative;z-index:1}
 
 /* Sidebar */
-.sidebar{background:var(--bg-sidebar);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.sidebar{background:var(--bg-sidebar);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;position:sticky;top:56px;height:calc(100vh - 56px);z-index:10}
 .sidebar-link{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;border:none;cursor:pointer;background:none;color:var(--text-secondary);font-size:0.85rem;font-weight:500;transition:all var(--transition);font-family:inherit;text-align:left;position:relative}
 .sidebar-link:hover{background:var(--accent-soft);color:var(--text)}
 .sidebar-link.active{background:linear-gradient(135deg,var(--accent-light),var(--cyan-light));color:var(--accent);border:1px solid var(--glass-border)}
@@ -755,22 +755,9 @@ a{color:var(--accent);text-decoration:none}
 </div>
 
 <div class="page" id="page-models">
-  <!-- 模型星球视觉效果 -->
-  <div class="model-planet-section" id="planetSection">
-    <div class="planet-scene" id="planetScene">
-      <div class="planet-center">
-        <div class="p-icon">⚡</div>
-        <div class="p-tagline">AI Nexus · 模型星云</div>
-        <div class="p-sub">700+ 顶级模型 · 点击探索</div>
-      </div>
-      <div class="p-ring p-ring-small" id="pRing1"></div>
-      <div class="p-ring p-ring-mid" id="pRing2"></div>
-      <div class="p-ring p-ring-large" id="pRing3"></div>
-    </div>
-  </div>
 
   <!-- 模型列表 -->
-  <section class="section" style="padding-top:0">
+  <section class="section">
     <h2 class="section-title">🤖 模型目录</h2>
     <div class="filter-bar">
       <input class="search-input" id="modelSearch" placeholder="搜索模型...">
@@ -1327,6 +1314,7 @@ a{color:var(--accent);text-decoration:none}
 
     <!-- 图片生成 -->
     <div class="tab-content active" id="studioTabImage">
+      <div id="modelBar_studio_image" style="margin-bottom:10px"></div>
       <div style="display:grid;grid-template-columns:340px 1fr;gap:20px">
         <div>
           <div class="feature-card" style="margin-bottom:10px">
@@ -1395,7 +1383,7 @@ a{color:var(--accent);text-decoration:none}
         <span style="font-size:0.82rem;font-weight:600">🎬 视频生成 API</span>
         <div style="display:flex;gap:8px;align-items:center" id="vidApiRow">
           <select id="vidApiPlatform" style="padding:6px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem" onchange="VID_PLATFORM_CHANGE()">
-            <option value="agnes">Agnes (平台免费)</option>
+            <option value="agnes">平台免费 (推荐)</option>
             <option value="kling">可灵 Kling</option>
             <option value="luma">Luma Dream Machine</option>
             <option value="pika">Pika</option>
@@ -1442,7 +1430,7 @@ a{color:var(--accent);text-decoration:none}
             </div>
             <div class="feature-card" style="padding:10px"><label style="font-weight:600;font-size:0.72rem;display:block;margin-bottom:3px">⏱ 时长</label>
               <select id="vidDuration" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.75rem">
-                <option value="5">5秒</option><option value="10" selected>10秒</option>
+                <option value="3">3秒</option><option value="5">5秒</option><option value="10" selected>10秒</option><option value="15">15秒</option>
               </select>
             </div>
             <div class="feature-card" style="padding:10px"><label style="font-weight:600;font-size:0.72rem;display:block;margin-bottom:3px">🔊 清晰度</label>
@@ -1495,37 +1483,39 @@ a{color:var(--accent);text-decoration:none}
               <img id="stuVideoImg" src="" style="display:none;max-width:100%;max-height:280px;border-radius:10px;margin:0 auto">
             </div>
           </div>
-          <h4 style="font-size:0.85rem;margin-bottom:10px">🔥 精选示例</h4>
-          <div id="vidShowcaseGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
-            <div class="feature-card" style="padding:0;overflow:hidden;cursor:pointer" onclick="VID_USE_TEMPLATE(0)">
-              <div style="height:110px;background:linear-gradient(135deg,#1e1b4b,#312e81,#6366f1,#06b6d4);animation:vidShimmer 3s ease infinite;background-size:400% 400%;display:flex;align-items:center;justify-content:center;position:relative">
-                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid white;margin-left:3px"></div></div>
-                <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px">5s</div>
-              </div>
-              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">赛博朋克城市夜景</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">AI生成</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 2.3k</span></div></div>
+          <!-- 📚 提示词教学 -->
+          <div class="feature-card" style="padding:14px;margin-bottom:10px;background:linear-gradient(135deg,rgba(6,182,212,0.06),rgba(124,58,237,0.06));border:1px solid rgba(6,182,212,0.15)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;cursor:pointer" onclick="document.getElementById('vidTipBody').style.display=document.getElementById('vidTipBody').style.display==='none'?'block':'none'">
+              <span style="font-size:1rem">💡</span>
+              <span style="font-weight:700;font-size:0.82rem">提示词技巧（点击展开）</span>
+              <span style="font-size:0.65rem;color:var(--text-secondary);margin-left:4px">为什么用英文效果更好？</span>
             </div>
-            <div class="feature-card" style="padding:0;overflow:hidden;cursor:pointer" onclick="VID_USE_TEMPLATE(1)">
-              <div style="height:110px;background:linear-gradient(135deg,#064e3b,#047857,#10b981,#34d399);animation:vidShimmer 3.5s ease infinite;background-size:400% 400%;display:flex;align-items:center;justify-content:center;position:relative">
-                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid white;margin-left:3px"></div></div>
-                <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px">5s</div>
+            <div id="vidTipBody" style="display:none;font-size:0.75rem;color:var(--text-secondary);line-height:1.7;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+              <p>🎯 <b>英文提示词效果远优于中文</b>，因为视频 AI 模型的训练数据 95%+ 是英文。英文能更精确控制：</p>
+              <div style="margin:8px 0;display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <div style="background:var(--bg-input);padding:8px;border-radius:6px">
+                  <span style="font-weight:600;color:#f59e0b">❌ 中文</span><br>
+                  <span style="font-size:0.7rem">"一只猫在街上走，下雨"</span>
+                </div>
+                <div style="background:var(--bg-input);padding:8px;border-radius:6px">
+                  <span style="font-weight:600;color:#10b981">✅ 英文</span><br>
+                  <span style="font-size:0.7rem">"A cat walking through rain-soaked neon street, slow motion, cinematic lighting"</span>
+                </div>
               </div>
-              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">壮丽自然风光航拍</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">AI生成</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 1.8k</span></div></div>
-            </div>
-            <div class="feature-card" style="padding:0;overflow:hidden;cursor:pointer" onclick="VID_USE_TEMPLATE(2)">
-              <div style="height:110px;background:linear-gradient(135deg,#1c1917,#292524,#f59e0b,#ef4444);animation:vidShimmer 4s ease infinite;background-size:400% 400%;display:flex;align-items:center;justify-content:center;position:relative">
-                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid white;margin-left:3px"></div></div>
-                <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px">10s</div>
-              </div>
-              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">古风武侠打斗</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">AI生成</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 3.1k</span></div></div>
-            </div>
-            <div class="feature-card" style="padding:0;overflow:hidden;cursor:pointer" onclick="VID_USE_TEMPLATE(3)">
-              <div style="height:110px;background:linear-gradient(135deg,#1e1b4b,#4c1d95,#a855f7,#d946ef);animation:vidShimmer 3.2s ease infinite;background-size:400% 400%;display:flex;align-items:center;justify-content:center;position:relative">
-                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid white;margin-left:3px"></div></div>
-                <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px">5s</div>
-              </div>
-              <div style="padding:8px"><div style="font-weight:600;font-size:0.75rem">机械动物特写</div><div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);border-radius:4px">AI生成</span><span style="font-size:0.6rem;color:var(--text-secondary)">❤️ 980</span></div></div>
+              <p>🔑 <b>万能提升词</b>：在描述后加上 <code style="background:var(--bg);padding:1px 5px;border-radius:3px;color:var(--accent)">cinematic, 4K, slow motion, shallow depth of field</code> — 画面质量立刻提升。</p>
+              <p style="margin-top:6px">📝 <b>建议流程</b>：先用熟悉的语言写初稿 → 复制到翻译工具 → 粘贴英文到视频描述框 → 产生更好效果。</p>
             </div>
           </div>
+
+          <!-- 🔥 提示词模板 -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <h4 style="font-size:0.85rem">🔥 提示词模板</h4>
+            <div style="display:flex;gap:4px;background:var(--bg-input);border-radius:8px;padding:2px">
+              <button id="vidTmplBtnCN" class="btn-xs" style="padding:3px 10px;font-size:0.68rem;background:var(--accent);color:#fff;border-radius:6px;border:none" onclick="VID_TMPL_LANG('cn')">🇨🇳 中文</button>
+              <button id="vidTmplBtnEN" class="btn-xs" style="padding:3px 10px;font-size:0.68rem;background:transparent;color:var(--text-secondary);border-radius:6px;border:none" onclick="VID_TMPL_LANG('en')">🇺🇸 English</button>
+            </div>
+          </div>
+          <div id="vidTmplGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:4px"></div>
         </div>
       </div>
     </div>
@@ -1742,32 +1732,10 @@ a{color:var(--accent);text-decoration:none}
       </div>
     </div>
     <h3 style="margin-bottom:12px">🎎 角色展示库</h3>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px" id="d3Showcase">
-      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='一只威武的中国龙，东方神话风格，盘旋姿态，鳞片细节丰富，低面数优化'">
-        <div style="height:80px;background:linear-gradient(135deg,#7c2d12,#b45309,#d97706,#f59e0b);animation:vidShimmer 4s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;font-size:2.2rem">🐉</div>
-        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">中国龙</div><div style="font-size:0.72rem;color:var(--text-secondary)">卡通风格 · 低面数</div></div>
-      </div>
-      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='未来机甲战士，合金装甲，蓝色能量核心，战斗姿态，高精度模型'">
-        <div style="height:80px;background:linear-gradient(135deg,#1e3a5f,#1d4ed8,#3b82f6,#06b6d4);animation:vidShimmer 3.5s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;font-size:2.2rem">🤖</div>
-        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">机甲战士</div><div style="font-size:0.72rem;color:var(--text-secondary)">写实风格 · 高模</div></div>
-      </div>
-      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='中国古代宫殿建筑群，唐代风格，红墙金瓦，对称布局，低多边形场景'">
-        <div style="height:80px;background:linear-gradient(135deg,#4a1d96,#6d28d9,#8b5cf6,#a78bfa);animation:vidShimmer 4.5s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;font-size:2.2rem">🏯</div>
-        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">古代建筑</div><div style="font-size:0.72rem;color:var(--text-secondary)">低多边形 · 场景</div></div>
-      </div>
-      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='九尾狐妖，白色毛发，九条尾巴飘逸，灵动的眼睛，卡通渲染风格'">
-        <div style="height:80px;background:linear-gradient(135deg,#9d174d,#db2777,#f472b6,#f9a8d4);animation:vidShimmer 3.8s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;font-size:2.2rem">🦊</div>
-        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">九尾狐</div><div style="font-size:0.72rem;color:var(--text-secondary)">卡通风格 · 可动</div></div>
-      </div>
-      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='科幻星际飞船，流线型设计，金属光泽，引擎喷口发光，高精度细节'">
-        <div style="height:80px;background:linear-gradient(135deg,#0f172a,#1e40af,#2563eb,#38bdf8);animation:vidShimmer 3.2s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;font-size:2.2rem">🚀</div>
-        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">星际飞船</div><div style="font-size:0.72rem;color:var(--text-secondary)">科幻 · 高细节</div></div>
-      </div>
-      <div class="feature-card" style="padding:0;overflow:hidden;text-align:center;cursor:pointer" onclick="document.getElementById('d3TextPrompt').value='像素风格游戏角色，8-bit复古风格，色彩鲜艳，体素方块构建，Q版可爱'">
-        <div style="height:80px;background:linear-gradient(135deg,#064e3b,#059669,#10b981,#6ee7b7);animation:vidShimmer 4.2s ease infinite;background-size:300% 300%;display:flex;align-items:center;justify-content:center;font-size:2.2rem">👾</div>
-        <div style="padding:8px"><div style="font-weight:600;font-size:0.85rem">像素角色</div><div style="font-size:0.72rem;color:var(--text-secondary)">体素风格 · 游戏</div></div>
-      </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:0.75rem;color:var(--text-secondary)">点击任意模板加载提示词，悬停预览效果</span>
     </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:24px" id="d3Showcase"></div>
     <h3 style="margin-bottom:12px">⭐ 用户评价</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:24px">
       <div class="feature-card" style="padding:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:1.2rem">👤</span><div><div style="font-weight:600;font-size:0.85rem">游戏开发者张明</div><div style="font-size:0.72rem;color:var(--text-secondary)">★★★★★</div></div></div><p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.5">用文本生成的3D角色直接导入Unity，效果出奇的好，大大加快了原型开发速度。</p></div>
@@ -2256,6 +2224,7 @@ a{color:var(--accent);text-decoration:none}
           • <b>OpenRouter</b>: <a href="https://openrouter.ai/activity" target="_blank">openrouter.ai/activity → 用量</a><br>
           • <b>七牛云合规</b>: <a href="https://portal.qiniu.com/financial/cost" target="_blank">portal.qiniu.com → 费用中心</a><br>
           • <b>腾讯混元</b>: <a href="https://console.cloud.tencent.com/hunyuan/start" target="_blank">console.cloud.tencent.com → 混元控制台</a><br>
+          • <b>Agnes (视频)</b>: <a href="https://platform.agnes-ai.com/" target="_blank">platform.agnes-ai.com → API管理</a> — 当前免费，用量为 0% 无需充值<br>
           • <b>充值</b>: 各平台独立充值，不互通。建议每月初检查所有 Key 余额
         </div>
       </div>
@@ -2441,7 +2410,7 @@ function switchPage(name){
   if(name==='admin'){document.getElementById('adminLogin').style.display='block';document.getElementById('adminDashboard').style.display='none'}
   if(name==='agents'){renderAgents('all');setTimeout(()=>renderModelBar('agents','modelBar_agents'),50)}
   if(name!='chat'&&name!='studio'&&name!='prompts'&&name!='knowledge')updateRightPanel(name);
-  if(name==='studio'){updateRightPanel('studio');setTimeout(initStudioData,100);setTimeout(()=>renderModelBar('studio','modelBar_studio'),50)}
+  if(name==='studio'){updateRightPanel('studio');setTimeout(initStudioData,100);setTimeout(()=>{renderModelBar('studio','modelBar_studio');renderModelBar('studio','modelBar_studio_image')},50)}
   if(name==='prompts'){updateRightPanel('prompts');setTimeout(renderPromptCards,100)}
   if(name==='knowledge'){updateRightPanel('knowledge');setTimeout(renderKnowledgeTree,100)}
   if(name==='tools'){updateRightPanel('tools')}
@@ -2825,7 +2794,7 @@ function initHeroPlanet(){
     });
   });
 }
-initHeroPlanet();
+initHeroPlanet(); // 首页星球保留
 // 动态获取模型总数 & 动态模型合并
 (async function loadModelCount(){
   try{
@@ -2849,7 +2818,7 @@ initHeroPlanet();
 })();
 
 function initAllModels(){
-  renderPlanet();
+  // renderPlanet(); // 已移除模型页星球
   const af=document.querySelector('#page-models .filter-tag.active')?.dataset?.filter||'all';
   const st=document.getElementById('modelSearch')?.value?.toLowerCase()||'';
   let f=models;
@@ -3641,7 +3610,6 @@ function doRegisterNew(){
   if(e){const users=getUsers();if(users.find(x=>x.email===e)){showFieldError(document.getElementById('regEmail'),'该邮箱已被注册');return}}
 
   const btn=document.querySelector('.auth-btn');btn.textContent='注册中...';btn.disabled=true;
-  const phone=document.getElementById('regPhone').value.trim();
   apiFetch('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,email:e||undefined,password:p,phone:phone||undefined,deviceFp,refCode:ref||undefined})}).then(d=>{
     btn.textContent='注 册';btn.disabled=false;
     if(d.ok&&d.token){
@@ -4023,12 +3991,15 @@ function getKeyConfig(){
     {platform:'科大讯飞星火',prefix:'SPARK',models:['spark4','spark-lite'],status:'ok',usagePercent:4,manageUrl:'https://xinghuo.xfyun.cn/'},
     {platform:'MiniMax',prefix:'MINIMAX',models:['minimax1'],status:'ok',usagePercent:2,manageUrl:'https://platform.minimaxi.com/'},
     {platform:'百川智能',prefix:'BAICHUAN',models:['baichuan4'],status:'ok',usagePercent:1,manageUrl:'https://platform.baichuan-ai.com/'},
+    {platform:'Agnes (视频)',prefix:'AGNES',models:['agnes-video-v2.0'],status:'ok',usagePercent:0,manageUrl:'https://platform.agnes-ai.com/'},
   ]));
 }
 function saveKeyConfig(cfg){localStorage.setItem('api_keys_config',JSON.stringify(cfg))}
 function refreshKeyStats(){
   const ps=getKeyConfig();
   ps.forEach(p=>{
+    // Agnes 免费所以用量始终为 0
+    if(p.platform.includes('Agnes')){p.usagePercent=0;return}
     const base=p.platform.includes('七牛云')?42:p.platform.includes('DeepSeek')?12:p.platform.includes('阿里')?25:p.platform.includes('Kimi')?8:p.platform.includes('GLM')?15:p.platform.includes('OpenAI')?35:p.platform.includes('Gemini')?18:p.platform.includes('Claude')?28:p.platform.includes('Yi')?5:p.platform.includes('混元')?3:p.platform.includes('豆包')?10:p.platform.includes('文心')?6:p.platform.includes('星火')?4:p.platform.includes('MiniMax')?2:p.platform.includes('百川')?1:15;
     p.usagePercent=Math.min(99,Math.max(1,base+(Math.random()-0.5)*12|0));
   });
@@ -4039,7 +4010,7 @@ function renderKeyDashboard(){
   if(!tb)return;
   const totalUsage=ps.reduce((s,p)=>s+p.usagePercent,0);
   const avgUsage=(totalUsage/ps.length).toFixed(0);
-  const estCost=ps.reduce((s,p)=>{const costs={'deepseek':30,'dashscope':50,'moonshot':20,'zhipu':25,'siliconflow':30,'dmxapi':10,'openrouter':80,'hunyuan':8,'qiniu':120};const key=Object.keys(costs).find(k=>p.prefix.toLowerCase().includes(k));return s+(key?costs[key]:15)*(p.usagePercent/50)},0);
+  const estCost=ps.reduce((s,p)=>{const costs={'deepseek':30,'dashscope':50,'moonshot':20,'zhipu':25,'siliconflow':30,'dmxapi':10,'openrouter':80,'hunyuan':8,'qiniu':120,'agnes':0};const key=Object.keys(costs).find(k=>p.prefix.toLowerCase().includes(k));return s+(key?costs[key]:15)*(p.usagePercent/50)},0);
   const summary=`<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;padding:12px;background:var(--bg-card);border-radius:var(--radius)">
     <div><span style="font-size:0.7rem;color:var(--text-secondary)">监控平台</span><br><b style="font-size:1.1rem">${ps.length}</b></div>
     <div><span style="font-size:0.7rem;color:var(--text-secondary)">平均用量</span><br><b style="font-size:1.1rem">${avgUsage}%</b></div>
@@ -4401,7 +4372,7 @@ function STUDIO_SET(k,v){if(k==='ratio')document.getElementById('stuRatio').valu
 async function STUDIO_GENERATE_IMAGE(){const prompt=document.getElementById('stuPromptText').textContent.trim();const subj=document.getElementById('stuPrompt').value.trim();const p=subj||prompt;if(!p){showToast('请输入创作描述');return}const load=document.getElementById('stuLoading'),img=document.getElementById('stuImage');load.style.display='block';img.style.display='none';document.getElementById('stuImgActions').style.display='none';try{const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=768&height=768&nologo=true&seed=${Math.floor(Math.random()*99999)}`;img.src=url;img.onload=()=>{load.style.display='none';img.style.display='block';document.getElementById('stuImgActions').style.display='flex';window._stuLastImage={url,prompt:document.getElementById('stuPrompt').value,full:p,cat:'绘画',time:new Date().toISOString()}};img.onerror=()=>{load.style.display='none';showToast('生成失败')}}catch(e){load.style.display='none';showToast('出错')}}
 function STUDIO_SAVE_IMAGE(){if(!window._stuLastImage){showToast('请先生成图像');return}const a=document.createElement('a');a.href=window._stuLastImage.url;a.download='ai-creation.png';a.click()}
 function STUDIO_ADD_TO_GALLERY(){if(!window._stuLastImage){showToast('请先生成图像');return}STUDIO_GALLERY.unshift({...window._stuLastImage,cat:'绘画'});STUDIO_GALLERY=STUDIO_GALLERY.slice(0,100);localStorage.setItem('stuGallery',JSON.stringify(STUDIO_GALLERY));showToast('已加入画廊')}
-function renderStudioGallery(){const g=document.getElementById('studioGalleryGrid');let items=STUDIO_GALLERY;if(GALLERY_FILTER_CURRENT!=='all')items=items.filter(i=>i.cat===GALLERY_FILTER_CURRENT);if(!items.length){g.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎨</div><p>没有找到作品</p></div>';return}g.innerHTML=items.map((s,i)=>`<div class="feature-card" style="cursor:pointer;padding:0;overflow:hidden" onclick="STUDIO_GALLERY_USE(${STUDIO_GALLERY.indexOf(s)})"><div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--bg-input)"><img src="${s.url}" style="max-width:100%;max-height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🎨'"></div><div style="padding:12px"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">${escapeHtml(s.prompt.substring(0,40))}...</div><div style="font-size:0.68rem;color:var(--text-secondary)">${s.cat||'绘画'} · ${new Date(s.time).toLocaleString('zh-CN')}</div></div></div>`).join('')}
+function renderStudioGallery(){const g=document.getElementById('studioGalleryGrid');let items=STUDIO_GALLERY;if(GALLERY_FILTER_CURRENT!=='all')items=items.filter(i=>i.cat===GALLERY_FILTER_CURRENT);if(!items.length){g.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎨</div><p>没有找到作品</p></div>';return}g.innerHTML=items.map((s,i)=>`<div class="feature-card" style="cursor:pointer;padding:0;overflow:hidden" onclick="STUDIO_GALLERY_USE(${STUDIO_GALLERY.indexOf(s)})"><div style="height:160px;display:flex;align-items:center;justify-content:center;background:var(--bg-input);position:relative;overflow:hidden"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:0.3;pointer-events:none">🎨</div><img src="${s.url}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:cover;position:relative;z-index:1" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none';this.previousElementSibling.style.opacity='0.8';this.previousElementSibling.textContent='🖼️'"></div><div style="padding:12px"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">${escapeHtml(s.prompt.substring(0,40))}...</div><div style="font-size:0.68rem;color:var(--text-secondary)">${s.cat||'绘画'} · ${new Date(s.time).toLocaleString('zh-CN')}</div></div></div>`).join('')}
 function STUDIO_GALLERY_USE(i){if(!STUDIO_GALLERY[i])return;document.getElementById('stuPrompt').value=STUDIO_GALLERY[i].prompt;document.getElementById('studioTabs').querySelector('[data-tab=image]').click();document.getElementById('studioTabImage').style.display='block';document.getElementById('studioTabVideo').style.display='none';document.getElementById('studioTabGallery').style.display='none';STUDIO_BUILD_PROMPT();showToast('已加载到创作区')}
 async function STUDIO_GENERATE_VIDEO(){const p=document.getElementById('stuVidPrompt').value.trim();if(!p){showToast('请输入视频描述');return}const platform=localStorage.getItem('vid_api_platform')||'agnes';const load=document.getElementById('stuVidLoading'),ph=document.getElementById('stuVidPlaceholder'),res=document.getElementById('stuVidResult'),img=document.getElementById('stuVideoImg'),bar=document.getElementById('vidProgressBar'),txt=document.getElementById('vidStatusText'),sub=document.getElementById('vidStatusSub');if(ph)ph.style.display='none';load.style.display='block';if(bar)bar.style.width='0%';if(txt)txt.textContent='🎨 AI 正在创作视频...';if(sub)sub.textContent='预计需要 1-3 分钟';if(img)img.style.display='none';if(res){res.style.display='none';res.innerHTML=''}const style=document.getElementById('vidStyle').value;const dur=document.getElementById('vidDuration').value;const ratio=document.getElementById('vidRatio').value;const quality=document.getElementById('vidQuality').value;if(!spendCredits(platform==='agnes'?5:10)){load.style.display='none';if(ph)ph.style.display='block';return}try{if(platform==='agnes'){const fullPrompt=p+(style&&style!=='不限制'?', '+style:'')+', cinematic, '+quality+', '+ratio;const body={prompt:fullPrompt,width:1152,height:768,num_frames:Math.min(81+Math.floor(parseInt(dur)/5)*40,241),frame_rate:24};if(style==='赛博朋克'){body.negative_prompt='blurry, low quality, cartoon, anime, pixelated'}const r=await fetch('/api/agnes-video',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!d.ok||!d.id){load.style.display='none';if(ph)ph.style.display='block';showToast('❌ 提交失败: '+(d.error||'未知错误'));return}const taskId=d.id;const statusMsgs=['🎬 正在构思画面...','🎨 绘制关键帧中...','✨ 渲染视频细节...','🎵 合成音频轨道...','🔮 即将完成...'];if(txt)txt.textContent=statusMsgs[0];if(bar)bar.style.width='10%';let result=null;for(let i=0;i<60;i++){await new Promise(rv=>setTimeout(rv,3000));const sr=await fetch('/api/agnes-video/'+taskId);const sd=await sr.json();const pct=Math.min(95,Math.floor((i+1)/60*95));if(bar)bar.style.width=pct+'%';const msgIdx=Math.min(4,Math.floor(i/12));if(txt&&(i===0||i%12===0))txt.textContent=statusMsgs[msgIdx];if(sub)sub.textContent='已等待 '+Math.floor((i+1)*3)+' 秒...';if(sd.status==='completed'){result=sd;if(bar)bar.style.width='100%';if(txt)txt.textContent='✅ 生成完成！';break}if(sd.status==='failed'){load.style.display='none';if(ph)ph.style.display='block';showToast('❌ 生成失败: '+(sd.error||'未知错误'));return}}if(!result){load.style.display='none';if(ph)ph.style.display='block';showToast('⏰ 生成超时，请稍后重试');return}const videoUrl=result.video_url||result.url||result.remixed_from_video_id;if(!videoUrl){load.style.display='none';if(ph)ph.style.display='block';showToast('❌ 未获取到视频链接');return}await new Promise(rv=>setTimeout(rv,400));load.style.display='none';res.style.display='block';res.innerHTML='<div style="padding:8px"><video id="stuVidPlayer" controls autoplay loop playsinline style="width:100%;max-height:400px;border-radius:12px;animation:vidPulse 2s ease 1" src="'+videoUrl+'" onloadeddata="this.closest(\'#stuVidResult\').querySelector(\'.vid-loading-overlay\').style.display=\'none\'"><div class="vid-loading-overlay" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);border-radius:12px;pointer-events:none"><div class="spinner"></div></div></video><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn-sm primary" onclick="window.open(\''+videoUrl+'\')" style="animation:vidReveal 0.4s ease 0.1s both">🔗 新窗口打开</button><button class="btn-sm" onclick="STUDIO_ADD_VIDEO_TO_GALLERY(\''+videoUrl+'\',\''+escapeHtml(p.substring(0,60))+'\')" style="animation:vidReveal 0.4s ease 0.2s both">💾 加入画廊</button><button class="btn-sm" onclick="STUDIO_SAVE_VIDEO()" style="animation:vidReveal 0.4s ease 0.3s both">📥 下载视频</button></div></div>';showToast('🎉 视频生成成功！')}else{const savedKey=localStorage.getItem('vid_api_key');if(!savedKey){showToast('⚠️ 请先在上方切换为自配模式并输入 '+platform+' API Key');load.style.display='none';if(ph)ph.style.display='block';return}const url='https://image.pollinations.ai/prompt/'+encodeURIComponent(p+' '+style+', cinematic, '+quality+', '+ratio)+'?width=768&height=432&nologo=true&seed='+Math.floor(Math.random()*99999);img.src=url;img.onload=()=>{load.style.display='none';img.style.display='block';showToast('🎬 视频预览生成完成（'+dur+'秒, '+platform+', '+quality+'）')};img.onerror=()=>{load.style.display='none';showToast('生成失败')}}}catch(e){load.style.display='none';if(ph)ph.style.display='block';showToast('出错: '+e.message)}}
 function STUDIO_ADD_VIDEO_TO_GALLERY(url,prompt){STUDIO_GALLERY.unshift({url:url,prompt:prompt||'AI 视频',full:prompt||'',cat:'视频',time:new Date().toISOString()});STUDIO_GALLERY=STUDIO_GALLERY.slice(0,100);localStorage.setItem('stuGallery',JSON.stringify(STUDIO_GALLERY));showToast('✅ 已加入画廊')}
@@ -4411,7 +4382,105 @@ function STUDIO_SAVE_VIDEO(){const v=document.getElementById('stuVidPlayer');if(
 function VID_SET_MODE(mode,el){document.querySelectorAll('#studioTabVideo .workshop-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('vidTextMode').style.display=mode==='text'?'block':'none';document.getElementById('vidImageMode').style.display=mode==='image'?'block':'none'}
 function VID_PREVIEW_IMAGE(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=function(e){const preview=document.getElementById('vidImagePreview');preview.style.display='block';preview.querySelector('img').src=e.target.result;document.getElementById('vidImageDrop').style.display='none'};r.readAsDataURL(f)}
 function VID_CLEAR(){document.getElementById('stuVidPrompt').value='';document.getElementById('stuVideoImg').style.display='none';document.getElementById('stuVidLoading').style.display='none';const r=document.getElementById('stuVidResult');if(r){r.style.display='none';r.innerHTML=''}document.getElementById('stuVidPlaceholder').style.display='block';document.getElementById('vidImagePreview').style.display='none';document.getElementById('vidImageDrop').style.display='flex';const bar=document.getElementById('vidProgressBar');if(bar)bar.style.width='0%'}
-function VID_USE_TEMPLATE(i){const templates=[{p:'赛博朋克城市夜景，霓虹灯闪烁，雨夜街道倒影，未来感，电影级画质',s:'赛博朋克'},{p:'壮丽自然风景航拍，雪山湖泊，日出金色光芒，无人机视角，8K',s:'写实'},{p:'古风武侠打斗，竹林深处，剑光闪烁，衣袂翻飞，慢动作特写',s:'电影感'},{p:'机械动物特写，金属质感，齿轮转动，蒸汽朋克风格，细节丰富',s:'科幻'}];const t=templates[i];if(!t)return;document.getElementById('stuVidPrompt').value=t.p;document.getElementById('vidStyle').value=t.s;showToast('✅ 已加载模板提示词')}
+// ==== 视频提示词模板 ====
+const VID_TEMPLATES=[
+  {cn:'赛博朋克：雨夜霓虹街道，孤独人影穿行，倒影闪烁，蒸汽升腾，慢镜头，电影感',en:'A lone figure walking through a rain-soaked neon street at night, reflections of pink and blue lights on wet pavement, slow cinematic pan, steam rising, cyberpunk',icon:'🌆',color:'#6366f1,#06b6d4',sec:5,video:'https://storage.googleapis.com/agnes-aigc/aigc/videos/2026/06/03/video_ec52cf21df81389c82af51a35e99239b1b09cf4618ffb63f.mp4'},
+  {cn:'自然风光：无人机飞越日出雪山，金色光芒穿透云层，原始高山湖泊，4K画质',en:'Drone shot flying over misty mountain peaks at sunrise, golden light breaking through clouds, pristine alpine lake, cinematic 4K, smooth aerial',icon:'🏔️',color:'#047857,#10b981',sec:5,video:'https://storage.googleapis.com/agnes-aigc/aigc/videos/2026/06/03/video_b77afb78dd159653fea56e8b0ceda7e6bb5863ce0d2ae5da.mp4'},
+  {cn:'趣味动物：橘猫在窗台安睡，午后阳光洒落，微风拂动窗帘，温暖治愈',en:'A fluffy orange cat sleeping peacefully on a sunny windowsill, warm afternoon light, gentle breeze, cozy atmosphere, shallow depth of field',icon:'🐱',color:'#f59e0b,#ef4444',sec:5,video:'https://storage.googleapis.com/agnes-aigc/aigc/videos/2026/06/03/video_0e90988ac7475c6034bef9a16362c2d2678abceedd987af2.mp4'},
+  {cn:'古风武侠：白衣剑客立于竹叶之上，风吹竹林，落叶环绕，慢动作，电影光影',en:'A swordsman in flowing white robes on bamboo leaf, slow motion, wind in bamboo forest, leaves swirling, cinematic lighting, martial arts',icon:'⚔️',color:'#1c1917,#f59e0b',sec:5,video:'https://storage.googleapis.com/agnes-aigc/aigc/videos/2026/06/03/video_1a55609c81a23fb8a75c9e761356996f9d1e6d23305869c6.mp4'},
+  {cn:'科幻大片：巨型星舰从紫色星云浮现，引擎蓝光，粒子漂浮，史诗级别',en:'A massive starship emerging from purple nebula, engine glow, cosmic particles, epic scale cinematic space shot, 4K',icon:'🚀',color:'#4c1d95,#a855f7',sec:5,video:'https://storage.googleapis.com/agnes-aigc/aigc/videos/2026/06/03/video_ab5c0e0d8cbb18ca50a248f8d1c57b2ddd7028b839c8f1d4.mp4'},
+  {cn:'海浪日落：海浪拍打暗礁，夕阳逆光，慢动作水花，海鸥远处，戏剧化天空',en:'Waves crashing against dark rocks at sunset, golden hour backlight, slow motion splashes, seagulls, dramatic sky, cinematic',icon:'🌊',color:'#0e7490,#06b6d4',sec:5,video:'https://storage.googleapis.com/agnes-aigc/aigc/videos/2026/06/03/video_317d6380fdd50aa83b82e73a2941e45e46b6bd787668a859.mp4'},
+  {cn:'魔法森林：发光蘑菇与萤火虫在古老森林闪烁，月光穿透树冠，魔幻仙境',en:'Glowing mushrooms and fireflies in enchanted ancient forest, moonlight through canopy, magical particles floating, fantasy cinematic',icon:'🌲',color:'#15803d,#34d399',sec:5,video:'https://storage.googleapis.com/agnes-aigc/aigc/videos/2026/06/03/video_900511d41580b28bb81bfe3bf1fe9e6687043aaf8f1f9bad.mp4'},
+  {cn:'蒸汽朋克：黄铜齿轮特写转动，铜管蒸汽嘶嘶声，钟表匠工作台温暖光',en:'Brass mechanical gears turning closeup, steam hissing from copper pipes, watchmaker workbench, warm lighting, steampunk, shallow depth',icon:'⚙️',color:'#92400e,#f59e0b',sec:5,video:'https://storage.googleapis.com/agnes-aigc/aigc/videos/2026/06/03/video_40a32719311384268bc8deb92736a50eaed2494c8e927d5e.mp4'},
+];
+let vidTmplLang='cn';
+function VID_TMPL_LANG(lang){
+  vidTmplLang=lang;
+  document.getElementById('vidTmplBtnCN').style.background=lang==='cn'?'var(--accent)':'transparent';
+  document.getElementById('vidTmplBtnCN').style.color=lang==='cn'?'#fff':'var(--text-secondary)';
+  document.getElementById('vidTmplBtnEN').style.background=lang==='en'?'var(--accent)':'transparent';
+  document.getElementById('vidTmplBtnEN').style.color=lang==='en'?'#fff':'var(--text-secondary)';
+  VID_RENDER_TEMPLATES();
+}
+function VID_RENDER_TEMPLATES(){
+  const grid=document.getElementById('vidTmplGrid');
+  if(!grid)return;
+  grid.innerHTML=VID_TEMPLATES.map((t,i)=>`<div class="feature-card vid-tmpl-card" style="padding:0;overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative" onclick="VID_TMPL_USE(${i})" onmouseenter="VID_TMPL_HOVER(${i},true,this)" onmouseleave="VID_TMPL_HOVER(${i},false,this)">
+    <div class="vid-tmpl-media" style="height:90px;position:relative;overflow:hidden;background:#1a1035">
+      ${t.video?`<video class="vid-tmpl-video" src="${t.video}" muted loop playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0" onloadedmetadata="this.currentTime=1"></video><div class="vid-tmpl-overlay" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.25);transition:opacity 0.3s;pointer-events:none"></div>`:'<div style="width:100%;height:100%;background:linear-gradient(135deg,'+t.color+');display:flex;align-items:center;justify-content:center;font-size:2rem">'+t.icon+'</div>'}
+      <div class="vid-tmpl-play" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:transform 0.2s,opacity 0.2s">
+        <div style="width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid #fff;margin-left:2px"></div>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.65);color:#fff;font-size:0.6rem;padding:1px 6px;border-radius:3px;pointer-events:none">${t.sec||5}s</div>
+    <div style="padding:8px">
+      <div style="font-weight:600;font-size:0.72rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${vidTmplLang==='cn'?t.cn.split('：')[1]||t.cn:t.en.substring(0,36)}</div>
+      <div style="margin-top:3px;display:flex;gap:4px;align-items:center">
+        <span style="font-size:0.6rem;padding:1px 5px;background:var(--accent-soft);border-radius:3px;color:var(--accent)">点击使用</span>
+        <span style="font-size:0.58rem;color:var(--text-secondary)">${vidTmplLang==='cn'?'中文':'English'}</span>
+      </div>
+    </div>
+  </div>`).join('');
+}
+function VID_TMPL_HOVER(i,enter,el){
+  const v=el.querySelector('video');
+  const overlay=el.querySelector('.vid-tmpl-overlay');
+  const play=el.querySelector('.vid-tmpl-play');
+  if(!v||!v.src)return;
+  if(enter){
+    v.play().catch(()=>{});
+    if(overlay)overlay.style.opacity='0';
+    if(play){play.style.opacity='0';play.style.transform='translate(-50%,-50%) scale(1.3)'}
+  }else{
+    v.pause();
+    v.currentTime=1;
+    if(overlay)overlay.style.opacity='1';
+    if(play){play.style.opacity='1';play.style.transform='translate(-50%,-50%) scale(1)'}
+  }
+}
+function VID_TMPL_USE(i){
+  const t=VID_TEMPLATES[i];
+  if(!t)return;
+  const prompt=vidTmplLang==='cn'?t.cn:t.en;
+  document.getElementById('stuVidPrompt').value=prompt;
+  document.getElementById('vidStyle').value=vidTmplLang==='cn'?'电影感':'cinematic';
+  showToast('✅ 已加载「'+t.cn.substring(0,t.cn.indexOf('：')>=0?t.cn.indexOf('：'):8)+'」提示词');
+}
+// 页面初始化时渲染模板
+setTimeout(()=>{if(document.getElementById('vidTmplGrid'))VID_RENDER_TEMPLATES()},200);
+
+// ==== 🎎 3D 角色展示库（数据驱动 + 悬停预览） ====
+const D3_TEMPLATES=[
+  {name:'中国龙',prompt:'一只威武的中国龙，东方神话风格，盘旋姿态，鳞片细节丰富，低面数优化',icon:'🐉',color:'#7c2d12,#b45309,#d97706,#f59e0b',tags:['神话','低面数'],thumb:'https://image.pollinations.ai/prompt/A%20majestic%20Chinese%20dragon,%20oriental%20mythical%20style,%20coiled%20pose,%20detailed%20scales,%20low-poly%20game%20asset%20on%20dark%20background?width=400&height=300&nologo=true&seed=1000'},
+  {name:'机甲战士',prompt:'未来机甲战士，合金装甲，蓝色能量核心，战斗姿态，高精度模型，关节可动',icon:'🤖',color:'#1e3a5f,#1d4ed8,#3b82f6,#06b6d4',tags:['科幻','高精度'],thumb:'https://image.pollinations.ai/prompt/Futuristic%20mecha%20warrior,%20alloy%20armor,%20blue%20energy%20core,%20battle%20stance,%20high%20detail%203D%20render?width=400&height=300&nologo=true&seed=1001'},
+  {name:'古代宫殿',prompt:'中国古代宫殿建筑群，唐代风格，红墙金瓦，飞檐翘角，对称布局，低多边形场景模型',icon:'🏯',color:'#4a1d96,#6d28d9,#8b5cf6,#a78bfa',tags:['建筑','场景'],thumb:'https://image.pollinations.ai/prompt/Ancient%20Chinese%20palace%20architecture,%20Tang%20dynasty%20style,%20red%20walls%20golden%20tiles,%20symmetrical%20layout,%20low-poly%203D%20scene?width=400&height=300&nologo=true&seed=1002'},
+  {name:'九尾狐',prompt:'九尾狐妖，白色毛发，九条尾巴飘逸灵动，红宝石般的眼睛，卡通渲染风格，半写实',icon:'🦊',color:'#9d174d,#db2777,#f472b6,#f9a8d4',tags:['卡通','角色'],thumb:'https://image.pollinations.ai/prompt/Nine-tailed%20fox%20spirit,%20white%20fur,%20nine%20flowing%20tails,%20ruby%20eyes,%20cel-shaded%20game%20character%20style?width=400&height=300&nologo=true&seed=1003'},
+  {name:'星际飞船',prompt:'科幻星际驱逐舰，流线型设计，金属装甲外壳，引擎喷口蓝色火焰，高精度细节，太空场景',icon:'🚀',color:'#0f172a,#1e40af,#2563eb,#38bdf8',tags:['科幻','载具'],thumb:'https://image.pollinations.ai/prompt/Sci-fi%20starship%20destroyer,%20streamlined%20design,%20metallic%20armor,%20blue%20engine%20glow,%203D%20model%20on%20black?width=400&height=300&nologo=true&seed=1004'},
+  {name:'像素角色',prompt:'像素风格游戏角色，8-bit复古风格，色彩鲜艳，体素方块构建，Q版可爱大头造型',icon:'👾',color:'#064e3b,#059669,#10b981,#6ee7b7',tags:['体素','游戏'],thumb:'https://image.pollinations.ai/prompt/Pixel%20art%20game%20character,%208-bit%20retro%20style,%20bright%20colors,%20voxel%20block%20built,%20chibi%20cute%20big%20head?width=400&height=300&nologo=true&seed=1005'},
+  {name:'精灵弓箭手',prompt:'奇幻精灵弓箭手，尖耳朵，银色长发，翠绿斗篷，手持精灵长弓，轻盈姿态，PBR材质',icon:'🧝',color:'#14532d,#166534,#16a34a,#86efac',tags:['奇幻','角色'],thumb:'https://image.pollinations.ai/prompt/Fantasy%20elf%20archer,%20pointed%20ears,%20silver%20long%20hair,%20emerald%20cloak,%20holding%20elf%20bow,%203D%20game%20character%20concept?width=400&height=300&nologo=true&seed=1006'},
+  {name:'赛博武士',prompt:'赛博朋克日本武士，霓虹灯管武士刀，全息面甲，碳纤维护甲，雨夜街头站立，高模',icon:'⚔️',color:'#1e1b4b,#312e81,#6366f1,#a855f7',tags:['赛博','角色'],thumb:'https://image.pollinations.ai/prompt/Cyberpunk%20samurai,%20neon%20katana,%20holographic%20face%20mask,%20carbon%20fiber%20armor,%20standing%20in%20rain,%203D%20render?width=400&height=300&nologo=true&seed=1007'},
+  {name:'机甲恐龙',prompt:'机械暴龙，金属骨骼外露，液压关节，红色电子眼，科幻武器化改装，大型生物机甲',icon:'🦖',color:'#7c2d12,#c2410c,#f97316,#fdba74',tags:['科幻','生物'],thumb:'https://image.pollinations.ai/prompt/Mechanical%20tyrannosaurus%20rex,%20exposed%20metal%20skeleton,%20hydraulic%20joints,%20red%20electronic%20eye,%20sci-fi%20weaponized,%20large%20bio-mecha?width=400&height=300&nologo=true&seed=1008'},
+  {name:'魔法书',prompt:'漂浮的古老魔法书，皮革封面金色符文，书页自动翻动，魔法粒子环绕，低多边形游戏资产',icon:'📖',color:'#4a044e,#86198f,#c026d3,#e879f9',tags:['魔法','道具'],thumb:'https://image.pollinations.ai/prompt/Floating%20ancient%20spellbook,%20leather%20cover%20golden%20runes,%20pages%20turning,%20magic%20particles,%20low-poly%20game%20asset?width=400&height=300&nologo=true&seed=1009'},
+];
+function D3_RENDER_SHOWCASE(){
+  const grid=document.getElementById('d3Showcase');
+  if(!grid)return;
+  grid.innerHTML=D3_TEMPLATES.map((t,i)=>`<div class="feature-card vid-tmpl-card d3-card" style="padding:0;overflow:hidden;cursor:pointer;position:relative;perspective:600px" onclick="D3_TMPL_USE(${i})">
+    <div class="d3-card-inner" style="width:100%;height:200px;position:relative;transform-style:preserve-3d;transition:transform 0.8s cubic-bezier(0.4,0,0.2,1)"><div class="d3-card-front" style="position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(135deg,${t.color});display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:absolute;inset:0;z-index:0">${t.icon}</div>${t.thumb?`<img src="${t.thumb}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1;opacity:0;transition:opacity 0.5s" onload="this.style.opacity='1'" onerror="this.remove()">`:''}<div style="position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,0.8));z-index:2;pointer-events:none"><div style="font-weight:700;font-size:0.85rem;color:#fff">${t.name}</div><div style="display:flex;gap:3px;margin-top:3px">${t.tags.map(tag=>`<span style="font-size:0.6rem;padding:1px 6px;background:rgba(255,255,255,0.15);border-radius:3px;color:#fff">${tag}</span>`).join('')}</div></div></div><div class="d3-card-back" style="position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;background:linear-gradient(135deg,#1a1035,#261652);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;transform:rotateY(180deg)"><div style="font-size:3rem;margin-bottom:8px">🔮</div><div style="font-weight:700;font-size:0.9rem;color:var(--accent);margin-bottom:8px">${t.name}</div><div style="font-size:0.7rem;color:var(--text-secondary);text-align:center;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${t.prompt.substring(0,60)}...</div><div style="margin-top:10px;font-size:0.65rem;padding:3px 10px;background:var(--accent);color:#fff;border-radius:12px">🖱 点击加载提示词</div></div></div>
+  </div>`).join('');
+  // 鼠标悬停旋转
+  document.querySelectorAll('.d3-card').forEach(card=>{
+    card.addEventListener('mouseenter',function(){this.querySelector('.d3-card-inner').style.transform='rotateY(180deg)'});
+    card.addEventListener('mouseleave',function(){this.querySelector('.d3-card-inner').style.transform='rotateY(0deg)'});
+  });
+}
+function D3_TMPL_USE(i){
+  const t=D3_TEMPLATES[i];
+  if(!t)return;
+  document.getElementById('d3TextPrompt').value=t.prompt;
+  showToast('✅ 已加载「'+t.name+'」提示词');
+}
+setTimeout(()=>{if(document.getElementById('d3Showcase'))D3_RENDER_SHOWCASE()},250);
 
 // ==== PROMPT LIBRARY ====
 const PROMPTS=[
@@ -4979,12 +5048,14 @@ function renderModelBar(pageId,containerId){
   const el=document.getElementById(containerId);
   if(!el||!rec)return;
   const saved=localStorage.getItem('pageModel_'+pageId)||rec.id;
+  // 动态生成全部模型选项
+  const allOpts=models.map(m=>`<option value="${m.id}" ${saved===m.id?'selected':''}>${m.name}</option>`).join('');
   el.innerHTML=`
     <div class="feature-card" style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:12px;background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(99,102,241,0.05))">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="font-size:0.75rem;font-weight:600;">🤖 模型选择</span>
-        <select id="pm_${pageId}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.75rem;min-width:140px" onchange="PAGE_MODEL_CHANGE('${pageId}',this.value)">
-          ${PAGE_MODEL_RECOMMEND_OPTIONS.map(m=>`<option value="${m.id}" ${saved===m.id?'selected':''}>${m.name}</option>`).join('')}
+        <select id="pm_${pageId}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.75rem;min-width:200px;max-width:280px" onchange="PAGE_MODEL_CHANGE('${pageId}',this.value)">
+          ${allOpts}
         </select>
         <span style="font-size:0.65rem;padding:2px 8px;background:rgba(245,158,11,0.15);color:#f59e0b;border-radius:10px;font-weight:600">✨ 推荐 ${rec.name}</span>
       </div>
@@ -5006,9 +5077,14 @@ function getPageModel(pageId){
 const PAGE_MODEL_RECOMMEND_OPTIONS=[
   {id:'deepseekv3',name:'DeepSeek V3'},{id:'deepseekr1',name:'DeepSeek R1'},
   {id:'qwen_max',name:'Qwen Max'},{id:'qwen_turbo',name:'Qwen Turbo'},
-  {id:'kimi_k2',name:'Kimi K2'},{id:'glm_4',name:'GLM-4'},
-  {id:'hunyuan',name:'腾讯混元'},
-  {id:'sf_deepseek_v32',name:'DeepSeek V3（硅基）'},
+  {id:'gpt4o',name:'GPT-4o'},{id:'gemini25pro',name:'Gemini 2.5 Pro'},
+  {id:'kimi2',name:'Kimi K2'},{id:'glm4plus',name:'GLM-4 Plus'},
+  {id:'hunyuan',name:'腾讯混元'},{id:'ali_qwen37_max',name:'Qwen 3.7 Max（百炼）'},
+  {id:'ali_deepseek_v4_pro',name:'DeepSeek V4 Pro（百炼）'},
+  {id:'sf_deepseek_v32',name:'DeepSeek V3.2（硅基）'},
+  {id:'sf_qwen35_397b',name:'Qwen 3.5 397B（硅基）'},
+  {id:'dmx_minimax_m27_free',name:'MiniMax M2.7（免费）'},
+  {id:'ali_kimi_k26',name:'Kimi K2.6（百炼）'},
 ];
 </script>
 </body>
