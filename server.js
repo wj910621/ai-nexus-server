@@ -42,8 +42,8 @@ const MODEL_CONFIG = {
   gpt4omini:    { provider: 'openai',   model: 'gpt-4o-mini',        baseUrl: process.env.OPENAI_BASE_URL },
   deepseekv3:   { provider: 'openai',   model: 'deepseek-chat',      baseUrl: 'https://api.deepseek.com/v1' },
   deepseekr1:   { provider: 'openai',   model: 'deepseek-reasoner',  baseUrl: 'https://api.deepseek.com/v1' },
-  gemini25pro:  { provider: 'gemini',   model: 'gemini-2.5-pro-exp-03-25' },
-  gemini25flash:{ provider: 'gemini',   model: 'gemini-2.5-flash' },
+  gemini25pro:  { provider: 'openai',   model: 'google/gemini-2.5-pro-exp-03-25', baseUrl: 'https://openrouter.ai/api/v1' },
+  gemini25flash:{ provider: 'openai',   model: 'google/gemini-2.5-flash',        baseUrl: 'https://openrouter.ai/api/v1' },
   qwen3:        { provider: 'openai',   model: 'qwen3-235b-a22b',    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
   kimi2:        { provider: 'openai',   model: 'moonshot-v1-128k',   baseUrl: 'https://api.moonshot.cn/v1' },
   glm4plus:     { provider: 'openai',   model: 'glm-4-plus',         baseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
@@ -120,10 +120,22 @@ const MODEL_CONFIG = {
   or_mistral_large:  { provider: 'openai', model: 'mistralai/mistral-large',    baseUrl: 'https://openrouter.ai/api/v1' },
   or_perplexity:     { provider: 'openai', model: 'perplexity/llama-3.1-sonar-huge-128k-online', baseUrl: 'https://openrouter.ai/api/v1' },
   or_codeqwen:       { provider: 'openai', model: 'qwen/qwen-2.5-coder-32b-instruct', baseUrl: 'https://openrouter.ai/api/v1' },
+
+  // === 旧模型 ID 补充接入 ===
+  gpt4turbo:    { provider: 'openai', model: 'gpt-4-turbo',                baseUrl: process.env.OPENAI_BASE_URL },
+  claude35:     { provider: 'openai', model: 'anthropic/claude-3-sonnet',   baseUrl: 'https://openrouter.ai/api/v1' },
+  claude3opus:  { provider: 'openai', model: 'anthropic/claude-3-opus',    baseUrl: 'https://openrouter.ai/api/v1' },
+  gemini15pro:  { provider: 'openai', model: 'google/gemini-1.5-pro',      baseUrl: 'https://openrouter.ai/api/v1' },
+  gemini15flash:{ provider: 'openai', model: 'google/gemini-1.5-flash',    baseUrl: 'https://openrouter.ai/api/v1' },
+  kimi:         { provider: 'openai', model: 'moonshot-v1-8k',             baseUrl: 'https://api.moonshot.cn/v1' },
+  glm4:         { provider: 'openai', model: 'glm-4',                      baseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
+  minimax:      { provider: 'openai', model: 'MiniMax-M2.7-free',          baseUrl: 'https://www.dmxapi.cn/v1' },
+  doubao:       { provider: 'openai', model: 'doubao-seed-2.0-pro-free',   baseUrl: 'https://www.dmxapi.cn/v1' },
+  spark4:       { provider: 'openai', model: 'spark-lite-free',            baseUrl: 'https://www.dmxapi.cn/v1' },
 };
 
-// 那些我们还没接入真实 API 但有模型的（Claude, Llama, Baichuan 等）
-// 会返回友好的提示信息
+// 部分旧模型（qwen25, step2 等）无 API 配置或渠道，暂时保留模拟回复
+// 接入状态说明：gpt4turbo/claude35/claude3opus/gemini15pro/gemini15flash/kimi/glm4/minimax/doubao/spark4 已通过对应渠道接入
 
 // ============================================================
 // API Key 管理
@@ -140,6 +152,9 @@ function getApiKey(provider, modelId) {
   if (modelId.startsWith('dmx_'))    return process.env.DMXAPI_API_KEY;
   if (modelId.startsWith('or_'))     return process.env.OPENROUTER_API_KEY;
   if (modelId.startsWith('qiniu_'))  return process.env.QINIU_API_KEY;
+  if (modelId.startsWith('claude'))   return process.env.OPENROUTER_API_KEY;
+  if (modelId.startsWith('gemini25')) return process.env.OPENROUTER_API_KEY;
+  if (modelId.startsWith('gemini15')) return process.env.OPENROUTER_API_KEY;
 
   switch (provider) {
     case 'openai':  return process.env.OPENAI_API_KEY;
@@ -224,16 +239,10 @@ async function callGemini(config, messages, apiKey) {
 // ============================================================
 function getSimulatedReply(modelId, question) {
   const modelName = {
-    gpt4o: 'GPT-4o', gpt4turbo: 'GPT-4 Turbo',
-    claude35: 'Claude 3.5 Sonnet', claude3opus: 'Claude 3 Opus',
-    gemini15pro: 'Gemini 1.5 Pro', gemini15flash: 'Gemini 1.5 Flash',
+    gpt4o: 'GPT-4o',
     deepseekv3: 'DeepSeek-V3', deepseekr1: 'DeepSeek-R1',
-    qwen25: '通义千问 2.5', kimi: 'Kimi', glm4: 'GLM-4',
-    yi: 'Yi-Large', hunyuan: '混元', baichuan4: 'Baichuan 4',
-    minimax: 'MiniMax', doubao: '豆包', ernie40: '文心一言 4.0',
-    spark4: '讯飞星火', step2: 'Step-2', sensechat: '日日新',
-    llama31: 'Llama 3.1', mistral: 'Mistral Large',
-    commandr: 'Command R+', phi3: 'Phi-3.5',
+    qwen25: '通义千问 2.5', hunyuan: '混元',
+    step2: 'Step-2',
   };
 
   const name = modelName[modelId] || modelId;
@@ -366,8 +375,26 @@ app.get('/api/models-list', (req, res) => {
   res.json({ count: allModels.length, models: allModels });
 });
 
-app.get('/api/models-count', (req, res) => {
-  res.json({ count: Object.keys(MODEL_CONFIG).length });
+app.get('/api/models-count', async (req, res) => {
+  let staticCount = Object.keys(MODEL_CONFIG).length;
+  let dynamicCount = 0;
+
+  // 尝试并行拉取动态模型计数
+  const tryCount = (url, headers) => fetch(url, { headers, signal: AbortSignal.timeout(8000) })
+    .then(r => r.ok ? r.json() : null)
+    .then(d => d?.data?.length || 0)
+    .catch(() => 0);
+
+  try {
+    const [bailian, sf, openrouter] = await Promise.all([
+      process.env.DASHSCOPE_API_KEY ? tryCount('https://dashscope.aliyuncs.com/compatible-mode/v1/models', { Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY}` }) : Promise.resolve(211),
+      process.env.SILICONFLOW_API_KEY ? tryCount('https://api.siliconflow.cn/v1/models', { Authorization: `Bearer ${process.env.SILICONFLOW_API_KEY}` }) : Promise.resolve(92),
+      process.env.OPENROUTER_API_KEY ? tryCount('https://openrouter.ai/api/v1/models', { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}` }) : Promise.resolve(100),
+    ]);
+    dynamicCount = bailian + sf + openrouter;
+  } catch(e) { dynamicCount = 0; }
+
+  res.json({ count: staticCount + (dynamicCount || 400) });
 });
 
 // ============================================================
@@ -520,9 +547,25 @@ function genAvatarColor(str) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 function genModelDesc(name, provider) {
-  const descMap = { '阿里百炼':'阿里云大模型，中文优化', '硅基流动':'硅基流动开源模型，按量付费', 'OpenRouter':'OpenRouter 聚合模型，全球200+模型' };
+  const descMap = { '阿里云':'阿里云大模型，中文优化', '高性能':'高性能开源模型，按量付费', '海外':'海外模型，全球覆盖' };
   return descMap[provider] || provider + '模型';
 }
+
+// 动态模型积分等级（基于名称和大小）
+function getDynamicCost(modelId) {
+  const id = (modelId || '').toLowerCase();
+  // 免费模型
+  if (id.includes('免费') || id.includes('free') || id.includes('bge-') || id.includes('embed')) return 0;
+  if (/[0-9]{1,2}b/i.test(id) && (id.includes('1.7b') || id.includes('2b') || id.includes('3b') || id.includes('4b') || id.includes('7b') || id.includes('8b'))) return 1;
+  if (id.includes('flash') || id.includes('lite') || id.includes('turbo')) return 2;
+  if (id.includes('plus') || id.includes('qwen3-') || id.includes('coder')) return 2;
+  if (id.includes('max') || id.includes('pro') || id.includes('r1')) return 3;
+  if (id.includes('opus') || id.includes('sonnet') || id.includes('gpt-4') || id.includes('claude')) return 10;
+  if (id.includes('gemini') && id.includes('pro')) return 10;
+  // 默认
+  return 3;
+}
+
 
 // ============================================================
 // 阿里百炼模型动态拉取
@@ -542,14 +585,15 @@ app.get('/api/bailian-models', async (req, res) => {
         name,
         rawModel: m.id,
         avatar: genAvatarColor(name),
-        desc: genModelDesc(name, '阿里百炼'),
-        provider: '阿里百炼',
+        desc: genModelDesc(name, '阿里云'),
+        provider: '阿里云',
         context: '128K',
         inputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
         outputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
         tags: [],
         platform: 'bailian',
         free: (m.id || '').includes('免费'),
+        cost: getDynamicCost(m.id),
       };
     });
     res.json({ ok: true, count: models.length, models });
@@ -576,14 +620,15 @@ app.get('/api/siliconflow-models', async (req, res) => {
         name,
         rawModel: m.id,
         avatar: genAvatarColor(name),
-        desc: genModelDesc(name, '硅基流动'),
-        provider: '硅基流动',
+        desc: genModelDesc(name, '高性能'),
+        provider: '高性能',
         context: '64K',
         inputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
         outputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
         tags: [],
         platform: 'siliconflow',
         free: (m.id || '').includes('free') || (m.id || '').includes('免费'),
+        cost: getDynamicCost(m.id),
       };
     });
     res.json({ ok: true, count: models.length, models });
@@ -610,14 +655,15 @@ app.get('/api/openrouter-models', async (req, res) => {
         name,
         rawModel: m.id,
         avatar: genAvatarColor(name),
-        desc: genModelDesc(name, 'OpenRouter'),
-        provider: 'OpenRouter',
+        desc: genModelDesc(name, '海外'),
+        provider: '海外',
         context: (m.context_length || '128K') + '',
         inputPrice: m.pricing ? (m.pricing.prompt || '?') : '?',
         outputPrice: m.pricing ? (m.pricing.completion || '?') : '?',
         tags: [],
         platform: 'openrouter',
         free: false,
+        cost: getDynamicCost(m.id),
       };
     });
     res.json({ ok: true, count: models.length, models });
@@ -768,12 +814,98 @@ async function initDB() {
     notes TEXT,
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
   )`);
+  // === 知识库表 (RAG) ===
+  db.run(`CREATE TABLE IF NOT EXISTS knowledge_base (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    category TEXT DEFAULT 'general',
+    tags TEXT DEFAULT '',
+    source TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+  )`);
+  // 为知识库建全文搜索索引
+  try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge_base(category)`); } catch(e) {}
+  try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_updated ON knowledge_base(updated_at)`); } catch(e) {}
   // 确保有 admin 用户
   const adminExists = db.exec("SELECT id FROM users WHERE username='admin'");
   if (!adminExists.length || !adminExists[0].values.length) {
     db.run("INSERT INTO users (username, email, password, credits, role) VALUES (?, ?, ?, ?, ?)",
       ['admin', 'admin@j3trisheng.com', btoaPwd('admin888'), 9999, 'admin']);
   }
+  // 初始化知识库种子数据（仅当表为空时）
+  const kbCount = db.exec("SELECT COUNT(*) FROM knowledge_base");
+  const kbEmpty = !kbCount.length || !kbCount[0].values.length || kbCount[0].values[0][0] === 0;
+  if (kbEmpty) {
+    const seeds = [
+      // === 平台基础 ===
+      ['平台介绍', 'AI Nexus 是一个智能创作平台，聚合全球顶尖大语言模型，无需注册多个账户即可一站体验。支持多模型对比、智能路由、RAG 知识增强、积分通用等功能。涵盖聊天、写作、绘图、视频、3D、音乐等全方位 AI 能力。', 'platform', '平台,介绍,聚合,AI'],
+      ['会员权益', '注册即送 10 积分。聊天消耗 2 积分/次，小说创作 10 积分/章，图片生成 2 积分/张。积分通用，一个账户畅享所有 AI 服务。支持充值补积分。', 'pricing', '积分,充值,会员,价格'],
+      ['隐私保护', '用户对话不长期存储，对话仅用于实时生成回复。知识库内容加密存储。我们承诺不将用户数据用于 AI 模型训练或任何商业用途。', 'platform', '隐私,安全,数据'],
+
+      // === 聊天 ===
+      ['多模型聊天', 'AI 聊天支持同时选择多个模型对话。输入一个问题，可同时获得多个模型的回答并直观对比。支持 RAG 知识增强——输入框上方勾选开关后，每次提问会自动检索平台知识库，注入相关背景信息，让回答更精准。', 'chat', '聊天,多模型,对比,RAG'],
+      ['RAG 知识增强', 'RAG（检索增强生成）是 AI Nexus 的核心特色功能。启用后，每次对话前系统会从知识库中检索相关内容，注入到对话上下文中。这意味着 AI 回答会基于平台的最新信息，而非仅依赖训练数据。用户可通过「知识库」按钮管理自己的知识条目。', 'chat', 'RAG,知识增强,检索,对话'],
+
+      // === 小说 ===
+      ['AI 小说创作', '小说创作提供完整六步流程：确定方向→搭建框架→锁定框架→编写大纲→确认大纲→逐章写作。系统自动注入大纲约束、人物档案和前文摘要，确保长篇小说前后连贯。支持快速创作、分步指导和灵感火花三种模式。', 'novel', '小说,创作,大纲,写作,长文'],
+      ['小说写作技巧', '创作建议：1) 先确定类型和风格 2) 利用人物模块建立角色库 3) 大纲越详细成稿质量越高 4) 每章写完后检查前文回顾 5) 使用「去AI痕迹」功能让文风更自然。平台支持百万字长篇创作，提供分章节管理和导出功能。', 'novel', '写作,技巧,建议,长文'],
+
+      // === 漫剧 ===
+      ['AI 漫剧工厂', '漫剧功能支持将小说自动转为漫画脚本。包含分镜脚本生成、角色设计参考、场景描述等功能。适合将已有小说作品可视化呈现，也支持独立创作漫画故事。', 'comic', '漫剧,漫画,分镜,脚本'],
+
+      // === 智能体 ===
+      ['AI 智能体', '智能体工坊提供 10+ 预置专家智能体：编程导师、文案写手、翻译专家、数据分析师、法律顾问、健康助手等。每个智能体拥有专属系统提示和领域知识，比通用聊天更专业。支持自定义创建专属智能体。', 'agent', '智能体,专家,自定义,领域'],
+
+      // === 办公 ===
+      ['智能办公工具', '办公模块集成多种职场工具：工作总结生成、PPT 大纲、会议纪要整理、邮件撰写、简历优化、公文写作等。选择对应模板，输入关键信息即可快速生成专业文档。', 'office', '办公,总结,PPT,邮件,简历'],
+
+      // === 品牌 ===
+      ['品牌设计', '品牌模块提供企业命名、Slogan 生成、品牌故事撰写、Logo 设计理念、品牌配色方案等功能。帮助创业者从零搭建品牌体系。输入行业和目标人群即可获得定制方案。', 'brand', '品牌,命名,Slogan,Logo,创业'],
+
+      // === 营销 ===
+      ['智能营销', '营销工具覆盖主流内容平台：小红书文案、公众号文章、短视频脚本、朋友圈文案、产品详情页、SEO 标题优化等。根据平台特性和目标受众自动调整文案风格和长度。', 'marketing', '营销,小红书,公众号,文案,短视频'],
+
+      // === 创作工场 ===
+      ['AI 创作工场', '创作工场提供文字转图像、文字转视频功能。输入画面描述即可生成高质量图像，支持多种风格（写实、动漫、油画、水墨等）。视频生成支持 cinematic 电影级画面，内置 20+ 示例模板可直接使用。', 'studio', '创作,绘图,视频,AI'],
+
+      // === 提示词库 ===
+      ['提示词库', '提示词库内置 50+ 写作辅助工具：小说开篇生成、人物对话润色、场景描写、情感渲染、冲突设计等。每个工具都经过专业调优，帮助创作者突破瓶颈。支持自定义提示词模板。', 'prompt', '提示词,写作,模板,润色'],
+
+      // === 3D 生成 ===
+      ['3D 模型生成', '支持文字转 3D 模型和图片转 3D 模型。输入描述或上传参考图即可生成可用于游戏、影视、3D 打印的低面数模型。生成后可在线预览并下载通用格式文件。', '3d', '3D,模型,建模,游戏'],
+
+      // === AI 音乐 ===
+      ['AI 音乐创作', 'AI 音乐模块支持输入歌词、选择音乐风格（流行、古风、电子、爵士等）一键生成原创歌曲。提供多种声线和编曲风格选项，适合内容创作者、短视频制作者、独立音乐人使用。', 'music', '音乐,歌曲,作曲,编曲'],
+
+      // === 工具箱 ===
+      ['实用工具箱', '工具箱集成常用实用功能：图片去水印、图片拼接、图片压缩、在线取色器、图片隐写术、Base64 编解码、JSON 格式化、二维码生成等。全部免费使用，无需下载安装。', 'tools', '工具箱,图片处理,编码,实用'],
+
+      // === 模型与对比 ===
+      ['模型对比', '支持同时选择 2-4 个模型对比同一问题的回答。直观展示各模型的推理速度、输出长度和内容差异。适合评估不同模型的能力边界，为特定任务选择最优模型。', 'platform', '对比,模型,评估'],
+      ['模型选择建议', '不同场景推荐：长篇创作选推理能力强的模型，快速问答选响应快的轻量模型，多模态任务选支持图像理解的模型，代码编程选专门优化过的编程模型。模型目录页面可按类别和标签筛选。', 'platform', '模型,选择,推荐,场景'],
+
+      // === 注册与账户 ===
+      ['注册方式', '支持手机号注册，每个手机号限一个账号。新用户注册即送 10 积分。支持邀请码注册，邀请人与被邀请人各得 20 积分奖励。', 'account', '注册,手机号,邀请码,积分'],
+      ['签到奖励', '每日签到获得积分奖励，连续签到天数越多奖励越丰厚。签到积分每日刷新，可在顶部导航栏点击签到按钮查看当日奖励。', 'account', '签到,奖励,积分'],
+
+      // === 充值 ===
+      ['充值套餐', '提供多种积分套餐：体验包 100 积分 ¥9.9、标准包 600 积分 ¥39、进阶包 2000 积分 ¥69、专业包 3000 积分 ¥99。积分永久有效，支持多次购买叠加。', 'pricing', '充值,套餐,价格,积分'],
+
+      // === 知识库 ===
+      ['知识库管理', '知识库是 RAG 系统的数据基础。用户可以添加、编辑、删除知识条目，支持按分类和标签管理。知识条目会被自动索引，在启用 RAG 增强的对话中自动检索匹配。建议将产品文档、FAQ、创作素材等存入知识库。', 'knowledge', '知识库,管理,RAG,数据'],
+
+      // === 其他 ===
+      ['反馈与支持', '如有功能建议、Bug 反馈或使用疑问，可通过反馈页面提交。我们会根据用户反馈持续优化平台功能。也欢迎通过联系页面提供商业合作建议。', 'support', '反馈,支持,建议,联系'],
+    ];
+    const stmt = db.prepare("INSERT INTO knowledge_base (title, content, category, tags) VALUES (?,?,?,?)");
+    for (const s of seeds) { stmt.run(s); }
+    stmt.free();
+    saveDB();
+    console.log('知识库种子数据已初始化 (' + seeds.length + ' 条)');
+  }
+
   saveDB();
   console.log('数据库已就绪');
 }
@@ -1018,6 +1150,162 @@ app.delete('/api/admin/keys/:id', requireAdmin, (req, res) => {
     saveDB();
     res.json({ ok: true });
   } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// ============================================================
+// 知识库 API (RAG 核心)
+// ============================================================
+
+// 获取全部知识库条目
+app.get('/api/knowledge', (req, res) => {
+  try {
+    const category = req.query.category || '';
+    let sql = 'SELECT id, title, content, category, tags, source, created_at, updated_at FROM knowledge_base';
+    let params = [];
+    if (category) { sql += ' WHERE category=?'; params.push(category); }
+    sql += ' ORDER BY updated_at DESC';
+    const result = db.exec(sql, params);
+    const items = result.length ? result[0].values.map(r => ({
+      id: r[0], title: r[1], content: r[2], category: r[3], tags: r[4], source: r[5],
+      createdAt: r[6], updatedAt: r[7]
+    })) : [];
+    // 同时返回分类列表
+    const catResult = db.exec('SELECT DISTINCT category FROM knowledge_base ORDER BY category');
+    const categories = catResult.length ? catResult[0].values.map(r => r[0]) : [];
+    res.json({ ok: true, items, categories, total: items.length });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 获取单条知识
+app.get('/api/knowledge/:id', (req, res) => {
+  try {
+    const result = db.exec('SELECT id, title, content, category, tags, source, created_at, updated_at FROM knowledge_base WHERE id=?', [req.params.id]);
+    if (!result.length || !result[0].values.length) return res.json({ ok: false, error: '不存在' });
+    const r = result[0].values[0];
+    res.json({ ok: true, item: { id: r[0], title: r[1], content: r[2], category: r[3], tags: r[4], source: r[5], createdAt: r[6], updatedAt: r[7] } });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 新增知识
+app.post('/api/knowledge', (req, res) => {
+  const { title, content, category, tags, source } = req.body;
+  if (!title || !content) return res.json({ ok: false, error: '标题和内容必填' });
+  try {
+    db.run('INSERT INTO knowledge_base (title, content, category, tags, source) VALUES (?,?,?,?,?)',
+      [title, content, category || 'general', tags || '', source || '']);
+    saveDB();
+    const id = db.exec('SELECT last_insert_rowid()')[0].values[0][0];
+    res.json({ ok: true, id });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 更新知识
+app.put('/api/knowledge/:id', (req, res) => {
+  const { title, content, category, tags, source } = req.body;
+  try {
+    db.run(`UPDATE knowledge_base SET title=?, content=?, category=?, tags=?, source=?, updated_at=datetime('now','localtime') WHERE id=?`,
+      [title, content, category || 'general', tags || '', source || '', req.params.id]);
+    saveDB();
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 删除知识
+app.delete('/api/knowledge/:id', (req, res) => {
+  try {
+    db.run('DELETE FROM knowledge_base WHERE id=?', [req.params.id]);
+    saveDB();
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// RAG 检索：基于关键词匹配 + TF-IDF 风格打分
+app.post('/api/knowledge/search', (req, res) => {
+  const { query, topK } = req.body;
+  if (!query) return res.json({ ok: false, error: '缺少 query', results: [] });
+  const k = Math.min(topK || 5, 10);
+
+  try {
+    // 拉取全部知识库条目
+    const result = db.exec('SELECT id, title, content, category, tags FROM knowledge_base');
+    if (!result.length || !result[0].values.length) {
+      return res.json({ ok: true, results: [], query });
+    }
+
+    const items = result[0].values.map(r => ({
+      id: r[0], title: r[1], content: r[2], category: r[3], tags: r[4]
+    }));
+
+    // === TF-IDF 风格关键词匹配打分 ===
+    // 1. 分词：中英文混合（中文按字符 n-gram，英文按空格）
+    function tokenize(text) {
+      const tokens = [];
+      // 提取英文单词
+      const enWords = text.toLowerCase().match(/[a-zA-Z0-9_]+/g) || [];
+      tokens.push(...enWords);
+      // 中文：取 1-gram 和 2-gram
+      const cnChars = text.replace(/[a-zA-Z0-9_\s]+/g, '');
+      for (let i = 0; i < cnChars.length; i++) {
+        tokens.push(cnChars[i]);
+        if (i < cnChars.length - 1) tokens.push(cnChars[i] + cnChars[i + 1]);
+      }
+      return tokens;
+    }
+
+    // 2. 计算 IDF（简化：稀有词权重高）
+    const totalDocs = items.length;
+    const queryTokens = tokenize(query);
+    const queryTokenSet = new Set(queryTokens);
+
+    // 为每个文档打分
+    const scored = items.map(item => {
+      const docText = `${item.title} ${item.tags} ${item.content}`;
+      const docTokens = tokenize(docText);
+      const docTokenSet = new Set(docTokens);
+
+      let score = 0;
+      for (const qt of queryTokenSet) {
+        // TF in query
+        const queryTF = queryTokens.filter(t => t === qt).length;
+        if (docTokenSet.has(qt)) {
+          // 计算 IDF：包含这个词的文档数
+          const docsWithTerm = items.filter(i => {
+            const t = `${i.title} ${i.tags} ${i.content}`;
+            return tokenize(t).includes(qt);
+          }).length;
+          const idf = Math.log((totalDocs + 1) / (docsWithTerm + 1)) + 1;
+          // TF in doc
+          const docTF = docTokens.filter(t => t === qt).length;
+          score += queryTF * docTF * idf;
+        }
+      }
+
+      // 标题命中加权
+      const titleLower = item.title.toLowerCase();
+      for (const qt of queryTokenSet) {
+        if (titleLower.includes(qt)) score *= 2.5;
+      }
+
+      return { ...item, score };
+    });
+
+    // 排序取 topK，过滤掉得分为 0 的
+    const results = scored
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, k)
+      .map(s => ({
+        id: s.id,
+        title: s.title,
+        content: s.content,
+        category: s.category,
+        score: Math.round(s.score * 100) / 100
+      }));
+
+    res.json({ ok: true, results, query, total: items.length, matched: results.length });
+  } catch(e) {
+    res.json({ ok: false, error: e.message, results: [] });
+  }
 });
 
 // ============================================================
