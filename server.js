@@ -1,15 +1,15 @@
 /**
- * AI Nexus - 大模型聚合平台后端代理
+ * Nexus Hub - 大模型聚合平台后端代理
  *
  * 统一代理多个 AI 模型提供商的 API，保护密钥安全。
  * 启动: npm start / npm run dev
- * 重启 (pm2): pm2 restart ai-nexus
+ * 重启 (pm2): pm2 restart nexus-hub
  */
 
 const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: '/home/admin/.env' });
 const express = require('express');
 const cors = require('cors');
 
@@ -19,20 +19,57 @@ app.use(express.json({ limit: '10mb' }));
 
 // 提供前端静态文件（支持多种目录结构：本地开发 / Railway 部署）
 let staticDir = path.resolve(__dirname, '..');
-if (!fs.existsSync(path.join(staticDir, 'index.html'))) {
-  staticDir = __dirname; // 部署时 index.html 可能在同目录
+if (!fs.existsSync(path.join(staticDir, 'index.html')) && !fs.existsSync(path.join(staticDir, 'dashboard.html'))) {
+  staticDir = __dirname; // 部署时文件可能在同目录
 }
 console.log('静态文件目录:', staticDir);
 
-// 首页
+// 首页 - 落地页
 app.get('/', (req, res) => {
-  res.sendFile(path.join(staticDir, 'index.html'));
+  const landingPath = path.join(staticDir, 'landing.html');
+  if (fs.existsSync(landingPath)) {
+    res.sendFile(landingPath);
+  } else {
+    res.sendFile(path.join(staticDir, 'index.html'));
+  }
+});
+
+// 控制台（原首页）
+app.get('/dashboard', (req, res) => {
+  const dashPath = path.join(staticDir, 'dashboard.html');
+  if (fs.existsSync(dashPath)) {
+    res.sendFile(dashPath);
+  } else {
+    res.sendFile(path.join(staticDir, 'index.html'));
+  }
 });
 
 // 其他静态资源
 app.use(express.static(staticDir));
 
 const PORT = process.env.PORT || 3001;
+
+// ============================================================
+// 百度千帆 Access Token 缓存
+// ============================================================
+let qianfanToken = null;
+let qianfanTokenExpiry = 0;
+async function getQianfanToken() {
+  if (qianfanToken && Date.now() < qianfanTokenExpiry) return qianfanToken;
+  try {
+    const ak = process.env.QIANFAN_AK;
+    const sk = process.env.QIANFAN_SK;
+    if (!ak || !sk) return null;
+    const r = await fetch(`https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${ak}&client_secret=${sk}`);
+    const d = await r.json();
+    if (d.access_token) {
+      qianfanToken = d.access_token;
+      qianfanTokenExpiry = Date.now() + (d.expires_in - 300) * 1000;
+      return qianfanToken;
+    }
+  } catch(e) { console.error('Qianfan token error:', e.message); }
+  return null;
+}
 
 // ============================================================
 // 模型到 API 配置的映射
@@ -42,7 +79,7 @@ const MODEL_CONFIG = {
   gpt4omini:    { provider: 'openai',   model: 'gpt-4o-mini',        baseUrl: process.env.OPENAI_BASE_URL },
   deepseekv3:   { provider: 'openai',   model: 'deepseek-chat',      baseUrl: 'https://api.deepseek.com/v1' },
   deepseekr1:   { provider: 'openai',   model: 'deepseek-reasoner',  baseUrl: 'https://api.deepseek.com/v1' },
-  gemini25pro:  { provider: 'openai',   model: 'google/gemini-2.5-pro-exp-03-25', baseUrl: 'https://openrouter.ai/api/v1' },
+  gemini25pro:  { provider: 'nexus',   model: 'gemini-2.5-pro',             baseUrl: 'https://apinexus.net/v1' },
   gemini25flash:{ provider: 'openai',   model: 'google/gemini-2.5-flash',        baseUrl: 'https://openrouter.ai/api/v1' },
   qwen3:        { provider: 'openai',   model: 'qwen3-235b-a22b',    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
   kimi2:        { provider: 'openai',   model: 'moonshot-v1-128k',   baseUrl: 'https://api.moonshot.cn/v1' },
@@ -105,6 +142,41 @@ const MODEL_CONFIG = {
   dmx_qwen36_plus_free:  { provider: 'openai', model: 'qwen3.6-plus-free',         baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_code_free_x:       { provider: 'openai', model: 'DMXAPI-Code-Free-X',        baseUrl: 'https://www.dmxapi.cn/v1' },
 
+  // === 百度千帆 ===
+  qf_ernie4:         { provider: 'qianfan',  model: 'ernie-4.0-8k',             baseUrl: 'https://qianfan.baidubce.com/v2' },
+  qf_ernie35:        { provider: 'qianfan',  model: 'ernie-3.5-8k',             baseUrl: 'https://qianfan.baidubce.com/v2' },
+  qf_ernie_speed:    { provider: 'qianfan',  model: 'ernie-speed-128k',         baseUrl: 'https://qianfan.baidubce.com/v2' },
+
+  // === 火山引擎 Ark（DeepSeek/豆包/GLM 全免费接入） ===
+  ark_dsv32:          { provider: 'openai', model: 'ep-20260606020151-4qv8h',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dsv4f:          { provider: 'openai', model: 'ep-20260606020130-t75wz',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dsv4p:          { provider: 'openai', model: 'ep-20260606020111-9j75t',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dbs2_pro:       { provider: 'openai', model: 'ep-20260606015252-n6gdv',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dbs2_lite:      { provider: 'openai', model: 'ep-20260606015318-njb98',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dbs2_mini:      { provider: 'openai', model: 'ep-20260606015445-xdsmx',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dbs_code:       { provider: 'openai', model: 'ep-20260606015514-hbm6v',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dbs1_8:         { provider: 'openai', model: 'ep-20260606015615-m4fdz',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dbs_char:       { provider: 'openai', model: 'ep-20260606015638-qqfjr',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dbs1_6:         { provider: 'openai', model: 'ep-20260606015941-mtwc2',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dbp15p:         { provider: 'openai', model: 'ep-20260606014616-t79qr',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_dbp15l:         { provider: 'openai', model: 'ep-20260606014948-p49s2',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_glm47:          { provider: 'openai', model: 'ep-20260606020254-wr4km',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+
+  // === API Nexus (海外旗舰模型) ===
+  nx_gpt5:            { provider: 'nexus', model: 'gpt-5-pro',              baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt5mini:        { provider: 'nexus', model: 'gpt-5-mini',             baseUrl: 'https://apinexus.net/v1' },
+  nx_claude_opus:     { provider: 'nexus', model: 'claude-opus-4-6',        baseUrl: 'https://apinexus.net/v1' },
+  nx_claude_sonnet:   { provider: 'nexus', model: 'claude-sonnet-4-6',      baseUrl: 'https://apinexus.net/v1' },
+  nx_claude_haiku:    { provider: 'nexus', model: 'claude-haiku-4-5',       baseUrl: 'https://apinexus.net/v1' },
+  nx_gemini_pro:      { provider: 'nexus', model: 'gemini-2.5-pro',         baseUrl: 'https://apinexus.net/v1' },
+  nx_o3mini:          { provider: 'nexus', model: 'o3-mini',                baseUrl: 'https://apinexus.net/v1' },
+  nx_dalle3:          { provider: 'nexus', model: 'dall-e-3',               baseUrl: 'https://apinexus.net/v1' },
+  nx_flux:            { provider: 'nexus', model: 'flux-pro',               baseUrl: 'https://apinexus.net/v1' },
+  nx_suno:            { provider: 'nexus', model: 'suno-v5',                baseUrl: 'https://apinexus.net/v1' },
+  nx_grok3:           { provider: 'nexus', model: 'grok-3',                 baseUrl: 'https://apinexus.net/v1' },
+  bc_baichuan4:      { provider: 'openai',   model: 'Baichuan4',                baseUrl: 'https://api.baichuan-ai.com/v1' },
+  bc_baichuan3:      { provider: 'openai',   model: 'Baichuan3-Turbo',          baseUrl: 'https://api.baichuan-ai.com/v1' },
+
   // === 七牛云合规 ===
   qiniu_claude37:     { provider: 'openai', model: 'claude-3-7-sonnet-20250219',  baseUrl: 'https://api.qnaiqc.com/v1' },
   qiniu_claudeopus4:  { provider: 'openai', model: 'claude-opus-4-20250514',      baseUrl: 'https://api.qnaiqc.com/v1' },
@@ -114,12 +186,21 @@ const MODEL_CONFIG = {
 
   // === OpenRouter ===
   or_gpt4o:          { provider: 'openai', model: 'openai/gpt-4o',              baseUrl: 'https://openrouter.ai/api/v1' },
-  or_claude_sonnet:  { provider: 'openai', model: 'anthropic/claude-3.5-sonnet', baseUrl: 'https://openrouter.ai/api/v1' },
-  or_gemini25pro:    { provider: 'openai', model: 'google/gemini-2.5-pro-exp-03-25', baseUrl: 'https://openrouter.ai/api/v1' },
+  or_claude_sonnet:  { provider: 'openai', model: 'anthropic/claude-4-sonnet-20250514', baseUrl: 'https://openrouter.ai/api/v1' },
+  or_gemini25pro:    { provider: 'openai', model: 'google/gemini-2.5-pro',           baseUrl: 'https://openrouter.ai/api/v1' },
   or_llama3_70b:     { provider: 'openai', model: 'meta-llama/llama-3-70b-instruct', baseUrl: 'https://openrouter.ai/api/v1' },
   or_mistral_large:  { provider: 'openai', model: 'mistralai/mistral-large',    baseUrl: 'https://openrouter.ai/api/v1' },
   or_perplexity:     { provider: 'openai', model: 'perplexity/llama-3.1-sonar-huge-128k-online', baseUrl: 'https://openrouter.ai/api/v1' },
   or_codeqwen:       { provider: 'openai', model: 'qwen/qwen-2.5-coder-32b-instruct', baseUrl: 'https://openrouter.ai/api/v1' },
+  // 前端展示的海外模型路由
+  claude4:           { provider: 'openai', model: 'anthropic/claude-4-sonnet-20250514',  baseUrl: 'https://openrouter.ai/api/v1' },
+  claude4opus:       { provider: 'openai', model: 'anthropic/claude-opus-4-20250514',    baseUrl: 'https://openrouter.ai/api/v1' },
+  llama4:            { provider: 'openai', model: 'meta-llama/llama-4-scout',            baseUrl: 'https://openrouter.ai/api/v1' },
+  'mistral-large2': { provider: 'openai', model: 'mistralai/mistral-large-2',           baseUrl: 'https://openrouter.ai/api/v1' },
+  grok3:             { provider: 'openai', model: 'x-ai/grok-3',                         baseUrl: 'https://openrouter.ai/api/v1' },
+  // 豆包/MiniMax via DMXAPI
+  doubao15:          { provider: 'openai', model: 'doubao-seed-2.0-pro-free',            baseUrl: 'https://www.dmxapi.cn/v1' },
+  minimax1:          { provider: 'openai', model: 'MiniMax-M2.7-free',                   baseUrl: 'https://www.dmxapi.cn/v1' },
 
   // === 旧模型 ID 补充接入 ===
   gpt4turbo:    { provider: 'openai', model: 'gpt-4-turbo',                baseUrl: process.env.OPENAI_BASE_URL },
@@ -141,6 +222,14 @@ const MODEL_CONFIG = {
 // API Key 管理
 // ============================================================
 function getApiKey(provider, modelId) {
+  // 百度千帆 (专用token)
+  if (modelId.startsWith('qf_') || provider === 'qianfan') return 'qianfan'; // 标记，实际token从getQianfanToken()获取
+  // 火山引擎
+  if (modelId.startsWith('ark_'))    return process.env.ARK_API_KEY;
+  // 百川智能
+  if (modelId.startsWith('bc_'))     return process.env.BAICHUAN_API_KEY;
+  // API Nexus（无论模型ID，provider=nexus 的都用这个 key）
+  if (modelId.startsWith('nx_') || provider === 'nexus') return process.env.NEXUS_API_KEY;
   // DeepSeek 使用自己的 key
   if (modelId.startsWith('deepseek')) return process.env.DEEPSEEK_API_KEY;
   if (modelId.startsWith('qwen'))     return process.env.DASHSCOPE_API_KEY;
@@ -155,6 +244,9 @@ function getApiKey(provider, modelId) {
   if (modelId.startsWith('claude'))   return process.env.OPENROUTER_API_KEY;
   if (modelId.startsWith('gemini25')) return process.env.OPENROUTER_API_KEY;
   if (modelId.startsWith('gemini15')) return process.env.OPENROUTER_API_KEY;
+  if (modelId.startsWith('llama'))    return process.env.OPENROUTER_API_KEY;
+  if (modelId.startsWith('mistral'))  return process.env.OPENROUTER_API_KEY;
+  if (modelId.startsWith('grok'))     return process.env.OPENROUTER_API_KEY;
 
   switch (provider) {
     case 'openai':  return process.env.OPENAI_API_KEY;
@@ -187,6 +279,7 @@ async function callOpenAICompatible(config, messages, apiKey) {
 
   if (!res.ok) {
     const err = await res.text();
+    console.log(`[API ERROR] ${config.model} → ${res.status}: ${err.substring(0,200)}`);
     throw new Error(`API 调用失败 [${res.status}]: ${err}`);
   }
 
@@ -287,6 +380,7 @@ app.post('/api/chat', async (req, res) => {
 
   if (!config) {
     // 完全未知的模型 → 模拟回复
+    console.log(`[SIMULATED] 未知模型: ${modelId}`);
     const question = messages[messages.length - 1]?.content || '';
     return res.json({
       model: modelId,
@@ -297,7 +391,16 @@ app.post('/api/chat', async (req, res) => {
 
   const apiKey = getApiKey(config.provider, modelId);
 
-  if (!apiKey) {
+  // 百度千帆需要实时获取 access token
+  let actualApiKey = apiKey;
+  if (apiKey === 'qianfan') {
+    actualApiKey = await getQianfanToken();
+    if (!actualApiKey) {
+      return res.json({ model: modelId, content: '❌ 百度千帆 Token 获取失败，请检查 AK/SK 配置。', error: true });
+    }
+  }
+
+  if (!actualApiKey) {
     // 未配置密钥 → 返回模拟回复
     const question = messages[messages.length - 1]?.content || '';
     return res.json({
@@ -311,10 +414,10 @@ app.post('/api/chat', async (req, res) => {
     let content;
     const startTime = Date.now();
 
-    if (config.provider === 'openai') {
-      content = await callOpenAICompatible(config, messages, apiKey);
+    if (config.provider === 'openai' || config.provider === 'qianfan' || config.provider === 'nexus') {
+      content = await callOpenAICompatible(config, messages, actualApiKey);
     } else if (config.provider === 'gemini') {
-      content = await callGemini(config, messages, apiKey);
+      content = await callGemini(config, messages, actualApiKey);
     } else {
       return res.status(400).json({ error: `不支持的 provider: ${config.provider}` });
     }
@@ -773,6 +876,50 @@ app.get('/api/agnes-video/:taskId', async (req, res) => {
 });
 
 // ============================================================
+// Suno 音乐 API 代理
+// ============================================================
+const SUNO_BASE = process.env.SUNO_API_BASE || 'https://open.suno.cn/api/v1';
+const SUNO_KEY = process.env.SUNO_API_KEY || '';
+
+// 提交音乐生成
+app.post('/api/music/generate', async (req, res) => {
+  const { prompt, title, instrumental, model } = req.body;
+  if (!SUNO_KEY) return res.json({ ok: false, error: 'Suno API Key 未配置' });
+  try {
+    const body = {
+      gpt_description_prompt: prompt,
+      make_instrumental: !!instrumental,
+      mv: model || 'chirp-crow',
+      title: title || '未命名歌曲'
+    };
+    const r = await fetch(`${SUNO_BASE}/music/generate`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${SUNO_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    res.json(data);
+  } catch(e) {
+    res.status(500).json({ ok: false, error: 'Suno API 调用失败: ' + e.message });
+  }
+});
+
+// 查询音乐生成结果
+app.get('/api/music/task', async (req, res) => {
+  const { id } = req.query;
+  if (!id) return res.json({ ok: false, error: '缺少 task_id' });
+  try {
+    const r = await fetch(`${SUNO_BASE}/music/task?id=${id}`, {
+      headers: { 'Authorization': `Bearer ${SUNO_KEY}` }
+    });
+    const data = await r.json();
+    res.json(data);
+  } catch(e) {
+    res.status(500).json({ ok: false, error: '查询失败: ' + e.message });
+  }
+});
+
+// ============================================================
 // SQLite 数据库
 // ============================================================
 let db = null;
@@ -797,6 +944,19 @@ async function initDB() {
   try { db.run(`ALTER TABLE users ADD COLUMN phone TEXT DEFAULT ''`); } catch(e) {}
   try { db.run(`ALTER TABLE users ADD COLUMN register_ip TEXT DEFAULT ''`); } catch(e) {}
   try { db.run(`ALTER TABLE users ADD COLUMN device_fp TEXT DEFAULT ''`); } catch(e) {}
+  try { db.run(`ALTER TABLE users ADD COLUMN security_q TEXT DEFAULT ''`); } catch(e) {}
+  try { db.run(`ALTER TABLE users ADD COLUMN security_a TEXT DEFAULT ''`); } catch(e) {}
+  // === API Key 表 ===
+  db.run(`CREATE TABLE IF NOT EXISTS api_keys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    key_name TEXT DEFAULT '',
+    api_key TEXT UNIQUE NOT NULL,
+    quota INTEGER DEFAULT 0,
+    used INTEGER DEFAULT 0,
+    active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+  )`);
   db.run(`CREATE TABLE IF NOT EXISTS credit_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -840,13 +1000,13 @@ async function initDB() {
   if (kbEmpty) {
     const seeds = [
       // === 平台基础 ===
-      ['平台介绍', 'AI Nexus 是一个智能创作平台，聚合全球顶尖大语言模型，无需注册多个账户即可一站体验。支持多模型对比、智能路由、RAG 知识增强、积分通用等功能。涵盖聊天、写作、绘图、视频、3D、音乐等全方位 AI 能力。', 'platform', '平台,介绍,聚合,AI'],
-      ['会员权益', '注册即送 10 积分。聊天消耗 2 积分/次，小说创作 10 积分/章，图片生成 2 积分/张。积分通用，一个账户畅享所有 AI 服务。支持充值补积分。', 'pricing', '积分,充值,会员,价格'],
+      ['平台介绍', 'Nexus Hub 是一个智能创作平台，聚合全球顶尖大语言模型，无需注册多个账户即可一站体验。支持多模型对比、智能路由、RAG 知识增强、积分通用等功能。涵盖聊天、写作、绘图、视频、3D、音乐等全方位 AI 能力。', 'platform', '平台,介绍,聚合,AI'],
+      ['会员权益', '注册即送 30 积分。根据不同模型消耗 1-10 积分/次。积分通用，一个账户畅享所有 AI 服务。会员订阅更划算，最低 ¥49/月。', 'pricing', '积分,充值,会员,价格,订阅'],
       ['隐私保护', '用户对话不长期存储，对话仅用于实时生成回复。知识库内容加密存储。我们承诺不将用户数据用于 AI 模型训练或任何商业用途。', 'platform', '隐私,安全,数据'],
 
       // === 聊天 ===
       ['多模型聊天', 'AI 聊天支持同时选择多个模型对话。输入一个问题，可同时获得多个模型的回答并直观对比。支持 RAG 知识增强——输入框上方勾选开关后，每次提问会自动检索平台知识库，注入相关背景信息，让回答更精准。', 'chat', '聊天,多模型,对比,RAG'],
-      ['RAG 知识增强', 'RAG（检索增强生成）是 AI Nexus 的核心特色功能。启用后，每次对话前系统会从知识库中检索相关内容，注入到对话上下文中。这意味着 AI 回答会基于平台的最新信息，而非仅依赖训练数据。用户可通过「知识库」按钮管理自己的知识条目。', 'chat', 'RAG,知识增强,检索,对话'],
+      ['RAG 知识增强', 'RAG（检索增强生成）是 Nexus Hub 的核心特色功能。启用后，每次对话前系统会从知识库中检索相关内容，注入到对话上下文中。这意味着 AI 回答会基于平台的最新信息，而非仅依赖训练数据。用户可通过「知识库」按钮管理自己的知识条目。', 'chat', 'RAG,知识增强,检索,对话'],
 
       // === 小说 ===
       ['AI 小说创作', '小说创作提供完整六步流程：确定方向→搭建框架→锁定框架→编写大纲→确认大纲→逐章写作。系统自动注入大纲约束、人物档案和前文摘要，确保长篇小说前后连贯。支持快速创作、分步指导和灵感火花三种模式。', 'novel', '小说,创作,大纲,写作,长文'],
@@ -887,8 +1047,8 @@ async function initDB() {
       ['模型选择建议', '不同场景推荐：长篇创作选推理能力强的模型，快速问答选响应快的轻量模型，多模态任务选支持图像理解的模型，代码编程选专门优化过的编程模型。模型目录页面可按类别和标签筛选。', 'platform', '模型,选择,推荐,场景'],
 
       // === 注册与账户 ===
-      ['注册方式', '支持手机号注册，每个手机号限一个账号。新用户注册即送 10 积分。支持邀请码注册，邀请人与被邀请人各得 20 积分奖励。', 'account', '注册,手机号,邀请码,积分'],
-      ['签到奖励', '每日签到获得积分奖励，连续签到天数越多奖励越丰厚。签到积分每日刷新，可在顶部导航栏点击签到按钮查看当日奖励。', 'account', '签到,奖励,积分'],
+      ['注册方式', '支持手机号注册，每个手机号限一个账号。新用户注册即送 30 积分。支持邀请码注册，邀请人与被邀请人各得 30 积分奖励。', 'account', '注册,手机号,邀请码,积分'],
+      ['签到奖励', '每日签到获得 5 积分奖励，连续签到天数越多奖励越丰厚（第7天+5）。签到积分每日刷新，可在顶部导航栏点击签到按钮查看当日奖励。', 'account', '签到,奖励,积分'],
 
       // === 充值 ===
       ['充值套餐', '提供多种积分套餐：体验包 100 积分 ¥9.9、标准包 600 积分 ¥39、进阶包 2000 积分 ¥69、专业包 3000 积分 ¥99。积分永久有效，支持多次购买叠加。', 'pricing', '充值,套餐,价格,积分'],
@@ -898,6 +1058,8 @@ async function initDB() {
 
       // === 其他 ===
       ['反馈与支持', '如有功能建议、Bug 反馈或使用疑问，可通过反馈页面提交。我们会根据用户反馈持续优化平台功能。也欢迎通过联系页面提供商业合作建议。', 'support', '反馈,支持,建议,联系'],
+      ['模型积分说明', 'Nexus Hub 模型按能力分为六个等级：免费（4个轻量模型）、1积分（入门级如DeepSeek-V3）、2积分（进阶如Qwen3.6-Plus）、3积分（高级如DeepSeek-V4-Pro）、5积分（旗舰如GPT-4o/DeepSeek-R1）、10积分（尊享如Claude/Gemini Pro）。免费模型不限次数，付费模型按次消耗积分。积分永不过期。', 'pricing', '积分,模型,价格,等级'],
+      ['新用户指南', '首次使用建议：1) 注册领取30积分 2) 在Chat页面勾选RAG知识增强获得更精准回答 3) 从1积分模型开始体验 4) 尝试多模型对比功能感受不同AI的回答差异 5) 将常用提示词存入知识库。月度会员¥49最划算，适合深度使用。', 'platform', '新用户,指南,入门,教程'],
     ];
     const stmt = db.prepare("INSERT INTO knowledge_base (title, content, category, tags) VALUES (?,?,?,?)");
     for (const s of seeds) { stmt.run(s); }
@@ -934,14 +1096,19 @@ app.post('/api/auth/register', (req, res) => {
   if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
     return res.json({ ok: false, error: '请填写正确的手机号' });
   }
-  if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]{2,20}$/.test(username)) {
-    return res.json({ ok: false, error: '用户名格式不正确（2-20位字母/数字/中文/下划线）' });
+  if (!/^[a-zA-Z0-9]{2,20}$/.test(username)) {
+    return res.json({ ok: false, error: '用户名格式不正确（2-20位字母或数字）' });
   }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.json({ ok: false, error: '邮箱格式不正确' });
   }
   if (password.length < 6) {
     return res.json({ ok: false, error: '密码至少6位' });
+  }
+  const securityQ = (req.body.securityQuestion || '').trim();
+  const securityA = (req.body.securityA || '').trim();
+  if (!securityQ || !securityA) {
+    return res.json({ ok: false, error: '请设置密保问题和答案' });
   }
   // === 防多账号：同一IP永久最多注册2个账号 ===
   const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
@@ -957,24 +1124,24 @@ app.post('/api/auth/register', (req, res) => {
       return res.json({ ok: false, error: '用户名、邮箱或手机号已被注册' });
     }
     const refCodeGen = 'J3' + username.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) + Math.random().toString(36).slice(2, 5).toUpperCase();
-    const userEmail = email || ('noemail_' + username + '@ai-nexus.local');
-    let bonus = 10; // 注册赠送 10 积分（防薅：不够成本的量）
+    const userEmail = email || ('noemail_' + username + '@nexus-hub.local');
+    let bonus = 30; // 注册赠送
     let referrer = null;
     if (refCode) {
       const refUser = db.exec("SELECT username FROM users WHERE ref_code=? OR username=?", [refCode, refCode]);
       if (refUser.length && refUser[0].values.length) {
-        bonus += 20;
+        bonus += 30;
         referrer = refUser[0].values[0][0];
-        db.run("UPDATE users SET credits=credits+20 WHERE username=?", [referrer]);
-        db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?, ?, ?)", [referrer, 20, '推荐奖励']);
+        db.run("UPDATE users SET credits=credits+30 WHERE username=?", [referrer]);
+        db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?, ?, ?)", [referrer, 30, '推荐奖励']);
       }
     }
-    db.run("INSERT INTO users (username, email, password, credits, ref_code, referrer, register_ip, phone, device_fp) VALUES (?,?,?,?,?,?,?,?,?)",
-      [username, userEmail, btoaPwd(password), bonus, refCodeGen, referrer, clientIP, phone||'', deviceFp||'']);
+    db.run("INSERT INTO users (username, email, password, credits, ref_code, referrer, register_ip, phone, device_fp, security_q, security_a) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+      [username, userEmail, btoaPwd(password), bonus, refCodeGen, referrer, clientIP, phone||'', deviceFp||'', securityQ, btoaPwd(securityA)]);
     db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, bonus, '注册赠送']);
     saveDB();
     const token = Buffer.from(JSON.stringify({ username, role: 'user', ts: Date.now() })).toString('base64');
-    res.json({ ok: true, token, user: { username, email, credits: bonus, refCode: refCodeGen }, bonus, referrerBonus: refCode ? 20 : 0 });
+    res.json({ ok: true, token, user: { username, email, credits: bonus, refCode: refCodeGen }, bonus, referrerBonus: refCode ? 30 : 0 });
   } catch(e) {
     res.json({ ok: false, error: '注册失败: ' + e.message });
   }
@@ -986,8 +1153,8 @@ app.post('/api/auth/login', (req, res) => {
     return res.json({ ok: false, error: '请输入用户名和密码' });
   }
   try {
-    const result = db.exec("SELECT username, email, password, credits, role, ref_code FROM users WHERE username=? OR email=?",
-      [username, username]);
+    const result = db.exec("SELECT username, email, password, credits, role, ref_code FROM users WHERE username=? OR email=? OR phone=?",
+      [username, username, username]);
     if (!result.length || !result[0].values.length) {
       return res.json({ ok: false, error: '用户不存在' });
     }
@@ -999,6 +1166,72 @@ app.post('/api/auth/login', (req, res) => {
     res.json({ ok: true, token, user: { username: user[0], email: user[1], credits: user[3], role: user[4], refCode: user[5] } });
   } catch(e) {
     res.json({ ok: false, error: '登录失败: ' + e.message });
+  }
+});
+
+// 用户消费积分（登录后调用，同步到数据库）
+app.post('/api/user/spend', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.json({ ok: false, error: '未登录' });
+  const { amount } = req.body;
+  if (!amount || amount <= 0) {
+    return res.json({ ok: false, error: '金额无效' });
+  }
+  try {
+    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const username = payload.username;
+    const user = db.exec("SELECT credits FROM users WHERE username=?", [username]);
+    if (!user.length || !user[0].values.length) {
+      return res.json({ ok: false, error: '用户不存在' });
+    }
+    const current = user[0].values[0][0];
+    if (current < amount) {
+      return res.json({ ok: false, error: '积分不足' });
+    }
+    db.run("UPDATE users SET credits=credits-? WHERE username=?", [amount, username]);
+    db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, -amount, '消费']);
+    saveDB();
+    const newCredits = db.exec("SELECT credits FROM users WHERE username=?", [username]);
+    res.json({ ok: true, credits: newCredits[0].values[0][0] });
+  } catch(e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// 获取用户积分
+app.get('/api/user/credits', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.json({ ok: false, error: '未登录' });
+  try {
+    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const user = db.exec("SELECT credits FROM users WHERE username=?", [payload.username]);
+    if (!user.length || !user[0].values.length) {
+      return res.json({ ok: false, error: '用户不存在' });
+    }
+    res.json({ ok: true, credits: user[0].values[0][0] });
+  } catch(e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// 退款（API 调用失败时）
+
+// 退款（API 调用失败时）
+app.post('/api/user/refund', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.json({ ok: false, error: '未登录' });
+  const { amount } = req.body;
+  if (!amount || amount <= 0) return res.json({ ok: false, error: '金额无效' });
+  try {
+    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const username = payload.username;
+    db.run("UPDATE users SET credits=credits+? WHERE username=?", [amount, username]);
+    db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, amount, '退款-API失败']);
+    saveDB();
+    const newCredits = db.exec("SELECT credits FROM users WHERE username=?", [username]);
+    res.json({ ok: true, credits: newCredits[0].values[0][0] });
+  } catch(e) {
+    res.json({ ok: false, error: e.message });
   }
 });
 
@@ -1311,9 +1544,233 @@ app.post('/api/knowledge/search', (req, res) => {
 // ============================================================
 // 启动服务
 // ============================================================
+// 管理员认证（服务端存储密码，跨浏览器/缓存后不丢失）
+// ============================================================
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+app.post('/api/admin/auth', (req, res) => {
+  const { password } = req.body || {};
+  if (password === ADMIN_PASSWORD) {
+    res.json({ ok: true, token: Buffer.from(password + ':' + Date.now()).toString('base64') });
+  } else {
+    res.json({ ok: false, error: '密码错误' });
+  }
+});
+
+// ============================================================
+// API Key 管理系统 — 用户生成自己的 Key 接入外部应用
+// ============================================================
+function generateApiKey(prefix) {
+  return 'ai-' + (prefix || 'nx') + '-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
+}
+
+// 创建 API Key
+app.post('/api/keys/create', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.json({ ok: false, error: '未登录' });
+  try {
+    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const username = payload.username;
+    const keyName = (req.body.name || '').trim() || '默认 Key';
+    const apiKey = generateApiKey(username.substring(0, 3));
+    db.run("INSERT INTO api_keys (username, key_name, api_key, quota) VALUES (?,?,?,?)",
+      [username, keyName, apiKey, 0]);
+    saveDB();
+    res.json({ ok: true, apiKey, name: keyName });
+  } catch(e) { res.json({ ok: false, error: '创建失败: ' + e.message }); }
+});
+
+// 获取我的 API Keys
+app.get('/api/keys', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.json({ ok: false, error: '未登录' });
+  try {
+    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const result = db.exec("SELECT id, key_name, api_key, quota, used, active, created_at FROM api_keys WHERE username=? ORDER BY id DESC",
+      [payload.username]);
+    const keys = result.length ? result[0].values.map(v => ({
+      id: v[0], name: v[1], key: v[2], quota: v[3], used: v[4], active: v[5], created: v[6]
+    })) : [];
+    res.json({ ok: true, keys });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 删除 API Key
+app.delete('/api/keys/:id', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.json({ ok: false, error: '未登录' });
+  try {
+    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    db.run("DELETE FROM api_keys WHERE id=? AND username=?", [req.params.id, payload.username]);
+    saveDB();
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// ============================================================
+// OpenAI 兼容代理 — 用户用自己的 Key 调用 Nexus Hub 模型
+// POST /v1/chat/completions
+// ============================================================
+app.post('/v1/chat/completions', async (req, res) => {
+  const apiKey = (req.headers.authorization || '').replace('Bearer ', '');
+  if (!apiKey) return res.status(401).json({ error: { message: '缺少 API Key', type: 'auth_error' } });
+  
+  // 查找 Key
+  const result = db.exec("SELECT a.username, a.quota, a.used, a.active, u.credits FROM api_keys a JOIN users u ON a.username=u.username WHERE a.api_key=?",
+    [apiKey]);
+  if (!result.length || !result[0].values.length) {
+    return res.status(401).json({ error: { message: '无效的 API Key', type: 'auth_error' } });
+  }
+  const keyInfo = result[0].values[0];
+  if (!keyInfo[3]) { // not active
+    return res.status(403).json({ error: { message: 'API Key 已被禁用', type: 'auth_error' } });
+  }
+  
+  const username = keyInfo[0];
+  const { model, messages } = req.body;
+  if (!model || !messages) return res.status(400).json({ error: { message: '缺少 model 或 messages 参数' } });
+  
+  // 查找模型配置
+  const config = MODEL_CONFIG[model];
+  if (!config) return res.status(400).json({ error: { message: `不支持的模型: ${model}`, type: 'invalid_request_error' } });
+  
+  // 计算成本 — 和前端 MODEL_COST 保持一致
+  const modelCostMap = {
+    dmx_qwen35_2b_free:0, dmx_qwen3_17b_free:0, dmx_spark_lite_free:0,
+    sf_qwen3_8b:1, sf_deepseek_v3_free:2, dmx_qwen3_8b_free:1, dmx_qwen_flash_free:1,
+    deepseekv3:1, glm4:1, kimi:1, sf_glm47:1, ali_qwen36_flash:1,
+    dmx_minimax_m25_free:1, dmx_glm_47_free:1, dmx_glm_47_flash:1, dmx_glm_45_flash:1,
+    dmx_glm_4_9b:1, dmx_hunyuan_lite:1, dmx_qwen35_plus_free:1,
+    dmx_qwen3_5_plus_free:1, dmx_qwen35_35b_free:1, dmx_qwen25_coder_7b:1,
+    dmx_doubao_seed_lite:1, dmx_mimo_v25_free:1, sf_qwen3_32b:1, or_codeqwen:1,
+    glm4plus:2, minimax:2, spark4:2, ali_qwen36_plus:2, ali_deepseek_v4_flash:2,
+    sf_hunyuan_a13b:2, sf_qwen35_397b:2, sf_qwq_32b:2,
+    dmx_minimax_m27_free:2, dmx_glm_5_turbo_free:2, dmx_qwen3_coder_plus_free:2,
+    dmx_qwen3_coder_next_free:2, dmx_doubao_seed_code:2, dmx_mimo_v2_pro_free:2,
+    dmx_code_free:2, dmx_codex_free:2, dmx_kat_coder_free:2,
+    dmx_qwen36_plus_free:2, dmx_code_free_x:2,
+    ark_dbs2_mini:0, ark_dbp15l:0, ark_dbs2_lite:0,
+    ark_dsv4f:1, ark_dbs1_6:1, ark_dbs1_8:1, ark_dbs_code:1,
+    ark_dsv32:2, ark_dsv4p:2, ark_dbs2_pro:2, ark_glm47:2,
+    ark_dbp15p:3, ark_dbs_char:1,
+    // API Nexus 海外旗舰（高价，消耗用户余额 ¥100）
+    nx_gpt5:20, nx_gpt5mini:5, nx_claude_opus:25, nx_claude_sonnet:15,
+    nx_claude_haiku:8, nx_gemini_pro:15, nx_o3mini:10,
+    nx_dalle3:15, nx_flux:8, nx_suno:10, nx_grok3:15,
+    meshy_text:12, meshy_image:12,
+    qf_ernie4:5, qf_ernie35:2, qf_ernie_speed:0,
+    ark_doubao_pro:3, ark_doubao_lite:1,
+    bc_baichuan4:3, bc_baichuan3:1,
+    qwen3:3, kimi2:3, minimax1:3, doubao:3, doubao15:3, gpt4omini:3, gemini15flash:3,
+    ali_qwen37_max:3, ali_deepseek_v4_pro:3, ali_kimi_k26:3,
+    sf_deepseek_v32:3, sf_glm5:3,
+    dmx_glm_5_free:3, dmx_glm_51_free:3, dmx_kimi_k25_free:3,
+    dmx_kimi_k26_free:3, dmx_doubao_seed_pro:3, dmx_qwen3_max_free:3,
+    deepseekr1:5, gpt4o:5, hunyuan:5, gemini15pro:5, gemini25flash:5,
+    grok3:5, ali_glm51:5, 'mistral-large2':5,
+    or_llama3_70b:5, or_mistral_large:5, or_perplexity:5, llama4:3,
+    gpt4turbo:10, claude35:10, claude3opus:10, claude4:10,
+    gemini25pro:10,
+    or_gpt4o:10, or_claude_sonnet:10, or_gemini25pro:10,
+    qiniu_claude37:10, qiniu_claudeopus4:10, qiniu_gpt4o:10, qiniu_o3:10,
+    qiniu_gemini25pro:10,
+    claude4opus:15,
+  };
+  let creditCost = modelCostMap[model] || 2;
+  // 检查积分
+  const userCredits = keyInfo[4] || 0;
+  if (userCredits < creditCost) {
+    return res.status(402).json({ error: { message: '积分不足，请充值', type: 'insufficient_credits' } });
+  }
+  
+  // 扣积分
+  db.run("UPDATE users SET credits=credits-? WHERE username=?", [creditCost, username]);
+  db.run("UPDATE api_keys SET used=used+? WHERE api_key=?", [creditCost, apiKey]);
+  db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, -creditCost, 'API调用: '+model]);
+  saveDB();
+  
+  // 调用模型
+  try {
+    const apiKeyVal = getApiKey(config.provider, model);
+    if (!apiKeyVal) return res.status(500).json({ error: { message: '平台配置错误' } });
+    
+    const url = `${config.baseUrl}/chat/completions`;
+    const body = JSON.stringify({
+      model: config.model,
+      messages,
+      stream: false,
+      temperature: req.body.temperature || 0.7,
+      max_tokens: req.body.max_tokens || 4096,
+    });
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKeyVal}` },
+      body,
+    });
+    const data = await response.json();
+    
+    // 注入使用信息
+    data._credits_used = creditCost;
+    data._credits_remaining = userCredits - creditCost;
+    res.json(data);
+  } catch(e) {
+    // 调用失败退款
+    db.run("UPDATE users SET credits=credits+? WHERE username=?", [creditCost, username]);
+    db.run("UPDATE api_keys SET used=used-? WHERE api_key=?", [creditCost, apiKey]);
+    saveDB();
+    res.status(500).json({ error: { message: 'Nexus Hub 模型调用失败: ' + e.message, type: 'api_error' } });
+  }
+});
+
+// 获取所有可用模型（供API Key用户参考）
+app.get('/v1/models', (req, res) => {
+  const apiKey = (req.headers.authorization || '').replace('Bearer ', '');
+  if (!apiKey) return res.status(401).json({ error: { message: '缺少 API Key' } });
+  const result = db.exec("SELECT id FROM api_keys WHERE api_key=? AND active=1", [apiKey]);
+  if (!result.length || !result[0].values.length) return res.status(401).json({ error: { message: '无效的 API Key' } });
+  
+  const models = Object.entries(MODEL_CONFIG).map(([id, config]) => ({
+    id, object: 'model', owned_by: 'nexus-hub'
+  }));
+  res.json({ object: 'list', data: models });
+});
+
+// ============================================================
+// 忘记密码 — 通过密保问题重置
+// ============================================================
+app.post('/api/auth/forgot-password', (req, res) => {
+  const { phone, securityAnswer, newPassword } = req.body;
+  if (!phone || !securityAnswer || !newPassword) {
+    return res.json({ ok: false, error: '请填写完整信息' });
+  }
+  if (newPassword.length < 6) {
+    return res.json({ ok: false, error: '新密码至少6位' });
+  }
+  try {
+    const result = db.exec("SELECT username, security_a FROM users WHERE phone=?", [phone]);
+    if (!result.length || !result[0].values.length) {
+      return res.json({ ok: false, error: '未找到该手机号关联的账号' });
+    }
+    const user = result[0].values[0];
+    const storedAnswer = user[1];
+    if (!storedAnswer) {
+      return res.json({ ok: false, error: '该账号未设置密保，无法找回' });
+    }
+    if (storedAnswer !== btoaPwd(securityAnswer)) {
+      return res.json({ ok: false, error: '密保答案错误' });
+    }
+    db.run("UPDATE users SET password=? WHERE phone=?", [btoaPwd(newPassword), phone]);
+    saveDB();
+    res.json({ ok: true, message: '密码已重置，请使用新密码登录', username: user[0] });
+  } catch(e) {
+    res.json({ ok: false, error: '重置失败: ' + e.message });
+  }
+});
+
+// ============================================================
 initDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`\n⚡ AI Nexus 后端代理已启动`);
+    console.log(`\n⚡ Nexus Hub 后端代理已启动`);
     console.log(`   本地访问: http://localhost:${PORT}`);
     console.log(`   API 状态: http://localhost:${PORT}/api/status`);
 

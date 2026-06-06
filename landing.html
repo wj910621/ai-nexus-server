@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus Hub - 一站式 AI 大模型聚合平台</title>
+<meta name="description" content="Nexus Hub 聚合全球 700+ AI 模型，一站式接入 GPT-5、Claude 4、Gemini、DeepSeek 等最新模型，ChatGPT 替代方案">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#0a0a0f; color:#e0e0e0; line-height:1.6; }
+a { color:#6c8cff; text-decoration:none; }
+a:hover { color:#8aa4ff; }
+.container { max-width:1200px; margin:0 auto; padding:0 24px; }
+
+/* Header/Nav */
+header { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(10,10,15,0.85); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.06); }
+nav { display:flex; align-items:center; justify-content:space-between; height:64px; }
+.logo { display:flex; align-items:center; gap:10px; font-size:22px; font-weight:700; color:#fff; letter-spacing:-0.5px; }
+.logo-icon { width:32px; height:32px; background:linear-gradient(135deg,#6c8cff,#a855f7); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; color:#fff; }
+.nav-links { display:flex; gap:32px; align-items:center; }
+.nav-links a { color:#999; font-size:14px; transition:color 0.2s; }
+.nav-links a:hover { color:#fff; }
+.cta-btn { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#6c8cff,#a855f7); color:#fff !important; padding:10px 24px; border-radius:10px; font-weight:600; font-size:14px; transition:transform 0.2s,box-shadow 0.2s; border:none; cursor:pointer; }
+.cta-btn:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(108,140,255,0.3); }
+
+/* Hero */
+.hero { padding:140px 0 80px; text-align:center; position:relative; overflow:hidden; }
+.hero-bg { position:absolute; top:0; left:50%; transform:translateX(-50%); width:800px; height:800px; background:radial-gradient(circle,rgba(108,140,255,0.08) 0%,transparent 70%); pointer-events:none; }
+.hero h1 { font-size:48px; font-weight:800; line-height:1.15; margin-bottom:20px; background:linear-gradient(135deg,#fff 0%,#6c8cff 50%,#a855f7 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; max-width:800px; margin:0 auto 20px; }
+.hero p { font-size:18px; color:#888; max-width:600px; margin:0 auto 36px; }
+.hero-buttons { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+.hero-cta { display:inline-flex; align-items:center; gap:10px; background:linear-gradient(135deg,#6c8cff,#a855f7); color:#fff; padding:14px 32px; border-radius:12px; font-size:16px; font-weight:600; border:none; cursor:pointer; transition:transform 0.2s; }
+.hero-cta:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(108,140,255,0.35); }
+.hero-cta-secondary { display:inline-flex; align-items:center; gap:10px; background:rgba(255,255,255,0.06); color:#ccc; padding:14px 32px; border-radius:12px; font-size:16px; font-weight:500; border:1px solid rgba(255,255,255,0.1); cursor:pointer; transition:background 0.2s; }
+.hero-cta-secondary:hover { background:rgba(255,255,255,0.1); color:#fff; }
+.hero-stats { display:flex; justify-content:center; gap:60px; margin-top:60px; flex-wrap:wrap; }
+.hero-stat { text-align:center; }
+.hero-stat-num { font-size:36px; font-weight:800; color:#fff; }
+.hero-stat-label { font-size:14px; color:#888; margin-top:4px; }
+
+/* Features Section */
+.section { padding:80px 0; }
+.section-title { text-align:center; font-size:32px; font-weight:700; color:#fff; margin-bottom:16px; }
+.section-subtitle { text-align:center; font-size:16px; color:#888; max-width:600px; margin:0 auto 48px; }
+.features-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:24px; }
+.feature-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:28px; transition:border-color 0.2s,background 0.2s; }
+.feature-card:hover { border-color:rgba(108,140,255,0.3); background:rgba(108,140,255,0.03); }
+.feature-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px; }
+.feature-card h3 { font-size:18px; font-weight:600; color:#fff; margin-bottom:8px; }
+.feature-card p { font-size:14px; color:#888; line-height:1.7; }
+
+/* Model Showcase */
+.model-showcase { background:rgba(255,255,255,0.02); border-radius:20px; border:1px solid rgba(255,255,255,0.06); padding:40px; margin-top:40px; }
+.model-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; margin-top:24px; }
+.model-brand { background:rgba(255,255,255,0.04); border-radius:12px; padding:20px 16px; text-align:center; transition:background 0.2s; }
+.model-brand:hover { background:rgba(108,140,255,0.08); }
+.model-brand-logo { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:16px; font-weight:700; color:#fff; }
+.model-brand-name { font-size:14px; font-weight:600; color:#ddd; margin-bottom:4px; }
+.model-brand-count { font-size:12px; color:#666; }
+
+/* Platform Integration */
+.platform-row { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin:32px 0; }
+.platform-tag { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px 20px; font-size:13px; color:#999; display:flex; align-items:center; gap:8px; }
+.platform-tag .dot { width:6px; height:6px; border-radius:50%; }
+
+/* Pricing */
+.pricing-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:24px; }
+.pricing-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:32px; text-align:center; transition:border-color 0.2s; position:relative; }
+.pricing-card.featured { border-color:#6c8cff; background:rgba(108,140,255,0.04); }
+.pricing-card.featured::before { content:'推荐'; position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#6c8cff,#a855f7); color:#fff; font-size:12px; font-weight:600; padding:4px 16px; border-radius:20px; }
+.pricing-name { font-size:20px; font-weight:700; color:#fff; margin-bottom:8px; }
+.pricing-desc { font-size:14px; color:#888; margin-bottom:24px; }
+.pricing-price { font-size:36px; font-weight:800; color:#fff; margin-bottom:4px; }
+.pricing-sub { font-size:14px; color:#666; margin-bottom:24px; }
+.pricing-features { list-style:none; text-align:left; margin-bottom:28px; }
+.pricing-features li { padding:8px 0; font-size:14px; color:#bbb; display:flex; align-items:center; gap:8px; }
+.pricing-features li::before { content:'✓'; color:#6c8cff; font-weight:700; }
+
+/* FAQ */
+.faq-list { max-width:800px; margin:0 auto; }
+.faq-item { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; margin-bottom:12px; overflow:hidden; }
+.faq-q { padding:18px 24px; font-size:15px; font-weight:600; color:#ddd; cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none; }
+.faq-q:hover { color:#fff; }
+.faq-arrow { transition:transform 0.3s; font-size:12px; color:#666; }
+.faq-item.open .faq-arrow { transform:rotate(180deg); }
+.faq-a { padding:0 24px 18px; font-size:14px; color:#888; line-height:1.8; display:none; }
+.faq-item.open .faq-a { display:block; }
+
+/* Footer */
+footer { border-top:1px solid rgba(255,255,255,0.06); padding:48px 0; }
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; }
+@media(max-width:768px) { .footer-grid { grid-template-columns:1fr; } }
+.footer-brand .logo { margin-bottom:16px; }
+.footer-brand p { font-size:13px; color:#666; }
+.footer-col h4 { font-size:14px; font-weight:600; color:#fff; margin-bottom:16px; }
+.footer-col a { display:block; font-size:13px; color:#666; margin-bottom:10px; }
+.footer-col a:hover { color:#999; }
+.footer-bottom { text-align:center; padding-top:32px; margin-top:32px; border-top:1px solid rgba(255,255,255,0.04); font-size:13px; color:#555; }
+
+/* Animations */
+.fade-in { opacity:0; transform:translateY(20px); transition:opacity 0.6s ease,transform 0.6s ease; }
+.fade-in.visible { opacity:1; transform:translateY(0); }
+
+/* Responsive */
+@media(max-width:768px) {
+  .hero h1 { font-size:32px; }
+  .hero p { font-size:16px; }
+  .nav-links { display:none; }
+  .hero-stats { gap:30px; }
+  .features-grid { grid-template-columns:1fr; }
+  .pricing-grid { grid-template-columns:1fr; }
+  .model-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<header>
+  <nav class="container">
+    <a href="/" class="logo">
+      <div class="logo-icon">N</div>
+      Nexus Hub
+    </a>
+    <div class="nav-links">
+      <a href="#features">功能</a>
+      <a href="#models">模型</a>
+      <a href="#pricing">定价</a>
+      <a href="#faq">常见问题</a>
+      <a href="/dashboard" class="cta-btn">
+        <span>→</span> 进入控制台
+      </a>
+    </div>
+  </nav>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <h1>全球 AI 大模型<br>一站式聚合平台</h1>
+    <p>无需切换平台即可调用 700+ 最新 AI 模型。从 GPT-5 到 DeepSeek，从 Claude 4 到 Gemini 3，一个控制台掌控所有。</p>
+    <div class="hero-buttons">
+      <a href="/dashboard" class="hero-cta">
+        <span>🚀</span> 免费开始使用
+      </a>
+      <a href="#features" class="hero-cta-secondary">
+        了解更多 <span>↓</span>
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">700+</div>
+        <div class="hero-stat-label">接入模型</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">9</div>
+        <div class="hero-stat-label">AI 平台</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">15+</div>
+        <div class="hero-stat-label">功能模块</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Platform Integration -->
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="platform-row">
+      <span class="platform-tag"><span class="dot" style="background:#6c8cff"></span> DeepSeek</span>
+      <span class="platform-tag"><span class="dot" style="background:#a855f7"></span> 阿里百炼</span>
+      <span class="platform-tag"><span class="dot" style="background:#f59e0b"></span> Kimi</span>
+      <span class="platform-tag"><span class="dot" style="background:#10b981"></span> 智谱 GLM</span>
+      <span class="platform-tag"><span class="dot" style="background:#ef4444"></span> 硅基流动</span>
+      <span class="platform-tag"><span class="dot" style="background:#3b82f6"></span> OpenRouter</span>
+      <span class="platform-tag"><span class="dot" style="background:#8b5cf6"></span> 腾讯混元</span>
+      <span class="platform-tag"><span class="dot" style="background:#ec4899"></span> 火山引擎</span>
+      <span class="platform-tag"><span class="dot" style="background:#6366f1"></span> 百度千帆</span>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="container">
+    <h2 class="section-title">一个控制台，解锁所有</h2>
+    <p class="section-subtitle">抛弃碎片化的 AI 使用体验，Nexus Hub 集成所有主流模型到统一界面</p>
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(108,140,255,0.15);color:#6c8cff">🤖</div>
+        <h3>多模型聊天</h3>
+        <p>同时与多个模型对话，对比回复质量。支持 GPT-5、Claude 4、Gemini 3、DeepSeek R1 等最新模型。</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(168,85,247,0.15);color:#a855f7">📝</div>
+        <h3>AI 小说创作</h3>
+        <p>6 步创作向导，从设定到完稿。支持长篇管理、分章写作、角色一致性和 AI 润色。</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.15);color:#10b981">🎨</div>
+        <h3>智能体工坊</h3>
+        <p>16 个预制专业智能体，覆盖创作、营销、编程、研究等场景。自定义智能体玩法。</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b">🎬</div>
+        <h3>AI 视频 & 3D 生成</h3>
+        <p>文生视频、图生视频、3D 模型生成。支持可灵、Meshy 等多平台，一个界面操控。</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(239,68,68,0.15);color:#ef4444">🎵</div>
+        <h3>AI 音乐生成</h3>
+        <p>使用 Suno API 生成完整歌曲，支持歌词编写、风格选择和音频播放下载。</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(99,102,241,0.15);color:#6366f1">📊</div>
+        <h3>模型对比 & 知识库</h3>
+        <p>并排对比多模型输出，RAG 知识库系统管理企业数据，精准检索注入对话。</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(236,72,153,0.15);color:#ec4899">💼</div>
+        <h3>AI 办公 & 营销</h3>
+        <p>智能文档、邮件、PPT 生成。小红书爆款、公众号文章、广告投放策略一键生成。</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6">🔧</div>
+        <h3>联想搜索 & 工具</h3>
+        <p>AI 辅助编程、品牌设计、API Key 管理、第三方工具集成，一站式搞定。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Model Showcase -->
+<section class="section" id="models">
+  <div class="container">
+    <h2 class="section-title">全球顶级模型齐聚</h2>
+    <p class="section-subtitle">从旗舰模型到性价比之选，700+ 模型满足各种场景</p>
+    <div class="model-showcase fade-in">
+      <div class="model-grid">
+        <div class="model-brand">
+          <div class="model-brand-logo" style="background:linear-gradient(135deg,#19c37d,#00a66c)">G</div>
+          <div class="model-brand-name">GPT-5 Pro</div>
+          <div class="model-brand-count">旗舰模型</div>
+        </div>
+        <div class="model-brand">
+          <div class="model-brand-logo" style="background:linear-gradient(135deg,#5436da,#3415b0)">C</div>
+          <div class="model-brand-name">Claude 4 Opus</div>
+          <div class="model-brand-count">深度思考</div>
+        </div>
+        <div class="model-brand">
+          <div class="model-brand-logo" style="background:linear-gradient(135deg,#4285f4,#1a73e8)">G</div>
+          <div class="model-brand-name">Gemini 3 Pro</div>
+          <div class="model-brand-count">多模态</div>
+        </div>
+        <div class="model-brand">
+          <div class="model-brand-logo" style="background:linear-gradient(135deg,#4f46e5,#3730a3)">D</div>
+          <div class="model-brand-name">DeepSeek V4</div>
+          <div class="model-brand-count">开源先锋</div>
+        </div>
+        <div class="model-brand">
+          <div class="model-brand-logo" style="background:linear-gradient(135deg,#f97316,#ea580c)">K</div>
+          <div class="model-brand-name">Kimi K2.6</div>
+          <div class="model-brand-count">超长上下文</div>
+        </div>
+        <div class="model-brand">
+          <div class="model-brand-logo" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">G</div>
+          <div class="model-brand-name">GLM-5.1</div>
+          <div class="model-brand-count">中文优化</div>
+        </div>
+        <div class="model-brand">
+          <div class="model-brand-logo" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">G</div>
+          <div class="model-brand-name">Grok 4</div>
+          <div class="model-brand-count">实时数据</div>
+        </div>
+        <div class="model-brand">
+          <div class="model-brand-logo" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">Q</div>
+          <div class="model-brand-name">Qwen3-Max</div>
+          <div class="model-brand-count">阿里旗舰</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="section" id="pricing">
+  <div class="container">
+    <h2 class="section-title">灵活的积分定价</h2>
+    <p class="section-subtitle">按模型消耗积分，0 积分免费模型体验，用完即付，无需订阅</p>
+    <div class="pricing-grid">
+      <div class="pricing-card fade-in">
+        <div class="pricing-name">轻量套餐</div>
+        <div class="pricing-desc">轻度使用首选</div>
+        <div class="pricing-price">¥19</div>
+        <div class="pricing-sub">500 积分 / 月</div>
+        <ul class="pricing-features">
+          <li>全部 700+ 模型可用</li>
+          <li>基础聊天功能</li>
+          <li>模型对比</li>
+          <li>AI 小说创作</li>
+        </ul>
+        <a href="/dashboard" class="hero-cta-secondary" style="display:block;text-align:center;border-color:rgba(255,255,255,0.1);">开始使用</a>
+      </div>
+      <div class="pricing-card featured fade-in">
+        <div class="pricing-name">标准套餐</div>
+        <div class="pricing-desc">日常首选</div>
+        <div class="pricing-price">¥39</div>
+        <div class="pricing-sub">800 积分 / 月</div>
+        <ul class="pricing-features">
+          <li>全部 700+ 模型可用</li>
+          <li>多模型聊天 & 对比</li>
+          <li>AI 小说创作 & 漫剧</li>
+          <li>智能助手 & 提示词库</li>
+          <li>AI 办公 & 营销工具</li>
+          <li>视频 & 音乐生成</li>
+        </ul>
+        <a href="/dashboard" class="hero-cta" style="display:block;text-align:center;">立即购买</a>
+      </div>
+      <div class="pricing-card fade-in">
+        <div class="pricing-name">专业套餐</div>
+        <div class="pricing-desc">重度用户专属</div>
+        <div class="pricing-price">¥79</div>
+        <div class="pricing-sub">2000 积分 / 月</div>
+        <ul class="pricing-features">
+          <li>全部 700+ 模型无限量</li>
+          <li>3D 模型生成</li>
+          <li>知识库管理</li>
+          <li>API Key 独立接入</li>
+          <li>优先技术支持</li>
+          <li>所有高级功能</li>
+        </ul>
+        <a href="/dashboard" class="hero-cta-secondary" style="display:block;text-align:center;">购买专业版</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container">
+    <h2 class="section-title">常见问题</h2>
+    <p class="section-subtitle">快速了解 Nexus Hub</p>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          Nexus Hub 和其他平台有什么区别？
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">Nexus Hub 聚合了 9 个主流 AI 平台、700+ 模型，你无需注册多个平台、管理多个 API Key。一个控制台即可调用所有的最新模型。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          模型是实时可用的吗？
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">是的，所有模型都通过我们后端的实时 API 代理调用。我们支持自动切换备用渠道，即使某个平台故障，也能保证服务可用性。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          积分如何计算和使用？
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">每个模型消耗不同数量的积分（0-25 分/次对话）。免费模型不消耗积分，高级模型（如 GPT-5、Claude 4 Opus）消耗更多。注册即送体验积分。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          是否支持 API Key 接入？
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">支持！你可以在控制台的 API Key 管理中创建自己的 Key，然后通过 OpenAI 兼容接口调用 Nexus Hub 的所有模型。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          如何保障数据安全？
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">所有对话数据经过加密传输，我们不存储你的聊天记录。API Key 由你自行管理，也可选择使用平台提供的公共额度。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="logo" style="margin-bottom:16px">
+          <div class="logo-icon">N</div>
+          Nexus Hub
+        </a>
+        <p>一站式 AI 大模型聚合平台。打破模型壁垒，释放 AI 潜能。</p>
+      </div>
+      <div class="footer-col">
+        <h4>产品</h4>
+        <a href="#models">模型目录</a>
+        <a href="#features">功能特性</a>
+        <a href="#pricing">定价方案</a>
+        <a href="/dashboard">控制台</a>
+      </div>
+      <div class="footer-col">
+        <h4>支持</h4>
+        <a href="#faq">常见问题</a>
+        <a href="/dashboard">反馈建议</a>
+        <a href="/dashboard">使用帮助</a>
+      </div>
+      <div class="footer-col">
+        <h4>法律</h4>
+        <a href="/dashboard">服务条款</a>
+        <a href="/dashboard">隐私政策</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 Nexus Hub. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+// Fade-in animation on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Confirm the user is going to the dashboard
+document.querySelectorAll('a[href="/dashboard"]').forEach(a => {
+  a.addEventListener('click', (e) => {
+    // Allow normal navigation
+  });
+});
+</script>
+</body>
+</html>
