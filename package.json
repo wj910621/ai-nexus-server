@@ -11,9 +11,11 @@
     "dev": "node --watch server.js"
   },
   "dependencies": {
-    "express": "^4.21.0",
+    "@google/generative-ai": "^0.21.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "@google/generative-ai": "^0.21.0"
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "ssh2": "^1.17.0"
   }
 }

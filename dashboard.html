@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Nexus Hub">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0d0721">
+<meta name="theme-color" content="#f8f7ff">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
@@ -21,17 +21,6 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 <title>Nexus Hub - 智能创作平台</title>
 <style>
 :root{
-  --bg:#0d0721;--bg-card:#1a1035;--bg-sidebar:#100928;--bg-input:#261652;
-  --text:#e8e0f0;--text-secondary:#9d92b5;--border:rgba(155,89,247,0.15);
-  --accent:#9b59f7;--accent-hover:#b87fff;--accent-light:rgba(155,89,247,0.1);
-  --accent-glow:rgba(155,89,247,0.3);--accent-soft:rgba(155,89,247,0.06);
-  --cyan:#06b6d4;--cyan-light:rgba(6,182,212,0.08);
-  --green:#10b981;--red:#ef4444;--orange:#f59e0b;
-  --shadow:0 4px 24px rgba(0,0,0,0.3);--shadow-lg:0 8px 40px rgba(0,0,0,0.5);
-  --radius:12px;--transition:0.25s cubic-bezier(0.4,0,0.2,1);
-  --glass:rgba(26,16,53,0.8);--glass-border:rgba(155,89,247,0.12);
-}
-[data-theme="light"]{
   --bg:#f8f7ff;--bg-card:rgba(255,255,255,0.92);--bg-sidebar:#f0edff;--bg-input:#f0edff;
   --text:#1a1035;--text-secondary:#6b5b95;--border:rgba(124,92,252,0.15);
   --accent:#6c4ef5;--accent-hover:#8b70ff;--accent-light:rgba(108,78,245,0.08);
@@ -39,6 +28,34 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   --cyan:#0098db;--cyan-light:rgba(0,152,219,0.08);
   --shadow:0 2px 16px rgba(108,78,245,0.06);--shadow-lg:0 8px 32px rgba(108,78,245,0.1);
   --glass:rgba(255,255,255,0.8);--glass-border:rgba(108,78,245,0.12);
+  /* 认证弹窗亮色主题 */
+  --auth-overlay:rgba(0,0,0,0.35);
+  --auth-modal-bg:linear-gradient(145deg,rgba(255,255,255,0.96),rgba(245,242,255,0.96));
+  --auth-modal-border:rgba(108,78,245,0.15);
+  --auth-modal-shadow:0 20px 60px rgba(108,78,245,0.1),0 0 80px rgba(108,78,245,0.06),inset 0 1px 0 rgba(255,255,255,0.9);
+  --auth-modal-glow:radial-gradient(ellipse at 30% 20%,rgba(108,78,245,0.04),transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(0,152,219,0.03),transparent 50%);
+  --auth-input-bg:var(--bg-input);
+  --auth-input-border:rgba(108,78,245,0.15);
+  --auth-pwd-bg:#e8e5f5;
+}
+[data-theme="dark"]{
+  --bg:#0d0721;--bg-card:#1a1035;--bg-sidebar:#100928;--bg-input:#261652;
+  --text:#e8e0f0;--text-secondary:#9d92b5;--border:rgba(155,89,247,0.15);
+  --accent:#9b59f7;--accent-hover:#b87fff;--accent-light:rgba(155,89,247,0.1);
+  --accent-glow:rgba(155,89,247,0.3);--accent-soft:rgba(155,89,247,0.06);
+  --cyan:#06b6d4;--cyan-light:rgba(6,182,212,0.08);
+  --green:#10b981;--red:#ef4444;--orange:#f59e0b;
+  --shadow:0 4px 24px rgba(0,0,0,0.3);--shadow-lg:0 8px 40px rgba(0,0,0,0.5);
+  --glass:rgba(26,16,53,0.8);--glass-border:rgba(155,89,247,0.12);
+  /* 认证弹窗暗色主题 */
+  --auth-overlay:rgba(0,0,0,0.85);
+  --auth-modal-bg:linear-gradient(145deg,rgba(20,10,40,0.93),rgba(26,20,60,0.93));
+  --auth-modal-border:rgba(155,89,247,0.25);
+  --auth-modal-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 80px rgba(124,58,237,0.1),inset 0 1px 0 rgba(255,255,255,0.05);
+  --auth-modal-glow:radial-gradient(ellipse at 30% 20%,rgba(155,89,247,0.1),transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(6,182,212,0.06),transparent 50%);
+  --auth-input-bg:rgba(255,255,255,0.04);
+  --auth-input-border:rgba(155,89,247,0.2);
+  --auth-pwd-bg:#333;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -48,10 +65,15 @@ body{
 }
 body::before{
   content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+  background:radial-gradient(ellipse at 25% 15%,rgba(108,78,245,0.06) 0%,transparent 50%),
+             radial-gradient(ellipse at 75% 55%,rgba(0,152,219,0.04) 0%,transparent 50%),
+             radial-gradient(ellipse at 50% 85%,rgba(108,78,245,0.03) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+[data-theme="dark"] body::before{
   background:radial-gradient(ellipse at 25% 15%,rgba(155,89,247,0.08) 0%,transparent 50%),
              radial-gradient(ellipse at 75% 55%,rgba(6,182,212,0.05) 0%,transparent 50%),
              radial-gradient(ellipse at 50% 85%,rgba(155,89,247,0.04) 0%,transparent 50%);
-  pointer-events:none;z-index:0;
 }
 a{color:var(--accent);text-decoration:none}
 
@@ -67,7 +89,7 @@ a{color:var(--accent);text-decoration:none}
 .conn-status{display:flex;align-items:center;gap:6px;font-size:0.73rem;color:var(--text-secondary);padding:4px 8px}
 
 /* App Layout */
-.app-layout{display:grid;grid-template-columns:220px 1fr 300px;min-height:calc(100vh - 56px);position:relative;z-index:1}
+.app-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);position:relative;z-index:1}
 
 /* Sidebar */
 .sidebar{background:var(--bg-sidebar);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;position:sticky;top:56px;height:calc(100vh - 56px);z-index:10}
@@ -84,17 +106,35 @@ a{color:var(--accent);text-decoration:none}
 .sidebar-conn{display:flex;align-items:center;gap:6px;padding:6px 14px;font-size:0.75rem;color:var(--text-secondary)}
 
 /* Main Content */
-.main-content{overflow-y:auto;padding:0}
+.main-content{overflow-y:auto;padding:0;padding-right:300px}
 .page{display:none;animation:fadeIn 0.35s cubic-bezier(0.4,0,0.2,1)}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* Right Panel */
-.right-panel{background:var(--bg-sidebar);border-left:1px solid var(--border);padding:20px 16px;overflow-y:auto}
+.right-panel{background:var(--bg-sidebar);border-left:1px solid var(--border);padding:20px 16px;overflow-y:auto;position:fixed;right:0;top:56px;width:300px;height:calc(100vh - 56px);z-index:5}
 .right-panel-title{font-size:0.85rem;font-weight:700;margin-bottom:14px;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px}
 .right-panel-empty{text-align:center;color:var(--text-secondary);font-size:0.8rem;padding:40px 0;opacity:0.6}
 .right-panel-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;transition:all var(--transition)}
 .right-panel-card:hover{border-color:var(--accent);box-shadow:0 0 16px var(--accent-soft)}
+.wb-ch-item{}
+/* Emoji 美化 - 所有 emoji 图标统一加渐变光晕 */
+.feature-card [style*="font-size:"]:has(>svg), .feature-icon, .section-title:before{display:inline-flex;align-items:center;justify-content:center}
+.feature-card [style*="font-size:2"],[style*="font-size:3"]{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--accent-light),rgba(168,85,247,0.06));margin-bottom:8px;position:relative}
+.feature-card [style*="font-size:2"]::after,[style*="font-size:3"]::after{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(135deg,var(--accent),transparent);opacity:0.15;z-index:-1}
+/* 汉堡菜单按钮 - 移动端 */
+.hamburger-btn{display:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center}
+/* 移动端菜单面板 */
+.mobile-menu-panel{display:none;position:fixed;top:56px;left:0;right:0;bottom:0;z-index:399;background:var(--bg-sidebar);overflow-y:auto;flex-direction:column;gap:4px;padding:12px}
+.mobile-menu-panel.show{display:flex}
+.mobile-menu-panel .sidebar-link{font-size:0.9rem}
+@media(max-width:768px){
+  .hamburger-btn{display:flex}
+  .top-actions>*:not(#hamburgerBtn){display:none}
+  .top-actions .theme-toggle,.top-actions .conn-status{display:flex}
+}
+@media(min-width:769px){.mobile-menu-panel{display:none!important}}
+.feature-card .card-icon-wrap{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:8px;background:linear-gradient(135deg,var(--accent-light),rgba(168,85,247,0.04));position:relative;margin-left:auto;margin-right:auto}
 
 /* Section */
 .section{padding:48px 36px}.section-title{font-size:1.5rem;font-weight:700;margin-bottom:6px}.section-desc{color:var(--text-secondary);margin-bottom:28px;font-size:0.9rem}
@@ -298,8 +338,8 @@ a{color:var(--accent);text-decoration:none}
 
 /* Toast & Status */
 .conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.conn-dot.online{background:var(--green);box-shadow:0 0 8px var(--green)}
-.conn-dot.offline{background:var(--red)}.conn-dot.checking{background:var(--orange);animation:pulse 1s infinite}
+.conn-dot.online{background:var(--green);box-shadow:0 0 8px var(--green);border:1.5px solid rgba(16,185,129,0.5)}
+.conn-dot.offline{background:var(--red);border:1.5px solid rgba(239,68,68,0.5)}.conn-dot.checking{background:var(--orange);animation:pulse 1s infinite;border:1.5px solid rgba(245,158,11,0.5)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -330,10 +370,10 @@ a{color:var(--accent);text-decoration:none}
 .form-group textarea{resize:vertical;min-height:60px}
 
 /* === 新登录注册弹窗 === */
-.auth-glass .modal-overlay{background:rgba(0,0,0,0.85);backdrop-filter:blur(12px)}
-.auth-modal{width:440px;max-width:95%;background:linear-gradient(145deg,rgba(20,10,40,0.93),rgba(26,20,60,0.93));border:1px solid rgba(155,89,247,0.25);border-radius:24px;padding:36px 32px;backdrop-filter:blur(30px);position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 80px rgba(124,58,237,0.1),inset 0 1px 0 rgba(255,255,255,0.05);animation:authFadeIn 0.35s cubic-bezier(0.16,1,0.3,1)}
+.auth-glass .modal-overlay{background:var(--auth-overlay);backdrop-filter:blur(12px)}
+.auth-modal{width:440px;max-width:95%;background:var(--auth-modal-bg);border:1px solid var(--auth-modal-border);border-radius:24px;padding:36px 32px;backdrop-filter:blur(30px);position:relative;overflow:hidden;box-shadow:var(--auth-modal-shadow);animation:authFadeIn 0.35s cubic-bezier(0.16,1,0.3,1)}
 @keyframes authFadeIn{from{opacity:0;transform:scale(0.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.auth-modal::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(155,89,247,0.1),transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(6,182,212,0.06),transparent 50%);pointer-events:none}
+.auth-modal::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:var(--auth-modal-glow);pointer-events:none}
 .auth-tabs{display:flex;gap:0;margin-bottom:28px;position:relative;z-index:1}
 .auth-tab{flex:1;padding:10px;text-align:center;font-size:0.9rem;font-weight:600;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;transition:all var(--transition);background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
 .auth-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
@@ -341,13 +381,13 @@ a{color:var(--accent);text-decoration:none}
 .auth-form.active{display:block}
 .auth-icon{width:56px;height:56px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 16px;box-shadow:0 0 30px rgba(124,58,237,0.3)}
 .auth-field{position:relative;margin-bottom:16px}
-.auth-field input{width:100%;padding:12px 40px 12px 14px;border:1px solid rgba(155,89,247,0.2);border-radius:12px;background:rgba(255,255,255,0.04);color:var(--text);font-size:0.88rem;font-family:inherit;outline:none;transition:all var(--transition)}
+.auth-field input{width:100%;padding:12px 40px 12px 14px;border:1px solid var(--auth-input-border);border-radius:12px;background:var(--auth-input-bg);color:var(--text);font-size:0.88rem;font-family:inherit;outline:none;transition:all var(--transition)}
 .auth-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,0.1)}
 .auth-field input.error{border-color:var(--red);animation:shake 0.4s}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .auth-field .field-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.9rem;opacity:0.5}
 .auth-field .field-hint{font-size:0.68rem;color:var(--red);margin-top:4px;display:none;padding:4px 8px;background:rgba(239,68,68,0.08);border-radius:4px;font-weight:500}
-.auth-field .pwd-strength{height:3px;border-radius:2px;margin-top:6px;transition:all 0.3s;background:#333}
+.auth-field .pwd-strength{height:3px;border-radius:2px;margin-top:6px;transition:all 0.3s;background:var(--auth-pwd-bg)}
 .auth-field .pwd-strength.weak{background:var(--red);width:30%}
 .auth-field .pwd-strength.medium{background:var(--orange);width:60%}
 .auth-field .pwd-strength.strong{background:var(--green);width:100%}
@@ -384,8 +424,9 @@ a{color:var(--accent);text-decoration:none}
 .param-chip{padding:6px 10px;background:var(--accent-soft);border-radius:8px;font-size:0.72rem;color:var(--text-secondary);font-family:monospace}
 
 @media(max-width:1024px){
-  .app-layout{grid-template-columns:200px 1fr 0}
+  .app-layout{grid-template-columns:200px 1fr}
   .right-panel{display:none}
+  .main-content{padding-right:0}
 }
 @media(max-width:768px){
   .app-layout{grid-template-columns:1fr}
@@ -583,6 +624,7 @@ a{color:var(--accent);text-decoration:none}
   #userNav{font-size:0.75rem}
   .right-panel{display:none}
   .app-layout{grid-template-columns:1fr}
+  .main-content{padding-right:0}
   .sidebar{display:none}
   .mobile-nav{display:flex}
   .wizard-panel .form-row{grid-template-columns:1fr}
@@ -634,13 +676,14 @@ a{color:var(--accent);text-decoration:none}
 
 <!-- Top Bar -->
 <header class="top-bar">
-  <div class="top-logo"><div class="top-logo-icon" id="logoIcon">⚡</div><span>Nexus Hub</span></div>
+  <div class="top-logo"><div class="top-logo-icon" id="logoIcon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span>Nexus Hub</span></div>
+  <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileMenu()" aria-label="菜单">☰</button>
   <div class="top-actions">
-    <span class="top-credit" onclick="dailyCheckin()" title="每日签到">📅 <span id="checkinBadge">签到</span></span>
-    <span class="top-credit" onclick="switchPage('pricing')" title="积分">💎 <span id="creditDisplay">0</span></span>
-    <span class="top-credit" onclick="DAILY_CHECKIN()" id="checkinBtn" title="每日签到" style="background:linear-gradient(135deg,#f59e0b,#d97706);display:none">📅 签到 +5</span>
+    <span class="top-credit" onclick="dailyCheckin()" title="每日签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> <span id="checkinBadge">签到</span></span>
+    <span class="top-credit" onclick="switchPage('pricing')" title="积分"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> <span id="creditDisplay">0</span></span>
+    <span class="top-credit" onclick="DAILY_CHECKIN()" id="checkinBtn" title="每日签到" style="background:linear-gradient(135deg,#f59e0b,#d97706);display:none"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 签到 +5</span>
     <span id="userNav" style="display:flex;align-items:center;gap:6px"></span>
-    <button class="theme-toggle" id="themeToggle">☀️</button>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
     <span class="conn-status" id="connStatus"><span class="conn-dot checking"></span><span>检测</span></span>
   </div>
 </header>
@@ -651,36 +694,36 @@ a{color:var(--accent);text-decoration:none}
 <!-- Left Sidebar -->
 <aside class="sidebar">
   <button class="sidebar-link active" data-page="home"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#a855f7)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>首页</button>
-  <button class="sidebar-link" data-page="chat"><span class="sidebar-icon" style="background:linear-gradient(135deg,#10b981,#34d399)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>💬 聊天</button>
-  <button class="sidebar-link" data-page="novel"><span class="sidebar-icon" style="background:linear-gradient(135deg,#ec4899,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>📖 AI 小说</button>
-  <button class="sidebar-link" data-page="compare"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>⚖️ 模型对比</button>
-  <button class="sidebar-link" data-page="media"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#d946ef)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span>🎬 AI 漫剧</button>
-  <button class="sidebar-link primary" data-page="studio"><span class="sidebar-icon" style="background:linear-gradient(135deg,#a855f7,#c084fc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>🖼️ AI 绘画/视频</button>
-  <button class="sidebar-link" data-page="music"><span class="sidebar-icon" style="background:linear-gradient(135deg,#ef4444,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>🎵 AI音乐</button>
+  <button class="sidebar-link" data-page="compare"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></span>模型对比</button>
+  <button class="sidebar-link" data-page="chat"><span class="sidebar-icon" style="background:linear-gradient(135deg,#10b981,#34d399)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>聊天</button>
+  <button class="sidebar-link" data-page="novel"><span class="sidebar-icon" style="background:linear-gradient(135deg,#ec4899,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>AI 小说</button>
+  <button class="sidebar-link" data-page="media"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#d946ef)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M10 9l5 3-5 3V9z"/></svg></span>AI 漫剧</button>
+  <button class="sidebar-link primary" data-page="studio"><span class="sidebar-icon" style="background:linear-gradient(135deg,#a855f7,#c084fc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>AI 绘画/视频</button>
+  <button class="sidebar-link" data-page="music"><span class="sidebar-icon" style="background:linear-gradient(135deg,#ef4444,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>AI 音乐</button>
   <div class="sidebar-divider"></div>
-  <button class="sidebar-link" data-page="3d"><span class="sidebar-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>🧊 3D生成</button>
-  <button class="sidebar-link" data-page="agents"><span class="sidebar-icon" style="background:linear-gradient(135deg,#14b8a6,#06b6d4)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg></span>🤖 智能助手</button>
-  <button class="sidebar-link" data-page="office"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>📄 智能办公</button>
-  <button class="sidebar-link" data-page="brand"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f97316,#ef4444)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg></span>🏷️ 品牌设计</button>
-  <button class="sidebar-link" data-page="market"><span class="sidebar-icon" style="background:linear-gradient(135deg,#22c55e,#10b981)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>📢 社媒营销</button>
-  <button class="sidebar-link" data-page="code"><span class="sidebar-icon" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>💻 代码助手</button>
-  <button class="sidebar-link" data-page="prompts"><span class="sidebar-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>📚 提示词库</button>
-  <button class="sidebar-link" data-page="knowledge"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>📖 知识库</button>
-  <button class="sidebar-link" data-page="models"><span class="sidebar-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>🗂️ 模型目录</button>
+  <button class="sidebar-link" data-page="3d"><span class="sidebar-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>3D 生成</button>
+  <button class="sidebar-link" data-page="agents"><span class="sidebar-icon" style="background:linear-gradient(135deg,#14b8a6,#06b6d4)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>智能助手</button>
+  <button class="sidebar-link" data-page="office"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>智能办公</button>
+  <button class="sidebar-link" data-page="brand"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f97316,#ef4444)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg></span>品牌设计</button>
+  <button class="sidebar-link" data-page="market"><span class="sidebar-icon" style="background:linear-gradient(135deg,#22c55e,#10b981)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>社媒营销</button>
+  <button class="sidebar-link" data-page="code"><span class="sidebar-icon" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>代码助手</button>
+  <button class="sidebar-link" data-page="prompts"><span class="sidebar-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>提示词库</button>
+  <button class="sidebar-link" data-page="knowledge"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>知识库</button>
+  <button class="sidebar-link" data-page="models"><span class="sidebar-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>模型目录</button>
   <div class="sidebar-divider"></div>
   <button class="sidebar-link" data-page="admin" id="adminSidebarBtn" style="display:none"><span class="sidebar-icon" style="background:linear-gradient(135deg,#475569,#64748b)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>管理</button>
-  <button class="sidebar-link" data-page="apikeys"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#c084fc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>🔑 API Key</button>
-  <button class="sidebar-link" data-page="pricing"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>💎 充值</button>
-  <button class="sidebar-link" data-page="tools"><span class="sidebar-icon" style="background:linear-gradient(135deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>🔧 实用工具</button>
-  <button class="sidebar-link" data-page="feedback"><span class="sidebar-icon" style="background:linear-gradient(135deg,#0284c7,#38bdf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>❓ 反馈</button>
+  <button class="sidebar-link" data-page="apikeys"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#c084fc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>API Key</button>
+  <button class="sidebar-link" data-page="pricing"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>充值</button>
+  <button class="sidebar-link" data-page="tools"><span class="sidebar-icon" style="background:linear-gradient(135deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>实用工具</button>
+  <button class="sidebar-link" data-page="feedback"><span class="sidebar-icon" style="background:linear-gradient(135deg,#0284c7,#38bdf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>反馈</button>
   <div class="sidebar-bottom">
     <div class="sidebar-conn" id="sidebarConn"><span class="conn-dot checking"></span><span>检查连接</span></div>
     <div class="sidebar-user" id="sidebarUser" onclick="openUserSettings()" style="cursor:pointer" title="点击修改密码">
-      <span>👤</span><span id="sidebarUserName">未登录</span>
-      <span style="margin-left:auto;font-size:0.7rem;opacity:0.5">⚙️</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span id="sidebarUserName">未登录</span>
+      <span style="margin-left:auto;font-size:0.7rem;opacity:0.5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
     </div>
     <div class="sidebar-admin-gate" onclick="ADMIN_GATE()" style="cursor:pointer;padding:4px 8px;border-radius:6px;font-size:0.7rem;color:var(--text-secondary);text-align:center;transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-secondary)'" title="管理员入口">
-      🔐 管理
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align:middle;margin-right:3px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> 管理
     </div>
   </div>
 </aside>
@@ -707,7 +750,7 @@ a{color:var(--accent);text-decoration:none}
   </div>
   <section class="hero">
     <h1>Nexus Hub 智能创作平台</h1>
-    <p>接入500+顶级AI模型，不需要学提示词，不需要搭智能体——一个网站，全搞定。对话30+顶级模型、写小说变漫剧做品牌去营销、16个预制智能体一键使用。</p>
+    <p>接入顶级AI模型，不需要学提示词，不需要搭智能体 —— 一个网站，全搞定。对话30+顶级模型、写小说变漫剧做品牌去营销、16个预制智能体一键使用。</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px">
       <button class="btn-send" onclick="switchPage('chat');showToast('首次聊天不扣积分，试试吧~')" style="font-size:1rem;padding:14px 36px">🚀 免费体验</button>
       <button class="btn-send" onclick="switchPage('pricing')" style="font-size:1rem;padding:14px 36px;background:linear-gradient(135deg,#f59e0b,#d97706)">💎 查看套餐</button>
@@ -715,7 +758,7 @@ a{color:var(--accent);text-decoration:none}
     <div style="display:inline-block;background:rgba(16,185,129,0.15);color:var(--green);padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;margin-bottom:24px">✨ 新用户注册即送 <span style="font-size:1rem">30积分</span> 免费体验</div>
     <div style="margin-bottom:20px;font-size:0.72rem;color:var(--text-secondary);opacity:0.7">🟢 <span id="onlineUsers">128</span> 人在线 · 📈 今日已有 <span id="todayPurchases">47</span> 人充值 · ⭐ 4.9/5 好评</div>
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num" id="modelCount">72</div><div class="stat-label">收录模型</div></div>
+      <div class="stat"><div class="stat-num" id="modelCount">...</div><div class="stat-label">收录模型</div></div>
       <div class="stat"><div class="stat-num" id="providerCount">9</div><div class="stat-label">模型品牌</div></div>
       <div class="stat"><div class="stat-num" id="usedCount">0</div><div class="stat-label">今日使用</div></div>
     </div>
@@ -763,7 +806,7 @@ a{color:var(--accent);text-decoration:none}
     </div>
   </section>
   <section class="section" id="continueSection" style="display:none">
-    <h2 class="section-title">📌 继续上次</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg> 继续上次</h2>
     <div id="continueContent" style="display:flex;gap:12px;flex-wrap:wrap"></div>
   </section>
   <section class="section">
@@ -776,14 +819,16 @@ a{color:var(--accent);text-decoration:none}
 
   <!-- 模型列表 -->
   <section class="section">
-    <h2 class="section-title">🗂️ 模型目录</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> 模型目录</h2>
     <div class="filter-bar">
-      <input class="search-input" id="modelSearch" placeholder="搜索模型...">
+      <input class="search-input" id="modelSearch" placeholder="搜索模型..." oninput="initAllModels()">
       <button class="filter-tag active" data-filter="all">全部</button>
       <button class="filter-tag" data-filter="海外">海外</button>
       <button class="filter-tag" data-filter="国内">国内</button>
       <button class="filter-tag" data-filter="开源">开源</button>
       <button class="filter-tag" data-filter="多模态">多模态</button>
+      <button class="filter-tag" data-filter="编程">编程</button>
+      <button class="filter-tag" data-filter="推理">推理</button>
       <button class="filter-tag" data-filter="免费">免费</button>
     </div>
     <div class="models-grid" id="allModels"></div>
@@ -793,7 +838,7 @@ a{color:var(--accent);text-decoration:none}
 
 <div class="page" id="page-chat">
   <section class="section">
-    <h2 class="section-title">💬 多模型聊天</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 多模型聊天</h2>
     <div class="chat-layout">
       <div class="chat-main">
         <div class="chat-messages" id="chatMessages"><div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">💡</div><p>在右侧面板选择模型 → 输入问题 → 看回复</p></div></div>
@@ -819,7 +864,7 @@ a{color:var(--accent);text-decoration:none}
 
 <div class="page" id="page-compare">
   <section class="section">
-    <h2 class="section-title">📊 模型对比</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>模型对比</h2>
     <div class="compare-controls">
       <input class="compare-prompt" id="comparePrompt" placeholder="输入问题对比...">
       <button class="btn-send" onclick="runCompare()">对比</button>
@@ -836,54 +881,210 @@ a{color:var(--accent);text-decoration:none}
 
 <div class="page" id="page-novel">
   <section class="section" style="padding:24px 36px">
-    <h2 class="section-title">📖 AI 小说创作</h2>
-    <p class="section-desc">6步创作流程：定方向→搭框架→锁框架→写大纲→确大纲→写正文。全链路打通，写完变漫剧→做品牌→去营销</p>
-    <div id="modelBar_novel"></div>
-    
-    <!-- 创作向导入口 -->
-    <div id="novelWizardHome">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px">
-        <div class="feature-card" style="cursor:pointer;text-align:center;padding:32px 20px;border:2px solid var(--accent)" onclick="NOVEL_START_WIZARD('quick')">
-          <div style="font-size:3rem;margin-bottom:12px">🚀</div>
-          <h3 style="font-size:1.1rem;margin-bottom:8px">快速创作</h3>
-          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">一句话灵感 → 6步自动走完 → 拿到第一章</p>
-          <div style="margin-top:14px;padding:8px 20px;background:var(--accent);border-radius:20px;color:#fff;font-weight:600;font-size:0.85rem;display:inline-block">开始创作</div>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg> AI 小说创作工坊</h2>
+    <p class="section-desc">四种创作方式 · 智能立项 · 六步流程 · 专业工作台 — 从灵感火花到百万字长篇的全链路创作平台</p>
+    <!-- 创作入口 -->
+    <div id="novelHome">
+      <!-- 我的作品 -->
+      <div class="feature-card" style="padding:20px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h4 style="display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="vertical-align:middle"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 我的作品 <span style="color:var(--accent);font-weight:700" id="novelBookTitle2">未开始</span></h4>
+          <div style="display:flex;gap:6px" id="myWorksBar">
+            <span style="font-size:0.8rem;color:var(--text-secondary)">已写: <b id="chapterCount2">0</b> 章</span>
+            <span style="font-size:0.8rem;color:var(--text-secondary)">字数: <b id="totalWords2">0</b></span>
+          </div>
         </div>
-        <div class="feature-card" style="cursor:pointer;text-align:center;padding:32px 20px" onclick="NOVEL_START_WIZARD('guided')">
-          <div style="font-size:3rem;margin-bottom:12px">🎯</div>
-          <h3 style="font-size:1.1rem;margin-bottom:8px">分步指导</h3>
-          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">每步可调整 → 随时返回修改 → 适合精细打磨</p>
-          <div style="margin-top:14px;padding:8px 20px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text);font-weight:600;font-size:0.85rem;display:inline-block">分步创作</div>
-        </div>
-        <div class="feature-card" style="cursor:pointer;text-align:center;padding:32px 20px" onclick="NOVEL_OPEN_TOOLS()">
-          <div style="font-size:3rem;margin-bottom:12px">✨</div>
-          <h3 style="font-size:1.1rem;margin-bottom:8px">灵感火花</h3>
-          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">随机抽卡 → 类型/世界观/金手指 → 组合创意</p>
-          <div style="margin-top:14px;padding:8px 20px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text);font-weight:600;font-size:0.85rem;display:inline-block">抽取灵感</div>
-        </div>
-        <div class="feature-card" style="cursor:pointer;text-align:center;padding:32px 20px" onclick="switchPage('prompts')">
-          <div style="font-size:3rem;margin-bottom:12px">📚</div>
-          <h3 style="font-size:1.1rem;margin-bottom:8px">提示词库</h3>
-          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">50+写作工具 → 续写/润色/大纲/扩写 → 一键使用</p>
-          <div style="margin-top:14px;padding:8px 20px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text);font-weight:600;font-size:0.85rem;display:inline-block">查看工具</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-sm primary" onclick="NOVEL_GO_WORKBENCH(0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> 继续写作</button>
+          <button class="btn-sm" onclick="NOVEL_OPEN_MANAGE()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle;margin-right:4px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg> 章节管理</button>
+          <button class="btn-sm" onclick="exportAllChapters()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 导出全书</button>
+          <button class="btn-sm" onclick="openReader()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle;margin-right:4px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 阅读模式</button>
         </div>
       </div>
-      <div class="feature-card" style="padding:20px">
-        <h4 style="margin-bottom:12px;text-align:center">📚 我的作品 <span style="color:var(--accent);font-weight:700" id="novelBookTitle">未开始</span></h4>
-        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap" id="novelProgressBar">
-          <span style="font-size:0.82rem;color:var(--text-secondary)">已写: <b id="chapterCount">0</b> 章</span>
-          <span style="font-size:0.82rem;color:var(--text-secondary)">字数: <b id="totalWords">0</b></span>
+
+      <!-- 四种创作方式 -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:20px">
+        <div class="feature-card" style="cursor:pointer;text-align:center;padding:28px 16px;border:2px solid var(--accent);transition:all 0.2s" onclick="NOVEL_OPEN_SPARK()" onmouseover="this.style.borderColor='#a855f7'" onmouseout="this.style.borderColor='var(--accent)'">
+          <div style="font-size:2.4rem;margin-bottom:10px">✨</div>
+          <h3 style="font-size:1rem;margin-bottom:6px">灵感火花</h3>
+          <p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.5">随机组合类型+世界观+人设+金手指 → 5步生成立项</p>
+          <div style="margin-top:10px;padding:6px 18px;background:linear-gradient(135deg,#a855f7,#6366f1);border-radius:20px;color:#fff;font-weight:600;font-size:0.8rem;display:inline-block">抽取灵感</div>
         </div>
-        <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap">
-          <button class="btn-sm primary" onclick="NOVEL_CONTINUE()">📝 继续写作</button>
-          <button class="btn-sm" onclick="NOVEL_MANAGE()">📖 章节管理</button>
-          <button class="btn-sm" onclick="exportAllChapters()">📥 导出全书</button>
-          <button class="btn-sm" onclick="openReader()">📖 阅读模式</button>
+        <div class="feature-card" style="cursor:pointer;text-align:center;padding:28px 16px;transition:all 0.2s" onclick="NOVEL_OPEN_IMITATE()" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:2.4rem;margin-bottom:10px">📋</div>
+          <h3 style="font-size:1rem;margin-bottom:6px">仿写立项</h3>
+          <p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.5">排行榜选书 / 粘贴正文 / 上传TXT → AI分析生成仿写方案</p>
+          <div style="margin-top:10px;padding:6px 18px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text);font-weight:600;font-size:0.8rem;display:inline-block">选择参考</div>
+        </div>
+        <div class="feature-card" style="cursor:pointer;text-align:center;padding:28px 16px;transition:all 0.2s" onclick="NOVEL_OPEN_SMART()" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:2.4rem;margin-bottom:10px">🧠</div>
+          <h3 style="font-size:1rem;margin-bottom:6px">智能导入</h3>
+          <p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.5">粘贴原始想法/碎碎念 → AI自动整理成规范立项</p>
+          <div style="margin-top:10px;padding:6px 18px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text);font-weight:600;font-size:0.8rem;display:inline-block">导入想法</div>
+        </div>
+        <div class="feature-card" style="cursor:pointer;text-align:center;padding:28px 16px;transition:all 0.2s" onclick="NOVEL_OPEN_CRUCIBLE()" onmouseover="this.style.borderColor='#ef4444'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:2.4rem;margin-bottom:10px">🔮</div>
+          <h3 style="font-size:1rem;margin-bottom:6px">熔炉仿写</h3>
+          <p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.5">投入1-3本书 → 九维度分析 → 取各家所长融合创新</p>
+          <div style="margin-top:10px;padding:6px 18px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text);font-weight:600;font-size:0.8rem;display:inline-block">启动熔炉</div>
+        </div>
+      </div>
+
+      <!-- 快捷入口 -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+        <button class="btn-sm" onclick="NOVEL_START_WIZARD('quick')" style="flex:1">🚀 快速创作（一键走完6步）</button>
+        <button class="btn-sm" onclick="NOVEL_START_WIZARD('guided')" style="flex:1">🎯 分步指导（每步可调整）</button>
+      </div>
+    </div>
+
+    <!-- ✨ 灵感火花向导 -->
+    <div id="novelSpark" style="display:none;margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="vertical-align:middle;margin-right:4px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 灵感火花 · 随机组合创意</h3>
+        <button class="btn-sm" onclick="NOVEL_CLOSE_PANEL('spark');NOVEL_SHOW_HOME()">✕ 返回</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">
+        <div class="feature-card" style="text-align:center;padding:24px 16px;cursor:pointer" onclick="NOVEL_SPARK_CARD('type')">
+          <div style="font-size:2rem;margin-bottom:8px">🎲</div>
+          <div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">小说类型</div>
+          <div style="font-weight:700;font-size:1rem;color:var(--accent)" id="sparkType">点击抽取</div>
+        </div>
+        <div class="feature-card" style="text-align:center;padding:24px 16px;cursor:pointer" onclick="NOVEL_SPARK_CARD('world')">
+          <div style="font-size:2rem;margin-bottom:8px">🌍</div>
+          <div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">世界观</div>
+          <div style="font-weight:700;font-size:1rem;color:var(--accent)" id="sparkWorld">点击抽取</div>
+        </div>
+        <div class="feature-card" style="text-align:center;padding:24px 16px;cursor:pointer" onclick="NOVEL_SPARK_CARD('char')">
+          <div style="font-size:2rem;margin-bottom:8px">👤</div>
+          <div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">主角人设</div>
+          <div style="font-weight:700;font-size:1rem;color:var(--accent)" id="sparkChar">点击抽取</div>
+        </div>
+        <div class="feature-card" style="text-align:center;padding:24px 16px;cursor:pointer" onclick="NOVEL_SPARK_CARD('cheat')">
+          <div style="font-size:2rem;margin-bottom:8px">💎</div>
+          <div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">金手指</div>
+          <div style="font-weight:700;font-size:1rem;color:var(--accent)" id="sparkCheat">点击抽取</div>
+        </div>
+      </div>
+      <div class="feature-card" style="padding:20px;margin-bottom:12px;min-height:80px" id="sparkResult">
+        <div style="text-align:center;color:var(--text-secondary);padding:30px"><div style="font-size:2rem">✨</div><p>点击上方卡片抽取灵感元素</p></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-send" onclick="NOVEL_SPARK_USE()" style="flex:1">🚀 用此灵感开始创作</button>
+        <button class="btn-sm" onclick="NOVEL_SPARK_ALL()">🔄 全部重抽</button>
+      </div>
+    </div>
+
+    <!-- 📋 仿写立项 -->
+    <div id="novelImitate" style="display:none;margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="vertical-align:middle;margin-right:4px"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> 仿写立项</h3>
+        <button class="btn-sm" onclick="NOVEL_CLOSE_PANEL('imitate');NOVEL_SHOW_HOME()">✕ 返回</button>
+      </div>
+      <div class="feature-card" style="padding:16px;margin-bottom:16px">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="filter-tag active" onclick="NOVEL_IMITATE_MODE('rank',this)">🏆 排行榜选书</button>
+          <button class="filter-tag" onclick="NOVEL_IMITATE_MODE('paste',this)">📝 粘贴正文</button>
+          <button class="filter-tag" onclick="NOVEL_IMITATE_MODE('upload',this)">📤 上传TXT</button>
+        </div>
+        <div id="imitateRankMode">
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:8px">选择类型筛选</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="imitateTypeFilters">
+            <span class="filter-tag active" onclick="NOVEL_IMITATE_FILTER('all',this)">全部</span>
+            <span class="filter-tag" onclick="NOVEL_IMITATE_FILTER('玄幻',this)">玄幻</span>
+            <span class="filter-tag" onclick="NOVEL_IMITATE_FILTER('仙侠',this)">仙侠</span>
+            <span class="filter-tag" onclick="NOVEL_IMITATE_FILTER('都市',this)">都市</span>
+            <span class="filter-tag" onclick="NOVEL_IMITATE_FILTER('科幻',this)">科幻</span>
+            <span class="filter-tag" onclick="NOVEL_IMITATE_FILTER('悬疑',this)">悬疑</span>
+            <span class="filter-tag" onclick="NOVEL_IMITATE_FILTER('言情',this)">言情</span>
+            <span class="filter-tag" onclick="NOVEL_IMITATE_FILTER('历史',this)">历史</span>
+            <span class="filter-tag" onclick="NOVEL_IMITATE_FILTER('轻小说',this)">轻小说</span>
+            <span class="filter-tag" onclick="NOVEL_IMITATE_FILTER('文学',this)">文学经典</span>
+          </div>
+          <div id="imitateBookList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;max-height:400px;overflow-y:auto"></div>
+        </div>
+        <div id="imitatePasteMode" style="display:none">
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:8px">粘贴你要仿写的参考文本</label>
+          <textarea id="imitatePasteText" rows="8" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="粘贴大师作品片段/你喜欢的段落风格..."></textarea>
+        </div>
+        <div id="imitateUploadMode" style="display:none">
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:8px">上传TXT文件</label>
+          <input type="file" accept=".txt" id="imitateFileInput" style="font-size:0.85rem">
+          <div id="imitateFileContent" style="margin-top:10px;font-size:0.78rem;color:var(--text-secondary)"></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn-send" onclick="NOVEL_IMITATE_ANALYZE()">🤖 AI分析生成仿写方案</button>
+        </div>
+      </div>
+      <div class="feature-card" id="imitateResult" style="padding:20px;min-height:100px;display:none">
+        <h4 style="margin-bottom:10px">📊 仿写分析报告</h4>
+        <div id="imitateResultContent" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap"></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn-send" onclick="NOVEL_IMITATE_USE()" style="flex:1">🚀 以此仿写方案开始创作</button>
         </div>
       </div>
     </div>
 
-    <!-- 📋 长篇创作指南 -->
+    <!-- 🧠 智能导入 -->
+    <div id="novelSmartImport" style="display:none;margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="vertical-align:middle;margin-right:4px"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg> 智能导入</h3>
+        <button class="btn-sm" onclick="NOVEL_CLOSE_PANEL('smart');NOVEL_SHOW_HOME()">✕ 返回</button>
+      </div>
+      <div class="feature-card" style="padding:20px">
+        <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.6">把你的原始想法、碎碎念、灵感片段粘贴进来，AI 会自动整理成规范的立项文档</p>
+        <textarea id="smartInput" rows="8" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="例如：我想写一个穿越到修仙世界的故事，主角是个现代程序员，用编程思维修炼...主角性格比较逗比，但关键时刻很靠谱...世界观可以结合赛博朋克和修仙..."></textarea>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn-send" onclick="NOVEL_SMART_IMPORT()">🤖 AI整理立项</button>
+        </div>
+      </div>
+      <div class="feature-card" id="smartResult" style="padding:20px;min-height:100px;display:none">
+        <h4 style="margin-bottom:10px">📋 智能立项</h4>
+        <div id="smartResultContent" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap"></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn-send" onclick="NOVEL_SMART_USE()" style="flex:1">🚀 以此立项开始创作</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔮 熔炉仿写 -->
+    <div id="novelCrucible" style="display:none;margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="vertical-align:middle;margin-right:4px"><path d="M12 2l9.09 7.27L12 22 2.91 9.27 12 2z"/><polyline points="12 2 7.09 7.27 12 22"/></svg> 熔炉仿写 · 九维度分析</h3>
+        <button class="btn-sm" onclick="NOVEL_CLOSE_PANEL('crucible');NOVEL_SHOW_HOME()">✕ 返回</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="feature-card" style="padding:20px">
+          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:8px">📚 投入参考书（1-3本，从排行榜选择）</label>
+          <div id="crucibleBookList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+            <div id="crucibleBook0" class="filter-tag" style="cursor:pointer;padding:8px 12px;text-align:center" onclick="NOVEL_CRUCIBLE_PICK(0)">+ 点击选择第一本书</div>
+            <div id="crucibleBook1" class="filter-tag" style="cursor:pointer;padding:8px 12px;text-align:center" onclick="NOVEL_CRUCIBLE_PICK(1)">+ 点击选择第二本书（可选）</div>
+            <div id="crucibleBook2" class="filter-tag" style="cursor:pointer;padding:8px 12px;text-align:center" onclick="NOVEL_CRUCIBLE_PICK(2)">+ 点击选择第三本书（可选）</div>
+          </div>
+          <button class="btn-send" onclick="NOVEL_CRUCIBLE_ANALYZE()" style="width:100%">🔮 投入熔炉分析</button>
+        </div>
+        <div class="feature-card" id="crucibleResult" style="padding:20px;overflow-y:auto;max-height:500px">
+          <div style="text-align:center;color:var(--text-secondary);padding:40px 0">
+            <div style="font-size:3rem;margin-bottom:10px">🔮</div>
+            <p style="font-size:0.85rem">选定参考书后启动熔炉</p>
+            <p style="font-size:0.75rem">AI将自动完成九维度分析</p>
+          </div>
+        </div>
+      </div>
+      <div class="feature-card" style="padding:16px">
+        <h4 style="margin-bottom:10px">🔬 九维度分析说明</h4>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:0.75rem;color:var(--text-secondary)">
+          <div>① 叙事风格 · 文风特点</div>
+          <div>② 结构节奏 · 章节布局</div>
+          <div>③ 人物塑造 · 角色刻画</div>
+          <div>④ 世界观 · 设定逻辑</div>
+          <div>⑤ 情节设计 · 冲突伏笔</div>
+          <div>⑥ 对话艺术 · 语言特色</div>
+          <div>⑦ 氛围渲染 · 情绪引导</div>
+          <div>⑧ 开篇吸睛 · 第一章钩子</div>
+          <div>⑨ 爽点节奏 · 读者心理</div>
+        </div>
+      </div>
+    </div>
     <details class="feature-card" style="padding:20px;margin-top:16px;cursor:default" id="novelGuide">
       <summary style="cursor:pointer;font-weight:700;font-size:0.95rem;margin-bottom:12px;display:flex;align-items:center;gap:8px">
         <span style="font-size:1.2rem">📋</span> 长篇创作指南 <span style="font-weight:400;font-size:0.75rem;color:var(--text-secondary)">— 百万字不崩的关键</span>
@@ -957,7 +1158,7 @@ a{color:var(--accent);text-decoration:none}
     <!-- 自定义提示词弹窗 -->
     <div id="customPromptModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
       <div class="modal" style="max-width:500px">
-        <div class="modal-header"><h3>✏️ 自定义提示词</h3><button class="modal-close" onclick="document.getElementById('customPromptModal').classList.remove('show')">✕</button></div>
+        <div class="modal-header"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="vertical-align:middle;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> 自定义提示词</h3><button class="modal-close" onclick="document.getElementById('customPromptModal').classList.remove('show')">✕</button></div>
         <div class="modal-body">
           <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:6px">名称</label>
           <input id="cpName" class="input" placeholder="例如：古风描写提示词" style="width:100%;margin-bottom:12px">
@@ -980,7 +1181,7 @@ a{color:var(--accent);text-decoration:none}
     <!-- 管理提示词弹窗 -->
     <div id="managePromptModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
       <div class="modal" style="max-width:500px">
-        <div class="modal-header"><h3>📂 管理我的提示词</h3><button class="modal-close" onclick="document.getElementById('managePromptModal').classList.remove('show')">✕</button></div>
+        <div class="modal-header"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="vertical-align:middle;margin-right:4px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> 管理我的提示词</h3><button class="modal-close" onclick="document.getElementById('managePromptModal').classList.remove('show')">✕</button></div>
         <div class="modal-body" id="managePromptList"></div>
       </div>
     </div>
@@ -1039,6 +1240,43 @@ a{color:var(--accent);text-decoration:none}
                 <span class="filter-tag" onclick="NOVEL_SET('pov',this,'多视角')">多视角</span>
               </div>
             </div>
+            <!-- 篇幅与字数设定 -->
+            <div class="feature-card" style="margin-top:12px">
+              <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle;margin-right:4px"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg> 篇幅设定（自由调整，留空则AI智能分配）</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px" id="novelLengthTags">
+                <span class="filter-tag" onclick="NOVEL_SET_LENGTH('短篇',this,10,'2000','20000')">短篇 · 10章×2000字</span>
+                <span class="filter-tag active" onclick="NOVEL_SET_LENGTH('中篇',this,20,'2500','50000')">中篇 · 20章×2500字</span>
+                <span class="filter-tag" onclick="NOVEL_SET_LENGTH('长篇',this,50,'3000','150000')">长篇 · 50章×3000字</span>
+                <span class="filter-tag" onclick="NOVEL_SET_LENGTH('超长篇',this,100,'3000','300000')">超长篇 · 100章×3000字</span>
+              </div>
+              <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem">
+                  <span style="color:var(--text-secondary)">卷数</span>
+                  <select id="novelVolumeCount" onchange="NOVEL_UPDATE_LENGTH()" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem">
+                    <option value="0">AI自动</option>
+                    <option value="3">3卷</option>
+                    <option value="4" selected>4卷</option>
+                    <option value="5">5卷</option>
+                    <option value="6">6卷</option>
+                    <option value="8">8卷</option>
+                    <option value="10">10卷</option>
+                  </select>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem">
+                  <span style="color:var(--text-secondary)">每章字数</span>
+                  <input id="novelPerChapWords" type="number" value="2500" min="500" max="10000" step="500" placeholder="AI自动" onchange="NOVEL_UPDATE_LENGTH()" style="width:80px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem">
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem">
+                  <span style="color:var(--text-secondary)">章节数</span>
+                  <input id="novelChapCount" type="number" value="20" min="5" max="500" placeholder="AI自动" onchange="NOVEL_UPDATE_LENGTH()" style="width:80px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem">
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem">
+                  <span style="color:var(--text-secondary)">总字数目标</span>
+                  <input id="novelTotalWordsInput" type="number" value="50000" min="5000" max="5000000" step="5000" onchange="NOVEL_UPDATE_LENGTH_TOTAL()" style="width:100px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem">
+                </div>
+                <div style="font-size:0.85rem;font-weight:700;color:var(--accent)" id="novelTotalWordsDisplay">总目标: 50,000 字</div>
+              </div>
+              <div style="margin-top:6px;font-size:0.7rem;color:var(--text-secondary)">💡 所有数值均可自由调整，留空则由AI在生成时智能分配</div>
           </div>
           <div class="feature-card" style="padding:22px">
             <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:12px">💡 创意核心（一句话说清楚你的故事）</label>
@@ -1172,10 +1410,61 @@ a{color:var(--accent);text-decoration:none}
       </div>
     </div>
 
+    <!-- 🖥️ 创作工作台 -->
+    <div id="novelWorkbench" style="display:none;margin-bottom:20px">
+      <!-- 工作台顶栏 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:10px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-weight:700;font-size:0.9rem" id="wbTitle">未命名作品</span>
+          <span style="font-size:0.7rem;padding:2px 10px;border-radius:10px;background:var(--accent-light);color:var(--accent)" id="wbProgress">第0章/共30章</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm" onclick="NOVEL_WB_SAVE()" style="font-size:0.72rem">💾 保存</button>
+          <button class="btn-sm" onclick="NOVEL_BACK_HOME()" style="font-size:0.72rem">✕ 返回</button>
+        </div>
+      </div>
+      <!-- 工作台主体 -->
+      <div style="display:grid;grid-template-columns:240px 1fr;gap:12px;min-height:500px">
+        <!-- 左侧：目录树 -->
+        <div class="feature-card" style="padding:12px;overflow-y:auto;max-height:600px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-weight:600;font-size:0.82rem">📑 章节目录</span>
+            <button class="btn-sm" onclick="NOVEL_WB_NEW_CHAPTER()" style="font-size:0.65rem;padding:3px 8px">+ 新建</button>
+          </div>
+          <div id="wbChapterTree" style="font-size:0.78rem"></div>
+        </div>
+        <!-- 右侧：编辑器 -->
+        <div class="feature-card" style="padding:16px;display:flex;flex-direction:column">
+          <!-- 章节标题 -->
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input id="wbChapTitle" style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-weight:600;font-family:inherit" placeholder="当前章节标题">
+            <span style="font-size:0.7rem;color:var(--text-secondary);display:flex;align-items:center;gap:4px"><span id="wbWordCount">0</span>字</span>
+          </div>
+          <!-- 编辑器 -->
+          <textarea id="wbEditor" rows="18" style="width:100%;padding:14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;line-height:1.8;resize:vertical;flex:1" placeholder="在此开始写作..." oninput="document.getElementById('wbWordCount').textContent=this.value.length"></textarea>
+          <!-- AI工具栏 -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding:8px;background:var(--accent-soft);border-radius:8px">
+            <button class="btn-sm" onclick="NOVEL_WB_AI('gen')" style="font-size:0.7rem">🤖 生成章节</button>
+            <button class="btn-sm" onclick="NOVEL_WB_AI('continue')" style="font-size:0.7rem">✍️ 续写</button>
+            <button class="btn-sm" onclick="NOVEL_WB_AI('polish')" style="font-size:0.7rem">✨ 润色</button>
+            <button class="btn-sm" onclick="NOVEL_WB_AI('deai')" style="font-size:0.7rem">🔍 去AI痕迹</button>
+            <button class="btn-sm" onclick="NOVEL_WB_AI('expand')" style="font-size:0.7rem">📈 扩写</button>
+            <button class="btn-sm" onclick="NOVEL_WB_AI('outline')" style="font-size:0.7rem">📋 本章大纲</button>
+            <button class="btn-sm" onclick="NOVEL_WB_AI('review')" style="font-size:0.7rem">📊 神评本章</button>
+            <button class="btn-sm" onclick="NOVEL_WB_SAVE_CHAPTER()" style="font-size:0.7rem">💾 保存本章</button>
+          </div>
+          <!-- 模型选择 -->
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+            <span style="font-size:0.72rem;color:var(--text-secondary)">使用顶部选择的写作模型，自动携带大纲+人物+前文摘要作为上下文</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 章节管理 -->
     <div id="novelManage" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h4>📖 章节管理</h4>
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="vertical-align:middle;margin-right:4px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg> 章节管理</h4>
         <button class="btn-sm" onclick="NOVEL_BACK_HOME()">← 返回</button>
       </div>
       <div class="chapter-list" id="chapterList"></div>
@@ -1184,7 +1473,7 @@ a{color:var(--accent);text-decoration:none}
     <!-- 炼字熔炉 -->
     <div id="novelRefinePanel" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h4>🔧 炼字熔炉</h4>
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="vertical-align:middle;margin-right:4px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> 炼字熔炉</h4>
         <button class="btn-sm" onclick="document.getElementById('novelRefinePanel').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP('6')">← 返回</button>
       </div>
       <div class="refine-options">
@@ -1208,34 +1497,13 @@ a{color:var(--accent);text-decoration:none}
       </div>
     </div>
 
-    <!-- 灵感火花抽卡 -->
-    <div id="novelSpark" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h4>✨ 灵感火花</h4>
-        <button class="btn-sm" onclick="NOVEL_BACK_HOME()">← 返回</button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:20px">
-        <div class="feature-card" style="text-align:center;padding:20px;cursor:pointer" onclick="NOVEL_SPARK_CARD('type')"><div style="font-size:2rem;margin-bottom:8px">🎲</div><div style="font-weight:700;font-size:0.9rem" id="sparkType">抽 类型</div></div>
-        <div class="feature-card" style="text-align:center;padding:20px;cursor:pointer" onclick="NOVEL_SPARK_CARD('world')"><div style="font-size:2rem;margin-bottom:8px">🌍</div><div style="font-weight:700;font-size:0.9rem" id="sparkWorld">抽 世界观</div></div>
-        <div class="feature-card" style="text-align:center;padding:20px;cursor:pointer" onclick="NOVEL_SPARK_CARD('cheat')"><div style="font-size:2rem;margin-bottom:8px">💎</div><div style="font-weight:700;font-size:0.9rem" id="sparkCheat">抽 金手指</div></div>
-        <div class="feature-card" style="text-align:center;padding:20px;cursor:pointer" onclick="NOVEL_SPARK_CARD('char')"><div style="font-size:2rem;margin-bottom:8px">👤</div><div style="font-weight:700;font-size:0.9rem" id="sparkChar">抽 主角</div></div>
-      </div>
-      <div class="feature-card" style="padding:20px;margin-bottom:12px;min-height:100px" id="sparkResult">
-        <div style="text-align:center;color:var(--text-secondary);padding:40px"><div style="font-size:2rem">✨</div><p>点击上方卡片抽取灵感元素</p></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-send" onclick="NOVEL_SPARK_USE()" style="flex:1">🚀 用此灵感开始创作</button>
-        <button class="btn-sm" onclick="NOVEL_SPARK_ALL()">🔄 全部重抽</button>
-      </div>
-    </div>
   </section>
 </div>
 
 <div class="page" id="page-media">
   <section class="section">
-    <h2 class="section-title">🎬 AI 漫剧</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M10 9l5 3-5 3V9z"/></svg> AI 漫剧</h2>
     <p class="section-desc">从故事到分镜、从角色到对白——专业漫画/动画制作流水线。支持多风格、保持角色一致性</p>
-    <div id="modelBar_media"></div>
     <div class="workshop-tabs" id="mediaTabs">
       <button class="workshop-tab active" onclick="switchMediaTab('create')"><span class="tab-icon">🎨</span>创作</button>
       <button class="workshop-tab" onclick="switchMediaTab('storyboard')"><span class="tab-icon">🎞</span>分镜板</button>
@@ -1299,7 +1567,7 @@ a{color:var(--accent);text-decoration:none}
 <!-- AI Agents Workshop -->
 <div class="page" id="page-agents">
   <section class="section">
-    <h2 class="section-title">🤖 智能助手</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="3"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 智能助手</h2>
     <p class="section-desc">16 个预制专业智能体，输入需求直接出结果。不需要写提示词、不需要搭工作流、不需要学技术——像跟专家说话一样简单。</p>
     <div class="filter-bar" id="agentFilters">
       <button class="filter-tag active" data-filter="all">全部</button>
@@ -1330,8 +1598,7 @@ a{color:var(--accent);text-decoration:none}
 </div>
 
 <div class="page" id="page-office"><section class="section">
-<h2 class="section-title">💼 AI 智能办公</h2>
-<div id="modelBar_office"></div>
+<h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> AI 智能办公</h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
 <div class="feature-card" style="cursor:pointer" onclick="aiOffice('doc','写一篇关于[主题]的1000字文章')"><div class="feature-icon">📄</div><h3>文档写作</h3><p>报告、方案、合同——输入主题秒出稿</p></div>
 <div class="feature-card" style="cursor:pointer" onclick="aiOffice('email','写一封商务邮件，主题：[合作邀约]')"><div class="feature-icon">📧</div><h3>邮件起草</h3><p>商务/求职/客户邮件，语气得体专业</p></div>
@@ -1348,8 +1615,7 @@ a{color:var(--accent);text-decoration:none}
 </section></div>
 
 <div class="page" id="page-brand"><section class="section">
-<h2 class="section-title">🎨 AI 品牌设计</h2>
-<div id="modelBar_brand"></div>
+<h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg> AI 品牌设计</h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
 <div class="feature-card" style="cursor:pointer" onclick="aiBrand('logo','为品牌[名称]，行业[领域]，设计3个Logo方案')"><div class="feature-icon">🔣</div><h3>Logo 方案</h3><p>AI 生成 Logo 创意描述+配色方案</p></div>
 <div class="feature-card" style="cursor:pointer" onclick="aiBrand('naming','为[行业/产品]起10个品牌名，中英文各5个')"><div class="feature-icon">✏️</div><h3>品牌命名</h3><p>中英文命名+含义解析</p></div>
@@ -1368,8 +1634,7 @@ a{color:var(--accent);text-decoration:none}
 </section></div>
 
 <div class="page" id="page-market"><section class="section">
-<h2 class="section-title">📢 社媒营销</h2>
-<div id="modelBar_market"></div>
+<h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><polyline points="15 14 20 14 20 18 15 18"/><path d="M4 4l8 5-8 5V4z"/><line x1="4" y1="12" x2="4" y2="16"/></svg> 社媒营销</h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
 <div class="feature-card" style="cursor:pointer" onclick="aiMarket('xhs','为[产品]创作小红书种草笔记（含标题+正文+话题标签）')"><div class="feature-icon">📕</div><h3>小红书</h3><p>种草笔记标题正文标签</p></div>
 <div class="feature-card" style="cursor:pointer" onclick="aiMarket('ad','为[产品]撰写广告投放文案（多版本A/B测试用）')"><div class="feature-icon">📺</div><h3>广告文案</h3><p>投放多版A/B测试</p></div>
@@ -1389,7 +1654,7 @@ a{color:var(--accent);text-decoration:none}
 
 <!-- ===== AI 编程助手（对话式） ===== -->
 <div class="page" id="page-code"><section class="section" style="padding:16px 24px">
-<h2 class="section-title">💻 代码助手</h2>
+<h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> 代码助手</h2>
     <p class="section-desc" style="font-size:0.83rem">像聊天一样写代码——说出你的想法，AI 帮你分析、规划、一步步实现。<span class="tag green" style="margin-left:8px">对话式</span></p>
 
 <div class="chat-layout">
@@ -1459,7 +1724,7 @@ a{color:var(--accent);text-decoration:none}
 
 <!-- ===== API Key 管理 ===== -->
 <div class="page" id="page-apikeys"><section class="section">
-<h2 class="section-title">🔑 API Key 管理</h2>
+<h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> API Key 管理</h2>
 <p class="section-desc" style="font-size:0.85rem">生成你自己的 API Key，接入你的网站或应用中，直接调用 Nexus Hub 的 500+ 模型</p>
 
 <div class="feature-card" style="margin-bottom:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;text-align:center">
@@ -1513,7 +1778,7 @@ response = client.chat.completions.create(
 <!-- AI 创作工场 (图片+视频融合) -->
 <div class="page" id="page-studio">
   <section class="section" style="padding:24px 36px">
-    <h2 class="section-title">🖼️ AI 绘画/视频</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M10 9l5 3-5 3V9z"/></svg> AI 绘画/视频</h2>
     <p class="section-desc">图片生成 · 视频创作 · 风格迁移 —— 一站式视觉创作平台</p>
 
     <div class="tab-bar" id="studioTabs">
@@ -1524,7 +1789,7 @@ response = client.chat.completions.create(
 
     <!-- 图片生成 -->
     <div class="tab-content active" id="studioTabImage">
-      <div id="modelBar_studio_image" style="margin-bottom:10px"></div>
+
       <div style="display:grid;grid-template-columns:340px 1fr;gap:20px">
         <div>
           <div class="feature-card" style="margin-bottom:10px">
@@ -1594,7 +1859,7 @@ response = client.chat.completions.create(
         <div style="display:flex;gap:8px;align-items:center" id="vidApiRow">
           <select id="vidApiPlatform" style="padding:6px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem" onchange="VID_PLATFORM_CHANGE()">
             <option value="agnes">平台免费 (推荐)</option>
-            <option value="kling">可灵 Kling</option>
+            <option value="kling">视频生成(推荐)</option>
             <option value="luma">Luma Dream Machine</option>
             <option value="pika">Pika</option>
             <option value="runway">Runway</option>
@@ -1656,7 +1921,6 @@ response = client.chat.completions.create(
           </div>
           <div class="feature-card" style="padding:12px;margin-bottom:10px">
             <label style="font-weight:600;font-size:0.72rem;display:block;margin-bottom:4px">🎬 创作模型</label>
-            <div id="modelBar_studio"></div>
           </div>
           <button class="btn-send" onclick="STUDIO_GENERATE_VIDEO()" style="width:100%;background:linear-gradient(135deg,#7c3aed,#6366f1);font-size:0.9rem;padding:12px">🎬 立即生成 <span id="vidCostLabel" style="font-size:0.72rem;opacity:0.8;margin-left:6px">⚡3积分</span></button>
           <div style="display:flex;gap:6px;margin-top:6px">
@@ -1771,7 +2035,7 @@ response = client.chat.completions.create(
 <!-- 全站提示词库 -->
 <div class="page" id="page-prompts">
   <section class="section" style="padding:24px 36px">
-    <h2 class="section-title">📚 提示词库</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 提示词库</h2>
     <p class="section-desc">50+精选写作工具，分类检索，一键填充使用。覆盖小说写作、漫剧创作、办公、品牌、营销全场景</p>
     <div class="filter-bar" style="margin-bottom:16px">
       <input class="search-input" id="promptSearch" placeholder="搜索提示词工具..." oninput="filterPromptCards()">
@@ -1792,7 +2056,7 @@ response = client.chat.completions.create(
 <!-- 全站知识库 -->
 <div class="page" id="page-knowledge">
   <section class="section" style="padding:24px 36px">
-    <h2 class="section-title">🧠 知识库</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="3"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 知识库</h2>
     <p class="section-desc">集中管理所有创作知识：设定、笔记、大纲、章节纲要。文件夹分类，卡片展示，快速检索</p>
     <div style="display:grid;grid-template-columns:240px 1fr;gap:20px">
       <div>
@@ -1851,7 +2115,7 @@ response = client.chat.completions.create(
 <!-- 🔧 工具箱 -->
 <div class="page" id="page-tools">
   <section class="section" style="padding:24px 36px">
-    <h2 class="section-title">🔧 工具箱</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> 工具箱</h2>
     <p class="section-desc">纯前端工具集，无需后端支持。去水印、图片编辑、色彩工具一应俱全。</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
       <div class="feature-card" style="padding:20px">
@@ -1936,9 +2200,8 @@ response = client.chat.completions.create(
 <!-- 🧊 3D 模型生成 -->
 <div class="page" id="page-3d">
   <section class="section" style="padding:24px 36px">
-    <h2 class="section-title">🧊 3D 模型生成</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 7.27 12 12 20.73 7.27"/></svg> 3D 模型生成</h2>
     <p class="section-desc">文本转3D / 图生3D，AI 驱动 · 平台已配置，即开即用</p>
-    <div id="modelBar_d3"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
       <div class="feature-card" style="padding:20px">
         <div style="font-size:2rem;margin-bottom:8px">📝</div>
@@ -1949,6 +2212,7 @@ response = client.chat.completions.create(
           <option value="realistic">写实风格</option><option value="cartoon">卡通风格</option><option value="low-poly">低多边形</option><option value="voxel">像素体素</option>
         </select>
         <button class="btn-send" onclick="D3_TEXT_TO_3D()" style="width:100%;font-size:0.85rem">🚀 生成 3D 模型</button>
+        <div style="font-size:0.68rem;color:var(--text-secondary);text-align:center;margin-top:4px">消耗 288 积分/次（Meshy API 成本 ¥12/次）</div>
         <div id="d3TextResult" style="display:none;margin-top:12px;text-align:center;padding:16px;background:var(--accent-soft);border-radius:12px"></div>
         <div id="d3ModelViewer" style="display:none;margin-top:20px;background:linear-gradient(135deg,#1a1035,#0d0721);border-radius:16px;border:1px solid var(--glass-border);overflow:hidden">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)">
@@ -1980,6 +2244,7 @@ response = client.chat.completions.create(
         <input id="d3ImageInput" type="file" accept="image/*" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.82rem;margin-bottom:8px">
         <div id="d3ImagePreview" style="width:100%;height:120px;border-radius:8px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:0.78rem;color:var(--text-secondary);margin-bottom:8px">选择图片预览</div>
         <button class="btn-send" onclick="D3_IMAGE_TO_3D()" style="width:100%;font-size:0.85rem">🚀 转换 3D 模型</button>
+        <div style="font-size:0.68rem;color:var(--text-secondary);text-align:center;margin-top:4px">消耗 288 积分/次（Meshy API 成本 ¥12/次）</div>
         <div id="d3ImageResult" style="display:none;margin-top:10px;text-align:center"></div>
       </div>
     </div>
@@ -2019,9 +2284,8 @@ response = client.chat.completions.create(
 <!-- 🎵 AI 音乐工作台 -->
 <div class="page" id="page-music">
   <section class="section" style="padding:24px 36px">
-    <h2 class="section-title">🎵 AI 音乐工作台</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> AI 音乐工作台</h2>
     <p class="section-desc">AI 智能作曲，输入创意或歌词生成独特音乐</p>
-    <div id="modelBar_music"></div>
 
     <!-- 顶部统计栏 -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
@@ -2143,7 +2407,7 @@ response = client.chat.completions.create(
 
 <div class="page" id="page-pricing">
   <section class="section">
-    <h2 class="section-title">💎 积分与会员</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 积分与会员</h2>
     <p class="section-desc" style="font-size:0.85rem">💡 <b>订阅会员比单买划算 3-5 倍</b> · 积分永不过期 · 一个账户通吃所有模型</p>
     <div style="text-align:center;margin-bottom:20px">
       <span style="background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(217,119,6,0.1));color:#f59e0b;padding:8px 24px;border-radius:20px;font-size:0.82rem;font-weight:600">🎁 邀请好友双方各得 30 积分 · 每日签到 +5 积分 · 连续签到额外奖励</span>
@@ -2349,7 +2613,7 @@ response = client.chat.completions.create(
 <!-- Terms of Service -->
 <div class="page" id="page-terms">
   <section class="section" style="max-width:800px;margin:0 auto">
-    <h2 class="section-title">📋 用户服务协议</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> 用户服务协议</h2>
     <div class="feature-card" style="font-size:0.88rem;line-height:2;white-space:pre-line">
       <p style="color:var(--text-secondary);margin-bottom:16px"><b>生效日期：</b>2026年5月28日<br><b>最后更新：</b>2026年5月28日</p>
 
@@ -2395,7 +2659,7 @@ response = client.chat.completions.create(
       <p>8.1 本协议的解释、效力及争议解决适用中华人民共和国法律。</p>
       <p>8.2 如本协议任何条款被认定为无效，其余条款继续有效。</p>
       <p>8.3 我们有权根据业务需要修改本协议，修改后将通过平台公告通知。继续使用视为同意修改后的协议。</p>
-      <p style="margin-top:20px;font-weight:700">📧 联系方式：[面包多审核通过后填写邮箱]</p>
+      <p style="margin-top:20px;font-weight:700">📧 联系邮箱：j3trisheng@163.com</p>
     </div>
   </section>
 </div>
@@ -2403,7 +2667,7 @@ response = client.chat.completions.create(
 <!-- Privacy Policy -->
 <div class="page" id="page-privacy">
   <section class="section" style="max-width:800px;margin:0 auto">
-    <h2 class="section-title">🔒 隐私政策</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> 隐私政策</h2>
     <div class="feature-card" style="font-size:0.88rem;line-height:2;white-space:pre-line">
       <p style="color:var(--text-secondary);margin-bottom:16px"><b>生效日期：</b>2026年5月28日<br><b>最后更新：</b>2026年5月28日<br><b>版本：</b>v1.0</p>
       <div id="policyChangelog" style="margin-bottom:16px;display:none;background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;padding:12px;font-size:0.82rem">
@@ -2445,8 +2709,9 @@ response = client.chat.completions.create(
       <h3>七、政策更新与联系方式</h3>
       <p>7.1 我们可能不时更新本隐私政策，更新后将通过平台公告通知。</p>
       <p>7.2 如您对本政策有任何疑问，请通过以下方式联系我们：</p>
-      <p style="margin-top:10px;font-weight:700">📧 联系邮箱：[面包多审核通过后填写]</p>
-      <p>📱 微信：[待添加]</p>
+      <p style="margin-top:10px;font-weight:700">📧 联系邮箱：j3trisheng@163.com</p>
+      <p>📱 微信：j3trisheng（注明来意）</p>
+      <p>🐧 QQ：350353280</p>
     </div>
   </section>
 </div>
@@ -2454,7 +2719,7 @@ response = client.chat.completions.create(
 <!-- Feedback Page -->
 <div class="page" id="page-feedback">
   <section class="section">
-    <h2 class="section-title">💬 用户反馈</h2>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> 用户反馈</h2>
     <p class="section-desc">你的建议帮助我们变得更好。遇到Bug、想要新功能、或有任何想法，都可以告诉我们。</p>
     <div style="max-width:600px;margin:0 auto">
       <div class="feature-card">
@@ -2466,9 +2731,10 @@ response = client.chat.completions.create(
       <div class="feature-card" style="margin-top:16px">
         <h4 style="margin-bottom:10px">📬 其他联系方式</h4>
         <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.8">
-          📱 微信：待添加<br>
-          📧 邮箱：联系客服获取<br>
-          💬 也可以在知乎/V2EX上找到我们
+          📱 微信：j3trisheng（注明来意）<br>
+          📧 邮箱：j3trisheng@163.com<br>
+          🐧 QQ：350353280<br>
+          🌐 官网：j3trisheng.com
         </p>
       </div>
     </div>
@@ -2484,7 +2750,7 @@ response = client.chat.completions.create(
     </div>
     <div class="admin-dashboard" id="adminDashboard">
       <div class="admin-header">
-        <h2 class="section-title" style="margin:0">⚙ 管理后台</h2>
+        <h2 class="section-title" style="margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> 管理后台</h2>
         <div class="admin-actions">
           <button class="btn-sm primary" onclick="openAddModel()">+ 添加</button>
           <button class="btn-sm" onclick="openApiSettings()">API Key</button>
@@ -2517,22 +2783,31 @@ response = client.chat.completions.create(
       <div id="keyDashboard" class="key-panel" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
           <h3 style="margin:0">🔑 API Key 用量监控</h3>
-          <div><button class="btn-sm" onclick="refreshKeyStats()">🔄 刷新</button><button class="btn-sm primary" onclick="addKeyManually()">+ 手动添加</button></div>
+          <div><button class="btn-sm" onclick="refreshBalanceUI()">🔄 刷新</button><button class="btn-sm primary" onclick="addKeyManually()">+ 手动添加</button></div>
         </div>
-        <table class="key-table"><thead><tr><th>平台</th><th>Key</th><th>绑定模型</th><th>预估用量</th><th>状态</th><th>操作</th></tr></thead><tbody id="keyDashboardTbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">点击 🔄 刷新 查看所有 Key 状态</td></tr></tbody></table>
+        <table class="key-table"><thead><tr><th>平台</th><th>前缀</th><th>余额</th><th>状态</th><th>耗尽切换</th><th>操作</th></tr></thead><tbody id="keyDashboardTbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">点击 🔄 刷新 查看各平台余额</td></tr></tbody></table>
         <div id="keyRechargeGuide" style="margin-top:20px;padding:16px;background:var(--accent-soft);border-radius:var(--radius);font-size:0.8rem;line-height:1.8">
-          <b>💡 Key 管理指南（点击直达各平台后台）：</b><br>
-          • <b>DeepSeek</b>: <a href="https://platform.deepseek.com/usage" target="_blank">platform.deepseek.com → 用量查询</a><br>
-          • <b>阿里云百炼(通义千问)</b>: <a href="https://bailian.console.aliyun.com/#/usage" target="_blank">bailian.console.aliyun.com → 用量概览</a><br>
-          • <b>Kimi(月之暗面)</b>: <a href="https://platform.moonshot.cn/console/usage" target="_blank">platform.moonshot.cn → 用量</a><br>
-          • <b>智谱GLM</b>: <a href="https://open.bigmodel.cn/usercenter/apikeys" target="_blank">open.bigmodel.cn → API密钥</a><br>
-          • <b>硅基流动</b>: <a href="https://cloud.siliconflow.cn/account/usage" target="_blank">cloud.siliconflow.cn → 用量</a><br>
-          • <b>DMXAPI</b>: <a href="https://www.dmxapi.cn/" target="_blank">dmxapi.cn → 控制台</a><br>
-          • <b>OpenRouter</b>: <a href="https://openrouter.ai/activity" target="_blank">openrouter.ai/activity → 用量</a><br>
-          • <b>七牛云合规</b>: <a href="https://portal.qiniu.com/financial/cost" target="_blank">portal.qiniu.com → 费用中心</a><br>
-          • <b>腾讯混元</b>: <a href="https://console.cloud.tencent.com/hunyuan/start" target="_blank">console.cloud.tencent.com → 混元控制台</a><br>
-          • <b>Agnes (视频)</b>: <a href="https://platform.agnes-ai.com/" target="_blank">platform.agnes-ai.com → API管理</a> — 当前免费，用量为 0% 无需充值<br>
-          • <b>充值</b>: 各平台独立充值，不互通。建议每月初检查所有 Key 余额
+          <b>💡 平台充值策略（按必需→可选排列）：</b><br>
+          <br>
+          <b style="color:var(--accent)">🟢 必须充值（核心平台，余额用完不切换）：</b><br>
+          • <b>DeepSeek</b>: <a href="https://platform.deepseek.com/top_up" target="_blank">platform.deepseek.com</a> — 直连 DeepSeek V3/R1<br>
+          • <b>阿里百炼</b>: <a href="https://dashscope.console.aliyun.com/topUp" target="_blank">dashscope.console.aliyun.com</a> — 通义千问/百炼动态模型<br>
+          • <b>API Nexus</b>: <a href="https://apinexus.net/dashboard" target="_blank">apinexus.net</a> ⭐ <b>主渠道</b> — 海外旗舰模型(GPT-5/Claude 4/Gemini)<br>
+          • <b>视频生成</b>: <a href="https://klingai.com/console/account" target="_blank">管理后台 → 充值</a> — AI 视频生成<br>
+          • <b>Suno 音乐</b>: <a href="https://platform.suno.cn/billing" target="_blank">platform.suno.cn</a> — AI 音乐生成<br>
+          • <b>Meshy 3D</b>: <a href="https://www.meshy.ai/account" target="_blank">meshy.ai</a> — 3D 模型生成<br>
+          <br>
+          <b style="color:var(--orange)">🟡 余额耗尽后自动切换至 API Nexus（不需要充值）：</b><br>
+          • <b>DMXAPI</b> → 余额耗尽 → <b>自动切到 API Nexus</b> 同等级模型<br>
+          • <b>OpenRouter</b> → 余额耗尽 → <b>自动切到 API Nexus</b> 同等级模型<br>
+          • <b>七牛云合规(停用)</b> → 已由 API Nexus 替代<br>
+          • <b>百川智能</b> → 余额耗尽 → <b>自动切到 API Nexus</b> 同等级模型<br>
+          <br>
+          <b style="color:var(--text-secondary)">⚪ 可选充值（有余额就用，用完不影响核心功能）：</b><br>
+          • 智谱GLM/硅基流动/Kimi/腾讯混元/百度千帆/火山引擎/科大讯飞/Mureka/MiniMax<br>
+          <br>
+          <b>📌 建议操作</b>：每周检查一次 <b>DeepSeek + 阿里百炼 + API Nexus</b> 三个核心平台的余额，确保不超过50元再充值。视频/音乐/3D 按月检查即可。
+        </div>
         </div>
       </div>
       <!-- 用户管理 & 充值 -->
@@ -2623,6 +2898,17 @@ response = client.chat.completions.create(
   </div>
 </aside>
 
+</div>
+
+<!-- 移动端菜单面板 -->
+<div class="mobile-menu-panel" id="mobileMenuPanel">
+  <button class="sidebar-link active" data-page="home" onclick="switchPage('home');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#a855f7)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>首页</button>
+  <button class="sidebar-link" data-page="chat" onclick="switchPage('chat');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#10b981,#34d399)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>聊天</button>
+  <button class="sidebar-link" data-page="novel" onclick="switchPage('novel');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#ec4899,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>AI 小说</button>
+  <button class="sidebar-link" data-page="compare" onclick="switchPage('compare');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></span>模型对比</button>
+  <button class="sidebar-link" data-page="studio" onclick="switchPage('studio');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#d946ef)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>创作工场</button>
+  <button class="sidebar-link" data-page="prompts" onclick="switchPage('prompts');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></span>提示词库</button>
+  <button class="sidebar-link" data-page="models" onclick="switchPage('models');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#a855f7)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg></span>模型目录</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2744,15 +3030,15 @@ response = client.chat.completions.create(
 </div>
 
 <script>
-// === Theme (default: dark) ===
+// === Theme (default: light) ===
 const themeToggle=document.getElementById('themeToggle');
-const savedTheme=localStorage.getItem('theme')||'dark';
+const savedTheme=localStorage.getItem('theme')||'light';
 document.documentElement.setAttribute('data-theme',savedTheme);
-themeToggle.textContent=savedTheme==='light'?'☀️':'🌙';
+themeToggle.textContent=savedTheme==='light'?'🌙':'☀️';
 themeToggle.addEventListener('click',()=>{
   const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',n);
-  themeToggle.textContent=n==='light'?'☀️':'🌙';
+  themeToggle.textContent=n==='light'?'🌙':'☀️';
   localStorage.setItem('theme',n);
 });
 
@@ -2793,22 +3079,22 @@ function switchPage(name){
   const nl=document.querySelector(`.sidebar-link[data-page="${name}"]`);if(nl)nl.classList.add('active');
   if(name==='models')initAllModels();
   if(name==='chat'){updateRightPanel('chat');setTimeout(initChatModels,200)}
-  if(name==='compare')initCompareModels();
-  if(name==='novel'){loadSavedOutline();switchNovelTab(novelTab);setTimeout(()=>{renderModelBar('novel','modelBar_novel');NOVEL_PROMPT_RENDER('all');renderAgentCombos()},50)}
-  if(name==='media'){loadSavedOutline();setTimeout(()=>renderModelBar('media','modelBar_media'),50)}
+  if(name==='compare')setTimeout(initCompareModels,100);
+  if(name==='novel'){NOVEL_SHOW_HOME();loadSavedOutline();switchNovelTab(novelTab);setTimeout(()=>{NOVEL_PROMPT_RENDER('all');renderAgentCombos()},100)}
+  if(name==='media'){loadSavedOutline();setTimeout(()=>{},100)}
   if(name==='admin'){if(adminToken){document.getElementById('adminLogin').style.display='none';document.getElementById('adminDashboard').style.display='block';renderAdminTable()}else{document.getElementById('adminLogin').style.display='block';document.getElementById('adminDashboard').style.display='none'}}
-  if(name==='agents'){renderAgents('all');setTimeout(()=>renderModelBar('agents','modelBar_agents'),50)}
+  if(name==='agents'){renderAgents('all');setTimeout(()=>{},100)}
   if(name!='chat'&&name!='studio'&&name!='prompts'&&name!='knowledge'&&name!='code')updateRightPanel(name);
-  if(name==='studio'){updateRightPanel('studio');setTimeout(initStudioData,100);setTimeout(()=>{renderModelBar('studio','modelBar_studio');renderModelBar('studio','modelBar_studio_image')},50)}
+  if(name==='studio'){updateRightPanel('studio');setTimeout(initStudioData,100);setTimeout(()=>{},150)}
   if(name==='prompts'){updateRightPanel('prompts');setTimeout(renderPromptCards,100)}
   if(name==='knowledge'){updateRightPanel('knowledge');setTimeout(renderKnowledgeTree,100)}
   if(name==='tools'){updateRightPanel('tools')}
-  if(name==='3d'){updateRightPanel('3d');setTimeout(()=>renderModelBar('d3','modelBar_d3'),50)}
-  if(name==='music'){updateRightPanel('music');setTimeout(()=>{MUSIC_RENDER_HISTORY();MUSIC_UPDATE_CREDITS();renderModelBar('music','modelBar_music')},100)}
+  if(name==='3d'){updateRightPanel('3d');setTimeout(()=>{},100)}
+  if(name==='music'){updateRightPanel('music');setTimeout(()=>{MUSIC_RENDER_HISTORY();MUSIC_UPDATE_CREDITS()},150)}
   // 页面模型选择器渲染
-  if(name==='office')setTimeout(()=>renderModelBar('office','modelBar_office'),50);
-  if(name==='brand')setTimeout(()=>renderModelBar('brand','modelBar_brand'),50);
-  if(name==='market')setTimeout(()=>renderModelBar('market','modelBar_market'),50);
+  if(name==='office')setTimeout(()=>{},100);
+  if(name==='brand')setTimeout(()=>{},100);
+  if(name==='market')setTimeout(()=>{},100);
   if(name==='code'){updateRightPanel('code');setTimeout(()=>{initCodeChatModels();if(codeChatHistory.length===0)document.getElementById('codeChatQuickStart').style.display='flex'},200)}
   if(name==='apikeys')setTimeout(loadApiKeys,200);
   // 重置所有滚动位置
@@ -2947,6 +3233,7 @@ function updateRightPanel(page){
       <div class="right-panel-card" onclick="switchPage('studio')" style="cursor:pointer"><div style="font-size:1.2rem;margin-bottom:4px">🖼</div><div style="font-weight:600;font-size:0.82rem">AI 创作工场</div><div style="font-size:0.72rem;color:var(--text-secondary)">图片+视频生成</div></div>
     `},
     'chat':{title:'选择模型',html:`
+      <input id="chatModelSearch" class="search-input" placeholder="搜索模型..." oninput="filterChatModels()" style="width:100%;margin-bottom:8px;font-size:0.75rem;padding:6px 10px">
       <div id="chatModelList"></div>
     `},
     'compare':{title:'对比设置',html:`
@@ -2978,8 +3265,8 @@ function updateRightPanel(page){
       <div class="right-panel-card"><div style="font-weight:600;font-size:0.8rem">📚 <span id="rpNovelTitle">未开始</span></div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:4px"><span id="rpChapterCount">0</span> 章 · <span id="rpTotalWords">0</span> 字</div></div>
       <div class="right-panel-card"><div style="font-weight:600;font-size:0.78rem;margin-bottom:8px">📝 快捷操作</div>
         <button class="btn-sm primary" style="width:100%;margin-bottom:6px" onclick="downloadNovel()">⬇ 导出全书 (TXT)</button>
-        <button class="btn-sm" style="width:100%;margin-bottom:6px" onclick="openReader()">📖 阅读模式</button>
-        <button class="btn-sm" style="width:100%" onclick="exportAllChapters()">📋 复制全部章节</button>
+        <button class="btn-sm" style="width:100%;margin-bottom:6px" onclick="openReader()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle;margin-right:4px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 阅读模式</button>
+        <button class="btn-sm" style="width:100%" onclick="exportAllChapters()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle;margin-right:4px"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> 复制全部章节</button>
       </div>
       <div class="right-panel-card"><div style="font-weight:600;font-size:0.78rem;margin-bottom:6px">💡 写作技巧</div>
         <div style="font-size:0.68rem;color:var(--text-secondary);line-height:1.6">
@@ -3061,6 +3348,10 @@ function updateRightPanel(page){
   const p=panels[page]||panels['home'];
   title.textContent=p.title;
   content.innerHTML=p.html;
+  // 自动渲染模型选择器到右侧面板顶部
+  if(page!=='home'&&page!=='pricing'&&page!=='admin'&&page!=='tools'&&page!=='code'&&page!=='chat'&&page!=='prompts'&&page!=='knowledge'&&page!=='apikeys'&&page!=='feedback'&&page!=='privacy'&&page!=='tos'){
+    setTimeout(()=>renderModelBarRight(page),50)
+  }
   if(page==='novel'){updateNovelRightPanel()}
   if(page==='pricing'){setTimeout(()=>{const e=document.getElementById('rpCredits');if(e)e.textContent=userCredits},100)}
 }
@@ -3180,6 +3471,10 @@ const models=[
   {id:'nx_claude_haiku',name:'Claude Haiku 4.5',provider:'Anthropic',desc:'Claude轻量版，极速响应。',avatar:'#f59e0b',tags:['快速','编程','海外'],context:'200K',inputPrice:'¥0.5/M',outputPrice:'¥2/M',featured:false,free:false},
   {id:'nx_gpt5',name:'GPT-5 Pro',provider:'OpenAI',desc:'OpenAI最新旗舰，国内直连。',avatar:'#10a37f',tags:['多模态','推理','编程','海外'],context:'256K',inputPrice:'¥180/M',outputPrice:'¥1080/M',featured:true,free:false},
   {id:'nx_gpt5mini',name:'GPT-5 Mini',provider:'OpenAI',desc:'GPT-5轻量，极低价高性价比。',avatar:'#10a37f',tags:['快速','编程','海外'],context:'256K',inputPrice:'¥0.15/M',outputPrice:'¥1.2/M',featured:true,free:false},
+  {id:'nx_gpt54pro',name:'GPT-5.4 Pro',provider:'OpenAI',desc:'GPT-5.4旗舰版，推理+编程大幅提升。',avatar:'#0d9488',tags:['多模态','推理','编程','海外'],context:'256K',inputPrice:'¥220/M',outputPrice:'¥1300/M',featured:true,free:false},
+  {id:'nx_gpt54mini',name:'GPT-5.4 Mini',provider:'OpenAI',desc:'GPT-5.4轻量，新版高效率。',avatar:'#14b8a6',tags:['快速','编程','海外'],context:'256K',inputPrice:'¥0.2/M',outputPrice:'¥1.5/M',featured:false,free:false},
+  {id:'nx_gpt54nano',name:'GPT-5.4 Nano',provider:'OpenAI',desc:'GPT-5.4超轻量，极速响应。',avatar:'#5eead4',tags:['极速','轻量','海外'],context:'256K',inputPrice:'¥0.1/M',outputPrice:'¥0.8/M',featured:false,free:false},
+  {id:'nx_gpt55pro',name:'GPT-5.5 Pro',provider:'OpenAI',desc:'OpenAI最新旗舰，推理能力登顶。',avatar:'#0f766e',tags:['多模态','推理','编程','旗舰','海外'],context:'256K',inputPrice:'¥280/M',outputPrice:'¥1500/M',featured:true,free:false},
   {id:'nx_gemini_pro',name:'Gemini 2.5 Pro（国内）',provider:'Google',desc:'Google旗舰，国内直连版。',avatar:'#4285f4',tags:['多模态','长文本','海外'],context:'1M',inputPrice:'¥3/M',outputPrice:'¥18/M',featured:true,free:false},
   {id:'nx_o3mini',name:'O3 Mini',provider:'OpenAI',desc:'OpenAI推理模型，国内直连。',avatar:'#10a37f',tags:['推理','数学','海外'],context:'200K',inputPrice:'¥2/M',outputPrice:'¥8/M',featured:false,free:false},
   {id:'nx_grok3',name:'Grok 3',provider:'xAI',desc:'马斯克xAI最强模型，国内直连。',avatar:'#1d9bf0',tags:['推理','编程','海外'],context:'256K',inputPrice:'¥5/M',outputPrice:'¥20/M',featured:false,free:false},
@@ -3346,6 +3641,13 @@ document.querySelectorAll('#page-models .filter-tag').forEach(t=>t.addEventListe
 function initChatModels(){
   const list=document.getElementById('chatModelList');
   if(list)list.innerHTML=models.filter(m=>!m.hidden).map(m=>`<label class="model-checkbox" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px;font-size:0.8rem;transition:all 0.2s"><input type="checkbox" value="${m.id}" ${m.featured?'checked':''}><span>${m.name}</span>${getModelCostLabel(m.id)}</label>`).join('');
+  const search=document.getElementById('chatModelSearch');
+  if(search)search.value='';
+}
+function filterChatModels(){
+  const q=(document.getElementById('chatModelSearch')?.value||'').toLowerCase();
+  const labels=document.querySelectorAll('#chatModelList .model-checkbox');
+  labels.forEach(l=>{l.style.display=!q||l.textContent.toLowerCase().includes(q)?'flex':'none'});
 }
 async function sendChatMessage(){
   const msg=document.getElementById('chatInput').value.trim();if(!msg)return;
@@ -3371,8 +3673,8 @@ async function sendChatMessage(){
       let r=await callModelAPI(id,msg,ragSysPrompt);
       // 如果返回模拟回复且模型有 backup，自动切换到备用渠道
       const backup=m.backup;
-      if(r.simulated&&backup){r=await callModelAPI(backup,msg,ragSysPrompt+'【系统提示：已自动切换到备用渠道】');if(!r.simulated){showToast(`🔄 ${m.name} 已自动切换到备用渠道`)}}
-      const el=document.getElementById(pid);if(el){el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if(r.simulated)el.querySelector('.chat-msg-content').style.opacity='0.6';if(backup&&!r.simulated)el.innerHTML+=`<div style="font-size:0.6rem;color:var(--orange);margin-top:4px">🔄 已自动切换到备用渠道</div>`}
+      if((r.simulated||r.error)&&backup){r=await callModelAPI(backup,msg,ragSysPrompt+'【系统提示：已自动切换到备用渠道】');if(!(r.simulated||r.error)){showToast(`🔄 ${m.name} 已自动切换到备用渠道`)}}
+      const el=document.getElementById(pid);if(el){el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if((r.simulated||r.error))el.querySelector('.chat-msg-content').style.opacity='0.6';if(backup&&!(r.simulated||r.error))el.innerHTML+=`<div style="font-size:0.6rem;color:var(--orange);margin-top:4px">🔄 已自动切换到备用渠道</div>`}
     }catch(e){const el=document.getElementById(pid);if(el)el.querySelector('.chat-msg-content').innerHTML=`<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`}
     md.scrollTop=md.scrollHeight;
   });
@@ -3397,8 +3699,20 @@ async function callModelAPI(modelId,question,sysPrompt){
   const m=models.find(x=>x.id===modelId);
   const body={model:modelId,messages:msgs};
   if(m&&m.rawModel) body.rawModel=m.rawModel;
-  try{const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(r.ok)return await r.json()}catch(e){}
-  return {model:modelId,content:`[${m?.name||modelId} 模拟]\n\n⚠️ API未连接。\n在管理后台→API Key 中配置后获得真实回复。`,simulated:true};
+  try{
+    const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(r.ok) return await r.json();
+    // 非200响应：尝试解析服务器返回的错误详情
+    try{
+      const errData=await r.json();
+      const errMsg=errData?.content||errData?.error?.message||errData?.error||'请求失败';
+      return {model:modelId,content:`❌ [${m?.name||modelId}] ${errMsg}\n\n状态码: ${r.status}\n建议: 检查管理后台→API Key 余额`,error:true};
+    }catch(e2){
+      return {model:modelId,content:`❌ [${m?.name||modelId}] HTTP ${r.status} 服务器错误\n建议: 检查服务器日志或API Key配置`,error:true};
+    }
+  }catch(e){
+    return {model:modelId,content:`❌ [${m?.name||modelId}] 网络请求失败: ${e.message}\n建议: 检查网络连接或服务器是否运行`,error:true};
+  }
 }
 
 // ============================================================
@@ -3603,21 +3917,22 @@ async function knowledgeDelete(){
 function initCompareModels(){updateCompareLayout()}
 function updateCompareLayout(){
   const colsEl=document.getElementById('colSelect');const cols=colsEl?parseInt(colsEl.value):2;
-  const g=document.getElementById('compareGrid');g.className='compare-grid cols-'+cols;g.innerHTML='';
+  const g=document.getElementById('compareGrid');if(!g)return;g.className='compare-grid cols-'+cols;g.innerHTML='';
   const defs=['gpt4o','deepseekv3','qwen3','kimi2'];
   for(let i=0;i<cols;i++){
     const dm=models.find(m=>m.id===defs[i]);
-    g.innerHTML+=`<div class="compare-panel"><div class="compare-panel-header"><div class="compare-panel-avatar" style="background:${dm.avatar}">${dm.name[0]}</div><select class="col-select" style="flex:1" onchange="updateCompareModel(this,${i})">${models.map(m=>`<option value="${m.id}" ${m.id===defs[i]?'selected':''}>${m.name}</option>`).join('')}</select></div><div class="compare-panel-content" id="compareContent${i}">选模型，输问题，点对比</div></div>`;
+    const name=dm?dm.name:'模型';const avatar=dm?dm.avatar:'#6366f1';const initial=name[0];
+    g.innerHTML+=`<div class="compare-panel"><div class="compare-panel-header"><div class="compare-panel-avatar" style="background:${avatar}">${initial}</div><select class="col-select" style="flex:1" onchange="updateCompareModel(this,${i})">${models.map(m=>`<option value="${m.id}" ${m.id===defs[i]?'selected':''}>${m.name}</option>`).join('')}</select></div><div class="compare-panel-content" id="compareContent${i}">选模型，输问题，点对比</div></div>`;
   }
 }
-function updateCompareModel(s,i){const m=models.find(x=>x.id===s.value);const h=s.parentElement;const a=h.querySelector('.compare-panel-avatar');if(a){a.style.background=m.avatar;a.textContent=m.name[0]}}
+function updateCompareModel(s,i){const m=models.find(x=>x.id===s.value);if(!m)return;const h=s.parentElement;const a=h.querySelector('.compare-panel-avatar');if(a){a.style.background=m.avatar;a.textContent=m.name[0]}}
 async function runCompare(){
   const p=document.getElementById('comparePrompt').value.trim();if(!p){showToast('输入问题');return}
   const colsEl=document.getElementById('colSelect');const cols=colsEl?parseInt(colsEl.value):2;
   const ps=[];
   for(let i=0;i<cols;i++){
     const c=document.getElementById('compareContent'+i);c.innerHTML='<span class="spinner"></span>';const s=document.querySelectorAll('#compareGrid select')[i];
-    ps.push(callModelAPI(s.value,p,'你是客观公正的AI。回答要：1. 直接回答问题，不回避 2. 需要推理的展示逻辑链 3. 不确定的明确说"不确定" 4. 尽量简洁但完整').then(r=>{c.innerHTML=escapeHtml(r.content);if(r.simulated)c.style.opacity='0.6'}).catch(e=>{c.innerHTML=`❌ ${e.message}`}));
+    ps.push(callModelAPI(s.value,p,'你是客观公正的AI。回答要：1. 直接回答问题，不回避 2. 需要推理的展示逻辑链 3. 不确定的明确说"不确定" 4. 尽量简洁但完整').then(r=>{c.innerHTML=escapeHtml(r.content);if((r.simulated||r.error))c.style.opacity='0.6'}).catch(e=>{c.innerHTML=`❌ ${e.message}`}));
   }
   await Promise.all(ps);
 }
@@ -4145,17 +4460,17 @@ const MODEL_COST={
   ark_dsv4f:1, ark_dbs1_6:1, ark_dbs1_8:1, ark_dbs_code:1,
   ark_dsv32:2, ark_dsv4p:2, ark_dbs2_pro:2, ark_glm47:2,
   ark_dbp15p:3, ark_dbs_char:1,
-  // 3D 生成
-  meshy_text:12, meshy_image:12,
-  // API Nexus 海外旗舰
-  nx_gpt5:20, nx_gpt5mini:5, nx_claude_opus:25, nx_claude_sonnet:15,
-  nx_claude_haiku:8, nx_gemini_pro:15, nx_o3mini:10,
-  nx_dalle3:15, nx_flux:8, nx_suno:10, nx_grok3:15,
+  // 3D 生成（成本 ¥12/次，定价 288 积分持平）
+  meshy_text:288, meshy_image:288,
+  // API Nexus 海外旗舰（高成本限 token）
+  nx_gpt5:80, nx_gpt5mini:15, nx_gpt54pro:100, nx_gpt54mini:25, nx_gpt54nano:15, nx_gpt55pro:150, nx_claude_opus:120, nx_claude_sonnet:60,
+  nx_claude_haiku:25, nx_gemini_pro:50, nx_o3mini:30,
+  nx_dalle3:30, nx_flux:15, nx_suno:20, nx_grok3:50,
   // 百川智能
   bc_baichuan4:3, bc_baichuan3:1,
   // 🟠 3积分
   qwen3:3, kimi2:3, minimax1:3, doubao:3, doubao15:3, gpt4omini:3, gemini15flash:3,
-  ali_qwen37_max:3, ali_deepseek_v4_pro:3, ali_kimi_k26:3,
+  ali_qwen37_max:8, ali_deepseek_v4_pro:3, ali_kimi_k26:3,
   sf_deepseek_v32:3, sf_glm5:3,
   dmx_glm_5_free:3, dmx_glm_51_free:3, dmx_kimi_k25_free:3,
   dmx_kimi_k26_free:3, dmx_doubao_seed_pro:3, dmx_qwen3_max_free:3,
@@ -4181,8 +4496,9 @@ function closeCreditLow(){document.getElementById('creditLow').style.display='no
 (function(){const h=new Date().getHours();const ou=document.getElementById('onlineUsers');const tp=document.getElementById('todayPurchases');
   if(ou){const base=h>20||h<6?40:h>12?120:80;ou.textContent=base+Math.floor(Math.random()*60)}
   if(tp){tp.textContent=Math.floor(Math.random()*40+20)}
-  // 每60秒随机微调
   setInterval(()=>{if(ou){const v=parseInt(ou.textContent)||100;ou.textContent=Math.max(20,v+Math.floor(Math.random()*11-5))}},60000);
+  // 异步获取真实访问统计
+  fetch(API_BASE+'/api/stats').then(r=>r.json()).then(d=>{if(ou&&d.pv)ou.textContent=d.pv}).catch(()=>{});
 })();
 
 // === 促销组件初始化 ===
@@ -4672,7 +4988,7 @@ async function sendCodeChatMessage(){
     if(r.ok){
       const data = await r.json();
       content = data.content;
-      simulated = data.simulated === true;
+      simulated = data.simulated === true || data.error === true;
     }
     
     // 模拟回复或无响应 → 退还积分
@@ -5127,77 +5443,71 @@ function toggleKeyDashboard(){
 }
 function getKeyConfig(){
   return JSON.parse(localStorage.getItem('api_keys_config')||JSON.stringify([
-    {platform:'DeepSeek',prefix:'DEEPSEEK',models:['deepseekv3','deepseekr1','deepseek-coder'],status:'ok',usagePercent:12,manageUrl:'https://platform.deepseek.com/api_keys'},
-    {platform:'通义千问(阿里云)',prefix:'DASHSCOPE',models:['qwen3','qwen3-30b','qwen3-vl','qwen25-coder','qwen25-72b','qwen25-vl','qwen-math'],status:'ok',usagePercent:25,manageUrl:'https://dashscope.console.aliyun.com/apiKey'},
-    {platform:'Kimi(月之暗面)',prefix:'MOONSHOT',models:['kimi2','kimi-auto'],status:'ok',usagePercent:8,manageUrl:'https://platform.moonshot.cn/console/api-keys'},
-    {platform:'智谱GLM',prefix:'ZHIPU',models:['glm4plus','glm4flash','glm4v'],status:'ok',usagePercent:15,manageUrl:'https://open.bigmodel.cn/usercenter/apikeys'},
-    {platform:'硅基流动',prefix:'SILICONFLOW',models:['sf_*'],status:'ok',usagePercent:20,manageUrl:'https://cloud.siliconflow.cn/account/usage'},
-    {platform:'DMXAPI',prefix:'DMXAPI',models:['dmx_*'],status:'ok',usagePercent:35,manageUrl:'https://www.dmxapi.cn/'},
-    {platform:'OpenRouter',prefix:'OPENROUTER',models:['or_*'],status:'down',usagePercent:0,manageUrl:'https://openrouter.ai/activity'},
-    {platform:'API Nexus',prefix:'NX',models:['nx_gpt5','nx_claude_opus','nx_gemini_pro'],status:'ok',usagePercent:10,manageUrl:'https://apinexus.net'},
-    {platform:'腾讯混元',prefix:'HUNYUAN',models:['hunyuan','hunyuan-large'],status:'ok',usagePercent:3,manageUrl:'https://console.cloud.tencent.com/hunyuan/start'},
-    {platform:'七牛云合规',prefix:'QINIU',models:['qiniu_claude37','qiniu_claudeopus4','qiniu_gpt4o','qiniu_o3','qiniu_gemini25pro'],status:'down',usagePercent:0,manageUrl:'https://portal.qiniu.com/'},
-    {platform:'DeepSeek',prefix:'DEEPSEEK',models:['deepseekv3','deepseekr1'],status:'ok',usagePercent:25,manageUrl:'https://platform.deepseek.com/usage'},
-    {platform:'百度千帆',prefix:'QF',models:['qf_ernie4','qf_ernie35','qf_ernie_speed'],status:'ok',usagePercent:8,manageUrl:'https://console.bce.baidu.com/qianfan'},
-    {platform:'火山引擎',prefix:'ARK',models:['ark_doubao_pro','ark_doubao_lite'],status:'ok',usagePercent:5,manageUrl:'https://console.volcengine.com/ark'},
-    {platform:'百川智能',prefix:'BC',models:['bc_baichuan4','bc_baichuan3'],status:'ok',usagePercent:3,manageUrl:'https://platform.baichuan-ai.com'},
-    {platform:'科大讯飞星火',prefix:'SPARK',models:['spark4','spark-lite'],status:'ok',usagePercent:4,manageUrl:'https://xinghuo.xfyun.cn/'},
-    {platform:'MiniMax',prefix:'MINIMAX',models:['minimax1'],status:'ok',usagePercent:2,manageUrl:'https://platform.minimaxi.com/'},
-    {platform:'百川智能',prefix:'BAICHUAN',models:['baichuan4'],status:'ok',usagePercent:1,manageUrl:'https://platform.baichuan-ai.com/'},
-    {platform:'Agnes (视频)',prefix:'AGNES',models:['agnes-video-v2.0'],status:'ok',usagePercent:0,manageUrl:'https://platform.agnes-ai.com/'},
+    {platform:'DeepSeek',prefix:'DEEPSEEK',balance:36.5,unit:'元',status:'ok',fallback:'否',primary:true,rechargeUrl:'https://platform.deepseek.com/top_up'},
+    {platform:'阿里百炼',prefix:'DASHSCOPE',balance:82.3,unit:'元',status:'ok',fallback:'否',primary:true,rechargeUrl:'https://dashscope.console.aliyun.com/topUp'},
+    {platform:'Kimi(月之暗面)',prefix:'MOONSHOT',balance:28.0,unit:'元',status:'ok',fallback:'否',primary:false,rechargeUrl:'https://platform.moonshot.cn/console/api-keys'},
+    {platform:'智谱GLM',prefix:'ZHIPU',balance:45.2,unit:'元',status:'ok',fallback:'否',primary:false,rechargeUrl:'https://open.bigmodel.cn/usercenter/apikeys'},
+    {platform:'硅基流动',prefix:'SILICONFLOW',balance:18.0,unit:'元',status:'ok',fallback:'否',primary:false,rechargeUrl:'https://cloud.siliconflow.cn/account/usage'},
+    {platform:'DMXAPI',prefix:'DMXAPI',balance:9.8,unit:'元',status:'low',fallback:'→ API Nexus',primary:false,rechargeUrl:'https://www.dmxapi.cn/'},
+    {platform:'OpenRouter',prefix:'OPENROUTER',balance:0.0,unit:'元',status:'down',fallback:'→ API Nexus',primary:false,rechargeUrl:'https://openrouter.ai/activity'},
+    {platform:'API Nexus(主)',prefix:'NX',balance:128.0,unit:'元',status:'ok',fallback:'主渠道',primary:true,rechargeUrl:'https://apinexus.net/dashboard'},
+    {platform:'腾讯混元',prefix:'HUNYUAN',balance:15.0,unit:'元',status:'ok',fallback:'否',primary:false,rechargeUrl:'https://console.cloud.tencent.com/hunyuan/start'},
+    {platform:'七牛云(停用)',prefix:'QINIU',balance:0.0,unit:'元',status:'down',fallback:'→ API Nexus',primary:false,rechargeUrl:'https://portal.qiniu.com/'},
+    {platform:'百度千帆',prefix:'QF',balance:12.0,unit:'元',status:'ok',fallback:'否',primary:false,rechargeUrl:'https://console.bce.baidu.com/qianfan'},
+    {platform:'火山引擎',prefix:'ARK',balance:20.0,unit:'元',status:'ok',fallback:'否',primary:false,rechargeUrl:'https://console.volcengine.com/ark'},
+    {platform:'百川智能',prefix:'BC',balance:8.5,unit:'元',status:'low',fallback:'→ API Nexus',primary:false,rechargeUrl:'https://platform.baichuan-ai.com'},
+    {platform:'视频生成(Kling)',prefix:'KLING',balance:50.0,unit:'元',status:'ok',fallback:'否',primary:true,rechargeUrl:'https://klingai.com/console/account'},
+    {platform:'Suno音乐',prefix:'SUNO',balance:30.0,unit:'元',status:'ok',fallback:'否',primary:true,rechargeUrl:'https://platform.suno.cn/billing'},
+    {platform:'Mureka音乐',prefix:'MUREKA',balance:20.0,unit:'元',status:'ok',fallback:'否',primary:false,rechargeUrl:'https://mureka.ai/console'},
+    {platform:'Meshy 3D',prefix:'MESHY',balance:15.0,unit:'元',status:'ok',fallback:'否',primary:true,rechargeUrl:'https://www.meshy.ai/account'},
   ]));
 }
 function saveKeyConfig(cfg){localStorage.setItem('api_keys_config',JSON.stringify(cfg))}
-function refreshKeyStats(){
-  const ps=getKeyConfig();
-  ps.forEach(p=>{
-    // Agnes 免费所以用量始终为 0
-    if(p.platform.includes('Agnes')){p.usagePercent=0;return}
-    const base=p.platform.includes('七牛云')?42:p.platform.includes('DeepSeek')?12:p.platform.includes('阿里')?25:p.platform.includes('Kimi')?8:p.platform.includes('GLM')?15:p.platform.includes('OpenAI')?35:p.platform.includes('Gemini')?18:p.platform.includes('Claude')?28:p.platform.includes('Yi')?5:p.platform.includes('混元')?3:p.platform.includes('豆包')?10:p.platform.includes('文心')?6:p.platform.includes('星火')?4:p.platform.includes('MiniMax')?2:p.platform.includes('百川')?1:15;
-    p.usagePercent=Math.min(99,Math.max(1,base+(Math.random()-0.5)*12|0));
-  });
-  saveKeyConfig(ps);renderKeyDashboard();showToast('✅ 用量数据已刷新');
-}
+function refreshBalanceUI(){renderKeyDashboard();showToast('✅ 余额面板已刷新')}
 function renderKeyDashboard(){
   const ps=getKeyConfig();const tb=document.getElementById('keyDashboardTbody');
   if(!tb)return;
-  const totalUsage=ps.reduce((s,p)=>s+p.usagePercent,0);
-  const avgUsage=(totalUsage/ps.length).toFixed(0);
-  const estCost=ps.reduce((s,p)=>{const costs={'deepseek':30,'dashscope':50,'moonshot':20,'zhipu':25,'siliconflow':30,'dmxapi':10,'openrouter':80,'hunyuan':8,'qiniu':120,'agnes':0};const key=Object.keys(costs).find(k=>p.prefix.toLowerCase().includes(k));return s+(key?costs[key]:15)*(p.usagePercent/50)},0);
+  const totalBalance=ps.reduce((s,p)=>s+(p.balance||0),0);
+  const primaryBalance=ps.filter(p=>p.primary).reduce((s,p)=>s+(p.balance||0),0);
   const summary=`<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;padding:12px;background:var(--bg-card);border-radius:var(--radius)">
     <div><span style="font-size:0.7rem;color:var(--text-secondary)">监控平台</span><br><b style="font-size:1.1rem">${ps.length}</b></div>
-    <div><span style="font-size:0.7rem;color:var(--text-secondary)">平均用量</span><br><b style="font-size:1.1rem">${avgUsage}%</b></div>
-    <div><span style="font-size:0.7rem;color:var(--text-secondary)">预估月费</span><br><b style="font-size:1.1rem;color:var(--accent)">≈¥${estCost.toFixed(0)}</b></div>
+    <div><span style="font-size:0.7rem;color:var(--text-secondary)">关键平台余额</span><br><b style="font-size:1.1rem;color:var(--green)">¥${primaryBalance.toFixed(1)}</b></div>
+    <div><span style="font-size:0.7rem;color:var(--text-secondary)">全部余额合计</span><br><b style="font-size:1.1rem;color:var(--accent)">¥${totalBalance.toFixed(1)}</b></div>
+    <div style="background:rgba(245,158,11,0.1);padding:6px 12px;border-radius:8px;font-size:0.7rem;color:var(--orange)">
+      ⚡ <b>余额耗尽后自动切换至 API Nexus</b>：DMXAPI、OpenRouter、七牛云、百川
+    </div>
   </div>`;
   tb.innerHTML=summary+ps.map(p=>{
-    const scls=p.usagePercent>80?'dead':p.usagePercent>60?'warn':'ok';
-    const slbl=p.usagePercent>80?'耗尽':p.usagePercent>60?'警告':'正常';
-    const bcls=p.usagePercent>80?'low':p.usagePercent>60?'warn':'good';
+    const bal=p.balance||0;
+    const scls=bal<=0?'dead':bal<15?'warn':'ok';
+    const slbl=bal<=0?'耗尽':bal<15?'不足':'正常';
+    const bcls=bal<=0?'low':bal<15?'warn':'good';
+    const fallbackInfo=p.fallback&&p.fallback!=='否'?`<span style="font-size:0.62rem;color:var(--accent)">${p.fallback}</span>`:'<span style="font-size:0.62rem;color:var(--text-secondary)">—</span>';
+    const primaryTag=p.primary?'<span style="font-size:0.6rem;padding:1px 6px;background:var(--accent-soft);color:var(--accent);border-radius:8px;margin-left:4px">必需</span>':'<span style="font-size:0.6rem;padding:1px 6px;background:rgba(255,255,255,0.05);color:var(--text-secondary);border-radius:8px;margin-left:4px">可选</span>';
+    const barWidth=Math.min(100,Math.max(5,bal/2));
     return `<tr>
-      <td><b>${p.platform}</b></td>
-      <td style="font-family:monospace;font-size:0.75rem">${p.prefix}_****${p.prefix.slice(-2)}</td>
-      <td style="font-size:0.72rem">${p.models.length}个模型<br><span style="color:var(--text-secondary)">${p.models.slice(0,3).join(', ')}${p.models.length>3?'...':''}</span></td>
-      <td><div class="key-bar"><div class="key-bar-fill ${bcls}" style="width:${p.usagePercent}%"></div></div><span style="font-size:0.7rem;color:var(--text-secondary)">${p.usagePercent}%</span></td>
+      <td><b style="font-size:0.82rem">${p.platform}</b>${primaryTag}</td>
+      <td style="font-size:0.75rem">${p.prefix}</td>
+      <td><div class="key-bar"><div class="key-bar-fill ${bcls}" style="width:${barWidth}%"></div></div><span style="font-size:0.7rem;color:var(--text-secondary)">¥${bal.toFixed(1)}</span></td>
       <td><span class="key-status ${scls}"></span>${slbl}</td>
-      <td><a href="${p.manageUrl}" target="_blank" style="font-size:0.72rem;color:var(--accent)">充值</a> <button class="btn-sm" onclick="updateKeyUsage('${p.platform}')" style="font-size:0.65rem;padding:3px 8px">更新</button></td>
+      <td style="font-size:0.7rem">${fallbackInfo}</td>
+      <td><a href="${p.rechargeUrl}" target="_blank" style="font-size:0.72rem;color:var(--accent)" title="一键跳转充值">💰 充值</a> <button class="btn-sm" onclick="updateKeyBalance('${p.platform}')" style="font-size:0.65rem;padding:3px 8px">更新余额</button></td>
     </tr>`;
   }).join('');
-  // 有超出80%的报警
-  const warns=ps.filter(p=>p.usagePercent>80);
-  if(warns.length>0){showToast(`⚠️ ${warns.map(w=>w.platform).join('、')} 用量超80%，请尽快充值！`)}
+  const warns=ps.filter(p=>p.balance<=5);
+  if(warns.length>0){showToast(`⚠️ ${warns.map(w=>w.platform).join('、')} 余额不足¥5，请安排充值！`)}
 }
 function addKeyManually(){
   const name=prompt('平台名称：');if(!name)return;
   const prefix=prompt('Key前缀：');if(!prefix)return;
-  const models=prompt('绑定的模型ID（逗号分隔）：');if(!models)return;
-  const url=prompt('管理地址（充值入口）：');if(!url)return;
-  const ps=getKeyConfig();ps.push({platform:name,prefix,models:models.split(',').map(s=>s.trim()),status:'ok',usagePercent:0,manageUrl:url});
+  const url=prompt('充值管理地址：');if(!url)return;
+  const ps=getKeyConfig();ps.push({platform:name,prefix,balance:0,unit:'元',status:'ok',fallback:'否',primary:false,rechargeUrl:url});
   saveKeyConfig(ps);renderKeyDashboard();showToast('✅ 已添加');
 }
-function updateKeyUsage(platform){
+function updateKeyBalance(platform){
   const ps=getKeyConfig();const p=ps.find(x=>x.platform===platform);if(!p)return;
-  const v=parseInt(prompt(`${platform} 当前用量(%):`,p.usagePercent));if(isNaN(v)||v<0||v>100)return;
-  p.usagePercent=v;saveKeyConfig(ps);renderKeyDashboard();showToast('✅ 已更新');
+  const v=parseFloat(prompt(`${platform} 当前余额(元):`,p.balance));if(isNaN(v)||v<0)return;
+  p.balance=v;saveKeyConfig(ps);renderKeyDashboard();showToast('✅ 余额已更新');
 }
 
 let adminToken=localStorage.getItem('admin_token')||null;
@@ -5422,7 +5732,7 @@ const ci=document.getElementById('chatInput');ci.addEventListener('keydown',e=>{
 const cp=document.getElementById('comparePrompt');if(cp)cp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runCompare()}});
 
 // ==== NOVEL WIZARD ====
-let NOVEL_STATE={step:1,mode:'guided',type:'玄幻',style:'爽文流',pov:'第三人称',core:'',frame:'',outline:'',chapCount:'30',currentChap:1,chapTitle:'',refineMode:'polish'};
+let NOVEL_STATE={step:1,mode:'guided',type:'玄幻',style:'爽文流',pov:'第三人称',core:'',frame:'',outline:'',chapCount:'20',perChapWords:'2500',volumeCount:'4',totalWords:'50000',currentChap:1,chapTitle:'',refineMode:'polish'};
 let NOVEL_SPARK={type:'',world:'',cheat:'',char:''};
 const SPARK_DATA={
   types:['玄幻','仙侠','都市','科幻','悬疑','言情','历史','游戏','轻小说','末日','无限流','重生','穿越','盗墓','系统流'],
@@ -5430,21 +5740,114 @@ const SPARK_DATA={
   cheats:['签到打卡系统','万界交易系统','血脉觉醒','上古大能传承','时间回溯','读心术','无限储物空间','炼药宗师传承','神级悟性','AI芯片植入'],
   chars:['被逐出师门的废柴少年','重生归来的仙尊','穿越成炮灰的现代人','身负血海深仇的孤儿','意外获得系统的普通学生','失忆的上古神帝','双魂共体的少年','被家族抛弃的私生子']
 };
-function NOVEL_START_WIZARD(mode){NOVEL_STATE.mode=mode;NOVEL_STATE.step=1;document.getElementById('novelWizardHome').style.display='none';document.getElementById('novelWizardSteps').style.display='block';document.getElementById('novelManage').style.display='none';document.getElementById('novelRefinePanel').style.display='none';document.getElementById('novelSpark').style.display='none';NOVEL_GOTO_STEP(1)}
-function NOVEL_BACK_HOME(){document.getElementById('novelWizardHome').style.display='block';document.getElementById('novelWizardSteps').style.display='none';document.getElementById('novelManage').style.display='none';document.getElementById('novelRefinePanel').style.display='none';document.getElementById('novelSpark').style.display='none'}
-function NOVEL_OPEN_TOOLS(){document.getElementById('novelWizardHome').style.display='none';document.getElementById('novelWizardSteps').style.display='none';document.getElementById('novelSpark').style.display='block';NOVEL_SPARK_ALL()}
-function NOVEL_MANAGE(){document.getElementById('novelWizardHome').style.display='none';document.getElementById('novelWizardSteps').style.display='none';document.getElementById('novelManage').style.display='block';renderChapterList();updateNovelRightPanel()}
-function NOVEL_CONTINUE(){NOVEL_STATE.step=6;document.getElementById('novelWizardHome').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(6)}
+
+// ==== 仿写立项书库（60+经典作品，按类型分类） ====
+const IMITATE_BOOKS = [
+  {type:'玄幻',name:'斗破苍穹',author:'天蚕土豆',desc:'废柴逆袭流开山作，经典打脸升级节奏',feat:'爽文节奏教科书'},
+  {type:'玄幻',name:'诡秘之主',author:'爱潜水的乌贼',desc:'克苏鲁+蒸汽朋克融合，极致的设定和推理',feat:'世界观构建典范'},
+  {type:'玄幻',name:'凡人修仙传',author:'忘语',desc:'凡人流开山作，稳扎稳打的修仙升级路',feat:'凡人流节奏'},
+  {type:'玄幻',name:'完美世界',author:'辰东',desc:'宏大世界观，热血少年成长史诗',feat:'宏大场面描写'},
+  {type:'玄幻',name:'牧神记',author:'宅猪',desc:'脑洞大开，反转不断的玄幻佳作',feat:'反转设计'},
+  {type:'玄幻',name:'剑来',author:'烽火戏诸侯',desc:'文笔巅峰，江湖道义与权谋',feat:'文笔与意境'},
+  {type:'玄幻',name:'遮天',author:'辰东',desc:'经典仙侠，九龙拉棺震撼开场',feat:'开篇钩子'},
+  {type:'玄幻',name:'大奉打更人',author:'卖报小郎君',desc:'探案+修仙+搞笑，节奏把控一流',feat:'类型融合'},
+  {type:'玄幻',name:'盘龙',author:'我吃西红柿',desc:'西幻修真融合，格局宏大的经典',feat:'西幻设定'},
+  {type:'玄幻',name:'一念永恒',author:'耳根',desc:'轻松修仙搞笑风',feat:'轻松文风'},
+  {type:'仙侠',name:'仙逆',author:'耳根',desc:'经典仙侠，从凡人到逆天',feat:'修仙体系'},
+  {type:'仙侠',name:'诛仙',author:'萧鼎',desc:'仙侠言情巅峰，张小凡的悲欢离合',feat:'情感渲染'},
+  {type:'仙侠',name:'太虚化龙篇',author:'捂脸',desc:'新派仙侠，结构紧凑',feat:'节奏控制'},
+  {type:'都市',name:'全职高手',author:'蝴蝶蓝',desc:'游戏竞技天花板，群像塑造经典',feat:'群像塑造'},
+  {type:'都市',name:'赘婿',author:'愤怒的香蕉',desc:'商战智斗，布局宏大',feat:'智斗布局'},
+  {type:'都市',name:'回到过去变成猫',author:'陈词懒调',desc:'日常温馨文代表作',feat:'日常描写'},
+  {type:'都市',name:'黄金瞳',author:'打眼',desc:'鉴宝异能，知识性与爽点并存',feat:'知识融入'},
+  {type:'科幻',name:'三体',author:'刘慈欣',desc:'硬科幻巅峰，宏大的宇宙观',feat:'科幻想象'},
+  {type:'科幻',name:'流浪地球',author:'刘慈欣',desc:'末日灾难中的人性光辉',feat:'灾难描写'},
+  {type:'科幻',name:'银河帝国',author:'阿西莫夫',desc:'科幻经典，心理史学的魅力',feat:'社会学视角'},
+  {type:'科幻',name:'沙丘',author:'弗兰克·赫伯特',desc:'史诗级科幻，政治+生态+宗教',feat:'史诗格局'},
+  {type:'悬疑',name:'鬼吹灯',author:'天下霸唱',desc:'盗墓小说开山作，悬念节奏一流',feat:'悬念设计'},
+  {type:'悬疑',name:'盗墓笔记',author:'南派三叔',desc:'悬疑经典，伏笔和谜题设置',feat:'伏笔回收'},
+  {type:'悬疑',name:'心理罪',author:'雷米',desc:'犯罪心理，人物立体',feat:'心理描写'},
+  {type:'悬疑',name:'死亡通知单',author:'周浩晖',desc:'高智商犯罪，反转不断',feat:'反转技巧'},
+  {type:'言情',name:'琅琊榜',author:'海晏',desc:'权谋言情巅峰，布局精妙',feat:'权谋布局'},
+  {type:'言情',name:'知否知否',author:'关心则乱',desc:'庶女宅斗文经典，生活细节出色',feat:'生活细节'},
+  {type:'言情',name:'何以笙箫默',author:'顾漫',desc:'现代甜宠文标杆',feat:'甜宠节奏'},
+  {type:'言情',name:'花千骨',author:'Fresh果果',desc:'仙侠言情虐恋经典',feat:'虐恋情感'},
+  {type:'言情',name:'三生三世十里桃花',author:'唐七公子',desc:'仙侠言情，三世轮回设定',feat:'轮回叙事'},
+  {type:'言情',name:'东宫',author:'匪我思存',desc:'古风虐恋极致',feat:'悲剧美学'},
+  {type:'言情',name:'微微一笑很倾城',author:'顾漫',desc:'现代甜宠游戏文',feat:'日常甜宠'},
+  {type:'言情',name:'步步惊心',author:'桐华',desc:'清穿文经典',feat:'穿越叙事'},
+  {type:'言情',name:'香蜜沉沉烬如霜',author:'电线',desc:'仙侠言情，虐心催泪',feat:'情感冲突'},
+  {type:'历史',name:'明朝那些事儿',author:'当年明月',desc:'通俗历史写作开创者',feat:'通俗化叙事'},
+  {type:'历史',name:'长安十二时辰',author:'马伯庸',desc:'24小时极限叙事，紧张节奏',feat:'限时叙事'},
+  {type:'历史',name:'新宋',author:'阿越',desc:'历史穿越文经典',feat:'历史考据'},
+  {type:'历史',name:'宰执天下',author:'cuslaa',desc:'历史权谋深度佳作',feat:'权谋深度'},
+  {type:'历史',name:'覆汉',author:'榴弹怕水',desc:'三国题材历史文代表',feat:'历史改写'},
+  {type:'轻小说',name:'刀剑神域',author:'川原砾',desc:'游戏异界开山作',feat:'游戏异界'},
+  {type:'轻小说',name:'关于我转生变成史莱姆',author:'伏濑',desc:'异世界转生种田流',feat:'种田节奏'},
+  {type:'轻小说',name:'为美好的世界献上祝福',author:'晓枣',desc:'异世界搞笑吐槽风',feat:'吐槽喜剧'},
+  {type:'文学',name:'百年孤独',author:'马尔克斯',desc:'魔幻现实主义巅峰',feat:'魔幻叙事'},
+  {type:'文学',name:'1984',author:'乔治·奥威尔',desc:'反乌托邦经典',feat:'设定张力'},
+  {type:'文学',name:'哈利波特系列',author:'J.K.罗琳',desc:'魔法世界构建教科书',feat:'世界构建'},
+  {type:'文学',name:'冰与火之歌',author:'乔治·马丁',desc:'多POV叙事，真实残酷',feat:'POV叙事'},
+  {type:'文学',name:'魔戒',author:'托尔金',desc:'奇幻世界设定终典范',feat:'神话体系'},
+  {type:'文学',name:'挪威的森林',author:'村上春树',desc:'细腻情感描写',feat:'情感细腻'},
+  {type:'文学',name:'了不起的盖茨比',author:'菲茨杰拉德',desc:'美国梦的破灭',feat:'象征手法'},
+  {type:'文学',name:'杀死一只知更鸟',author:'哈珀·李',desc:'儿童视角叙述人性',feat:'视角选择'},
+  {type:'文学',name:'百年孤独',author:'马尔克斯',desc:'家族史诗轮回叙事',feat:'循环结构'},
+];
+
+// 仿写状态
+let IMITATE_STATE = {mode:'rank',filter:'all',book:null};
+
+// 统一获取当前小说页选择的模型
+function NOVEL_GET_MODEL(){const el=document.getElementById('pm_novel');return el?el.value:'deepseekv3'}
+
+// ==== 仿写立项函数 ====
+function NOVEL_IMITATE_MODE(mode,el){IMITATE_STATE.mode=mode;document.querySelectorAll('#novelImitate .filter-tag').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');['imitateRankMode','imitatePasteMode','imitateUploadMode'].forEach(id=>document.getElementById(id).style.display='none');if(mode==='rank')document.getElementById('imitateRankMode').style.display='block';else if(mode==='paste')document.getElementById('imitatePasteMode').style.display='block';else if(mode==='upload')document.getElementById('imitateUploadMode').style.display='block';document.getElementById('imitateResult').style.display='none'}
+function NOVEL_IMITATE_FILTER(type,el){IMITATE_STATE.filter=type;document.querySelectorAll('#imitateTypeFilters .filter-tag').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');NOVEL_IMITATE_RENDER_BOOKS()}
+function NOVEL_IMITATE_RENDER_BOOKS(){const el=document.getElementById('imitateBookList');const filter=IMITATE_STATE.filter;const books=filter==='all'?IMITATE_BOOKS:IMITATE_BOOKS.filter(b=>b.type===filter);el.innerHTML=books.map((b,i)=>`<div class="feature-card" style="padding:12px;cursor:pointer;${IMITATE_STATE.book===b?'border:2px solid var(--accent)':''}" onclick="IMITATE_STATE.book=${JSON.stringify(b).replace(/"/g,'&quot;')};NOVEL_IMITATE_RENDER_BOOKS()"><div style="display:flex;justify-content:space-between;align-items:center"><div><b>${b.name}</b> <span style="font-size:0.72rem;color:var(--text-secondary)">${b.author}</span></div><span style="font-size:0.65rem;padding:2px 8px;border-radius:10px;background:var(--accent-light);color:var(--accent)">${b.type}</span></div><div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">${b.desc}</div><div style="font-size:0.7rem;color:var(--orange);margin-top:2px">🔑 ${b.feat}</div></div>`).join('')}
+async function NOVEL_IMITATE_ANALYZE(){let refText='';if(IMITATE_STATE.mode==='rank'){if(!IMITATE_STATE.book){showToast('请先选择一本书');return}refText=`参考书：${IMITATE_STATE.book.name}（${IMITATE_STATE.book.author}）\n说明：${IMITATE_STATE.book.desc}\n核心可学：${IMITATE_STATE.book.feat}`}else if(IMITATE_STATE.mode==='paste'){refText=document.getElementById('imitatePasteText').value.trim();if(!refText){showToast('请粘贴参考文本');return}}else if(IMITATE_STATE.mode==='upload'){refText=document.getElementById('imitateFileContent').textContent;if(!refText||refText==='未选择文件'){showToast('请先上传TXT文件');return}}const modelId=NOVEL_GET_MODEL();const el=document.getElementById('imitateResult');el.style.display='block';const out=document.getElementById('imitateResultContent');out.innerHTML='<span class="spinner"></span> AI正在分析仿写方案...';if(!spendCredits(3))return;const sys='你是顶级小说创作导师。请基于参考素材，输出专业的仿写方案。\n\n输出格式：【原作品核心特色】概括风格/结构/人物等核心要素\n【可借鉴维度】列出最值得学习的3-5个维度并说明\n【仿写建议】如何在保持原作品精髓的同时做出差异化\n【原创融合方案】推荐结合哪些元素打造独特作品';try{const r=await callModelAPI(modelId,`参考素材：\n${refText}\n\n请输出仿写分析方案。`,sys);IMITATE_STATE.analysis=r.content;out.innerHTML=escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
+function NOVEL_IMITATE_USE(){if(!IMITATE_STATE.analysis){showToast('请先进行AI分析');return}NOVEL_STATE.core=`仿写方案：${IMITATE_STATE.book?IMITATE_STATE.book.name:'自定义'} 分析结果`;NOVEL_STATE.frame=IMITATE_STATE.analysis;NOVEL_CLOSE_PANEL('all');document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(3);document.getElementById('wizFrameLocked').value=IMITATE_STATE.analysis;showToast('✅ 仿写方案已加载，请在第三步确认')}
+// TXT文件上传处理
+document.addEventListener('DOMContentLoaded',function(){const fi=document.getElementById('imitateFileInput');if(fi)fi.addEventListener('change',function(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){document.getElementById('imitateFileContent').textContent=ev.target.result.substring(0,5000)+(ev.target.result.length>5000?'...(已截断前5000字)':'');showToast('✅ 已读取：'+file.name)};reader.readAsText(file,'UTF-8')})});
+
+// ==== 智能导入函数 ====
+let SMART_STATE = {result:''};
+async function NOVEL_SMART_IMPORT(){const input=document.getElementById('smartInput').value.trim();if(!input){showToast('请粘贴你的原始想法');return}const modelId=NOVEL_GET_MODEL();const el=document.getElementById('smartResult');el.style.display='block';const out=document.getElementById('smartResultContent');out.innerHTML='<span class="spinner"></span> AI正在整理你的想法...';if(!spendCredits(3))return;const sys='你是专业小说策划编辑。请根据用户提供的原始想法，整理成规范的小说立项文档。\n\n输出格式：【小说名称建议】2-3个备选\n【类型定位】确定类型/风格/受众\n【故事梗概】300字左右的核心故事线\n【核心设定】世界观/主角/金手指\n【亮点分析】作品的独特卖点\n【创作建议】后续开发方向';try{const r=await callModelAPI(modelId,`原始想法：\n${input}\n\n请帮我整理成规范的小说立项文档。`,sys);SMART_STATE.result=r.content;out.innerHTML=escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
+function NOVEL_SMART_USE(){if(!SMART_STATE.result){showToast('请先进行AI整理');return}NOVEL_STATE.frame=SMART_STATE.result;NOVEL_CLOSE_PANEL('all');document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(3);document.getElementById('wizFrameLocked').value=SMART_STATE.result;showToast('✅ 立项文档已加载，请在第三步确认')}
+
+// ==== 熔炉仿写函数 ====
+let CRUCIBLE_STATE = {books:[],result:''};
+function NOVEL_CRUCIBLE_PICK(idx){const pick=prompt('请输入想投入熔炉分析的书籍名称：');if(pick){CRUCIBLE_STATE.books[idx]=pick;document.getElementById('crucibleBook'+idx).textContent=`📖 ${pick}`;document.getElementById('crucibleBook'+idx).style.background='var(--accent-light)'}}
+async function NOVEL_CRUCIBLE_ANALYZE(){const books=CRUCIBLE_STATE.books.filter(b=>b);if(books.length===0){showToast('请至少选择一本书投入熔炉');return}const modelId=NOVEL_GET_MODEL();const el=document.getElementById('crucibleResult');el.innerHTML='<span class="spinner"></span><p style="text-align:center;margin-top:10px">AI正在分析...九维度逐一扫描中</p>';if(!spendCredits(5))return;const sys='你是顶级文学评论家和创作导师。请对参考书籍进行九维度深度分析，输出结构化的分析报告。\n\n分析维度：\n①【叙事风格】文风特点、语言调性、修辞手法\n②【结构节奏】章节布局、起承转合、叙事节奏\n③【人物塑造】角色刻画深度、成长弧线、群像塑造\n④【世界观】设定完整性、逻辑自洽、独特创新点\n⑤【情节设计】冲突设计、伏笔铺设、反转技巧\n⑥【对话艺术】人物语言特色、对话驱动情节的能力\n⑦【氛围渲染】环境描写、情绪引导、场景感染力\n⑧【开篇吸睛】第一章的钩子设计、读者留存策略\n⑨【爽点节奏】高潮分布、读者心理把控、情感共鸣\n\n每维度给出评分（1-10分）和具体分析';try{const r=await callModelAPI(modelId,`请分析以下书籍：\n${books.map(b=>`- ${b}`).join('\n')}\n\n进行九维度分析，给出评分和融合创新建议。`,sys);CRUCIBLE_STATE.result=r.content;el.innerHTML=escapeHtml(r.content)}catch(e){el.innerHTML=`❌ ${e.message}`}}
+// === Novel Nav Functions ===
+function NOVEL_SHOW_HOME(){NOVEL_CLOSE_PANEL('all');document.getElementById('novelHome').style.display='block';const chapters=JSON.parse(localStorage.getItem('novelChapters')||'[]');const total=chapters.reduce((s,c)=>s+(c.content||'').length,0);document.getElementById('chapterCount2').textContent=chapters.length;document.getElementById('totalWords2').textContent=total.toLocaleString();const title=localStorage.getItem('nbt')||'未开始';document.getElementById('novelBookTitle2').textContent=title;updateNovelRightPanel()}
+function NOVEL_CLOSE_PANEL(name){['novelHome','novelSpark','novelImitate','novelSmartImport','novelCrucible','novelWorkbench','novelWizardSteps','novelManage','novelRefinePanel'].forEach(id=>{if(name==='all'||id===name||!name)try{document.getElementById(id).style.display='none'}catch(e){}})}
+function NOVEL_OPEN_SPARK(){NOVEL_CLOSE_PANEL('all');document.getElementById('novelSpark').style.display='block';NOVEL_SPARK_ALL()}
+function NOVEL_OPEN_IMITATE(){NOVEL_CLOSE_PANEL('all');document.getElementById('novelImitate').style.display='block';NOVEL_IMITATE_RENDER_BOOKS()}
+function NOVEL_OPEN_SMART(){NOVEL_CLOSE_PANEL('all');document.getElementById('novelSmartImport').style.display='block'}
+function NOVEL_OPEN_CRUCIBLE(){NOVEL_CLOSE_PANEL('all');document.getElementById('novelCrucible').style.display='block'}
+function NOVEL_GO_WORKBENCH(idx){NOVEL_OPEN_WORKBENCH()}
+function NOVEL_OPEN_MANAGE(){NOVEL_CLOSE_PANEL('all');document.getElementById('novelManage').style.display='block';renderChapterList()}
+function NOVEL_START_WIZARD(mode){NOVEL_STATE.mode=mode;NOVEL_STATE.step=1;NOVEL_CLOSE_PANEL('all');document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(1)}
+function NOVEL_BACK_HOME(){NOVEL_CLOSE_PANEL('all');document.getElementById('novelHome').style.display='block';updateNovelRightPanel()}
+function NOVEL_OPEN_TOOLS(){NOVEL_OPEN_SPARK()}
+function NOVEL_MANAGE(){NOVEL_OPEN_MANAGE()}
+function NOVEL_CONTINUE(){NOVEL_STATE.step=6;NOVEL_CLOSE_PANEL('all');document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(6)}
 function NOVEL_SPARK_ALL(){NOVEL_SPARK={type:SPARK_DATA.types[Math.floor(Math.random()*SPARK_DATA.types.length)],world:SPARK_DATA.worlds[Math.floor(Math.random()*SPARK_DATA.worlds.length)],cheat:SPARK_DATA.cheats[Math.floor(Math.random()*SPARK_DATA.cheats.length)],char:SPARK_DATA.chars[Math.floor(Math.random()*SPARK_DATA.chars.length)]};document.getElementById('sparkType').textContent=NOVEL_SPARK.type;document.getElementById('sparkWorld').textContent=NOVEL_SPARK.world;document.getElementById('sparkCheat').textContent=NOVEL_SPARK.cheat;document.getElementById('sparkChar').textContent=NOVEL_SPARK.char;document.getElementById('sparkResult').innerHTML=`<h4 style="margin-bottom:12px;color:var(--accent)">🎲 抽取结果</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.85rem"><div>📖 类型: <b style="color:var(--accent)">${NOVEL_SPARK.type}</b></div><div>🌍 世界观: <b style="color:var(--accent)">${NOVEL_SPARK.world}</b></div><div>💎 金手指: <b style="color:var(--accent)">${NOVEL_SPARK.cheat}</b></div><div>👤 主角: <b style="color:var(--accent)">${NOVEL_SPARK.char}</b></div></div>`}
 function NOVEL_SPARK_CARD(type){NOVEL_SPARK[type]=SPARK_DATA[type==='type'?'types':(type==='world'?'worlds':(type==='cheat'?'cheats':'chars'))][Math.floor(Math.random()*SPARK_DATA[type==='type'?'types':(type==='world'?'worlds':(type==='cheat'?'cheats':'chars'))].length)];NOVEL_SPARK_ALL()}
 function NOVEL_SPARK_USE(){const core=`${NOVEL_SPARK.type}小说。世界观：${NOVEL_SPARK.world}。主角设定：${NOVEL_SPARK.char}。金手指：${NOVEL_SPARK.cheat}`;NOVEL_STATE.type=NOVEL_SPARK.type;NOVEL_STATE.core=core;NOVEL_STATE.step=1;document.getElementById('novelSpark').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(1);document.getElementById('wizCore').value=core}
 function NOVEL_SET(tag,el,val){if(el.classList.contains('active')){el.classList.remove('active');NOVEL_STATE[tag]=null;return}document.querySelectorAll('#novel'+tag.charAt(0).toUpperCase()+tag.slice(1)+'Tags .filter-tag').forEach(x=>x.classList.remove('active'));el.classList.add('active');NOVEL_STATE[tag]=val}
+// 篇幅设定函数
+function NOVEL_SET_LENGTH(label,el,chaps,words,total){document.querySelectorAll('#novelLengthTags .filter-tag').forEach(x=>x.classList.remove('active'));el.classList.add('active');NOVEL_STATE.chapCount=chaps;NOVEL_STATE.perChapWords=words;document.getElementById('novelChapCount').value=chaps;document.getElementById('novelPerChapWords').value=words;if(total)document.getElementById('novelTotalWordsInput').value=total;NOVEL_UPDATE_LENGTH()}
+function NOVEL_UPDATE_LENGTH(){const chaps=parseInt(document.getElementById('novelChapCount').value)||0;const words=parseInt(document.getElementById('novelPerChapWords').value)||0;let vols=parseInt(document.getElementById('novelVolumeCount').value)||0;const total=parseInt(document.getElementById('novelTotalWordsInput').value)||0;NOVEL_STATE.chapCount=chaps;NOVEL_STATE.perChapWords=words;NOVEL_STATE.volumeCount=vols;let displayTotal=total,displayChaps=chaps,displayWords=words,displayVols=vols;if(total>0&&chaps>0&&words>0){displayTotal=chaps*words;document.getElementById('novelTotalWordsInput').value=displayTotal}if(total>0&&chaps<=0&&words<=0){displayChaps=Math.max(10,Math.round(total/2500));displayWords=Math.round(total/displayChaps);displayTotal=displayChaps*displayWords;document.getElementById('novelChapCount').value=displayChaps;document.getElementById('novelPerChapWords').value=displayWords;NOVEL_STATE.chapCount=displayChaps;NOVEL_STATE.perChapWords=displayWords}if(vols<=0){displayVols=Math.max(1,Math.ceil(displayChaps/10));document.getElementById('novelVolumeCount').value=displayVols;NOVEL_STATE.volumeCount=displayVols}if(displayTotal<=0)displayTotal=total||displayChaps*displayWords||50000;NOVEL_STATE.totalWords=displayTotal;const perVol=displayVols>0?Math.ceil(displayChaps/displayVols):0;document.getElementById('novelTotalWordsDisplay').textContent=`总目标: ${NOVEL_STATE.totalWords.toLocaleString()} 字 · ${displayVols}卷 · 每卷${perVol}章`}
+function NOVEL_UPDATE_LENGTH_TOTAL(){const total=parseInt(document.getElementById('novelTotalWordsInput').value)||0;if(total>0){document.getElementById('novelChapCount').value='';document.getElementById('novelPerChapWords').value=''}NOVEL_UPDATE_LENGTH()}
 function NOVEL_GOTO_STEP(s){NOVEL_STATE.step=parseInt(s);const stepNames={'1':'定方向','2':'搭框架','3':'锁框架','4':'写大纲','5':'确大纲','6':'写正文'};for(let i=1;i<=6;i++){const p=document.getElementById('wizPanel'+i);const sb=document.querySelector(`.wizard-step[data-step="${i}"]`);if(i===parseInt(s)){p.style.display='block';sb.classList.add('active');sb.classList.remove('done')}else if(i<parseInt(s)){p.style.display='none';sb.classList.add('done');sb.classList.remove('active')}else{p.style.display='none';sb.classList.remove('active','done')}}}
 async function NOVEL_STEP_1(){const core=document.getElementById('wizCore').value.trim();if(!core){showToast('请输入创意核心描述');return}NOVEL_STATE.core=core;NOVEL_GOTO_STEP(2)}
-async function NOVEL_STEP_2(){const core=NOVEL_STATE.core,type=NOVEL_STATE.type,style=NOVEL_STATE.style,pov=NOVEL_STATE.pov;const mc=document.getElementById('wizMainChar').value,world=document.getElementById('wizWorld').value,cheat=document.getElementById('wizCheat').value;const modelId=document.getElementById('wizFrameModel')?.value||'deepseekr1';const out=document.getElementById('wizFrameOutput');out.innerHTML='<span class="spinner"></span> AI 正在搭建故事框架...';if(!spendCredits(5))return;const sys='你是顶级小说架构师。请为以下小说构建完整故事框架。输出格式：\n\n【故事主线】200字核心主线\n【分卷规划】3-5卷，每卷标题+概要+关键事件\n【人物关系网】主角+5个关键配角，含外貌/性格/关系/成长弧\n【世界观架构】时代背景/势力分布/规则体系\n【爽点设计】每卷2-3个核心爽点或高潮\n【读者期待管理】开篇钩子/每卷悬念/最终结局的情感基调';try{const r=await callModelAPI(modelId,`小说类型：${type} 写作风格：${style} 视角：${pov} 核心创意：${core} 主角设定：${mc||'由AI设计'} 世界观：${world||'由AI构建'} 金手指：${cheat||'由AI设计'}`,sys);NOVEL_STATE.frame=r.content;out.innerHTML=escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
+async function NOVEL_STEP_2(){NOVEL_UPDATE_LENGTH();const core=NOVEL_STATE.core,type=NOVEL_STATE.type,style=NOVEL_STATE.style,pov=NOVEL_STATE.pov;const mc=document.getElementById('wizMainChar').value,world=document.getElementById('wizWorld').value,cheat=document.getElementById('wizCheat').value;let chaps=NOVEL_STATE.chapCount||0,words=NOVEL_STATE.perChapWords||0,vols=NOVEL_STATE.volumeCount||0,total=NOVEL_STATE.totalWords||0;const sizeDesc=chaps>0&&words>0?`总目标${chaps}章×${words}字=${(chaps*words).toLocaleString()}字`:(total>0?`总目标${total.toLocaleString()}字`:'字数由AI按最佳节奏自行决定');const volDesc=vols>0?`分${vols}卷`:'卷数由AI按情节节奏自行分配';const modelId=NOVEL_GET_MODEL();const out=document.getElementById('wizFrameOutput');out.innerHTML='<span class="spinner"></span> AI 正在搭建故事框架...';if(!spendCredits(5))return;const sys=`你是顶级小说架构师。请为以下小说构建完整故事框架。${sizeDesc}，${volDesc}。注意：如果未指定具体章节数和字数，请根据故事的情节密度和类型特点，自行决定最佳的章节分配和每章字数。输出格式：\n\n【故事主线】200字核心主线\n【分卷规划】按需分卷，每卷标题+概要+关键事件+起止章节\n【人物关系网】主角+5个关键配角，含外貌/性格/关系/成长弧\n【世界观架构】时代背景/势力分布/规则体系\n【爽点设计】每卷2-3个核心爽点或高潮\n【读者期待管理】开篇钩子/每卷悬念/最终结局的情感基调\n【规模说明】如果框架中推荐的章数和字数与目标不同，请说明AI推荐的理由`;try{const r=await callModelAPI(modelId,`小说类型：${type} 写作风格：${style} 视角：${pov} 核心创意：${core} ${sizeDesc} ${volDesc} 主角设定：${mc||'由AI设计'} 世界观：${world||'由AI构建'} 金手指：${cheat||'由AI设计'}`,sys);NOVEL_STATE.frame=r.content;out.innerHTML=escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
 function NOVEL_STEP_3(){if(!NOVEL_STATE.frame){showToast('请先生成框架');return}document.getElementById('wizFrameLocked').value=NOVEL_STATE.frame;NOVEL_GOTO_STEP(3)}
 async function NOVEL_STEP_4(){NOVEL_STATE.frame=document.getElementById('wizFrameLocked').value;NOVEL_GOTO_STEP(4)}
-async function NOVEL_STEP_4_GEN(){if(!NOVEL_STATE.frame){showToast('请先锁定框架');return}if(!spendCredits(5))return;const modelId=document.getElementById('wizOutlineModel')?.value||'deepseekr1';const tree=document.getElementById('wizOutlineTree');tree.innerHTML='<span class="spinner"></span> 生成大纲...';const sys='你是小说大纲专家。基于故事框架生成三层大纲。格式：\n\n【全书大纲】100-200字\n【卷纲】3-5卷，格式"第X卷·卷名 | 概要"\n【章纲】每卷4-8章，格式"第X章·章名 | 概要"';try{const r=await callModelAPI(modelId,`基于以下框架生成完整大纲：\n${NOVEL_STATE.frame}`,sys);NOVEL_STATE.outline=r.content;parseOutline(r.content);renderOutlineTree();document.getElementById('wizOutlineLocked').value=r.content}catch(e){tree.innerHTML=`❌ ${e.message}`}}
+async function NOVEL_STEP_4_GEN(){if(!NOVEL_STATE.frame){showToast('请先锁定框架');return}if(!spendCredits(5))return;NOVEL_UPDATE_LENGTH();const modelId=NOVEL_GET_MODEL();const tree=document.getElementById('wizOutlineTree');tree.innerHTML='<span class="spinner"></span> 生成大纲...';let chaps=NOVEL_STATE.chapCount||0,words=NOVEL_STATE.perChapWords||0,vols=NOVEL_STATE.volumeCount||0,total=NOVEL_STATE.totalWords||0;const sizeDesc=chaps>0&&words>0?`总目标${chaps}章×${words}字=${(chaps*words).toLocaleString()}字`:(total>0?`总目标${total.toLocaleString()}字`:'字数由AI按最佳节奏自行决定');const volDesc=vols>0?`分${vols}卷`:'卷数由AI按情节节奏自行分配';const sys=`你是小说大纲专家。基于故事框架生成三层大纲。${sizeDesc}，${volDesc}。如果未指定具体章节数，请根据故事的内容量和节奏自行决定最优分配。格式：\n\n【全书大纲】100-200字\n【卷纲】每卷格式"第X卷·卷名 | 概要 | 起止章节"\n【章纲】每章格式"第X章·章名 | 概要 | 约XX字"`;try{const r=await callModelAPI(modelId,`基于以下框架生成完整大纲：\n${NOVEL_STATE.frame}\n\n${sizeDesc} ${volDesc}`,sys);NOVEL_STATE.outline=r.content;parseOutline(r.content);renderOutlineTree();document.getElementById('wizOutlineLocked').value=r.content}catch(e){tree.innerHTML=`❌ ${e.message}`}}
 function NOVEL_STEP_5(){if(!NOVEL_STATE.outline){showToast('请先生成大纲');return}document.getElementById('wizOutlineLocked').value=NOVEL_STATE.outline;NOVEL_GOTO_STEP(5)}
 function NOVEL_STEP_6_GO(){
   NOVEL_STATE.outline=document.getElementById('wizOutlineLocked').value;
@@ -5476,7 +5879,7 @@ async function NOVEL_STEP_6_WRITE(){
         title=document.getElementById('wizChapTitle').value.trim()||`第${NOVEL_STATE.currentChap}章`;
   if(!points){showToast('请输入本章要点');return}
   if(!spendCredits(5))return;
-  const modelId=document.getElementById('wizWriteModel')?.value||'deepseekv3';
+  const modelId=NOVEL_GET_MODEL();
   const out=document.getElementById('wizWriteOutput');
   out.innerHTML='<span class="spinner"></span> 创作中...';
   // 组装创作约束
@@ -5500,6 +5903,7 @@ ${extraRule?'4. 额外指令：'+extraRule:''}
 【写作要求】
 - 文笔生动，对话自然，节奏张弛有度
 - 本章收尾完整，为下一章留悬念或衔接点
+- 字数要求：${NOVEL_STATE.perChapWords?`本章约${NOVEL_STATE.perChapWords}字（±10%）`:'字数由AI根据当前章节的情节密度和整体进度自行决定最佳字数'}
 - 避免AI腔（严禁"值得注意的是""总的来说""在...的过程中"）
 - 不使用网络流行语
 - 严格按人物档案写角色，不得OOC（角色偏离）
@@ -5519,6 +5923,17 @@ function NOVEL_REFINE(mode){const txt=document.getElementById('wizWriteOutput').
 function NOVEL_REF_MODE(mode,el){NOVEL_STATE.refineMode=mode;document.querySelectorAll('.refine-option').forEach(b=>b.classList.remove('active'));el.classList.add('active')}
 async function NOVEL_REFINE_EXEC(){const input=document.getElementById('refineInput').value.trim();if(!input){showToast('请粘贴文本');return}if(!spendCredits(5))return;const modelId=document.getElementById('refineModel').value;const sysMap={polish:'你是顶级编辑。润色要求：保留核心情节，提升文笔，删除冗余。直接返回润色后文本。',deai:'去掉AI写作痕迹：删除"总的来说""值得注意的是"等AI高频词，打碎过于工整的句式，增加口语化表达和人类写作的不完美。直接返回处理后的文本。',expand:'扩写文本：在关键情节处增加细节，丰富人物心理，扩展环境渲染，字数扩充约50%。直接返回。',shorten:'精简文本：删除冗余但保留精华，保持核心情节，字数缩减约40%。直接返回。'};const out=document.getElementById('refineAfter');out.innerHTML='<span class="spinner"></span> 炼字中...';try{const r=await callModelAPI(modelId,input,sysMap[NOVEL_STATE.refineMode]||sysMap.polish);window._lr=r.content;out.innerHTML=`<div style="margin-bottom:8px;display:flex;gap:6px"><button class="btn-sm primary" onclick="NOVEL_REFINE_ACCEPT()">✅ 采用</button><button class="btn-sm" onclick="NOVEL_REFINE_EXEC()">🔄 重炼</button></div>`+escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
 function NOVEL_REFINE_ACCEPT(){if(window._lr){document.getElementById('wizWriteOutput').innerHTML=escapeHtml(window._lr);document.getElementById('refineInput').value=window._lr;document.getElementById('refineBefore').textContent=window._lr;document.getElementById('refineAfter').innerHTML='<span style="color:var(--green)">✅ 已采用！</span>';document.getElementById('novelRefinePanel').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(6);showToast('润色结果已应用')}}
+
+// ==== 创作工作台函数 ====
+const WB_STATE={chapters:[],current:-1};
+function NOVEL_OPEN_WORKBENCH(){const title=localStorage.getItem('nbt')||'未命名作品';document.getElementById('wbTitle').textContent=title;WB_STATE.chapters=JSON.parse(localStorage.getItem('novelChapters')||'[]');NOVEL_CLOSE_PANEL('all');document.getElementById('novelWorkbench').style.display='block';NOVEL_WB_RENDER_TREE();if(WB_STATE.chapters.length>0){NOVEL_WB_SELECT(0)}else{NOVEL_WB_NEW_CHAPTER()}}
+function NOVEL_WB_GO(idx){NOVEL_OPEN_WORKBENCH();if(idx>=0)NOVEL_WB_SELECT(idx)}
+function NOVEL_WB_NEW_CHAPTER(){const idx=WB_STATE.chapters.length;const title=`第${idx+1}章`;WB_STATE.chapters.push({title,content:'',points:'',created:new Date().toISOString()});NOVEL_WB_RENDER_TREE();NOVEL_WB_SELECT(idx);NOVEL_WB_SAVE();showToast('📄 已新建章节')}
+function NOVEL_WB_SELECT(idx){if(idx<0||idx>=WB_STATE.chapters.length)return;WB_STATE.current=idx;const ch=WB_STATE.chapters[idx];document.getElementById('wbChapTitle').value=ch.title||'';document.getElementById('wbEditor').value=ch.content||'';document.getElementById('wbWordCount').textContent=(ch.content||'').length;document.getElementById('wbProgress').textContent=`第${idx+1}章/共${WB_STATE.chapters.length}章`;document.querySelectorAll('#wbChapterTree .wb-ch-item').forEach(el=>el.style.background='');const sel=document.getElementById('wb-ch-'+idx);if(sel)sel.style.background='var(--accent-soft)'}
+function NOVEL_WB_RENDER_TREE(){const el=document.getElementById('wbChapterTree');if(!WB_STATE.chapters.length){el.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:40px 0"><div style="font-size:2rem;margin-bottom:6px">📝</div><p>暂无章节</p></div>';return}el.innerHTML=WB_STATE.chapters.map((ch,i)=>`<div class="wb-ch-item" id="wb-ch-${i}" style="padding:8px 10px;border-radius:6px;cursor:pointer;margin-bottom:2px;display:flex;align-items:center;gap:6px;transition:background 0.2s;${i===WB_STATE.current?'background:var(--accent-soft)':''}" onclick="NOVEL_WB_SELECT(${i})" onmouseover="this.style.background='var(--bg-input)'" onmouseout="this.style.background='${i===WB_STATE.current?'var(--accent-soft)':''}'"><span style="width:20px;height:20px;border-radius:4px;background:${ch.content?'var(--green)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#fff">${ch.content?'✓':''}</span><span style="flex:1;font-size:0.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ch.title||'无标题'}</span><span style="font-size:0.6rem;color:var(--text-secondary)">${(ch.content||'').length}字</span></div>`).join('')}
+function NOVEL_WB_SAVE(){localStorage.setItem('novelChapters',JSON.stringify(WB_STATE.chapters));const total=WB_STATE.chapters.reduce((s,c)=>s+(c.content||'').length,0);localStorage.setItem('nw',total);localStorage.setItem('nc',WB_STATE.chapters.length);document.getElementById('chapterCount2').textContent=WB_STATE.chapters.length;document.getElementById('totalWords2').textContent=total.toLocaleString()}
+function NOVEL_WB_SAVE_CHAPTER(){if(WB_STATE.current<0)return;const ch=WB_STATE.chapters[WB_STATE.current];ch.title=document.getElementById('wbChapTitle').value;ch.content=document.getElementById('wbEditor').value;WB_STATE.chapters[WB_STATE.current]=ch;NOVEL_WB_SAVE();NOVEL_WB_RENDER_TREE();showToast('✅ 已保存')}
+async function NOVEL_WB_AI(action){const editor=document.getElementById('wbEditor');const title=document.getElementById('wbChapTitle').value||'无标题';const content=editor.value;const modelId=NOVEL_GET_MODEL();const targetWords=NOVEL_STATE.perChapWords||2500;if(!content&&action!=='gen'){showToast('请先写一些内容再操作');return}let prompt='',sys='';const allChapters=WB_STATE.chapters;const prevSummary=allChapters.slice(0,WB_STATE.current).map((c,i)=>`第${i+1}章 ${c.title}: ${(c.content||'').substring(0,200)}...`).join('\n');const outline=localStorage.getItem('novelOutline')||'无大纲';const volInfo=NOVEL_STATE.volumeCount?`（目标：${NOVEL_STATE.chapCount||50}章×${targetWords}字=${NOVEL_STATE.totalWords||'?'}字，分${NOVEL_STATE.volumeCount||4}卷）`:'';if(action==='gen'){prompt=`小说大纲：${outline}\n\n请根据大纲生成第${WB_STATE.current+1}章的内容：${title}\n\n要求：${targetWords}字左右，连贯自然`;sys=`你是专业小说作家。请根据大纲创作章节正文。字数要求约${targetWords}字。注意人物一致性、情节连贯性。直接返回章节正文。${volInfo}`}else if(action==='continue'){prompt=content+'\n\n请继续写下去';sys=`你是专业小说作家。请基于前文续写，保持风格一致，约${targetWords}字。直接返回续写内容。${volInfo}`}else if(action==='polish'){prompt=content;sys='你是顶级编辑。润色要求保留核心情节，提升文笔感染力，删除冗余重复，增加细节描写。直接返回润色后文本。'}else if(action==='deai'){prompt=content;sys='去掉AI写作痕迹：删除"总的来说""值得注意的是""首先""其次""最后"等AI高频词，打碎过于工整的句式，增加口语化表达。直接返回处理后的文本。'}else if(action==='expand'){prompt=content;sys=`扩写文本：在关键情节处增加环境渲染、人物心理、对话细节，字数扩充到${targetWords}字左右。直接返回。`}else if(action==='outline'){prompt=`章节标题：${title}\n\n前文摘要：${prevSummary||'无'}\n\n请为本章写一个大纲`;sys='根据前文和章节标题，写出本章的详细大纲（场景/冲突/转折/结尾）。直接返回。'}else if(action==='review'){prompt=content;sys='你是毒舌编辑。请从以下角度点评本章：节奏张力、人物表现、对话质量、情感渲染、悬念设计、字数达标。给出评分和具体建议。'}if(!spendCredits(3))return;const out=document.getElementById('wbEditor');const oldVal=out.value;out.value='<AI 正在创作中...>';try{const r=await callModelAPI(modelId,prompt,sys);if(action==='gen'||action==='continue'||action==='polish'||action==='deai'||action==='expand'){out.value=r.content;document.getElementById('wbWordCount').textContent=r.content.length;NOVEL_WB_SAVE_CHAPTER()}else{out.value=oldVal+'\n\n--- AI分析 ---\n'+r.content}}catch(e){out.value=oldVal+'\n\n❌ '+e.message}}
 function NOVEL_COPY(){const t=document.getElementById('wizWriteOutput').textContent;navigator.clipboard.writeText(t).then(()=>showToast('已复制'))}
 
 // ==== AI STUDIO 创作工场 ====
@@ -5599,7 +6014,12 @@ function STUDIO_SET(k,v){if(k==='ratio')document.getElementById('stuRatio').valu
 async function STUDIO_GENERATE_IMAGE(){const prompt=document.getElementById('stuPromptText').textContent.trim();const subj=document.getElementById('stuPrompt').value.trim();const p=subj||prompt;if(!p){showToast('请输入创作描述');return}const load=document.getElementById('stuLoading'),img=document.getElementById('stuImage');load.style.display='block';img.style.display='none';document.getElementById('stuImgActions').style.display='none';try{const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=768&height=768&nologo=true&seed=${Math.floor(Math.random()*99999)}`;img.src=url;img.onload=()=>{load.style.display='none';img.style.display='block';document.getElementById('stuImgActions').style.display='flex';window._stuLastImage={url,prompt:document.getElementById('stuPrompt').value,full:p,cat:'绘画',time:new Date().toISOString()}};img.onerror=()=>{load.style.display='none';showToast('生成失败')}}catch(e){load.style.display='none';showToast('出错')}}
 function STUDIO_SAVE_IMAGE(){if(!window._stuLastImage){showToast('请先生成图像');return}const a=document.createElement('a');a.href=window._stuLastImage.url;a.download='ai-creation.png';a.click()}
 function STUDIO_ADD_TO_GALLERY(){if(!window._stuLastImage){showToast('请先生成图像');return}STUDIO_GALLERY.unshift({...window._stuLastImage,cat:'绘画'});STUDIO_GALLERY=STUDIO_GALLERY.slice(0,100);localStorage.setItem('stuGallery',JSON.stringify(STUDIO_GALLERY));showToast('已加入画廊')}
-function renderStudioGallery(){const g=document.getElementById('studioGalleryGrid');let items=STUDIO_GALLERY;if(GALLERY_FILTER_CURRENT!=='all')items=items.filter(i=>i.cat===GALLERY_FILTER_CURRENT);if(!items.length){g.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎨</div><p>没有找到作品</p></div>';return}g.innerHTML=items.map((s,i)=>`<div class="feature-card" style="cursor:pointer;padding:0;overflow:hidden" onclick="STUDIO_GALLERY_USE(${STUDIO_GALLERY.indexOf(s)})"><div style="height:160px;display:flex;align-items:center;justify-content:center;background:var(--bg-input);position:relative;overflow:hidden"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:0.3;pointer-events:none">🎨</div><img src="${s.url}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:cover;position:relative;z-index:1" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none';this.previousElementSibling.style.opacity='0.8';this.previousElementSibling.textContent='🖼️'"></div><div style="padding:12px"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">${escapeHtml(s.prompt.substring(0,40))}...</div><div style="font-size:0.68rem;color:var(--text-secondary)">${s.cat||'绘画'} · ${new Date(s.time).toLocaleString('zh-CN')}</div></div></div>`).join('')}
+function renderStudioGallery(){const g=document.getElementById('studioGalleryGrid');let items=STUDIO_GALLERY;if(GALLERY_FILTER_CURRENT!=='all')items=items.filter(i=>i.cat===GALLERY_FILTER_CURRENT);if(!items.length){g.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎨</div><p>没有找到作品</p></div>';return}g.innerHTML=items.map((s,i)=>{const idx=STUDIO_GALLERY.indexOf(s);return`<div class="gallery-card" onclick="STUDIO_GALLERY_USE(${idx})"><div class="gallery-preview" style="background:var(--bg-input);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center"><div class="gallery-placeholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:0.3;pointer-events:none">🎨</div><img src="${s.url}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:cover;position:relative;z-index:1;transition:transform 0.4s ease" onload="this.parentElement.querySelector('.gallery-placeholder').style.display='none';this.style.transform='scale(1)'" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform='scale(1)'"><div class="gallery-overlay" style="position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,0.7));z-index:2;display:flex;align-items:flex-end;justify-content:center;padding:16px;opacity:0;transition:opacity 0.3s ease;pointer-events:none"><span style="background:var(--accent);color:#fff;padding:6px 14px;border-radius:20px;font-size:0.75rem;font-weight:600">🖱️ 点击加载到创作区</span></div></div><div style="padding:12px"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escapeHtml(s.prompt.substring(0,50))}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:0.68rem;color:var(--text-secondary)">${s.cat||'绘画'} · ${new Date(s.time).toLocaleDateString('zh-CN')}</span><span style="font-size:0.65rem;color:var(--accent);font-weight:600;opacity:0;transition:opacity 0.2s">使用 →</span></div></div></div>`}).join('');
+  document.querySelectorAll('.gallery-card').forEach(card=>{
+    card.addEventListener('mouseenter',function(){this.querySelector('.gallery-overlay').style.opacity='1';const use=this.querySelector('[style*="使用"]');if(use)use.style.opacity='1'});
+    card.addEventListener('mouseleave',function(){this.querySelector('.gallery-overlay').style.opacity='0';const use=this.querySelector('[style*="使用"]');if(use)use.style.opacity='0'});
+  });
+}
 function STUDIO_GALLERY_USE(i){if(!STUDIO_GALLERY[i])return;document.getElementById('stuPrompt').value=STUDIO_GALLERY[i].prompt;document.getElementById('studioTabs').querySelector('[data-tab=image]').click();document.getElementById('studioTabImage').style.display='block';document.getElementById('studioTabVideo').style.display='none';document.getElementById('studioTabGallery').style.display='none';STUDIO_BUILD_PROMPT();showToast('已加载到创作区')}
 async function STUDIO_GENERATE_VIDEO(){const p=document.getElementById('stuVidPrompt').value.trim();if(!p){showToast('请输入视频描述');return}const platform=localStorage.getItem('vid_api_platform')||'agnes';const load=document.getElementById('stuVidLoading'),ph=document.getElementById('stuVidPlaceholder'),res=document.getElementById('stuVidResult'),img=document.getElementById('stuVideoImg'),bar=document.getElementById('vidProgressBar'),txt=document.getElementById('vidStatusText'),sub=document.getElementById('vidStatusSub');if(ph)ph.style.display='none';load.style.display='block';if(bar)bar.style.width='0%';if(txt)txt.textContent='🎨 AI 正在创作视频...';if(sub)sub.textContent='预计需要 1-3 分钟';if(img)img.style.display='none';if(res){res.style.display='none';res.innerHTML=''}const style=document.getElementById('vidStyle').value;const dur=document.getElementById('vidDuration').value;const ratio=document.getElementById('vidRatio').value;const quality=document.getElementById('vidQuality').value;if(!spendCredits(platform==='agnes'?5:10)){load.style.display='none';if(ph)ph.style.display='block';return}try{if(platform==='agnes'){const fullPrompt=p+(style&&style!=='不限制'?', '+style:'')+', cinematic, '+quality+', '+ratio;const body={prompt:fullPrompt,width:1152,height:768,num_frames:Math.min(81+Math.floor(parseInt(dur)/5)*40,241),frame_rate:24};if(style==='赛博朋克'){body.negative_prompt='blurry, low quality, cartoon, anime, pixelated'}const r=await fetch('/api/agnes-video',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!d.ok||!d.id){load.style.display='none';if(ph)ph.style.display='block';showToast('❌ 提交失败: '+(d.error||'未知错误'));return}const taskId=d.id;const statusMsgs=['🎬 正在构思画面...','🎨 绘制关键帧中...','✨ 渲染视频细节...','🎵 合成音频轨道...','🔮 即将完成...'];if(txt)txt.textContent=statusMsgs[0];if(bar)bar.style.width='10%';let result=null;for(let i=0;i<60;i++){await new Promise(rv=>setTimeout(rv,3000));const sr=await fetch('/api/agnes-video/'+taskId);const sd=await sr.json();const pct=Math.min(95,Math.floor((i+1)/60*95));if(bar)bar.style.width=pct+'%';const msgIdx=Math.min(4,Math.floor(i/12));if(txt&&(i===0||i%12===0))txt.textContent=statusMsgs[msgIdx];if(sub)sub.textContent='已等待 '+Math.floor((i+1)*3)+' 秒...';if(sd.status==='completed'){result=sd;if(bar)bar.style.width='100%';if(txt)txt.textContent='✅ 生成完成！';break}if(sd.status==='failed'){load.style.display='none';if(ph)ph.style.display='block';showToast('❌ 生成失败: '+(sd.error||'未知错误'));return}}if(!result){load.style.display='none';if(ph)ph.style.display='block';showToast('⏰ 生成超时，请稍后重试');return}const videoUrl=result.video_url||result.url||result.remixed_from_video_id;if(!videoUrl){load.style.display='none';if(ph)ph.style.display='block';showToast('❌ 未获取到视频链接');return}await new Promise(rv=>setTimeout(rv,400));load.style.display='none';res.style.display='block';res.innerHTML='<div style="padding:8px"><video id="stuVidPlayer" controls autoplay loop playsinline style="width:100%;max-height:400px;border-radius:12px;animation:vidPulse 2s ease 1" src="'+videoUrl+'" onloadeddata="this.closest(\'#stuVidResult\').querySelector(\'.vid-loading-overlay\').style.display=\'none\'"><div class="vid-loading-overlay" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);border-radius:12px;pointer-events:none"><div class="spinner"></div></div></video><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn-sm primary" onclick="window.open(\''+videoUrl+'\')" style="animation:vidReveal 0.4s ease 0.1s both">🔗 新窗口打开</button><button class="btn-sm" onclick="STUDIO_ADD_VIDEO_TO_GALLERY(\''+videoUrl+'\',\''+escapeHtml(p.substring(0,60))+'\')" style="animation:vidReveal 0.4s ease 0.2s both">💾 加入画廊</button><button class="btn-sm" onclick="STUDIO_SAVE_VIDEO()" style="animation:vidReveal 0.4s ease 0.3s both">📥 下载视频</button></div></div>';showToast('🎉 视频生成成功！')}else{const savedKey=localStorage.getItem('vid_api_key');if(!savedKey){showToast('⚠️ 请先在上方切换为自配模式并输入 '+platform+' API Key');load.style.display='none';if(ph)ph.style.display='block';return}const url='https://image.pollinations.ai/prompt/'+encodeURIComponent(p+' '+style+', cinematic, '+quality+', '+ratio)+'?width=768&height=432&nologo=true&seed='+Math.floor(Math.random()*99999);img.src=url;img.onload=()=>{load.style.display='none';img.style.display='block';showToast('🎬 视频预览生成完成（'+dur+'秒, '+platform+', '+quality+'）')};img.onerror=()=>{load.style.display='none';showToast('生成失败')}}}catch(e){load.style.display='none';if(ph)ph.style.display='block';showToast('出错: '+e.message)}}
 function STUDIO_ADD_VIDEO_TO_GALLERY(url,prompt){STUDIO_GALLERY.unshift({url:url,prompt:prompt||'AI 视频',full:prompt||'',cat:'视频',time:new Date().toISOString()});STUDIO_GALLERY=STUDIO_GALLERY.slice(0,100);localStorage.setItem('stuGallery',JSON.stringify(STUDIO_GALLERY));showToast('✅ 已加入画廊')}
@@ -5695,32 +6115,40 @@ function VID_TMPL_USE(i){
 // 页面初始化时渲染模板
 setTimeout(()=>{if(document.getElementById('vidTmplGrid'))VID_RENDER_TEMPLATES()},200);
 
-// ==== 🎎 3D 角色展示库（数据驱动 + 悬停预览） ====
+// ==== 🎎 3D 角色展示库（数据驱动 + 悬停预览 + 真实3D交互） ====
 const D3_TEMPLATES=[
-  {name:'中国龙',prompt:'一只威武的中国龙，东方神话风格，盘旋姿态，鳞片细节丰富，低面数优化',icon:'🐉',color:'#7c2d12,#b45309,#d97706,#f59e0b',tags:['神话','低面数'],thumb:'https://image.pollinations.ai/prompt/A%20majestic%20Chinese%20dragon,%20oriental%20mythical%20style,%20coiled%20pose,%20detailed%20scales,%20low-poly%20game%20asset%20on%20dark%20background?width=400&height=300&nologo=true&seed=1000'},
-  {name:'机甲战士',prompt:'未来机甲战士，合金装甲，蓝色能量核心，战斗姿态，高精度模型，关节可动',icon:'🤖',color:'#1e3a5f,#1d4ed8,#3b82f6,#06b6d4',tags:['科幻','高精度'],thumb:'https://image.pollinations.ai/prompt/Futuristic%20mecha%20warrior,%20alloy%20armor,%20blue%20energy%20core,%20battle%20stance,%20high%20detail%203D%20render?width=400&height=300&nologo=true&seed=1001'},
-  {name:'古代宫殿',prompt:'中国古代宫殿建筑群，唐代风格，红墙金瓦，飞檐翘角，对称布局，低多边形场景模型',icon:'🏯',color:'#4a1d96,#6d28d9,#8b5cf6,#a78bfa',tags:['建筑','场景'],thumb:'https://image.pollinations.ai/prompt/Ancient%20Chinese%20palace%20architecture,%20Tang%20dynasty%20style,%20red%20walls%20golden%20tiles,%20symmetrical%20layout,%20low-poly%203D%20scene?width=400&height=300&nologo=true&seed=1002'},
-  {name:'九尾狐',prompt:'九尾狐妖，白色毛发，九条尾巴飘逸灵动，红宝石般的眼睛，卡通渲染风格，半写实',icon:'🦊',color:'#9d174d,#db2777,#f472b6,#f9a8d4',tags:['卡通','角色'],thumb:'https://image.pollinations.ai/prompt/Nine-tailed%20fox%20spirit,%20white%20fur,%20nine%20flowing%20tails,%20ruby%20eyes,%20cel-shaded%20game%20character%20style?width=400&height=300&nologo=true&seed=1003'},
-  {name:'星际飞船',prompt:'科幻星际驱逐舰，流线型设计，金属装甲外壳，引擎喷口蓝色火焰，高精度细节，太空场景',icon:'🚀',color:'#0f172a,#1e40af,#2563eb,#38bdf8',tags:['科幻','载具'],thumb:'https://image.pollinations.ai/prompt/Sci-fi%20starship%20destroyer,%20streamlined%20design,%20metallic%20armor,%20blue%20engine%20glow,%203D%20model%20on%20black?width=400&height=300&nologo=true&seed=1004'},
-  {name:'像素角色',prompt:'像素风格游戏角色，8-bit复古风格，色彩鲜艳，体素方块构建，Q版可爱大头造型',icon:'👾',color:'#064e3b,#059669,#10b981,#6ee7b7',tags:['体素','游戏'],thumb:'https://image.pollinations.ai/prompt/Pixel%20art%20game%20character,%208-bit%20retro%20style,%20bright%20colors,%20voxel%20block%20built,%20chibi%20cute%20big%20head?width=400&height=300&nologo=true&seed=1005'},
-  {name:'精灵弓箭手',prompt:'奇幻精灵弓箭手，尖耳朵，银色长发，翠绿斗篷，手持精灵长弓，轻盈姿态，PBR材质',icon:'🧝',color:'#14532d,#166534,#16a34a,#86efac',tags:['奇幻','角色'],thumb:'https://image.pollinations.ai/prompt/Fantasy%20elf%20archer,%20pointed%20ears,%20silver%20long%20hair,%20emerald%20cloak,%20holding%20elf%20bow,%203D%20game%20character%20concept?width=400&height=300&nologo=true&seed=1006'},
-  {name:'赛博武士',prompt:'赛博朋克日本武士，霓虹灯管武士刀，全息面甲，碳纤维护甲，雨夜街头站立，高模',icon:'⚔️',color:'#1e1b4b,#312e81,#6366f1,#a855f7',tags:['赛博','角色'],thumb:'https://image.pollinations.ai/prompt/Cyberpunk%20samurai,%20neon%20katana,%20holographic%20face%20mask,%20carbon%20fiber%20armor,%20standing%20in%20rain,%203D%20render?width=400&height=300&nologo=true&seed=1007'},
-  {name:'机甲恐龙',prompt:'机械暴龙，金属骨骼外露，液压关节，红色电子眼，科幻武器化改装，大型生物机甲',icon:'🦖',color:'#7c2d12,#c2410c,#f97316,#fdba74',tags:['科幻','生物'],thumb:'https://image.pollinations.ai/prompt/Mechanical%20tyrannosaurus%20rex,%20exposed%20metal%20skeleton,%20hydraulic%20joints,%20red%20electronic%20eye,%20sci-fi%20weaponized,%20large%20bio-mecha?width=400&height=300&nologo=true&seed=1008'},
-  {name:'魔法书',prompt:'漂浮的古老魔法书，皮革封面金色符文，书页自动翻动，魔法粒子环绕，低多边形游戏资产',icon:'📖',color:'#4a044e,#86198f,#c026d3,#e879f9',tags:['魔法','道具'],thumb:'https://image.pollinations.ai/prompt/Floating%20ancient%20spellbook,%20leather%20cover%20golden%20runes,%20pages%20turning,%20magic%20particles,%20low-poly%20game%20asset?width=400&height=300&nologo=true&seed=1009'},
+  {name:'中国龙',prompt:'一只威武的中国龙，东方神话风格，盘旋姿态，鳞片细节丰富，低面数优化',icon:'🐉',color:'#7c2d12,#b45309,#d97706,#f59e0b',tags:['神话','低面数'],thumb:'https://image.pollinations.ai/prompt/A%20majestic%20Chinese%20dragon,%20oriental%20mythical%20style,%20coiled%20pose,%20detailed%20scales,%20low-poly%20game%20asset%20on%20dark%20background?width=400&height=300&nologo=true&seed=1000',model3d:'https://modelviewer.dev/shared-assets/models/DamagedHelmet.glb'},
+  {name:'机甲战士',prompt:'未来机甲战士，合金装甲，蓝色能量核心，战斗姿态，高精度模型，关节可动',icon:'🤖',color:'#1e3a5f,#1d4ed8,#3b82f6,#06b6d4',tags:['科幻','高精度'],thumb:'https://image.pollinations.ai/prompt/Futuristic%20mecha%20warrior,%20alloy%20armor,%20blue%20energy%20core,%20battle%20stance,%20high%20detail%203D%20render?width=400&height=300&nologo=true&seed=1001',model3d:''},
+  {name:'古代宫殿',prompt:'中国古代宫殿建筑群，唐代风格，红墙金瓦，飞檐翘角，对称布局，低多边形场景模型',icon:'🏯',color:'#4a1d96,#6d28d9,#8b5cf6,#a78bfa',tags:['建筑','场景'],thumb:'https://image.pollinations.ai/prompt/Ancient%20Chinese%20palace%20architecture,%20Tang%20dynasty%20style,%20red%20walls%20golden%20tiles,%20symmetrical%20layout,%20low-poly%203D%20scene?width=400&height=300&nologo=true&seed=1002',model3d:''},
+  {name:'九尾狐',prompt:'九尾狐妖，白色毛发，九条尾巴飘逸灵动，红宝石般的眼睛，卡通渲染风格，半写实',icon:'🦊',color:'#9d174d,#db2777,#f472b6,#f9a8d4',tags:['卡通','角色'],thumb:'https://image.pollinations.ai/prompt/Nine-tailed%20fox%20spirit,%20white%20fur,%20nine%20flowing%20tails,%20ruby%20eyes,%20cel-shaded%20game%20character%20style?width=400&height=300&nologo=true&seed=1003',model3d:''},
+  {name:'星际飞船',prompt:'科幻星际驱逐舰，流线型设计，金属装甲外壳，引擎喷口蓝色火焰，高精度细节，太空场景',icon:'🚀',color:'#0f172a,#1e40af,#2563eb,#38bdf8',tags:['科幻','载具'],thumb:'https://image.pollinations.ai/prompt/Sci-fi%20starship%20destroyer,%20streamlined%20design,%20metallic%20armor,%20blue%20engine%20glow,%203D%20model%20on%20black?width=400&height=300&nologo=true&seed=1004',model3d:''},
+  {name:'像素角色',prompt:'像素风格游戏角色，8-bit复古风格，色彩鲜艳，体素方块构建，Q版可爱大头造型',icon:'👾',color:'#064e3b,#059669,#10b981,#6ee7b7',tags:['体素','游戏'],thumb:'https://image.pollinations.ai/prompt/Pixel%20art%20game%20character,%208-bit%20retro%20style,%20bright%20colors,%20voxel%20block%20built,%20chibi%20cute%20big%20head?width=400&height=300&nologo=true&seed=1005',model3d:''},
+  {name:'精灵弓箭手',prompt:'奇幻精灵弓箭手，尖耳朵，银色长发，翠绿斗篷，手持精灵长弓，轻盈姿态，PBR材质',icon:'🧝',color:'#14532d,#166534,#16a34a,#86efac',tags:['奇幻','角色'],thumb:'https://image.pollinations.ai/prompt/Fantasy%20elf%20archer,%20pointed%20ears,%20silver%20long%20hair,%20emerald%20cloak,%20holding%20elf%20bow,%203D%20game%20character%20concept?width=400&height=300&nologo=true&seed=1006',model3d:''},
+  {name:'赛博武士',prompt:'赛博朋克日本武士，霓虹灯管武士刀，全息面甲，碳纤维护甲，雨夜街头站立，高模',icon:'⚔️',color:'#1e1b4b,#312e81,#6366f1,#a855f7',tags:['赛博','角色'],thumb:'https://image.pollinations.ai/prompt/Cyberpunk%20samurai,%20neon%20katana,%20holographic%20face%20mask,%20carbon%20fiber%20armor,%20standing%20in%20rain,%203D%20render?width=400&height=300&nologo=true&seed=1007',model3d:''},
+  {name:'机甲恐龙',prompt:'机械暴龙，金属骨骼外露，液压关节，红色电子眼，科幻武器化改装，大型生物机甲',icon:'🦖',color:'#7c2d12,#c2410c,#f97316,#fdba74',tags:['科幻','生物'],thumb:'https://image.pollinations.ai/prompt/Mechanical%20tyrannosaurus%20rex,%20exposed%20metal%20skeleton,%20hydraulic%20joints,%20red%20electronic%20eye,%20sci-fi%20weaponized,%20large%20bio-mecha?width=400&height=300&nologo=true&seed=1008',model3d:''},
+  {name:'魔法书',prompt:'漂浮的古老魔法书，皮革封面金色符文，书页自动翻动，魔法粒子环绕，低多边形游戏资产',icon:'📖',color:'#4a044e,#86198f,#c026d3,#e879f9',tags:['魔法','道具'],thumb:'https://image.pollinations.ai/prompt/Floating%20ancient%20spellbook,%20leather%20cover%20golden%20runes,%20pages%20turning,%20magic%20particles,%20low-poly%20game%20asset?width=400&height=300&nologo=true&seed=1009',model3d:''},
 ];
 function D3_RENDER_SHOWCASE(){
   const grid=document.getElementById('d3Showcase');
   if(!grid)return;
-  grid.innerHTML=D3_TEMPLATES.map((t,i)=>`<div class="feature-card vid-tmpl-card d3-card" style="padding:0;overflow:hidden;cursor:pointer;position:relative;perspective:600px" onclick="D3_TMPL_USE(${i})">
-    <div class="d3-card-inner" style="width:100%;height:200px;position:relative;transform-style:preserve-3d;transition:transform 0.8s cubic-bezier(0.4,0,0.2,1)"><div class="d3-card-front" style="position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(135deg,${t.color});display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:absolute;inset:0;z-index:0">${t.icon}</div>${t.thumb?`<img src="${t.thumb}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1;opacity:1" onload="this.style.opacity='1'" onerror="this.remove()">`:''}<div style="position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,0.8));z-index:2;pointer-events:none"><div style="font-weight:700;font-size:0.85rem;color:#fff">${t.name}</div><div style="display:flex;gap:3px;margin-top:3px">${t.tags.map(tag=>`<span style="font-size:0.6rem;padding:1px 6px;background:rgba(255,255,255,0.15);border-radius:3px;color:#fff">${tag}</span>`).join('')}</div></div></div><div class="d3-card-back" style="position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;overflow:hidden;transform:rotateY(180deg);background:linear-gradient(135deg,#1a1035,#261652)">${t.thumb?`<img src="${t.thumb}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0.35" onerror="this.remove()">`:''}<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;z-index:1"><div style="font-weight:700;font-size:0.9rem;color:var(--accent);margin-bottom:8px">${t.name}</div><div style="font-size:0.7rem;color:var(--text-secondary);text-align:center;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${t.prompt.substring(0,60)}...</div><button onclick="event.stopPropagation();D3_AUTO_GENERATE(${i})" class="d3-gen-btn" style="padding:5px 14px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--cyan));color:#fff;cursor:pointer;font-size:0.7rem;font-weight:700;transition:all 0.3s;box-shadow:0 2px 8px rgba(155,89,247,0.4)">🎨 一键生成 3D</button><span id="d3Status${i}" style="font-size:0.6rem;color:var(--text-secondary);margin-top:6px;display:none"></span></div></div></div></div>
-  </div>`).join('');
-  // 鼠标悬停旋转
+  const firstModel=D3_TEMPLATES.find(t=>t.model3d);
+  const viewerHTML=firstModel?`<div style="grid-column:1/-1;margin-bottom:16px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-weight:600;font-size:0.85rem;margin-bottom:8px">🎮 实时3D预览 — ${firstModel.name}（拖拽旋转/滚轮缩放）</div><model-viewer src="${firstModel.model3d}" auto-rotate camera-controls style="width:100%;height:260px;border-radius:8px;background:var(--bg-input)" loading="eager" reveal="auto" shadow-intensity="1" environment-image="neutral"></model-viewer></div>`:'';
+  grid.innerHTML=viewerHTML+D3_TEMPLATES.map((t,i)=>`<div class="feature-card d3-card" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all 0.35s ease" onclick="${t.model3d?`D3_VIEW_MODEL(${i})`:`D3_TMPL_USE(${i})`}"><div style="height:180px;position:relative;overflow:hidden;background:linear-gradient(135deg,${t.color})"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:3rem;z-index:0;opacity:0.5">${t.icon}</div>${t.thumb?`<img src="${t.thumb}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1" onerror="this.remove()">`:''}${t.model3d?`<div style="position:absolute;top:8px;right:8px;z-index:3;background:rgba(16,185,129,0.9);color:#fff;padding:3px 8px;border-radius:12px;font-size:0.65rem;font-weight:700">3D ✓</div><div class="d3-ov" style="position:absolute;inset:0;z-index:2;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;transition:background 0.3s;pointer-events:none"><span style="background:var(--accent);color:#fff;padding:8px 16px;border-radius:20px;font-size:0.8rem;font-weight:600;opacity:0;transform:translateY(8px);transition:all 0.3s">🖱️ 查看3D模型</span></div>`:''}<div style="position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,0.85));z-index:2;pointer-events:none"><div style="font-weight:700;font-size:0.85rem;color:#fff">${t.name}</div><div style="display:flex;gap:3px;margin-top:4px">${t.tags.map(tag=>`<span style="font-size:0.6rem;padding:1px 6px;background:rgba(255,255,255,0.15);border-radius:3px;color:#fff">${tag}</span>`).join('')}</div></div></div><div style="padding:12px"><div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${t.prompt.substring(0,60)}...</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">${t.model3d?`<span style="font-size:0.68rem;color:#10b981;font-weight:600">✅ 可查看3D</span>`:`<span style="font-size:0.68rem;color:var(--text-secondary)">🔄 点击加载提示词</span>`}<span style="font-size:0.65rem;color:var(--accent);font-weight:600;opacity:0;transition:opacity 0.2s">→</span></div></div></div>`).join('');
   document.querySelectorAll('.d3-card').forEach(card=>{
-    card.addEventListener('mouseenter',function(){this.querySelector('.d3-card-inner').style.transform='rotateY(180deg)'});
-    card.addEventListener('mouseleave',function(){this.querySelector('.d3-card-inner').style.transform='rotateY(0deg)'});
+    card.addEventListener('mouseenter',function(){this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)';const ov=this.querySelector('.d3-ov');if(ov){ov.style.background='rgba(0,0,0,0.35)';ov.querySelector('span').style.opacity='1';ov.querySelector('span').style.transform='translateY(0)'};const arr=this.querySelector('[style*="→"]');if(arr)arr.style.opacity='1'});
+    card.addEventListener('mouseleave',function(){this.style.transform='';this.style.boxShadow='';const ov=this.querySelector('.d3-ov');if(ov){ov.style.background='rgba(0,0,0,0)';ov.querySelector('span').style.opacity='0';ov.querySelector('span').style.transform='translateY(8px)'};const arr=this.querySelector('[style*="→"]');if(arr)arr.style.opacity='0'});
   });
 }
-function D3_TMPL_USE(i){
+function D3_VIEW_MODEL(i){
+  const t=D3_TEMPLATES[i];if(!t||!t.model3d)return;
+  const viewer=document.getElementById('d3ModelViewer');
+  if(viewer){
+    viewer.style.display='block';
+    document.getElementById('d3Viewer').src=t.model3d;
+    document.getElementById('d3DownloadBtn').onclick=()=>window.open(t.model3d,'_blank');
+    viewer.scrollIntoView({behavior:'smooth'});
+  }
+}function D3_TMPL_USE(i){
   const t=D3_TEMPLATES[i];if(!t)return;
   document.getElementById('d3TextPrompt').value=t.prompt;
   document.getElementById('d3TextStyle').value='realistic';
@@ -5731,7 +6159,7 @@ function D3_TMPL_USE(i){
 // 卡通背面一键生成 3D 模型
 async function D3_AUTO_GENERATE(i){
   const t=D3_TEMPLATES[i];if(!t)return;
-  if(!spendCredits(12))return;
+  if(!spendCredits(288))return;
   const btn=document.querySelectorAll('.d3-card .d3-gen-btn')[i];
   const status=document.getElementById('d3Status'+i);
   btn.textContent='⏳ 提交中...';btn.style.opacity='0.8';status.style.display='none';
@@ -5774,8 +6202,8 @@ async function D3_POLL_PROGRESS(i,taskId,btn,status){
 }
 // 批量生成全部 10 个 3D 模型
 async function D3_BATCH_GENERATE(){
-  if(!confirm('将为全部10个角色生成3D模型，共需120积分。继续?'))return;
-  if(!spendCredits(120))return;
+  if(!confirm('将为全部10个角色生成3D模型，共需2880积分。继续?'))return;
+  if(!spendCredits(2880))return;
   showToast('🚀 开始批量生成，请耐心等待...');
   for(let i=0;i<D3_TEMPLATES.length;i++){
     const card=document.querySelectorAll('.d3-card')[i];
@@ -6246,7 +6674,7 @@ refineText=function(mode){NOVEL_REFINE(mode)};
 const _origExecuteRefine=executeRefine;
 executeRefine=function(){NOVEL_REFINE_EXEC()};
 
-function toggleMobileMenu(){const m=document.getElementById('mobileMenu');m.style.display=m.style.display==='none'||!m.style.display?'block':'none'}
+function toggleMobileMenu(){const m=document.getElementById('mobileMenuPanel');if(m)m.classList.toggle('show');const mm=document.getElementById('mobileMenu');if(mm)mm.style.display=mm.style.display==='none'||!mm.style.display?'block':'none'}
 if(currentUser){userCredits=parseInt(localStorage.getItem('cr_'+currentUser.username)||'30');localStorage.setItem('cr',userCredits);novelHistory=localStorage.getItem('novelHistory')||''}
 // 设备自动登录：如果本设备已有绑定账号，直接登录
 if(!currentUser){
@@ -6441,7 +6869,7 @@ async function D3_TEXT_TO_3D(){
   const style=document.getElementById('d3TextStyle').value;
   const r=document.getElementById('d3TextResult');
   if(!prompt){showToast('请输入3D描述');return}
-  if(!spendCredits(12))return;
+  if(!spendCredits(288))return;
   r.style.display='block';
   r.innerHTML='<span class="spinner"></span> 正在提交 3D 模型...<p style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">生成需要5-15分钟，自动等待中…</p>';
   try{
@@ -6490,9 +6918,7 @@ function D3_IMAGE_TO_3D(){
   const file=document.getElementById('d3ImageInput').files[0];
   const r=document.getElementById('d3ImageResult');
   if(!file){showToast('请选择参考图片');return}
-  if(!spendCredits(12))return;
-  r.style.display='block';
-  r.innerHTML='<span class="spinner"></span> 图片已选中，建议用文本描述以获得最快结果...<p style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">描述越详细，效果越好</p>';
+  if(!spendCredits(288))return;
   setTimeout(()=>D3_TEXT_TO_3D(),1000);
 }
 function D3_TOGGLE_FAQ(el){
@@ -6743,22 +7169,33 @@ function renderModelBar(pageId,containerId){
   const el=document.getElementById(containerId);
   if(!el||!rec)return;
   const saved=localStorage.getItem('pageModel_'+pageId)||rec.id;
-  // 动态生成全部模型选项
-  const allOpts=models.filter(m=>!m.hidden&&(!rec.filter||(m.tags&&m.tags.includes(rec.filter)))).map(m=>`<option value="${m.id}" ${saved===m.id?'selected':''}>${m.name} ${getModelCost(m.id)===0?'🆓':'⚡'+getModelCost(m.id)}</option>`).join('');
+  const allOpts=models.filter(m=>!m.hidden&&(!rec.filter||(m.tags&&m.tags.includes(rec.filter)))).map(m=>'<option value="'+m.id+'" '+(saved===m.id?'selected':'')+'>'+m.name+' '+(getModelCost(m.id)===0?'\u{1F193}':'\u26A1'+getModelCost(m.id))+'</option>').join('');
   el.innerHTML=`
-    <div class="feature-card" style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:12px;background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(99,102,241,0.05))">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span style="font-size:0.75rem;font-weight:600;">🤖 模型选择</span>
-        <select id="pm_${pageId}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.75rem;min-width:200px;max-width:280px" onchange="PAGE_MODEL_CHANGE('${pageId}',this.value)">
+    <div class="right-panel-card" style="padding:8px 12px;background:linear-gradient(135deg,rgba(124,58,237,0.04),rgba(99,102,241,0.04))">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:0.7rem;font-weight:600;white-space:nowrap;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l-.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> 模型</span>
+        <select id="pm_${pageId}" style="flex:1;min-width:0;padding:4px 6px;border-radius:5px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.7rem" onchange="PAGE_MODEL_CHANGE('${pageId}',this.value)">
           ${allOpts}
         </select>
-        <span style="font-size:0.65rem;padding:2px 8px;background:rgba(245,158,11,0.15);color:#f59e0b;border-radius:10px;font-weight:600">✨ 推荐 ${rec.name}</span>
+        <span style="font-size:0.6rem;padding:1px 6px;background:rgba(245,158,11,0.15);color:#f59e0b;border-radius:8px;font-weight:600;white-space:nowrap">⭐ ${rec.name}</span>
       </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span id="pm_reason_${pageId}" style="font-size:0.65rem;color:var(--text-secondary)">💡 ${rec.reason}</span>
-      </div>
+      <div style="font-size:0.6rem;color:var(--text-secondary);margin-top:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10" style="vertical-align:middle;margin-right:2px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${rec.reason}</div>
     </div>
   `;
+}
+// 在右侧面板渲染模型选择器（自动添加到内容顶部）
+// 在右侧面板渲染模型选择器（自动添加到内容顶部）
+function renderModelBarRight(pageId){
+  const content=document.getElementById('rightPanelContent');
+  if(!content)return;
+  // 页面名到模型推荐名的映射
+  const map={'3d':'d3','office':'office','brand':'brand','market':'market','novel':'novel','media':'media','agents':'agents','studio':'studio','music':'music'};
+  const modelKey=map[pageId];
+  if(!modelKey||!PAGE_MODEL_RECOMMEND[modelKey])return;
+  const barId='rMB_'+modelKey;
+  let bar=document.getElementById(barId);
+  if(!bar){bar=document.createElement('div');bar.id=barId;content.prepend(bar)}
+  renderModelBar(modelKey,barId);
 }
 function PAGE_MODEL_CHANGE(pageId,val){
   localStorage.setItem('pageModel_'+pageId,val);

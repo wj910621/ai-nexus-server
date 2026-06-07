@@ -165,6 +165,10 @@ const MODEL_CONFIG = {
   // === API Nexus (海外旗舰模型) ===
   nx_gpt5:            { provider: 'nexus', model: 'gpt-5-pro',              baseUrl: 'https://apinexus.net/v1' },
   nx_gpt5mini:        { provider: 'nexus', model: 'gpt-5-mini',             baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt54pro:        { provider: 'nexus', model: 'gpt-5.4-pro',            baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt54mini:       { provider: 'nexus', model: 'gpt-5.4-mini',           baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt54nano:       { provider: 'nexus', model: 'gpt-5.4-nano',           baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt55pro:        { provider: 'nexus', model: 'gpt-5.5-pro',            baseUrl: 'https://apinexus.net/v1' },
   nx_claude_opus:     { provider: 'nexus', model: 'claude-opus-4-6',        baseUrl: 'https://apinexus.net/v1' },
   nx_claude_sonnet:   { provider: 'nexus', model: 'claude-sonnet-4-6',      baseUrl: 'https://apinexus.net/v1' },
   nx_claude_haiku:    { provider: 'nexus', model: 'claude-haiku-4-5',       baseUrl: 'https://apinexus.net/v1' },
@@ -215,7 +219,6 @@ const MODEL_CONFIG = {
   spark4:       { provider: 'openai', model: 'spark-lite-free',            baseUrl: 'https://www.dmxapi.cn/v1' },
 };
 
-// 部分旧模型（qwen25, step2 等）无 API 配置或渠道，暂时保留模拟回复
 // 接入状态说明：gpt4turbo/claude35/claude3opus/gemini15pro/gemini15flash/kimi/glm4/minimax/doubao/spark4 已通过对应渠道接入
 
 // ============================================================
@@ -284,7 +287,12 @@ async function callOpenAICompatible(config, messages, apiKey) {
   }
 
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || '(模型返回为空)';
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) {
+    console.log(`[EMPTY] ${config.model} 返回空内容, response keys:`, Object.keys(data).join(','));
+    throw new Error('模型返回了空内容，可能不是文本对话模型或请求格式有误');
+  }
+  return content;
 }
 
 // ============================================================
@@ -328,20 +336,6 @@ async function callGemini(config, messages, apiKey) {
 }
 
 // ============================================================
-// 模拟回复 (用于未配置 API Key 的模型)
-// ============================================================
-function getSimulatedReply(modelId, question) {
-  const modelName = {
-    gpt4o: 'GPT-4o',
-    deepseekv3: 'DeepSeek-V3', deepseekr1: 'DeepSeek-R1',
-    qwen25: '通义千问 2.5', hunyuan: '混元',
-    step2: 'Step-2',
-  };
-
-  const name = modelName[modelId] || modelId;
-  return `[${name} 模拟回复]\n\n关于「${question}」这个问题：\n\n⚠️ 该模型尚未配置 API Key，当前为模拟回复。\n\n如果需要真实 API 回复，请在 server/.env 文件中填入对应的 API Key 后重启服务。\n\n---\n模拟内容：这是一个很好的问题。从技术角度分析，这涉及到多个因素的综合考量。建议从以下几个方面入手：\n\n1. 明确需求和目标\n2. 评估可行方案\n3. 选择最优路径并持续迭代\n\n如需更深入的分析，请配置真实 API。`;
-}
-
 // ============================================================
 // 统一聊天接口
 // ============================================================
@@ -379,13 +373,13 @@ app.post('/api/chat', async (req, res) => {
   }
 
   if (!config) {
-    // 完全未知的模型 → 模拟回复
-    console.log(`[SIMULATED] 未知模型: ${modelId}`);
+    // 完全未知的模型 → 返回错误提示
+    console.log(`[UNKNOWN] 未找到模型配置: ${modelId}`);
     const question = messages[messages.length - 1]?.content || '';
-    return res.json({
+    return res.status(400).json({
       model: modelId,
-      content: `[${modelId} 模拟回复]\n\n⚠️ 该模型暂未配置 API，当前为模拟回复。\n\n---\n模拟内容：这是一个很好的问题。从技术角度分析，这涉及到多个因素的综合考量。建议从以下几个方面入手：\n\n1. 明确需求和目标\n2. 评估可行方案\n3. 选择最优路径并持续迭代\n\n如需更深入的分析，请配置真实 API。`,
-      simulated: true,
+      content: `❌ 模型「${modelId}」未配置\n\n该模型不在当前支持的模型列表中。可能原因：\n1. 该模型为图片/语音/视频等非对话模型\n2. 模型 ID 已变更或下架\n3. 需要联系管理员添加配置\n\n支持列表刷新页面后在"模型选择"中查看。`,
+      error: true,
     });
   }
 
@@ -396,17 +390,17 @@ app.post('/api/chat', async (req, res) => {
   if (apiKey === 'qianfan') {
     actualApiKey = await getQianfanToken();
     if (!actualApiKey) {
-      return res.json({ model: modelId, content: '❌ 百度千帆 Token 获取失败，请检查 AK/SK 配置。', error: true });
+      return res.status(500).json({ model: modelId, content: '❌ 百度千帆 Token 获取失败，请检查 AK/SK 配置。', error: true });
     }
   }
 
   if (!actualApiKey) {
-    // 未配置密钥 → 返回模拟回复
-    const question = messages[messages.length - 1]?.content || '';
-    return res.json({
+    // 未配置密钥 → 返回错误提示
+    console.log(`[NO_KEY] ${modelId} 缺少 API Key`);
+    return res.status(500).json({
       model: modelId,
-      content: getSimulatedReply(modelId, question),
-      simulated: true,
+      content: `❌ 模型「${modelId}」API Key 未配置\n\n该模型的后端 API 密钥未设置，暂时无法使用。请联系管理员在服务器环境变量中配置对应的 API Key。`,
+      error: true,
     });
   }
 
@@ -480,24 +474,29 @@ app.get('/api/models-list', (req, res) => {
 
 app.get('/api/models-count', async (req, res) => {
   let staticCount = Object.keys(MODEL_CONFIG).length;
+
+  // 尝试并行拉取动态模型计数（应用白名单过滤）
+  const tryCount = async (url, headers, filterFn) => {
+    try {
+      const r = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
+      if (!r.ok) return 0;
+      const d = await r.json();
+      if (!d?.data) return 0;
+      return d.data.filter(m => filterFn(m.id)).length;
+    } catch(e) { return 0; }
+  };
+
   let dynamicCount = 0;
-
-  // 尝试并行拉取动态模型计数
-  const tryCount = (url, headers) => fetch(url, { headers, signal: AbortSignal.timeout(8000) })
-    .then(r => r.ok ? r.json() : null)
-    .then(d => d?.data?.length || 0)
-    .catch(() => 0);
-
   try {
     const [bailian, sf, openrouter] = await Promise.all([
-      process.env.DASHSCOPE_API_KEY ? tryCount('https://dashscope.aliyuncs.com/compatible-mode/v1/models', { Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY}` }) : Promise.resolve(211),
-      process.env.SILICONFLOW_API_KEY ? tryCount('https://api.siliconflow.cn/v1/models', { Authorization: `Bearer ${process.env.SILICONFLOW_API_KEY}` }) : Promise.resolve(92),
-      process.env.OPENROUTER_API_KEY ? tryCount('https://openrouter.ai/api/v1/models', { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}` }) : Promise.resolve(100),
+      process.env.DASHSCOPE_API_KEY ? tryCount('https://dashscope.aliyuncs.com/compatible-mode/v1/models', { Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY}` }, isBailianChatModel) : Promise.resolve(0),
+      process.env.SILICONFLOW_API_KEY ? tryCount('https://api.siliconflow.cn/v1/models', { Authorization: `Bearer ${process.env.SILICONFLOW_API_KEY}` }, isSiliconFlowChatModel) : Promise.resolve(0),
+      process.env.OPENROUTER_API_KEY ? tryCount('https://openrouter.ai/api/v1/models', { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}` }, isOpenRouterChatModel) : Promise.resolve(0),
     ]);
     dynamicCount = bailian + sf + openrouter;
   } catch(e) { dynamicCount = 0; }
 
-  res.json({ count: staticCount + (dynamicCount || 400) });
+  res.json({ count: staticCount + dynamicCount });
 });
 
 // ============================================================
@@ -673,6 +672,16 @@ function getDynamicCost(modelId) {
 // ============================================================
 // 阿里百炼模型动态拉取
 // ============================================================
+// 百炼平台已知可用的聊天模型前缀（白名单）
+const BAILIAN_CHAT_PREFIX = /^(qwen3\.\d|qwen3-\d|deepseek-v\d|glm-[4-9]|glm-1\d)/i;
+
+function isBailianChatModel(modelId) {
+  // 先黑名单过滤非聊天类型
+  if (/image|wan|flux|stable|sd[-_]|asr|speech|tts|voice|audio|cosyvoice|gummy|paraformer|sambert|embed|bge[-_]|gte[-_]|video|deep[-_]research|rerank|realtime|MiniMax|kimi-L|abab|moonshot|step[-_]/i.test(modelId)) return false;
+  // 再白名单验证是否为已知可用的聊天模型
+  return BAILIAN_CHAT_PREFIX.test(modelId);
+}
+
 app.get('/api/bailian-models', async (req, res) => {
   const apiKey = process.env.DASHSCOPE_API_KEY;
   if (!apiKey) return res.json({ ok: false, models: [] });
@@ -681,25 +690,27 @@ app.get('/api/bailian-models', async (req, res) => {
       headers: { 'Authorization': `Bearer ${apiKey}` }
     });
     const data = await r.json();
-    const models = (data.data || []).map(m => {
-      const name = beautifyModelName(m.id, 'bailian');
-      return {
-        id: 'ali_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
-        name,
-        rawModel: m.id,
-        avatar: genAvatarColor(name),
-        desc: genModelDesc(name, '阿里云'),
-        provider: '阿里云',
-        context: '128K',
-        inputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
-        outputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
-        tags: [],
-        platform: 'bailian',
-        free: (m.id || '').includes('免费'),
-        cost: getDynamicCost(m.id),
-      };
-    });
-    res.json({ ok: true, count: models.length, models });
+    const models = (data.data || [])
+      .filter(m => isBailianChatModel(m.id))  // 白名单+黑名单双重过滤
+      .map(m => {
+        const name = beautifyModelName(m.id, 'bailian');
+        return {
+          id: 'ali_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
+          name,
+          rawModel: m.id,
+          avatar: genAvatarColor(name),
+          desc: genModelDesc(name, '阿里云'),
+          provider: '阿里云',
+          context: '128K',
+          inputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
+          outputPrice: (m.id || '').includes('免费') ? '免费' : '按量',
+          tags: [],
+          platform: 'bailian',
+          free: (m.id || '').includes('免费'),
+          cost: getDynamicCost(m.id),
+        };
+      });
+    res.json({ ok: true, count: models.length, models, filtered: (data.data||[]).length - models.length });
   } catch(e) {
     res.json({ ok: false, models: [] });
   }
@@ -708,6 +719,15 @@ app.get('/api/bailian-models', async (req, res) => {
 // ============================================================
 // 硅基流动模型动态拉取
 // ============================================================
+// 硅基流动已知可用的聊天模型前缀
+const SILICONFLOW_CHAT_PREFIX = /^(Qwen\/Qwen3|Qwen\/QwQ|Qwen\/Qwen2\.5|deepseek-ai\/DeepSeek-V3|deepseek-ai\/DeepSeek-R1|Pro\/zai-org\/GLM|tencent\/Hunyuan|meta-llama\/Llama-4|meta-llama\/Llama-3\.[1-9]|mistralai\/Mistral|THUDM\/glm|01-ai\/Yi|internlm\/)/i;
+const SF_NON_CHAT = /image|flux|stable|sd[-_]|video|cogvideo|embed|bge|asr|speech|tts|voice|audio/i;
+
+function isSiliconFlowChatModel(modelId) {
+  if (SF_NON_CHAT.test(modelId)) return false;
+  return SILICONFLOW_CHAT_PREFIX.test(modelId);
+}
+
 app.get('/api/siliconflow-models', async (req, res) => {
   const apiKey = process.env.SILICONFLOW_API_KEY;
   if (!apiKey) return res.json({ ok: false, models: [] });
@@ -716,25 +736,27 @@ app.get('/api/siliconflow-models', async (req, res) => {
       headers: { 'Authorization': `Bearer ${apiKey}` }
     });
     const data = await r.json();
-    const models = (data.data || []).map(m => {
-      const name = beautifyModelName(m.id, 'siliconflow');
-      return {
-        id: 'sf_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
-        name,
-        rawModel: m.id,
-        avatar: genAvatarColor(name),
-        desc: genModelDesc(name, '高性能'),
-        provider: '高性能',
-        context: '64K',
-        inputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
-        outputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
-        tags: [],
-        platform: 'siliconflow',
-        free: (m.id || '').includes('free') || (m.id || '').includes('免费'),
-        cost: getDynamicCost(m.id),
-      };
-    });
-    res.json({ ok: true, count: models.length, models });
+    const models = (data.data || [])
+      .filter(m => isSiliconFlowChatModel(m.id))  // 白名单过滤
+      .map(m => {
+        const name = beautifyModelName(m.id, 'siliconflow');
+        return {
+          id: 'sf_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
+          name,
+          rawModel: m.id,
+          avatar: genAvatarColor(name),
+          desc: genModelDesc(name, '高性能'),
+          provider: '高性能',
+          context: '64K',
+          inputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
+          outputPrice: (m.id || '').includes('free') || (m.id || '').includes('免费') ? '免费' : '按量',
+          tags: [],
+          platform: 'siliconflow',
+          free: (m.id || '').includes('free') || (m.id || '').includes('免费'),
+          cost: getDynamicCost(m.id),
+        };
+      });
+    res.json({ ok: true, count: models.length, models, filtered: (data.data||[]).length - models.length });
   } catch(e) {
     res.json({ ok: false, models: [] });
   }
@@ -743,6 +765,15 @@ app.get('/api/siliconflow-models', async (req, res) => {
 // ============================================================
 // OpenRouter 模型动态拉取
 // ============================================================
+// OpenRouter 已知可用的主流聊天模型前缀
+const OPENROUTER_CHAT_PREFIX = /^(openai\/gpt-4|openai\/gpt-5|openai\/o[1-9]|anthropic\/claude-|google\/gemini-2|google\/gemini-1\.5|meta-llama\/llama-4|meta-llama\/llama-3\.[1-9]|mistralai\/mistral-large|mistralai\/mistral-small|qwen\/qwen-2\.5|qwen\/qwen3|deepseek\/deepseek-v|deepseek\/deepseek-r|perplexity\/|cohere\/command-r|amazon\/nova)/i;
+const OR_NON_CHAT = /image|video|audio|tts|speech|embed|moderation/i;
+
+function isOpenRouterChatModel(modelId) {
+  if (OR_NON_CHAT.test(modelId)) return false;
+  return OPENROUTER_CHAT_PREFIX.test(modelId);
+}
+
 app.get('/api/openrouter-models', async (req, res) => {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) return res.json({ ok: false, models: [] });
@@ -751,25 +782,27 @@ app.get('/api/openrouter-models', async (req, res) => {
       headers: { 'Authorization': `Bearer ${apiKey}` }
     });
     const data = await r.json();
-    const models = (data.data || []).map(m => {
-      const name = beautifyModelName(m.id, 'openrouter');
-      return {
-        id: 'or_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
-        name,
-        rawModel: m.id,
-        avatar: genAvatarColor(name),
-        desc: genModelDesc(name, '海外'),
-        provider: '海外',
-        context: (m.context_length || '128K') + '',
-        inputPrice: m.pricing ? (m.pricing.prompt || '?') : '?',
-        outputPrice: m.pricing ? (m.pricing.completion || '?') : '?',
-        tags: [],
-        platform: 'openrouter',
-        free: false,
-        cost: getDynamicCost(m.id),
-      };
-    });
-    res.json({ ok: true, count: models.length, models });
+    const models = (data.data || [])
+      .filter(m => isOpenRouterChatModel(m.id))  // 白名单过滤
+      .map(m => {
+        const name = beautifyModelName(m.id, 'openrouter');
+        return {
+          id: 'or_' + m.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
+          name,
+          rawModel: m.id,
+          avatar: genAvatarColor(name),
+          desc: genModelDesc(name, '海外'),
+          provider: '海外',
+          context: (m.context_length || '128K') + '',
+          inputPrice: m.pricing ? (m.pricing.prompt || '?') : '?',
+          outputPrice: m.pricing ? (m.pricing.completion || '?') : '?',
+          tags: [],
+          platform: 'openrouter',
+          free: false,
+          cost: getDynamicCost(m.id),
+        };
+      });
+    res.json({ ok: true, count: models.length, models, filtered: (data.data||[]).length - models.length });
   } catch(e) {
     res.json({ ok: false, models: [] });
   }
@@ -920,6 +953,72 @@ app.get('/api/music/task', async (req, res) => {
 });
 
 // ============================================================
+// 可灵 Kling 视频生成 API
+// ============================================================
+const jwt = require('jsonwebtoken');
+const KLING_AK = 'AFFtyyYeEbHGBmYfBTDdF4TDA9TNTnrf';
+const KLING_SK = 'adnGpEn3kAR4TdKGBTMa8E3KLmyKTEEL';
+const KLING_BASE = 'https://api.klingai.com';
+
+function generateKlingToken() {
+  const now = Math.floor(Date.now() / 1000);
+  return jwt.sign(
+    { iss: KLING_AK, exp: now + 1800, nbf: now - 5 },
+    KLING_SK,
+    { algorithm: 'HS256', header: { alg: 'HS256', typ: 'JWT' } }
+  );
+}
+
+// 文生视频
+app.post('/api/kling/text2video', async (req, res) => {
+  try {
+    const { prompt, model = 'kling-v1.6', duration = 5, mode = 'pro' } = req.body;
+    if (!prompt) return res.status(400).json({ error: '请输入提示词' });
+    const token = generateKlingToken();
+    const r = await fetch(`${KLING_BASE}/v1/videos/text2video`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ model_name: model, prompt, duration, mode, image_tailor: 'none' })
+    });
+    res.json(await r.json());
+  } catch(e) {
+    res.status(500).json({ error: '视频生成失败: ' + e.message });
+  }
+});
+
+// 图生视频
+app.post('/api/kling/image2video', async (req, res) => {
+  try {
+    const { image, prompt, model = 'kling-v1.6', duration = 5 } = req.body;
+    if (!image) return res.status(400).json({ error: '请上传图片' });
+    const token = generateKlingToken();
+    const r = await fetch(`${KLING_BASE}/v1/videos/image2video`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ model_name: model, image, prompt: prompt || '', duration, mode: 'pro' })
+    });
+    res.json(await r.json());
+  } catch(e) {
+    res.status(500).json({ error: '图生视频失败: ' + e.message });
+  }
+});
+
+// 查询任务状态
+app.get('/api/kling/task', async (req, res) => {
+  try {
+    const { id } = req.query;
+    if (!id) return res.status(400).json({ error: '缺少任务ID' });
+    const token = generateKlingToken();
+    const r = await fetch(`${KLING_BASE}/v1/videos/${id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    res.json(await r.json());
+  } catch(e) {
+    res.status(500).json({ error: '查询任务失败: ' + e.message });
+  }
+});
+
+// ============================================================
 // SQLite 数据库
 // ============================================================
 let db = null;
@@ -1058,7 +1157,7 @@ async function initDB() {
 
       // === 其他 ===
       ['反馈与支持', '如有功能建议、Bug 反馈或使用疑问，可通过反馈页面提交。我们会根据用户反馈持续优化平台功能。也欢迎通过联系页面提供商业合作建议。', 'support', '反馈,支持,建议,联系'],
-      ['模型积分说明', 'Nexus Hub 模型按能力分为六个等级：免费（4个轻量模型）、1积分（入门级如DeepSeek-V3）、2积分（进阶如Qwen3.6-Plus）、3积分（高级如DeepSeek-V4-Pro）、5积分（旗舰如GPT-4o/DeepSeek-R1）、10积分（尊享如Claude/Gemini Pro）。免费模型不限次数，付费模型按次消耗积分。积分永不过期。', 'pricing', '积分,模型,价格,等级'],
+      ['模型积分说明', 'Nexus Hub 模型按能力分为八个等级：免费（轻量模型不限次）、1积分（入门如DS-V3）、2积分（进阶如Qwen3.6-Plus）、3积分（高级）、5积分（旗舰如GPT-4o/DS-R1）、10积分（尊享如Claude/Gemini Pro）、20-80积分（海外旗舰如GPT-5/Claude Opus）、288积分（3D模型生成）。免费模型不限次数，付费模型按次消耗积分。积分永不过期。', 'pricing', '积分,模型,价格,等级'],
       ['新用户指南', '首次使用建议：1) 注册领取30积分 2) 在Chat页面勾选RAG知识增强获得更精准回答 3) 从1积分模型开始体验 4) 尝试多模型对比功能感受不同AI的回答差异 5) 将常用提示词存入知识库。月度会员¥49最划算，适合深度使用。', 'platform', '新用户,指南,入门,教程'],
     ];
     const stmt = db.prepare("INSERT INTO knowledge_base (title, content, category, tags) VALUES (?,?,?,?)");
@@ -1542,6 +1641,38 @@ app.post('/api/knowledge/search', (req, res) => {
 });
 
 // ============================================================
+// 自定义错误页面
+// ============================================================
+const err404HTML = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>404 - Nexus Hub</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f8f7ff;color:#1a1035;text-align:center}.wrap{max-width:500px;padding:40px}h1{font-size:80px;font-weight:800;background:linear-gradient(135deg,#6c4ef5,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}p{font-size:18px;color:#6b5b95;margin:16px 0 24px}a{display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;border-radius:10px;text-decoration:none;font-weight:600}</style></head><body><div class="wrap"><h1>404</h1><p>页面不存在或已移动</p><a href="/">返回首页</a></div></body></html>`;
+const err500HTML = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>500 - Nexus Hub</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f8f7ff;color:#1a1035;text-align:center}.wrap{max-width:500px;padding:40px}h1{font-size:80px;font-weight:800;background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}p{font-size:18px;color:#6b5b95;margin:16px 0 24px}a{display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;border-radius:10px;text-decoration:none;font-weight:600}</style></head><body><div class="wrap"><h1>500</h1><p>服务器内部错误，请稍后重试</p><a href="/">返回首页</a></div></body></html>`;
+
+// 404 处理 — 放在所有路由之后
+app.use((req, res) => {
+  res.status(404).type('html').send(err404HTML);
+});
+// 全局错误处理
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.message);
+  res.status(500).type('html').send(err500HTML);
+});
+
+// ============================================================
+// 简易访问统计
+// ============================================================
+let statsData = { pv: 0, uv: new Set(), today: new Date().toDateString() };
+app.use((req, res, next) => {
+  const now = new Date().toDateString();
+  if (now !== statsData.today) { statsData = { pv: 0, uv: new Set(), today: now }; }
+  statsData.pv++;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+  if (ip) statsData.uv.add(ip);
+  next();
+});
+app.get('/api/stats', (req, res) => {
+  res.json({ pv: statsData.pv, uv: statsData.uv.size, today: statsData.today });
+});
+
+// ============================================================
 // 启动服务
 // ============================================================
 // 管理员认证（服务端存储密码，跨浏览器/缓存后不丢失）
@@ -1652,16 +1783,17 @@ app.post('/v1/chat/completions', async (req, res) => {
     ark_dsv4f:1, ark_dbs1_6:1, ark_dbs1_8:1, ark_dbs_code:1,
     ark_dsv32:2, ark_dsv4p:2, ark_dbs2_pro:2, ark_glm47:2,
     ark_dbp15p:3, ark_dbs_char:1,
-    // API Nexus 海外旗舰（高价，消耗用户余额 ¥100）
-    nx_gpt5:20, nx_gpt5mini:5, nx_claude_opus:25, nx_claude_sonnet:15,
-    nx_claude_haiku:8, nx_gemini_pro:15, nx_o3mini:10,
-    nx_dalle3:15, nx_flux:8, nx_suno:10, nx_grok3:15,
-    meshy_text:12, meshy_image:12,
+    // API Nexus 海外旗舰（高成本，限制 max_tokens 防止亏损）
+    nx_gpt5:80, nx_gpt5mini:15, nx_gpt54pro:100, nx_gpt54mini:25, nx_gpt54nano:15, nx_gpt55pro:150,
+    nx_claude_opus:120, nx_claude_sonnet:60,
+    nx_claude_haiku:25, nx_gemini_pro:50, nx_o3mini:30,
+    nx_dalle3:30, nx_flux:15, nx_suno:20, nx_grok3:50,
+    meshy_text:288, meshy_image:288,
     qf_ernie4:5, qf_ernie35:2, qf_ernie_speed:0,
     ark_doubao_pro:3, ark_doubao_lite:1,
     bc_baichuan4:3, bc_baichuan3:1,
     qwen3:3, kimi2:3, minimax1:3, doubao:3, doubao15:3, gpt4omini:3, gemini15flash:3,
-    ali_qwen37_max:3, ali_deepseek_v4_pro:3, ali_kimi_k26:3,
+    ali_qwen37_max:8, ali_deepseek_v4_pro:3, ali_kimi_k26:3,
     sf_deepseek_v32:3, sf_glm5:3,
     dmx_glm_5_free:3, dmx_glm_51_free:3, dmx_kimi_k25_free:3,
     dmx_kimi_k26_free:3, dmx_doubao_seed_pro:3, dmx_qwen3_max_free:3,
@@ -1693,13 +1825,25 @@ app.post('/v1/chat/completions', async (req, res) => {
     const apiKeyVal = getApiKey(config.provider, model);
     if (!apiKeyVal) return res.status(500).json({ error: { message: '平台配置错误' } });
     
+    // 高成本模型 token 上限控制（防止单次调用消耗过大）
+    const MAX_TOKENS_MAP = {
+      nx_gpt5: 2048, nx_gpt54pro: 2048, nx_gpt55pro: 2048,
+      nx_claude_opus: 2048, nx_claude_sonnet: 4096,
+      nx_gemini_pro: 4096, nx_grok3: 4096, nx_o3mini: 4096,
+      nx_gpt5mini: 4096, nx_claude_haiku: 4096,
+      ali_qwen37_max: 4096,
+    };
+    const tokenCap = MAX_TOKENS_MAP[model];
+    const userMaxTokens = req.body.max_tokens || 4096;
+    const effectiveMaxTokens = tokenCap ? Math.min(userMaxTokens, tokenCap) : userMaxTokens;
+    
     const url = `${config.baseUrl}/chat/completions`;
     const body = JSON.stringify({
       model: config.model,
       messages,
       stream: false,
       temperature: req.body.temperature || 0.7,
-      max_tokens: req.body.max_tokens || 4096,
+      max_tokens: effectiveMaxTokens,
     });
     
     const response = await fetch(url, {
@@ -1776,20 +1920,32 @@ initDB().then(() => {
 
     // 检查各平台 Key 配置状态（按平台分组输出）
     const platforms = {};
+    const modelsWithoutKey = [];
     for (const [id, config] of Object.entries(MODEL_CONFIG)) {
       const platformKey = id.includes('_') ? id.split('_')[0] : config.provider;
       if (!platforms[platformKey]) {
         const envVar = getApiKey(config.provider, id);
-        platforms[platformKey] = { configured: !!envVar, count: 0 };
+        const configured = !!envVar;
+        platforms[platformKey] = { configured, count: 0, hasKey: configured };
+      }
+      // 检查具体模型是否有 Key
+      const key = getApiKey(config.provider, id);
+      if (!key) {
+        modelsWithoutKey.push(id);
       }
       platforms[platformKey].count++;
     }
     console.log(`\n📋 API Key 配置状态（${Object.keys(MODEL_CONFIG).length} 个模型）:`);
     for (const [name, info] of Object.entries(platforms).sort((a,b)=>a[0].localeCompare(b[0]))) {
-      const icon = info.configured ? '✅' : '❌';
+      const icon = info.hasKey ? '✅' : '❌';
       console.log(`   ${icon} ${name.padEnd(14)} ${info.count} 个模型`);
     }
-    console.log(`\n⚠️  未配置 Key 的模型将返回模拟回复`);
+    if (modelsWithoutKey.length > 0) {
+      console.log(`\n❌ 缺少 API Key 的模型 (${modelsWithoutKey.length} 个):`);
+      modelsWithoutKey.forEach(id => console.log(`   - ${id}`));
+    } else {
+      console.log(`\n✅ 所有模型均已配置 API Key`);
+    }
     console.log(`   管理员默认密码: admin888`);
     console.log(`   数据库文件: ${DB_FILE}\n`);
   });
