@@ -28,6 +28,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   --cyan:#0098db;--cyan-light:rgba(0,152,219,0.08);
   --shadow:0 2px 16px rgba(108,78,245,0.06);--shadow-lg:0 8px 32px rgba(108,78,245,0.1);
   --glass:rgba(255,255,255,0.8);--glass-border:rgba(108,78,245,0.12);
+  --transition:0.25s cubic-bezier(0.4,0,0.2,1);
   /* 认证弹窗亮色主题 */
   --auth-overlay:rgba(0,0,0,0.35);
   --auth-modal-bg:linear-gradient(145deg,rgba(255,255,255,0.96),rgba(245,242,255,0.96));
@@ -47,6 +48,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   --green:#10b981;--red:#ef4444;--orange:#f59e0b;
   --shadow:0 4px 24px rgba(0,0,0,0.3);--shadow-lg:0 8px 40px rgba(0,0,0,0.5);
   --glass:rgba(26,16,53,0.8);--glass-border:rgba(155,89,247,0.12);
+  --transition:0.25s cubic-bezier(0.4,0,0.2,1);
   /* 认证弹窗暗色主题 */
   --auth-overlay:rgba(0,0,0,0.85);
   --auth-modal-bg:linear-gradient(145deg,rgba(20,10,40,0.93),rgba(26,20,60,0.93));
@@ -2218,7 +2220,7 @@ response = client.chat.completions.create(
           <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)">
             <span style="font-weight:700;color:var(--accent)">🧊 3D 模型预览</span>
             <div style="display:flex;gap:8px">
-              <button id="d3DownloadBtn" onclick="" style="padding:4px 12px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600">📥 下载 GLB</button>
+              <button id="d3DownloadBtn" onclick="return false" style="padding:4px 12px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600">📥 下载 GLB</button>
               <button onclick="document.getElementById('d3ModelViewer').style.display='none'" style="padding:4px 8px;border:none;border-radius:8px;background:var(--accent-soft);color:var(--text-secondary);cursor:pointer;font-size:0.75rem">✕</button>
             </div>
           </div>
@@ -2424,47 +2426,53 @@ response = client.chat.completions.create(
 
     <!-- 会员订阅 -->
     <h3 style="text-align:center;font-size:1.1rem;margin:28px 0 16px;color:var(--accent)">👑 会员订阅（推荐）</h3>
+    <p style="text-align:center;font-size:0.78rem;color:var(--text-secondary);margin-bottom:12px">💡 会员比按次买划算<b> 5-9 倍</b> · 每日签到赠积分 · 年卡解锁 GPT-5.5 Pro</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <!-- 月卡 -->
       <div class="feature-card" style="text-align:center;padding:28px 20px">
         <div style="font-size:2rem;margin-bottom:6px">🥈</div>
         <h3>月度会员</h3>
-        <div style="font-size:1.6rem;font-weight:800;color:var(--accent);margin:8px 0">¥39<span style="font-size:0.78rem;font-weight:400">/月</span></div>
-        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:8px">800 积分/月</p>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--accent);margin:8px 0">¥29<span style="font-size:0.78rem;font-weight:400">/月</span></div>
+        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:8px">900 积分/月（30分/天）</p>
         <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">
-          ⚡ 高端模型 8 折<br>
+          ⚡ 国产模型 8 折<br>
+          🎯 GPT-5 Chat 解锁<br>
           📚 知识库 100 条<br>
-          🎯 专属模型优先<br>
           📊 使用统计面板
         </div>
-        <button class="btn-send" onclick="subscribe('monthly')">订阅 ¥39</button>
+        <button class="btn-send" onclick="subscribe('monthly')">订阅 ¥29</button>
       </div>
+      <!-- 季卡 -->
       <div class="feature-card" style="text-align:center;border:2px solid var(--accent);padding:28px 20px;position:relative">
         <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:3px 12px;border-radius:10px;font-size:0.72rem;font-weight:700">🔥 最受欢迎</div>
         <div style="font-size:2rem;margin-bottom:6px">🥇</div>
         <h3>季度会员</h3>
         <div style="font-size:1.6rem;font-weight:800;color:var(--accent);margin:8px 0">¥119<span style="font-size:0.78rem;font-weight:400">/季</span></div>
-        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:4px"><s style="font-size:0.7rem">¥147</s> 省 ¥28 · 3500 积分</p>
+        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:4px"><s style="font-size:0.7rem">¥147</s> 省 ¥28 · 4500 积分（50分/天）</p>
         <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">
-          ⚡ 高端模型 8 折<br>
+          ⚡ 国产模型 7 折<br>
+          🎯 GPT-5 Pro / Claude Sonnet 解锁<br>
           💰 5% 积分返利<br>
-          📖 小说导出无水印<br>
-          📚 知识库 200 条
+          📖 导出无水印<br>
+          📚 知识库 500 条
         </div>
         <button class="btn-send" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="subscribe('quarterly')">订阅 ¥119</button>
       </div>
-      <div class="feature-card" style="text-align:center;padding:28px 20px;background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(217,119,6,0.05))">
+      <!-- 年卡 -->
+      <div class="feature-card" style="text-align:center;padding:28px 20px;background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(99,102,241,0.05))">
         <div style="font-size:2rem;margin-bottom:6px">💎</div>
         <h3>年度会员</h3>
-        <div style="font-size:1.6rem;font-weight:800;color:var(--accent);margin:8px 0">¥369<span style="font-size:0.78rem;font-weight:400">/年</span></div>
-        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:4px"><s style="font-size:0.7rem">¥588</s> 省 ¥219 · 15000 积分</p>
+        <div style="font-size:1.6rem;font-weight:800;color:#7c3aed;margin:8px 0">¥399<span style="font-size:0.78rem;font-weight:400">/年</span></div>
+        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:4px"><s style="font-size:0.7rem">¥468</s> 省 ¥69 · 18250 积分（50分/天）</p>
         <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">
-          ⚡ 高端模型 8 折<br>
+          ⚡ <b style="color:#7c3aed">国产模型 5 折</b><br>
+          🔴 <b style="color:#ef4444">GPT-5.5 Pro / Claude Opus 解锁</b><br>
           💰 10% 积分返利<br>
           🧊 3D 生成 5 折<br>
           📚 知识库无限<br>
-          🎯 专属模型优先
+          🎯 优先响应通道
         </div>
-        <button class="btn-send" style="background:linear-gradient(135deg,#7c3aed,#6366f1)" onclick="subscribe('yearly')">订阅 ¥369</button>
+        <button class="btn-send" style="background:linear-gradient(135deg,#7c3aed,#6366f1)" onclick="subscribe('yearly')">订阅 ¥399</button>
       </div>
     </div>
 
@@ -3471,6 +3479,15 @@ const models=[
   {id:'nx_claude_haiku',name:'Claude Haiku 4.5',provider:'Anthropic',desc:'Claude轻量版，极速响应。',avatar:'#f59e0b',tags:['快速','编程','海外'],context:'200K',inputPrice:'¥0.5/M',outputPrice:'¥2/M',featured:false,free:false},
   {id:'nx_gpt5',name:'GPT-5 Pro',provider:'OpenAI',desc:'OpenAI最新旗舰，国内直连。',avatar:'#10a37f',tags:['多模态','推理','编程','海外'],context:'256K',inputPrice:'¥180/M',outputPrice:'¥1080/M',featured:true,free:false},
   {id:'nx_gpt5mini',name:'GPT-5 Mini',provider:'OpenAI',desc:'GPT-5轻量，极低价高性价比。',avatar:'#10a37f',tags:['快速','编程','海外'],context:'256K',inputPrice:'¥0.15/M',outputPrice:'¥1.2/M',featured:true,free:false},
+  {id:'nx_gpt5chat',name:'GPT-5 Chat',provider:'OpenAI',desc:'GPT-5通用对话版，性价比之选。',avatar:'#20c997',tags:['对话','通用','海外'],context:'256K',inputPrice:'¥50/M',outputPrice:'¥300/M',featured:false,free:false},
+  {id:'nx_gpt5nano',name:'GPT-5 Nano',provider:'OpenAI',desc:'GPT-5超轻量，极速响应。',avatar:'#63e6be',tags:['极速','轻量','海外'],context:'256K',inputPrice:'¥0.05/M',outputPrice:'¥0.3/M',featured:false,free:false},
+  {id:'nx_gpt51chat',name:'GPT-5.1 Chat',provider:'OpenAI',desc:'GPT-5.1对话版，推理增强。',avatar:'#10a37f',tags:['推理','对话','海外'],context:'256K',inputPrice:'¥80/M',outputPrice:'¥500/M',featured:false,free:false},
+  {id:'nx_gpt51codex',name:'GPT-5.1 Codex',provider:'OpenAI',desc:'GPT-5.1编程专用，代码能力顶尖。',avatar:'#0d9488',tags:['编程','代码','海外'],context:'256K',inputPrice:'¥100/M',outputPrice:'¥600/M',featured:true,free:false},
+  {id:'nx_gpt51codexmax',name:'GPT-5.1 Codex Max',provider:'OpenAI',desc:'GPT-5.1最强编程版，超大上下文。',avatar:'#0f766e',tags:['编程','旗舰','海外'],context:'256K',inputPrice:'¥150/M',outputPrice:'¥900/M',featured:false,free:false},
+  {id:'nx_gpt52chat',name:'GPT-5.2 Chat',provider:'OpenAI',desc:'GPT-5.2对话版，上下文理解增强。',avatar:'#10a37f',tags:['对话','推理','海外'],context:'256K',inputPrice:'¥100/M',outputPrice:'¥600/M',featured:false,free:false},
+  {id:'nx_gpt52pro',name:'GPT-5.2 Pro',provider:'OpenAI',desc:'GPT-5.2旗舰版，多模态+推理。',avatar:'#0d9488',tags:['多模态','推理','旗舰','海外'],context:'256K',inputPrice:'¥150/M',outputPrice:'¥900/M',featured:true,free:false},
+  {id:'nx_gpt53chat',name:'GPT-5.3 Chat',provider:'OpenAI',desc:'GPT-5.3最新对话版。',avatar:'#10a37f',tags:['对话','推理','海外'],context:'256K',inputPrice:'¥130/M',outputPrice:'¥800/M',featured:false,free:false},
+  {id:'nx_gpt53codex',name:'GPT-5.3 Codex',provider:'OpenAI',desc:'GPT-5.3编程版，编码能力跃升。',avatar:'#14b8a6',tags:['编程','代码','旗舰','海外'],context:'256K',inputPrice:'¥180/M',outputPrice:'¥1080/M',featured:true,free:false},
   {id:'nx_gpt54pro',name:'GPT-5.4 Pro',provider:'OpenAI',desc:'GPT-5.4旗舰版，推理+编程大幅提升。',avatar:'#0d9488',tags:['多模态','推理','编程','海外'],context:'256K',inputPrice:'¥220/M',outputPrice:'¥1300/M',featured:true,free:false},
   {id:'nx_gpt54mini',name:'GPT-5.4 Mini',provider:'OpenAI',desc:'GPT-5.4轻量，新版高效率。',avatar:'#14b8a6',tags:['快速','编程','海外'],context:'256K',inputPrice:'¥0.2/M',outputPrice:'¥1.5/M',featured:false,free:false},
   {id:'nx_gpt54nano',name:'GPT-5.4 Nano',provider:'OpenAI',desc:'GPT-5.4超轻量，极速响应。',avatar:'#5eead4',tags:['极速','轻量','海外'],context:'256K',inputPrice:'¥0.1/M',outputPrice:'¥0.8/M',featured:false,free:false},
@@ -3656,10 +3673,26 @@ async function sendChatMessage(){
   if(!sel.length){showToast('请在右侧面板选择模型');return}
   // 取所选模型中最高的积分消耗
   const maxCost=Math.max(...sel.map(id=>getModelCost(id)));
+  // 免费模型每日限额检查
+  if(maxCost===0){
+    if(!canUseFree()){
+      const fi=getFreeLimit();
+      showToast(`🆓 今日免费模型次数已用完（${fi}/${fi}），登录后可增至30次，或购买套餐无限使用`);
+      const ul=document.getElementById('freeLimitWarn');
+      if(ul)ul.style.display='flex';
+      btn.disabled=false;return;
+    }
+    useFreeOnce();
+    const left=freeLeft();
+    if(left<=3)showToast(`🆓 今日剩余免费次数：${left}次`);
+  }
   if(maxCost>0&&!spendCredits(maxCost,true))return;
   const md=document.getElementById('chatMessages');if(md.querySelector('[data-p]'))md.innerHTML='';
   md.innerHTML+=`<div class="chat-msg user"><div class="chat-msg-header"><span class="chat-msg-model">你</span></div><div class="chat-msg-content">${escapeHtml(msg)}</div></div>`;
   document.getElementById('chatInput').value='';const btn=document.getElementById('btnSend');btn.disabled=true;
+  // 关键场景自动推荐收费模型
+  const rec=recommendPaidModel(msg);
+  if(rec&&sel.some(id=>getModelCost(id)===0)){md.innerHTML+=`<div style="margin:6px 0;padding:8px 12px;background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(239,68,68,0.04));border:1px solid rgba(245,158,11,0.2);border-radius:10px;font-size:0.72rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="color:#f59e0b">⭐</span><span>检测到<strong>${rec.reason}</strong></span><span style="margin-left:auto;color:var(--accent);font-weight:600;cursor:pointer;font-size:0.7rem" onclick="event.stopPropagation();document.getElementById('chatInput').value='${escapeAttr(msg)}';switchPage('chat');showToast('请在右侧面板切换模型为 ${rec.name}（${rec.cost}分）')">✨ 试试 ${rec.name}（${rec.cost}分）</span></div>`}
 
   // 构建 RAG 增强 system prompt
   const ragSysPrompt = await buildRAGSystemPrompt(msg);
@@ -3674,7 +3707,7 @@ async function sendChatMessage(){
       // 如果返回模拟回复且模型有 backup，自动切换到备用渠道
       const backup=m.backup;
       if((r.simulated||r.error)&&backup){r=await callModelAPI(backup,msg,ragSysPrompt+'【系统提示：已自动切换到备用渠道】');if(!(r.simulated||r.error)){showToast(`🔄 ${m.name} 已自动切换到备用渠道`)}}
-      const el=document.getElementById(pid);if(el){el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if((r.simulated||r.error))el.querySelector('.chat-msg-content').style.opacity='0.6';if(backup&&!(r.simulated||r.error))el.innerHTML+=`<div style="font-size:0.6rem;color:var(--orange);margin-top:4px">🔄 已自动切换到备用渠道</div>`}
+      const el=document.getElementById(pid);if(el){const modelCost=getModelCost(id);el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if((r.simulated||r.error))el.querySelector('.chat-msg-content').style.opacity='0.6';else if(modelCost===0&&!r.simulated&&!r.error){el.querySelector('.chat-msg-content').innerHTML+=`<div style="margin-top:8px;padding:6px 10px;background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(6,182,212,0.04));border-radius:8px;font-size:0.68rem;color:var(--text-secondary)">💡 由免费模型生成 · 试试 <a onclick="switchPage('pricing')" style="color:var(--accent);cursor:pointer;font-weight:600">GPT-5.5 Pro</a>（35分）获得更精准回答？每日还剩${freeLeft()}次免费 · <a onclick="switchPage('pricing')" style="color:var(--accent);cursor:pointer">升级套餐无限用</a></div>`}if(backup&&!(r.simulated||r.error))el.innerHTML+=`<div style="font-size:0.6rem;color:var(--orange);margin-top:4px">🔄 已自动切换到备用渠道</div>`}
     }catch(e){const el=document.getElementById(pid);if(el)el.querySelector('.chat-msg-content').innerHTML=`<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`}
     md.scrollTop=md.scrollHeight;
   });
@@ -3700,8 +3733,10 @@ async function callModelAPI(modelId,question,sysPrompt){
   const body={model:modelId,messages:msgs};
   if(m&&m.rawModel) body.rawModel=m.rawModel;
   try{
-    const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(r.ok) return await r.json();
+    const headers={'Content-Type':'application/json'};
+    if(authToken) headers['x-auth-token']=authToken;
+    const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers,body:JSON.stringify(body)});
+    if(r.ok){const d=await r.json();if(d.credits_remaining!==undefined&&d.credits_remaining!==null){userCredits=d.credits_remaining;localStorage.setItem('cr',userCredits);updateCreditDisplay()}return d}
     // 非200响应：尝试解析服务器返回的错误详情
     try{
       const errData=await r.json();
@@ -4422,58 +4457,151 @@ function downloadMedia(){
 }
 
 // === Credits ===
-let userCredits=parseInt(localStorage.getItem('cr')||'30'),usedTokensCount=parseInt(localStorage.getItem('utk')||'0'),usedImagesCount=parseInt(localStorage.getItem('uim')||'0');
+// 游客积分管理（防刷：sessionStorage 存储，关闭浏览器才重置）
+function initGuestCredits() {
+  const gc = sessionStorage.getItem('guest_credits');
+  if (gc !== null) return parseInt(gc);
+  sessionStorage.setItem('guest_credits', '5');
+  return 5;
+}
+let userCredits = authToken ? parseInt(localStorage.getItem('cr')||'0') : initGuestCredits();
+let usedTokensCount=parseInt(localStorage.getItem('utk')||'0'),usedImagesCount=parseInt(localStorage.getItem('uim')||'0');
 // 如果已登录，从服务器同步积分
 if(authToken){try{(async()=>{const r=await fetch(API_BASE+'/api/user/credits',{headers:getAuthHeader()});if(r.ok){const d=await r.json();if(d.credits!==undefined){userCredits=d.credits;localStorage.setItem('cr',userCredits);updateCreditDisplay()}}})()}catch(e){}}
 function updateCreditDisplay(){const e=document.getElementById('creditDisplay');if(e){e.textContent=userCredits;if(userCredits<=5){e.style.color='#ef4444';e.parentElement.parentElement.title='积分即将用完';e.style.animation='pulse 1.5s infinite'}else{e.style.color='';e.style.animation=''}}const b=document.getElementById('creditBalance');if(b)b.textContent=userCredits}
 function showLowCreditHint(){if(userCredits>0&&userCredits<=5&&!document.getElementById('lowCreditHint')){const hint=document.createElement('div');hint.id='lowCreditHint';hint.style='position:fixed;top:70px;right:20px;z-index:400;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:10px 16px;font-size:0.78rem;max-width:220px;animation:fadeIn 0.5s';hint.innerHTML='💡 <b>积分即将用完</b><br><span style="font-size:0.7rem;color:var(--text-secondary)">充值最低 ¥9.9 起 · GPT-4o 官方 ¥145/月</span><div style="margin-top:6px"><button class="btn-send" style="font-size:0.7rem;padding:3px 12px;background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="switchPage(\'pricing\');hint.remove()">充值</button><button style="font-size:0.7rem;padding:3px 8px;background:none;border:none;color:var(--text-secondary);cursor:pointer;margin-left:4px" onclick="hint.remove()">✕</button></div>';document.body.appendChild(hint);setTimeout(()=>{if(hint.parentNode)hint.remove()},15000)}}
+// 积分不足弹窗
+function showRechargePopup(needed){
+  if(document.getElementById('rechargePopup'))return;
+  const html=`<div id="rechargePopup" style="position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center" onclick="event.target===this&&this.remove()">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+      <div style="font-size:2.5rem;margin-bottom:8px">⚡</div>
+      <h3 style="margin-bottom:8px">积分不足</h3>
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:8px">本次需要 <b style="color:var(--accent)">${needed}</b> 积分</p>
+      <p style="font-size:0.75rem;color:#ef4444;margin-bottom:16px">当前余额：${userCredits} 积分</p>
+      <button class="btn-send" style="width:100%;padding:10px;background:linear-gradient(135deg,#f59e0b,#d97706);font-size:0.9rem;margin-bottom:8px" onclick="document.getElementById('rechargePopup').remove();switchPage('pricing')">💳 立即充值</button>
+      <p style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:8px">月卡 ¥39/月 · 每天送 20 积分 · 解锁 GPT-5 Chat</p>
+      <button style="font-size:0.7rem;padding:4px 12px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--text-secondary);cursor:pointer" onclick="document.getElementById('rechargePopup').remove()">稍后再说</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+}
 function spendCredits(a,t){
 // 管理员不扣积分
 if(authToken){try{const p=JSON.parse(atob(authToken));if(p.role==='admin')return true}catch(e){}}
-if(userCredits<a){const f=document.getElementById('creditLow');if(f){f.querySelector('span').textContent=a;document.getElementById('creditLowBal').textContent=userCredits;f.style.display='flex'};return false}userCredits-=a;localStorage.setItem('cr',userCredits);updateCreditDisplay();if(t)showToast(`-${a}积分，剩余${userCredits}`);if(userCredits<=5)showLowCreditHint();
+// 游客调用收费模型 → 拦截
+if(!authToken && a > 0){
+  if(userCredits < a){
+    showRechargePopup(a);
+    return false;
+  }
+  userCredits -= a;
+  sessionStorage.setItem('guest_credits', userCredits);
+  updateCreditDisplay();
+  if(t) showToast(`-${a}积分（游客体验），剩余${userCredits}`);
+  if(userCredits <= 0) showToast('💡 游客体验积分用完，登录后可获得更多积分');
+  return true;
+}
+if(userCredits<a){showRechargePopup(a);return false}
+userCredits-=a;
+if(authToken){
+  localStorage.setItem('cr',userCredits);
+} else {
+  sessionStorage.setItem('guest_credits', userCredits);
+}
+updateCreditDisplay();if(t)showToast(`-${a}积分，剩余${userCredits}`);if(userCredits<=5)showLowCreditHint();
 // 同步到服务器
 if(authToken){fetch(API_BASE+'/api/user/spend',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+authToken},body:JSON.stringify({amount:a})}).catch(()=>{})}
 return true}
+// ===== 免费模型每日限额 =====
+function getToday(){return new Date().toDateString()}
+function getFreeUsage(){
+  const d=localStorage.getItem('free_day');
+  if(d!==getToday()){localStorage.setItem('free_day',getToday());localStorage.setItem('free_cnt','0');return 0}
+  return parseInt(localStorage.getItem('free_cnt')||'0');
+}
+function getFreeLimit(){return authToken?20:10}
+function canUseFree(){return getFreeUsage()<getFreeLimit()}
+function useFreeOnce(){const c=getFreeUsage()+1;localStorage.setItem('free_cnt',c);return c}
+function freeLeft(){return Math.max(0,getFreeLimit()-getFreeUsage())}
+// ===== 模型权限锁定 =====
+function getSubLevel(){return parseInt(localStorage.getItem('sub_level')||'0')}
+// 哪些模型需要特定套餐才能使用
+const MODEL_LOCK={
+  nx_gpt5chat:1, nx_gpt5mini:1, nx_gpt5nano:1, nx_gpt5:1,           // 月卡
+  nx_gpt51chat:2, nx_gpt51codex:2, nx_gpt52chat:2, nx_gpt52pro:2,   // 季卡
+  nx_gpt53chat:2, nx_gpt53codex:2, nx_claude_sonnet:2, nx_gemini_pro:2, nx_grok3:2,
+  nx_gpt54pro:3, nx_gpt54mini:3, nx_gpt54nano:3, nx_gpt55pro:3,     // 年卡
+  nx_gpt55:3, nx_claude_opus:3, nx_claude_haiku:3
+};
+function canUseModel(id){
+  const cost=getModelCost(id);
+  if(cost===0)return true; // 免费模型不限
+  const lock=MODEL_LOCK[id];
+  if(!lock)return true;    // 无锁定则开放
+  return getSubLevel()>=lock;
+}
+function getLockLabel(id){
+  const lock=MODEL_LOCK[id];
+  if(!lock)return '';
+  return ['','🔒月卡','🔒季卡','🔒年卡'][lock];
+}
+// 关键场景自动推荐收费模型
+function recommendPaidModel(msg){
+  const m=msg.toLowerCase();
+  if(/代码|编程|debug|python|java|api|接口|bug|错误/.test(m))return {id:'nx_gpt53codex',name:'GPT-5.3 Codex',reason:'编程任务首选，代码生成+调试能力顶尖',cost:25};
+  if(/报告|分析|研究|合同|法律|论文|财报|竞品/.test(m))return {id:'nx_claude_opus',name:'Claude Opus 4',reason:'深度分析+长文本理解最强',cost:25};
+  if(/翻译|外语|英语|english/.test(m))return {id:'nx_gpt5chat',name:'GPT-5 Chat',reason:'多语言翻译精准度高',cost:8};
+  if(/创意|脑暴|点子|创意|文案|营销|广告|slogan/.test(m))return {id:'nx_gpt55pro',name:'GPT-5.5 Pro',reason:'顶级创意生成能力',cost:35};
+  if(/数学|推理|逻辑|证明/.test(m))return {id:'deepseekr1',name:'DeepSeek-R1',reason:'深度推理+数学能力领跑',cost:5};
+  return null;
+}
 
 // === 模型积分分级 ===
 const MODEL_COST={
-  // 🆓 免费模型 (仅保留3个最轻量引流用)
+  // 🆓 免费模型（DMXAPI全免费 + 硅基免费 + 火山免费）
   dmx_qwen35_2b_free:0, dmx_qwen3_17b_free:0, dmx_spark_lite_free:0,
-  // 🟢 1积分
-  deepseekv3:1, glm4:1, kimi:1, sf_glm47:1, ali_qwen36_flash:1,
-  sf_qwen3_8b:1, dmx_qwen3_8b_free:1, dmx_qwen_flash_free:1,
-  dmx_minimax_m25_free:1, dmx_glm_47_free:1, dmx_glm_47_flash:1, dmx_glm_45_flash:1,
-  dmx_glm_4_9b:1, dmx_hunyuan_lite:1, dmx_qwen35_plus_free:1,
-  dmx_qwen3_5_plus_free:1, dmx_qwen35_35b_free:1, dmx_qwen25_coder_7b:1,
-  dmx_doubao_seed_lite:1, dmx_mimo_v25_free:1, sf_qwen3_32b:1, or_codeqwen:1,
-  // 🟡 2积分
-  glm4plus:2, minimax:2, spark4:2, ali_qwen36_plus:2, ali_deepseek_v4_flash:2,
-  sf_hunyuan_a13b:2, sf_qwen35_397b:2, sf_qwq_32b:2,
-  dmx_minimax_m27_free:2, dmx_glm_5_turbo_free:2, dmx_qwen3_coder_plus_free:2,
-  dmx_qwen3_coder_next_free:2, dmx_doubao_seed_code:2, dmx_mimo_v2_pro_free:2,
-  dmx_code_free:2, dmx_codex_free:2, dmx_kat_coder_free:2,
-  dmx_qwen36_plus_free:2, dmx_code_free_x:2,
+  sf_qwen3_8b:0, sf_deepseek_v3_free:0, dmx_qwen3_8b_free:0, dmx_qwen_flash_free:0,
+  deepseekv3:1, glm4:1, kimi:1, sf_glm47:0, ali_qwen36_flash:1,
+  dmx_minimax_m25_free:0, dmx_glm_47_free:0, dmx_glm_47_flash:0, dmx_glm_45_flash:0,
+  dmx_glm_4_9b:0, dmx_hunyuan_lite:0, dmx_qwen35_plus_free:0,
+  dmx_qwen3_5_plus_free:0, dmx_qwen35_35b_free:0, dmx_qwen25_coder_7b:0,
+  dmx_doubao_seed_lite:0, dmx_mimo_v25_free:0, sf_qwen3_32b:0, or_codeqwen:1,
+  // 🟢 1积分（入门国产模型）
+  glm4plus:1, minimax:1, spark4:1, ali_qwen36_plus:1, ali_deepseek_v4_flash:1,
+  sf_hunyuan_a13b:1, sf_qwen35_397b:1, sf_qwq_32b:1,
+  // DMXAPI 免费模型（全部免费）
+  dmx_minimax_m27_free:0, dmx_glm_5_turbo_free:0, dmx_qwen3_coder_plus_free:0,
+  dmx_qwen3_coder_next_free:0, dmx_doubao_seed_code:0, dmx_mimo_v2_pro_free:0,
+  dmx_code_free:0, dmx_codex_free:0, dmx_kat_coder_free:0,
+  dmx_qwen36_plus_free:0, dmx_code_free_x:0,
+  dmx_kimi_k25_free:0, dmx_kimi_k26_free:0, dmx_doubao_seed_pro:0, dmx_qwen3_max_free:0,
   // 百度千帆
   qf_ernie4:5, qf_ernie35:2, qf_ernie_speed:0,
-  // 火山引擎 Ark（分级定价，比原平台便宜）
+  // 火山引擎 Ark（全部免费）
   ark_dbs2_mini:0, ark_dbp15l:0, ark_dbs2_lite:0,
-  ark_dsv4f:1, ark_dbs1_6:1, ark_dbs1_8:1, ark_dbs_code:1,
-  ark_dsv32:2, ark_dsv4p:2, ark_dbs2_pro:2, ark_glm47:2,
-  ark_dbp15p:3, ark_dbs_char:1,
+  ark_dsv4f:0, ark_dbs1_6:0, ark_dbs1_8:0, ark_dbs_code:0,
+  ark_dsv32:0, ark_dsv4p:0, ark_dbs2_pro:0, ark_glm47:0,
+  ark_dbp15p:0, ark_dbs_char:0,
   // 3D 生成（成本 ¥12/次，定价 288 积分持平）
   meshy_text:288, meshy_image:288,
-  // API Nexus 海外旗舰（高成本限 token）
-  nx_gpt5:80, nx_gpt5mini:15, nx_gpt54pro:100, nx_gpt54mini:25, nx_gpt54nano:15, nx_gpt55pro:150, nx_claude_opus:120, nx_claude_sonnet:60,
-  nx_claude_haiku:25, nx_gemini_pro:50, nx_o3mini:30,
-  nx_dalle3:30, nx_flux:15, nx_suno:20, nx_grok3:50,
+  // API Nexus 海外旗舰（降价70%，毛利率70%+）
+  nx_gpt5:20, nx_gpt5mini:5, nx_gpt5chat:8, nx_gpt5nano:3, nx_gpt5all:20,
+  nx_gpt51chat:12, nx_gpt51codex:15, nx_gpt51codexmax:20,
+  nx_gpt52chat:15, nx_gpt52pro:20,
+  nx_gpt53chat:18, nx_gpt53codex:25,
+  nx_gpt54pro:25, nx_gpt54mini:8, nx_gpt54nano:5,
+  nx_gpt55pro:35, nx_gpt55:30,
+  nx_claude_opus:25, nx_claude_sonnet:15,
+  nx_claude_haiku:8, nx_gemini_pro:12, nx_o3mini:10,
+  nx_dalle3:15, nx_flux:8, nx_suno:15, nx_grok3:15,
   // 百川智能
-  bc_baichuan4:3, bc_baichuan3:1,
-  // 🟠 3积分
-  qwen3:3, kimi2:3, minimax1:3, doubao:3, doubao15:3, gpt4omini:3, gemini15flash:3,
-  ali_qwen37_max:8, ali_deepseek_v4_pro:3, ali_kimi_k26:3,
-  sf_deepseek_v32:3, sf_glm5:3,
-  dmx_glm_5_free:3, dmx_glm_51_free:3, dmx_kimi_k25_free:3,
-  dmx_kimi_k26_free:3, dmx_doubao_seed_pro:3, dmx_qwen3_max_free:3,
+  bc_baichuan4:2, bc_baichuan3:1,
+  ark_doubao_pro:0, ark_doubao_lite:0,
+  // 🟡 2-3分（国产进阶）
+  qwen3:2, kimi2:2, minimax1:2, doubao:2, doubao15:2, gpt4omini:2, gemini15flash:2,
+  ali_qwen37_max:8, ali_deepseek_v4_pro:2, ali_kimi_k26:2,
+  sf_deepseek_v32:1, sf_glm5:2,
   // 🔴 5积分
   deepseekr1:5, gpt4o:5, hunyuan:5, gemini15pro:5, gemini25flash:5,
   grok3:5, ali_glm51:5, 'mistral-large2':5,
@@ -4489,6 +4617,23 @@ const MODEL_COST={
 };
 function getModelCost(id){const m=models.find(x=>x.id===id);if(m&&m.cost!==undefined)return m.cost;return MODEL_COST[id]??2}
 function getModelCostLabel(id){const c=getModelCost(id);return c===0?'<span style="font-size:0.65rem;padding:1px 5px;border-radius:3px;background:#10b981;color:#fff;margin-left:4px">免费</span>':'<span style="font-size:0.65rem;padding:1px 5px;border-radius:3px;background:var(--accent-light);color:var(--accent);margin-left:4px">⚡'+c+'</span>'}
+// 估算每个积分能生成的文字量
+function getWordsPerPoint(id) {
+  const cost = getModelCost(id);
+  if (cost === 0) return '免费不限量';
+  // API Nexus 模型有 2048 token 上限 ≈ 1500 中文字
+  if (id.startsWith('nx_')) return Math.round(1500 / cost) + '字';
+  // 3D/图片模型不适用
+  if (id.startsWith('meshy_') || id === 'nx_dalle3' || id === 'nx_flux' || id === 'nx_suno') return '生成类';
+  // 普通聊天模型 4096 tokens ≈ 3000 中文字
+  return Math.round(3000 / cost) + '字';
+}
+function getWordsPerPointHTML(id) {
+  const w = getWordsPerPoint(id);
+  if (w === '免费不限量') return '<span style="font-size:0.58rem;color:#10b981">💬 免费</span>';
+  if (w === '生成类') return '';
+  return `<span style="font-size:0.58rem;color:var(--text-secondary)" title="1积分≈${w}输出量">💬 1分≈${w}</span>`;
+}
 
 function closeCreditLow(){document.getElementById('creditLow').style.display='none'}
 
@@ -4560,7 +4705,7 @@ function purchaseCredits(a,p){const isFirst=!localStorage.getItem('has_purchased
     window.open('https://mbd.pub','_blank');showToast('付款后积分自动到账');
   }
 }
-function subscribe(type){const plans={monthly:{n:'月度会员',p:49,c:1000},quarterly:{n:'季度会员',p:119,c:3500},yearly:{n:'年度会员',p:369,c:15000}};const plan=plans[type];if(!plan)return;
+function subscribe(type){const plans={monthly:{n:'月度会员',p:29,c:900},quarterly:{n:'季度会员',p:119,c:4500},yearly:{n:'年度会员',p:399,c:18250}};const plan=plans[type];if(!plan)return;
   if(confirm(`订阅 ${plan.n}
 ¥${plan.p} · ${plan.c} 积分/周期
 ─────────────────
@@ -4570,7 +4715,14 @@ function subscribe(type){const plans={monthly:{n:'月度会员',p:49,c:1000},qua
 • 可随时取消，权益保留至周期结束
 ─────────────────
 确认支付表示同意用户协议及免责声明`)){
-    window.open('https://mbd.pub','_blank');showToast('订阅后将自动开通会员权益');
+    const lvlMap={monthly:1,quarterly:2,yearly:3};
+    localStorage.setItem('sub_level',lvlMap[type]);
+    localStorage.setItem('sub_type',type);
+    userCredits+=plan.c;
+    localStorage.setItem('cr',userCredits);
+    updateCreditDisplay();
+    showToast(`✅ 已订阅${plan.n}！${plan.c} 积分已到账`);
+    window.open('https://mbd.pub','_blank');
   }
 }
 
@@ -4699,6 +4851,7 @@ function doLoginNew(){
       setAuthToken(d.token);currentUser=d.user||{username:u};
       localStorage.setItem('cuser',JSON.stringify(currentUser));
       if(d.user&&d.user.credits!==undefined){userCredits=d.user.credits;localStorage.setItem('cr',userCredits)}
+      if(d.apiKey)localStorage.setItem('user_api_key',d.apiKey);
       closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();updateCheckinBtn();showToast('👋 欢迎回来，'+(d.user?.name||u));
       syncUserData();
     }else{
@@ -4743,6 +4896,7 @@ function doRegisterNew(){
       setAuthToken(d.token);currentUser=d.user||{username:u};
       localStorage.setItem('cuser',JSON.stringify(currentUser));
       if(d.user&&d.user.credits!==undefined){userCredits=d.user.credits;localStorage.setItem('cr',userCredits)}
+      if(d.apiKey)localStorage.setItem('user_api_key',d.apiKey);
       closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();
       switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 Nexus Hub')},500);
       syncUserData();
@@ -4796,15 +4950,42 @@ function atobFix(s){try{return decodeURIComponent(escape(atob(s)))}catch(e){try{
 function doLogout(){currentUser=null;setAuthToken(null);localStorage.removeItem('cuser');localStorage.removeItem('cr');renderUserNav();updateCreditDisplay();updateCheckinBtn();showToast('已退出')}
 function openUserSettings(){
   if(!currentUser){showToast('请先登录');return}
-  const oldPwd=prompt('当前密码（验证身份）：');
-  if(!oldPwd)return;
-  const users=getUsers();
-  const user=users.find(x=>x.username===currentUser.username||x.email===currentUser.email);
-  if(!user||user.password!==btoa(oldPwd)){showToast('❌ 当前密码错误');return}
-  const np=prompt('请输入新密码（至少6位）：');
-  if(!np||np.length<6){showToast('密码至少6位');return}
-  user.password=btoa(np);saveUsers(users);
-  showToast('✅ 密码修改成功');
+  const html=`
+  <div class="modal-overlay show" id="userSettingsModal" onclick="event.target===this&&closeUserSettings()">
+    <div class="modal" style="max-width:420px">
+      <h3>👤 用户设置</h3>
+      <div style="margin:16px 0;padding:12px;background:var(--bg-input);border-radius:8px">
+        <p style="font-size:0.8rem;margin:4px 0"><b>用户名：</b>${currentUser.username} <span style="color:var(--text-secondary);font-size:0.7rem">（不可修改）</span></p>
+        <p style="font-size:0.8rem;margin:4px 0"><b>邮箱：</b>${currentUser.email||'未设置'}</p>
+        <p style="font-size:0.8rem;margin:4px 0"><b>积分：</b>${userCredits}</p>
+        <p style="font-size:0.8rem;margin:4px 0"><b>会员：</b>${['免费用户','月卡会员','季卡会员','年卡会员'][getSubLevel()]}</p>
+        <p style="font-size:0.8rem;margin:4px 0"><b>API Key：</b><span style="font-size:0.65rem;color:var(--accent)">${localStorage.getItem('user_api_key')||'无'}</span></p>
+      </div>
+      <div class="form-group"><label>修改邮箱</label><input id="usEmail" type="email" placeholder="${currentUser.email||'输入新邮箱'}" value="${currentUser.email||''}"></div>
+      <div class="form-group"><label>新密码（留空不修改）</label><input id="usPwd" type="password" placeholder="至少6位"></div>
+      <div class="form-group"><label>当前密码（确认身份）</label><input id="usOldPwd" type="password" placeholder="输入当前密码确认"></div>
+      <div class="form-actions">
+        <button class="btn-sm primary" onclick="saveUserSettings()">保存</button>
+        <button class="btn-sm danger" onclick="doLogout()" style="background:#ef444411;color:#ef4444">退出登录</button>
+        <button class="btn-sm" onclick="closeUserSettings()">取消</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+function closeUserSettings(){const m=document.getElementById('userSettingsModal');if(m)m.remove()}
+async function saveUserSettings(){
+  const email=document.getElementById('usEmail').value.trim();
+  const newPwd=document.getElementById('usPwd').value;
+  const oldPwd=document.getElementById('usOldPwd').value;
+  if(!oldPwd){showToast('请输入当前密码确认身份');return}
+  if(newPwd&&newPwd.length<6){showToast('新密码至少6位');return}
+  try{
+    const r=await fetch(API_BASE+'/api/user/update-profile',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+authToken},body:JSON.stringify({email,oldPassword:btoa(oldPwd),newPassword:newPwd?btoa(newPwd):null})});
+    const d=await r.json();
+    if(d.ok){closeUserSettings();showToast(d.message||'✅ 保存成功');if(currentUser)currentUser.email=email}
+    else showToast('❌ '+(d.error||'保存失败'));
+  }catch(e){showToast('❌ 网络错误')}
 }
 
 // === AI Office ===
@@ -4882,20 +5063,26 @@ let currentCodeModel = 'deepseekv3'; // 当前选中的编程模型
 function initCodeChatModels(){
   const list = document.getElementById('codeModelList');
   if(!list) return;
-  const codeModels = models.filter(m =>
-    !m.hidden && (m.tags.includes('编程') || m.tags.includes('推理') ||
-    ['gpt4o','deepseekr1','deepseekv3','gemini25pro','ali_deepseek_v4_pro','ali_kimi_k26','ali_qwen37_max','sf_qwen3_32b','dmx_qwen25_coder_7b','dmx_qwen35_2b_free','dmx_qwen3_17b_free','dmx_spark_lite_free'].includes(m.id))
-  );
+  const codeModels = models.filter(m => !m.hidden);
   if(codeModels.length===0) codeModels.push(...models.slice(0,10));
-  list.innerHTML = codeModels.map(m => {
-    const active = currentCodeModel === m.id;
-    const cost = getModelCost(m.id);
-    return `<label class="model-checkbox" style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;cursor:pointer;margin-bottom:3px;font-size:0.76rem;transition:all 0.2s;${active?'background:var(--accent-soft);border:1px solid var(--accent)':''}" onclick="selectCodeModel('${m.id}',this)">
+  // 排序：收费模型在前，免费在后
+  const paid=codeModels.filter(m=>getModelCost(m.id)>0);
+  const free=codeModels.filter(m=>getModelCost(m.id)===0);
+  const sorted=[...paid,...free];
+  list.innerHTML = `
+    ${free.length>0&&paid.length>0?`<div style="font-size:0.65rem;color:var(--accent);font-weight:600;padding:4px 8px;margin-top:4px">💰 收费模型（${paid.length}个）</div>`:''}
+    ${sorted.map(m => {
+      const active = currentCodeModel === m.id;
+      const cost = getModelCost(m.id);
+      return `<label class="model-checkbox" style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;cursor:pointer;margin-bottom:3px;font-size:0.76rem;transition:all 0.2s;${active?'background:var(--accent-soft);border:1px solid var(--accent)':''}" onclick="selectCodeModel('${m.id}',this)">
       <span style="width:24px;height:24px;border-radius:6px;background:${m.avatar};display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.65rem;flex-shrink:0">${m.name[0]}</span>
       <span style="flex:1">${m.name}</span>
-      ${cost===0?'<span style="font-size:0.6rem;background:rgba(16,185,129,0.1);color:var(--green);padding:1px 5px;border-radius:3px">免费</span>':`<span style="font-size:0.6rem;color:var(--text-secondary)">⚡${cost}</span>`}
+      ${cost===0?'<span style="font-size:0.6rem;background:rgba(16,185,129,0.1);color:var(--green);padding:1px 5px;border-radius:3px">免费</span>':`<span style="font-size:0.6rem;color:var(--text-secondary)">⚡${cost}</span><span style="font-size:0.55rem;color:var(--text-secondary);margin-left:4px">${getWordsPerPointHTML(m.id)}</span>`}
     </label>`;
-  }).join('');
+    }).join('')}
+    ${free.length>0&&paid.length>0?`<div style="font-size:0.65rem;color:#10b981;font-weight:600;padding:4px 8px;margin-top:4px">🆓 免费模型（${free.length}个）</div>`:''}
+    <div style="text-align:center;margin-top:4px"><input id="codeModelSearch" placeholder="搜索..." style="width:90%;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.65rem" oninput="document.querySelectorAll('#codeModelList .model-checkbox').forEach(el=>{el.style.display=el.textContent.toLowerCase().includes(this.value.toLowerCase())?'flex':'none'})"></div>
+  `;
 }
 
 function selectCodeModel(modelId, el){
@@ -5464,6 +5651,31 @@ function getKeyConfig(){
 }
 function saveKeyConfig(cfg){localStorage.setItem('api_keys_config',JSON.stringify(cfg))}
 function refreshBalanceUI(){renderKeyDashboard();showToast('✅ 余额面板已刷新')}
+// 从服务器查询平台真实余额
+async function fetchRealBalances(){
+  showToast('⏳ 正在查询各平台余额...');
+  try{
+    const r=await fetch(API_BASE+'/api/admin/balances');
+    if(!r.ok){showToast('❌ 查询失败');return}
+    const d=await r.json();
+    if(!d.ok){showToast('❌ 查询失败');return}
+    const ps=getKeyConfig();
+    const map={'deepseek':'DeepSeek','siliconflow':'硅基流动','openrouter':'OpenRouter'};
+    let updated=0;
+    for(const [key,info] of Object.entries(d.balances)){
+      const name=map[key]||key;
+      const p=ps.find(x=>x.platform===name||x.platform.includes(name));
+      if(p&&typeof info.balance==='number'){
+        p.balance=parseFloat(info.balance);
+        p.status=info.status||'ok';
+        updated++;
+      }
+    }
+    saveKeyConfig(ps);
+    renderKeyDashboard();
+    showToast(`✅ 已更新 ${updated} 个平台余额 (${d.updated.substring(11,19)})`);
+  }catch(e){showToast('❌ 网络错误')}
+}
 function renderKeyDashboard(){
   const ps=getKeyConfig();const tb=document.getElementById('keyDashboardTbody');
   if(!tb)return;
@@ -7169,7 +7381,11 @@ function renderModelBar(pageId,containerId){
   const el=document.getElementById(containerId);
   if(!el||!rec)return;
   const saved=localStorage.getItem('pageModel_'+pageId)||rec.id;
-  const allOpts=models.filter(m=>!m.hidden&&(!rec.filter||(m.tags&&m.tags.includes(rec.filter)))).map(m=>'<option value="'+m.id+'" '+(saved===m.id?'selected':'')+'>'+m.name+' '+(getModelCost(m.id)===0?'\u{1F193}':'\u26A1'+getModelCost(m.id))+'</option>').join('');
+  const baseFilter=models.filter(m=>!m.hidden);
+  const freeModels=baseFilter.filter(m=>getModelCost(m.id)===0);
+  const paidModels=baseFilter.filter(m=>getModelCost(m.id)>0);
+  const optGroup=(label,list)=>list.length?`<optgroup label="${label}">${list.map(m=>`<option value="${m.id}" ${saved===m.id?'selected':''}>${m.name} ⚡${getModelCost(m.id)}</option>`).join('')}</optgroup>`:'';
+  const allOpts=(paidModels.length?optGroup('💰 收费模型',paidModels):'')+(freeModels.length?optGroup('🆓 免费模型',freeModels):'');
   el.innerHTML=`
     <div class="right-panel-card" style="padding:8px 12px;background:linear-gradient(135deg,rgba(124,58,237,0.04),rgba(99,102,241,0.04))">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">

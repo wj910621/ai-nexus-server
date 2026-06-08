@@ -8,8 +8,15 @@
 
 const fs = require('fs');
 const path = require('path');
-const fetch = require('node-fetch');
-require('dotenv').config({ path: '/home/admin/.env' });
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+const SALT_ROUNDS = 10;
+// dotenv: 优先加载项目根目录 .env，兼容本地开发与服务器部署
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+// 服务器部署时也尝试加载 /home/admin/.env（不覆盖已有变量）
+if (process.platform === 'linux' && fs.existsSync('/home/admin/.env')) {
+  require('dotenv').config({ path: '/home/admin/.env', override: false });
+}
 const express = require('express');
 const cors = require('cors');
 
@@ -157,6 +164,8 @@ const MODEL_CONFIG = {
   ark_dbs_code:       { provider: 'openai', model: 'ep-20260606015514-hbm6v',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
   ark_dbs1_8:         { provider: 'openai', model: 'ep-20260606015615-m4fdz',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
   ark_dbs_char:       { provider: 'openai', model: 'ep-20260606015638-qqfjr',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_doubao_pro:     { provider: 'openai', model: 'doubao-pro',              baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
+  ark_doubao_lite:    { provider: 'openai', model: 'doubao-lite',             baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
   ark_dbs1_6:         { provider: 'openai', model: 'ep-20260606015941-mtwc2',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
   ark_dbp15p:         { provider: 'openai', model: 'ep-20260606014616-t79qr',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
   ark_dbp15l:         { provider: 'openai', model: 'ep-20260606014948-p49s2',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
@@ -165,10 +174,21 @@ const MODEL_CONFIG = {
   // === API Nexus (海外旗舰模型) ===
   nx_gpt5:            { provider: 'nexus', model: 'gpt-5-pro',              baseUrl: 'https://apinexus.net/v1' },
   nx_gpt5mini:        { provider: 'nexus', model: 'gpt-5-mini',             baseUrl: 'https://apinexus.net/v1' },
-  nx_gpt54pro:        { provider: 'nexus', model: 'gpt-5.4-pro',            baseUrl: 'https://apinexus.net/v1' },
-  nx_gpt54mini:       { provider: 'nexus', model: 'gpt-5.4-mini',           baseUrl: 'https://apinexus.net/v1' },
-  nx_gpt54nano:       { provider: 'nexus', model: 'gpt-5.4-nano',           baseUrl: 'https://apinexus.net/v1' },
-  nx_gpt55pro:        { provider: 'nexus', model: 'gpt-5.5-pro',            baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt5chat:        { provider: 'nexus', model: 'gpt-5-chat',            baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt5nano:        { provider: 'nexus', model: 'gpt-5-nano',            baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt5all:         { provider: 'nexus', model: 'gpt-5-all',             baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt51chat:       { provider: 'nexus', model: 'gpt-5.1-chat',          baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt51codex:      { provider: 'nexus', model: 'gpt-5.1-codex',         baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt51codexmax:   { provider: 'nexus', model: 'gpt-5.1-codex-max',     baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt52chat:       { provider: 'nexus', model: 'gpt-5.2-chat-2025-12-11', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt52pro:        { provider: 'nexus', model: 'gpt-5.2-pro-2025-12-11',  baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt53chat:       { provider: 'nexus', model: 'gpt-5.3-chat-latest',   baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt53codex:      { provider: 'nexus', model: 'gpt-5.3-codex-latest',  baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt54pro:        { provider: 'nexus', model: 'gpt-5.4-pro-2026-03-05',   baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt54mini:       { provider: 'nexus', model: 'gpt-5.4-mini-2026-03-17',  baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt54nano:       { provider: 'nexus', model: 'gpt-5.4-nano-2026-03-17',  baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt55pro:        { provider: 'nexus', model: 'gpt-5.5-pro-2026-04-23',   baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt55:           { provider: 'nexus', model: 'gpt-5.5-2026-04-24',    baseUrl: 'https://apinexus.net/v1' },
   nx_claude_opus:     { provider: 'nexus', model: 'claude-opus-4-6',        baseUrl: 'https://apinexus.net/v1' },
   nx_claude_sonnet:   { provider: 'nexus', model: 'claude-sonnet-4-6',      baseUrl: 'https://apinexus.net/v1' },
   nx_claude_haiku:    { provider: 'nexus', model: 'claude-haiku-4-5',       baseUrl: 'https://apinexus.net/v1' },
@@ -336,14 +356,173 @@ async function callGemini(config, messages, apiKey) {
 }
 
 // ============================================================
+// IP 速率限制（防API直调绕过前端积分检查）
 // ============================================================
-// 统一聊天接口
+const ipRateMap = new Map(); // IP → {count, resetTime}
+const IP_FREE_LIMIT = 20;    // 每个IP每日免费调用次数
+const IP_RATE_WINDOW = 60000; // 速率窗口 1分钟
+const IP_RATE_MAX = 30;       // 每分钟最多30次
+
+function checkIpRate(ip, modelId) {
+  const now = Date.now();
+  // 高成本模型判断：API Nexus / 海外旗舰
+  const isHighCost = modelId.startsWith('nx_') || modelId.startsWith('or_') || modelId.startsWith('qiniu_') || 
+    ['gpt4o','deepseekr1','claude4','claude4opus','gemini25pro','grok3'].includes(modelId);
+  // 免费模型：DMXAPI、硅基、火山引擎
+  const isFree = modelId.startsWith('dmx_') || modelId.startsWith('ark_') || 
+    ['sf_qwen3_8b','sf_deepseek_v3_free','sf_qwen3_32b','sf_glm47','qf_ernie_speed'].includes(modelId);
+  
+  // 免费模型不限
+  if (isFree) return { blocked: false };
+  
+  // 清理过期记录
+  for (const [key, val] of ipRateMap) {
+    if (now > val.resetTime) ipRateMap.delete(key);
+  }
+  
+  let record = ipRateMap.get(ip);
+  if (!record || now > record.dailyReset) {
+    record = { count: 0, dailyCount: 0, dailyReset: now + 86400000, resetTime: now + IP_RATE_WINDOW };
+    ipRateMap.set(ip, record);
+  }
+  
+  record.count++;
+  record.dailyCount++;
+  
+  // 每分钟速度限制
+  if (record.count > IP_RATE_MAX) return { blocked: true, reason: `请求过频（${IP_RATE_MAX}次/分钟），请稍后重试` };
+  
+  // 高成本模型 + 无API Key → 限制每日次数
+  if (isHighCost && record.dailyCount > IP_FREE_LIMIT) {
+    return { blocked: true, reason: `高成本模型每日免费额度已用完（${IP_FREE_LIMIT}次），请注册并充值` };
+  }
+  
+  return { blocked: false };
+}
+
+// 每小时自动清理IP记录
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of ipRateMap) {
+    if (now > val.dailyReset) ipRateMap.delete(key);
+  }
+}, 3600000);
+
 // ============================================================
+// 统一聊天接口（需 API Key 认证）
+// ============================================================
+// 模型积分表（供API Key认证调用使用）
+const API_MODEL_COST = {
+  dmx_qwen35_2b_free:0, dmx_qwen3_17b_free:0, dmx_spark_lite_free:0,
+  sf_qwen3_8b:0, sf_deepseek_v3_free:0, dmx_qwen3_8b_free:0, dmx_qwen_flash_free:0,
+  deepseekv3:1, glm4:1, kimi:1, sf_glm47:0, ali_qwen36_flash:1,
+  dmx_minimax_m25_free:0, dmx_glm_47_free:0, dmx_glm_47_flash:0, dmx_glm_45_flash:0,
+  dmx_glm_4_9b:0, dmx_hunyuan_lite:0, dmx_qwen35_plus_free:0,
+  dmx_qwen3_5_plus_free:0, dmx_qwen35_35b_free:0, dmx_qwen25_coder_7b:0,
+  dmx_doubao_seed_lite:0, dmx_mimo_v25_free:0, sf_qwen3_32b:0, or_codeqwen:1,
+  glm4plus:1, minimax:1, spark4:1, ali_qwen36_plus:1, ali_deepseek_v4_flash:1,
+  sf_hunyuan_a13b:1, sf_qwen35_397b:1, sf_qwq_32b:1,
+  dmx_minimax_m27_free:0, dmx_glm_5_turbo_free:0, dmx_qwen3_coder_plus_free:0,
+  dmx_qwen3_coder_next_free:0, dmx_doubao_seed_code:0, dmx_mimo_v2_pro_free:0,
+  dmx_code_free:0, dmx_codex_free:0, dmx_kat_coder_free:0,
+  dmx_qwen36_plus_free:0, dmx_code_free_x:0,
+  dmx_kimi_k25_free:0, dmx_kimi_k26_free:0, dmx_doubao_seed_pro:0, dmx_qwen3_max_free:0,
+  ark_dbs2_mini:0, ark_dbp15l:0, ark_dbs2_lite:0,
+  ark_dsv4f:0, ark_dbs1_6:0, ark_dbs1_8:0, ark_dbs_code:0,
+  ark_dsv32:0, ark_dsv4p:0, ark_dbs2_pro:0, ark_glm47:0,
+  ark_dbp15p:0, ark_dbs_char:0,
+  nx_gpt5:20, nx_gpt5mini:5, nx_gpt5chat:8, nx_gpt5nano:3, nx_gpt5all:20,
+  nx_gpt51chat:12, nx_gpt51codex:15, nx_gpt51codexmax:20,
+  nx_gpt52chat:15, nx_gpt52pro:20, nx_gpt53chat:18, nx_gpt53codex:25,
+  nx_gpt54pro:25, nx_gpt54mini:8, nx_gpt54nano:5,
+  nx_gpt55pro:35, nx_gpt55:30,
+  nx_claude_opus:25, nx_claude_sonnet:15, nx_claude_haiku:8,
+  nx_gemini_pro:12, nx_o3mini:10, nx_dalle3:15, nx_flux:8, nx_suno:15, nx_grok3:15,
+  meshy_text:288, meshy_image:288,
+  qf_ernie4:5, qf_ernie35:2, qf_ernie_speed:0,
+  ark_doubao_pro:0, ark_doubao_lite:0,
+  bc_baichuan4:2, bc_baichuan3:1,
+  qwen3:2, kimi2:2, minimax1:2, doubao:2, doubao15:2, gpt4omini:2, gemini15flash:2,
+  ali_qwen37_max:8, ali_deepseek_v4_pro:2, ali_kimi_k26:2,
+  sf_deepseek_v32:1, sf_glm5:2,
+  deepseekr1:5, gpt4o:5, hunyuan:5, gemini15pro:5, gemini25flash:5,
+  grok3:5, ali_glm51:5, 'mistral-large2':5,
+  or_llama3_70b:5, or_mistral_large:5, or_perplexity:5, llama4:3,
+  gpt4turbo:10, claude35:10, claude3opus:10, claude4:10,
+  claude4opus:15, gemini25pro:10,
+  or_gpt4o:10, or_claude_sonnet:10, or_gemini25pro:10,
+  qiniu_claude37:10, qiniu_claudeopus4:10, qiniu_gpt4o:10, qiniu_o3:10, qiniu_gemini25pro:10,
+  dmx_glm_5_free:0, dmx_glm_51_free:0, dmx_glm_5_turbo_free:0,
+};
+
 app.post('/api/chat', async (req, res) => {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'unknown';
+  // 支持两种认证方式：1) API Key (Authorization header) 2) 登录Token (x-auth-token header)
+  const apiKey = (req.headers.authorization || '').replace('Bearer ', '');
+  const authToken = req.headers['x-auth-token'] || '';
   const { model: modelId, messages } = req.body;
 
   if (!modelId || !messages) {
     return res.status(400).json({ error: '缺少 model 或 messages 参数' });
+  }
+
+  let username = null;
+  let userCredits = 0;
+  const creditCost = API_MODEL_COST[modelId] || 2;
+
+  // 认证方式1：API Key（第三方接入）
+  if (apiKey && apiKey.length > 10) {
+    const keyResult = db.exec(
+      "SELECT a.username, a.active, u.credits FROM api_keys a JOIN users u ON a.username=u.username WHERE a.api_key=?",
+      [apiKey]
+    );
+    if (!keyResult.length || !keyResult[0].values.length) {
+      return res.status(401).json({ error: { message: '无效的 API Key', type: 'auth_error' } });
+    }
+    const ki = keyResult[0].values[0];
+    if (!ki[1]) return res.status(403).json({ error: { message: 'API Key 已被禁用', type: 'auth_error' } });
+    username = ki[0];
+    userCredits = ki[2] || 0;
+  }
+  // 认证方式2：登录 Token（网站自身前端）
+  else if (authToken && authToken.length > 10) {
+    try {
+      const payload = JSON.parse(Buffer.from(authToken, 'base64').toString());
+      if (payload.username && payload.role && payload.ts) {
+        username = payload.username;
+        const ur = db.exec("SELECT credits FROM users WHERE username=?", [username]);
+        if (ur.length && ur[0].values.length) userCredits = ur[0].values[0][0] || 0;
+      }
+    } catch(e) { /* token parse error */ }
+  }
+
+  // 未认证 → 仅允许免费模型
+  if (!username) {
+    if (creditCost > 0) {
+      return res.status(401).json({ 
+        error: { message: '调用收费模型需要 API Key 或登录。请在网站注册并创建 API Key。', type: 'auth_error' } 
+      });
+    }
+  }
+
+  // IP 速率检查
+  const rateCheck = checkIpRate(ip, modelId);
+  if (rateCheck.blocked) {
+    console.log(`[RATE_LIMIT] ${ip} → ${modelId}: ${rateCheck.reason}`);
+    return res.status(429).json({ error: { message: rateCheck.reason, type: 'rate_limit' } });
+  }
+
+  // 扣积分
+  if (username && creditCost > 0) {
+    if (userCredits < creditCost) {
+      return res.status(402).json({ error: { message: `积分不足（需要${creditCost}分，当前${userCredits}分）`, type: 'insufficient_credits' } });
+    }
+    db.run("UPDATE users SET credits=credits-? WHERE username=?", [creditCost, username]);
+    db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, -creditCost, 'API: ' + modelId]);
+    if (apiKey) {
+      db.run("UPDATE api_keys SET used=used+? WHERE api_key=?", [creditCost, apiKey]);
+    }
+    saveDB();
   }
 
   let config = MODEL_CONFIG[modelId];
@@ -383,11 +562,11 @@ app.post('/api/chat', async (req, res) => {
     });
   }
 
-  const apiKey = getApiKey(config.provider, modelId);
+  const providerApiKey = getApiKey(config.provider, modelId);
 
   // 百度千帆需要实时获取 access token
-  let actualApiKey = apiKey;
-  if (apiKey === 'qianfan') {
+  let actualApiKey = providerApiKey;
+  if (providerApiKey === 'qianfan') {
     actualApiKey = await getQianfanToken();
     if (!actualApiKey) {
       return res.status(500).json({ model: modelId, content: '❌ 百度千帆 Token 获取失败，请检查 AK/SK 配置。', error: true });
@@ -417,12 +596,20 @@ app.post('/api/chat', async (req, res) => {
     }
 
     const latency = Date.now() - startTime;
+    // 查询剩余积分
+    let remainingCredits = null;
+    if (username) {
+      const cr = db.exec("SELECT credits FROM users WHERE username=?", [username]);
+      if (cr.length && cr[0].values.length) remainingCredits = cr[0].values[0][0];
+    }
 
     res.json({
       model: modelId,
       content,
       simulated: false,
       latency: `${latency}ms`,
+      cost: creditCost,
+      credits_remaining: remainingCredits,
     });
   } catch (error) {
     console.error(`[${modelId}] 调用失败:`, error.message);
@@ -1091,7 +1278,7 @@ async function initDB() {
   const adminExists = db.exec("SELECT id FROM users WHERE username='admin'");
   if (!adminExists.length || !adminExists[0].values.length) {
     db.run("INSERT INTO users (username, email, password, credits, role) VALUES (?, ?, ?, ?, ?)",
-      ['admin', 'admin@j3trisheng.com', btoaPwd('admin888'), 9999, 'admin']);
+      ['admin', 'admin@j3trisheng.com', hashPasswordSync('admin888'), 9999, 'admin']);
   }
   // 初始化知识库种子数据（仅当表为空时）
   const kbCount = db.exec("SELECT COUNT(*) FROM knowledge_base");
@@ -1150,7 +1337,7 @@ async function initDB() {
       ['签到奖励', '每日签到获得 5 积分奖励，连续签到天数越多奖励越丰厚（第7天+5）。签到积分每日刷新，可在顶部导航栏点击签到按钮查看当日奖励。', 'account', '签到,奖励,积分'],
 
       // === 充值 ===
-      ['充值套餐', '提供多种积分套餐：体验包 100 积分 ¥9.9、标准包 600 积分 ¥39、进阶包 2000 积分 ¥69、专业包 3000 积分 ¥99。积分永久有效，支持多次购买叠加。', 'pricing', '充值,套餐,价格,积分'],
+      ['充值套餐', '提供多种积分套餐：体验包 180 积分 ¥9.9、标准包 900 积分 ¥39、进阶包 1800 积分 ¥69。月卡 ¥29/月送 900 积分，季卡 ¥119/季送 4500 积分，年卡 ¥399/年送 18250 积分。积分永久有效。', 'pricing', '充值,套餐,价格,积分'],
 
       // === 知识库 ===
       ['知识库管理', '知识库是 RAG 系统的数据基础。用户可以添加、编辑、删除知识条目，支持按分类和标签管理。知识条目会被自动索引，在启用 RAG 增强的对话中自动检索匹配。建议将产品文档、FAQ、创作素材等存入知识库。', 'knowledge', '知识库,管理,RAG,数据'],
@@ -1173,6 +1360,32 @@ async function initDB() {
 
 function btoaPwd(pwd) {
   return Buffer.from(pwd).toString('base64');
+}
+
+// 判断是否为 bcrypt 哈希格式
+function isBcryptHash(hash) {
+  return typeof hash === 'string' && hash.startsWith('$2b$');
+}
+
+// 使用 bcrypt 哈希密码（同步，用于最小化代码改动）
+function hashPasswordSync(pwd) {
+  return bcrypt.hashSync(pwd, SALT_ROUNDS);
+}
+
+// 验证密码（兼容 bcrypt 和旧版 Base64，同步）
+function verifyPasswordSync(pwd, storedHash) {
+  if (isBcryptHash(storedHash)) {
+    return bcrypt.compareSync(pwd, storedHash);
+  }
+  // 兼容旧版 Base64 编码的密码
+  return storedHash === btoaPwd(pwd);
+}
+
+// 升级旧版 Base64 密码为 bcrypt（在验证成功后调用）
+function upgradePasswordToBcrypt(username, plainPwd) {
+  const newHash = hashPasswordSync(plainPwd);
+  db.run("UPDATE users SET password=? WHERE username=?", [newHash, username]);
+  saveDB();
 }
 
 function saveDB() {
@@ -1236,11 +1449,14 @@ app.post('/api/auth/register', (req, res) => {
       }
     }
     db.run("INSERT INTO users (username, email, password, credits, ref_code, referrer, register_ip, phone, device_fp, security_q, security_a) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-      [username, userEmail, btoaPwd(password), bonus, refCodeGen, referrer, clientIP, phone||'', deviceFp||'', securityQ, btoaPwd(securityA)]);
+      [username, userEmail, hashPasswordSync(password), bonus, refCodeGen, referrer, clientIP, phone||'', deviceFp||'', securityQ, hashPasswordSync(securityA)]);
     db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, bonus, '注册赠送']);
+    // 自动生成 API Key
+    const apiKey = 'nexus-' + username.substring(0,4).toLowerCase() + '-' + crypto.randomBytes(6).toString('hex');
+    db.run("INSERT INTO api_keys (username, key_name, api_key, quota) VALUES (?,?,?,?)", [username, '默认Key', apiKey, 0]);
     saveDB();
     const token = Buffer.from(JSON.stringify({ username, role: 'user', ts: Date.now() })).toString('base64');
-    res.json({ ok: true, token, user: { username, email, credits: bonus, refCode: refCodeGen }, bonus, referrerBonus: refCode ? 30 : 0 });
+    res.json({ ok: true, token, apiKey, user: { username, email, credits: bonus, refCode: refCodeGen }, bonus, referrerBonus: refCode ? 30 : 0 });
   } catch(e) {
     res.json({ ok: false, error: '注册失败: ' + e.message });
   }
@@ -1258,11 +1474,17 @@ app.post('/api/auth/login', (req, res) => {
       return res.json({ ok: false, error: '用户不存在' });
     }
     const user = result[0].values[0];
-    if (user[2] !== btoaPwd(password)) {
+    if (!verifyPasswordSync(password, user[2])) {
       return res.json({ ok: false, error: '密码错误' });
     }
+    // 如果是旧版 Base64 密码，自动升级为 bcrypt
+    if (!isBcryptHash(user[2])) {
+      upgradePasswordToBcrypt(user[0], password);
+    }
     const token = Buffer.from(JSON.stringify({ username: user[0], role: user[4], ts: Date.now() })).toString('base64');
-    res.json({ ok: true, token, user: { username: user[0], email: user[1], credits: user[3], role: user[4], refCode: user[5] } });
+    const apiKeyResult = db.exec("SELECT api_key FROM api_keys WHERE username=? ORDER BY id LIMIT 1", [user[0]]);
+    const apiKey = apiKeyResult.length && apiKeyResult[0].values.length ? apiKeyResult[0].values[0][0] : null;
+    res.json({ ok: true, token, apiKey, user: { username: user[0], email: user[1], credits: user[3], role: user[4], refCode: user[5] } });
   } catch(e) {
     res.json({ ok: false, error: '登录失败: ' + e.message });
   }
@@ -1363,8 +1585,12 @@ app.post('/api/admin/login', (req, res) => {
       return res.json({ ok: false, error: '管理员账号不存在' });
     }
     const admin = result[0].values[0];
-    if (admin[1] !== btoaPwd(password)) {
+    if (!verifyPasswordSync(password, admin[1])) {
       return res.json({ ok: false, error: '密码错误' });
+    }
+    // 如果是旧版 Base64 密码，自动升级为 bcrypt
+    if (!isBcryptHash(admin[1])) {
+      upgradePasswordToBcrypt('admin', password);
     }
     const token = Buffer.from(JSON.stringify({ username: 'admin', role: 'admin', ts: Date.now() })).toString('base64');
     res.json({ ok: true, token });
@@ -1380,11 +1606,16 @@ app.post('/api/admin/change-pwd', requireAdmin, (req, res) => {
     return res.json({ ok: false, error: '新密码至少6位' });
   }
   try {
-    db.run("UPDATE users SET password=? WHERE username=? AND password=?", [btoaPwd(newPwd), 'admin', btoaPwd(oldPwd)]);
-    saveDB();
-    if (db.getRowsModified() === 0) {
+    const result = db.exec("SELECT password FROM users WHERE username='admin'");
+    if (!result.length || !result[0].values.length) {
+      return res.json({ ok: false, error: '管理员账号不存在' });
+    }
+    const storedHash = result[0].values[0][0];
+    if (!verifyPasswordSync(oldPwd, storedHash)) {
       return res.json({ ok: false, error: '原密码错误' });
     }
+    db.run("UPDATE users SET password=? WHERE username=?", [hashPasswordSync(newPwd), 'admin']);
+    saveDB();
     res.json({ ok: true });
   } catch(e) {
     res.json({ ok: false, error: '修改失败: ' + e.message });
@@ -1767,36 +1998,47 @@ app.post('/v1/chat/completions', async (req, res) => {
   // 计算成本 — 和前端 MODEL_COST 保持一致
   const modelCostMap = {
     dmx_qwen35_2b_free:0, dmx_qwen3_17b_free:0, dmx_spark_lite_free:0,
-    sf_qwen3_8b:1, sf_deepseek_v3_free:2, dmx_qwen3_8b_free:1, dmx_qwen_flash_free:1,
-    deepseekv3:1, glm4:1, kimi:1, sf_glm47:1, ali_qwen36_flash:1,
-    dmx_minimax_m25_free:1, dmx_glm_47_free:1, dmx_glm_47_flash:1, dmx_glm_45_flash:1,
-    dmx_glm_4_9b:1, dmx_hunyuan_lite:1, dmx_qwen35_plus_free:1,
-    dmx_qwen3_5_plus_free:1, dmx_qwen35_35b_free:1, dmx_qwen25_coder_7b:1,
-    dmx_doubao_seed_lite:1, dmx_mimo_v25_free:1, sf_qwen3_32b:1, or_codeqwen:1,
-    glm4plus:2, minimax:2, spark4:2, ali_qwen36_plus:2, ali_deepseek_v4_flash:2,
-    sf_hunyuan_a13b:2, sf_qwen35_397b:2, sf_qwq_32b:2,
-    dmx_minimax_m27_free:2, dmx_glm_5_turbo_free:2, dmx_qwen3_coder_plus_free:2,
-    dmx_qwen3_coder_next_free:2, dmx_doubao_seed_code:2, dmx_mimo_v2_pro_free:2,
-    dmx_code_free:2, dmx_codex_free:2, dmx_kat_coder_free:2,
-    dmx_qwen36_plus_free:2, dmx_code_free_x:2,
+    sf_qwen3_8b:0, sf_deepseek_v3_free:0, dmx_qwen3_8b_free:0, dmx_qwen_flash_free:0,
+    deepseekv3:1, glm4:1, kimi:1, sf_glm47:0, ali_qwen36_flash:1,
+    dmx_minimax_m25_free:0, dmx_glm_47_free:0, dmx_glm_47_flash:0, dmx_glm_45_flash:0,
+    dmx_glm_4_9b:0, dmx_hunyuan_lite:0, dmx_qwen35_plus_free:0,
+    dmx_qwen3_5_plus_free:0, dmx_qwen35_35b_free:0, dmx_qwen25_coder_7b:0,
+    dmx_doubao_seed_lite:0, dmx_mimo_v25_free:0, sf_qwen3_32b:0, or_codeqwen:1,
+    glm4plus:1, minimax:1, spark4:1, ali_qwen36_plus:1, ali_deepseek_v4_flash:1,
+    // 硅基流动免费模型（以上已归零）
+    sf_hunyuan_a13b:1, sf_qwen35_397b:1, sf_qwq_32b:1,
+    // DMXAPI 全免费模型
+    dmx_minimax_m27_free:0, dmx_minimax_m25_free:0,
+    dmx_glm_47_free:0, dmx_glm_47_flash:0, dmx_glm_5_free:0, dmx_glm_51_free:0,
+    dmx_glm_5_turbo_free:0, dmx_glm_45_flash:0, dmx_glm_4_9b:0,
+    dmx_hunyuan_lite:0, dmx_qwen3_8b_free:0, dmx_qwen_flash_free:0,
+    dmx_qwen3_5_plus_free:0, dmx_qwen35_plus_free:0,
+    dmx_qwen3_coder_plus_free:0, dmx_qwen3_coder_next_free:0,
+    dmx_doubao_seed_code:0, dmx_mimo_v2_pro_free:0, dmx_mimo_v25_free:0,
+    dmx_code_free:0, dmx_codex_free:0, dmx_kat_coder_free:0,
+    dmx_qwen36_plus_free:0, dmx_code_free_x:0,
+    dmx_kimi_k25_free:0, dmx_kimi_k26_free:0, dmx_doubao_seed_pro:0, dmx_qwen3_max_free:0,
     ark_dbs2_mini:0, ark_dbp15l:0, ark_dbs2_lite:0,
-    ark_dsv4f:1, ark_dbs1_6:1, ark_dbs1_8:1, ark_dbs_code:1,
-    ark_dsv32:2, ark_dsv4p:2, ark_dbs2_pro:2, ark_glm47:2,
-    ark_dbp15p:3, ark_dbs_char:1,
-    // API Nexus 海外旗舰（高成本，限制 max_tokens 防止亏损）
-    nx_gpt5:80, nx_gpt5mini:15, nx_gpt54pro:100, nx_gpt54mini:25, nx_gpt54nano:15, nx_gpt55pro:150,
-    nx_claude_opus:120, nx_claude_sonnet:60,
-    nx_claude_haiku:25, nx_gemini_pro:50, nx_o3mini:30,
-    nx_dalle3:30, nx_flux:15, nx_suno:20, nx_grok3:50,
+    ark_dsv4f:0, ark_dbs1_6:0, ark_dbs1_8:0, ark_dbs_code:0,
+    ark_dsv32:0, ark_dsv4p:0, ark_dbs2_pro:0, ark_glm47:0,
+    ark_dbp15p:0, ark_dbs_char:0,
+    // API Nexus 海外旗舰（降价70%，目标毛利率70%）
+    nx_gpt5:20, nx_gpt5mini:5, nx_gpt5chat:8, nx_gpt5nano:3, nx_gpt5all:20,
+    nx_gpt51chat:12, nx_gpt51codex:15, nx_gpt51codexmax:20,
+    nx_gpt52chat:15, nx_gpt52pro:20,
+    nx_gpt53chat:18, nx_gpt53codex:25,
+    nx_gpt54pro:25, nx_gpt54mini:8, nx_gpt54nano:5,
+    nx_gpt55pro:35, nx_gpt55:30,
+    nx_claude_opus:25, nx_claude_sonnet:15,
+    nx_claude_haiku:8, nx_gemini_pro:12, nx_o3mini:10,
+    nx_dalle3:15, nx_flux:8, nx_suno:15, nx_grok3:15,
     meshy_text:288, meshy_image:288,
     qf_ernie4:5, qf_ernie35:2, qf_ernie_speed:0,
-    ark_doubao_pro:3, ark_doubao_lite:1,
-    bc_baichuan4:3, bc_baichuan3:1,
-    qwen3:3, kimi2:3, minimax1:3, doubao:3, doubao15:3, gpt4omini:3, gemini15flash:3,
-    ali_qwen37_max:8, ali_deepseek_v4_pro:3, ali_kimi_k26:3,
-    sf_deepseek_v32:3, sf_glm5:3,
-    dmx_glm_5_free:3, dmx_glm_51_free:3, dmx_kimi_k25_free:3,
-    dmx_kimi_k26_free:3, dmx_doubao_seed_pro:3, dmx_qwen3_max_free:3,
+    ark_doubao_pro:0, ark_doubao_lite:0,
+    bc_baichuan4:2, bc_baichuan3:1,
+    qwen3:2, kimi2:2, minimax1:2, doubao:2, doubao15:2, gpt4omini:2, gemini15flash:2,
+    ali_qwen37_max:8, ali_deepseek_v4_pro:2, ali_kimi_k26:2,
+    sf_deepseek_v32:1, sf_glm5:2,
     deepseekr1:5, gpt4o:5, hunyuan:5, gemini15pro:5, gemini25flash:5,
     grok3:5, ali_glm51:5, 'mistral-large2':5,
     or_llama3_70b:5, or_mistral_large:5, or_perplexity:5, llama4:3,
@@ -1827,7 +2069,8 @@ app.post('/v1/chat/completions', async (req, res) => {
     
     // 高成本模型 token 上限控制（防止单次调用消耗过大）
     const MAX_TOKENS_MAP = {
-      nx_gpt5: 2048, nx_gpt54pro: 2048, nx_gpt55pro: 2048,
+      nx_gpt5: 2048, nx_gpt5all: 2048, nx_gpt54pro: 2048, nx_gpt55pro: 2048, nx_gpt55: 2048,
+      nx_gpt52pro: 2048, nx_gpt53codex: 2048,
       nx_claude_opus: 2048, nx_claude_sonnet: 4096,
       nx_gemini_pro: 4096, nx_grok3: 4096, nx_o3mini: 4096,
       nx_gpt5mini: 4096, nx_claude_haiku: 4096,
@@ -1882,6 +2125,23 @@ app.get('/v1/models', (req, res) => {
 // ============================================================
 // 忘记密码 — 通过密保问题重置
 // ============================================================
+// 用户修改资料
+app.post('/api/user/update-profile', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.json({ ok: false, error: '未登录' });
+  try {
+    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const { email, oldPassword, newPassword } = req.body;
+    const user = db.exec("SELECT password FROM users WHERE username=?", [payload.username]);
+    if (!user.length || !user[0].values.length) return res.json({ ok: false, error: '用户不存在' });
+    if (user[0].values[0][0] !== oldPassword) return res.json({ ok: false, error: '当前密码错误' });
+    if (email) db.run("UPDATE users SET email=? WHERE username=?", [email, payload.username]);
+    if (newPassword) db.run("UPDATE users SET password=? WHERE username=?", [newPassword, payload.username]);
+    saveDB();
+    res.json({ ok: true, message: '已保存' });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
 app.post('/api/auth/forgot-password', (req, res) => {
   const { phone, securityAnswer, newPassword } = req.body;
   if (!phone || !securityAnswer || !newPassword) {
@@ -1900,15 +2160,59 @@ app.post('/api/auth/forgot-password', (req, res) => {
     if (!storedAnswer) {
       return res.json({ ok: false, error: '该账号未设置密保，无法找回' });
     }
-    if (storedAnswer !== btoaPwd(securityAnswer)) {
+    if (!verifyPasswordSync(securityAnswer, storedAnswer)) {
       return res.json({ ok: false, error: '密保答案错误' });
     }
-    db.run("UPDATE users SET password=? WHERE phone=?", [btoaPwd(newPassword), phone]);
+    db.run("UPDATE users SET password=? WHERE phone=?", [hashPasswordSync(newPassword), phone]);
     saveDB();
     res.json({ ok: true, message: '密码已重置，请使用新密码登录', username: user[0] });
   } catch(e) {
     res.json({ ok: false, error: '重置失败: ' + e.message });
   }
+});
+// ============================================================
+// 平台余额查询
+// ============================================================
+app.get('/api/admin/balances', async (req, res) => {
+  const results = {};
+  const check = async (name, url, headers, parseFn) => {
+    try {
+      const r = await fetch(url, { headers, signal: AbortSignal.timeout(10000) });
+      if (!r.ok) return { balance: 0, unit: '元', status: 'down', error: `HTTP ${r.status}` };
+      const d = await r.json();
+      return parseFn ? parseFn(d) : { balance: 0, unit: '元', status: 'ok' };
+    } catch(e) {
+      return { balance: 0, unit: '元', status: 'down', error: e.message };
+    }
+  };
+  // DeepSeek（支持余额查询）
+  if (process.env.DEEPSEEK_API_KEY) {
+    results.deepseek = await check('DeepSeek',
+      'https://api.deepseek.com/user/balance',
+      { Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}` },
+      d => { const bal = (d.balance_infos || []).reduce((s, b) => s + parseFloat(b.total_balance || 0), 0);
+             return { balance: bal.toFixed(2), unit: '元', status: bal > 1 ? 'ok' : 'low' }; }
+    );
+  }
+  // 硅基流动（支持余额）
+  if (process.env.SILICONFLOW_API_KEY) {
+    results.siliconflow = await check('SiliconFlow',
+      'https://api.siliconflow.cn/v1/user/info',
+      { Authorization: `Bearer ${process.env.SILICONFLOW_API_KEY}` },
+      d => { const bal = d.data?.balance || d.balance || 0;
+             return { balance: parseFloat(bal).toFixed(2), unit: '元', status: bal > 5 ? 'ok' : 'low' }; }
+    );
+  }
+  // OpenRouter（支持余额）
+  if (process.env.OPENROUTER_API_KEY) {
+    results.openrouter = await check('OpenRouter',
+      'https://openrouter.ai/api/v1/auth/key',
+      { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}` },
+      d => { const bal = d.data?.credits || 0;
+             return { balance: parseFloat(bal).toFixed(2), unit: '$', status: bal > 0.5 ? 'ok' : 'low' }; }
+    );
+  }
+  res.json({ ok: true, balances: results, updated: new Date().toISOString() });
 });
 
 // ============================================================

@@ -1,7 +1,7 @@
 {
-  "name": "AI Nexus - 智能创作平台",
-  "short_name": "AI Nexus",
-  "description": "一站式AI大模型聚合平台，接入DeepSeek、通义千问、Kimi、GLM、混元、硅基流动、OpenRouter等700+模型，跨设备同步",
+  "name": "Nexus Hub - 智能创作平台",
+  "short_name": "Nexus Hub",
+  "description": "一站式AI大模型聚合平台，接入DeepSeek、GPT-5、Claude等300+模型，免费模型无限用，会员解锁全部旗舰",
   "start_url": "/?pwa=1",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
@@ -32,27 +32,6 @@
       "description": "开始多模型对话",
       "url": "/?page=chat",
       "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
-    },
-    {
-      "name": "AI 写小说",
-      "short_name": "写小说",
-      "description": "6步创作流程",
-      "url": "/?page=novel",
-      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
-    },
-    {
-      "name": "提示词库",
-      "short_name": "提示词",
-      "description": "50+写作工具",
-      "url": "/?page=prompts",
-      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
     }
   ]
 }
