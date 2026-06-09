@@ -450,6 +450,38 @@ a{color:var(--accent);text-decoration:none}
 @media(min-width:769px){
   .mobile-nav,#mobileMenu{display:none!important}
 }
+/* ====== 移动端适配 ====== */
+@media(max-width:768px){
+  .section{padding:24px 12px}
+  .hero{padding:20px 16px 30px}
+  .hero h1{font-size:1.4rem}
+  .hero-stats{gap:20px}
+  .stat-num{font-size:1.4rem}
+  .feature-grid,.pricing-grid{grid-template-columns:1fr;gap:12px}
+  .right-panel{display:none}
+  .right-panel.open{display:block;position:fixed;top:56px;right:0;bottom:0;width:85vw;max-width:360px;z-index:500;box-shadow:-4px 0 24px rgba(0,0,0,0.5)}
+  .chat-container{flex-direction:column}
+  .chat-main{width:100%!important;max-width:100%}
+  .chat-msg{padding:12px}
+  .chat-msg-content{font-size:0.85rem}
+  #chatInput{font-size:0.85rem;padding:10px}
+  .tab-bar{overflow-x:auto;white-space:nowrap;padding:4px}
+  .tab-btn{font-size:0.72rem;padding:6px 10px}
+  .model-card{min-width:100%}
+  .sidebar{width:60px}
+  .sidebar .sidebar-link span,.sidebar-user span{display:none}
+  .sidebar .sidebar-link .sidebar-icon{margin:0}
+  .top-bar{padding:8px 12px}
+  .dashboard-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .hero-stats{flex-direction:column;gap:12px;align-items:center}
+  .hero p{font-size:0.85rem}
+  .section-title{font-size:1.2rem}
+  .top-credit{font-size:0.7rem}
+  .pricing-card{padding:16px 12px}
+  .pricing-price{font-size:1.3rem}
+}
 /* Wizard Panels */
 .wizard-panel{animation:fadeIn 0.3s ease}
 .wizard-panel.active{display:block}
@@ -2214,7 +2246,7 @@ response = client.chat.completions.create(
           <option value="realistic">写实风格</option><option value="cartoon">卡通风格</option><option value="low-poly">低多边形</option><option value="voxel">像素体素</option>
         </select>
         <button class="btn-send" onclick="D3_TEXT_TO_3D()" style="width:100%;font-size:0.85rem">🚀 生成 3D 模型</button>
-        <div style="font-size:0.68rem;color:var(--text-secondary);text-align:center;margin-top:4px">消耗 288 积分/次（Meshy API 成本 ¥12/次）</div>
+        <div style="font-size:0.68rem;color:var(--text-secondary);text-align:center;margin-top:4px">消耗 288 积分/次</div>
         <div id="d3TextResult" style="display:none;margin-top:12px;text-align:center;padding:16px;background:var(--accent-soft);border-radius:12px"></div>
         <div id="d3ModelViewer" style="display:none;margin-top:20px;background:linear-gradient(135deg,#1a1035,#0d0721);border-radius:16px;border:1px solid var(--glass-border);overflow:hidden">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)">
@@ -2246,7 +2278,7 @@ response = client.chat.completions.create(
         <input id="d3ImageInput" type="file" accept="image/*" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.82rem;margin-bottom:8px">
         <div id="d3ImagePreview" style="width:100%;height:120px;border-radius:8px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:0.78rem;color:var(--text-secondary);margin-bottom:8px">选择图片预览</div>
         <button class="btn-send" onclick="D3_IMAGE_TO_3D()" style="width:100%;font-size:0.85rem">🚀 转换 3D 模型</button>
-        <div style="font-size:0.68rem;color:var(--text-secondary);text-align:center;margin-top:4px">消耗 288 积分/次（Meshy API 成本 ¥12/次）</div>
+        <div style="font-size:0.68rem;color:var(--text-secondary);text-align:center;margin-top:4px">消耗 288 积分/次</div>
         <div id="d3ImageResult" style="display:none;margin-top:10px;text-align:center"></div>
       </div>
     </div>
@@ -2426,64 +2458,63 @@ response = client.chat.completions.create(
 
     <!-- 会员订阅 -->
     <h3 style="text-align:center;font-size:1.1rem;margin:28px 0 16px;color:var(--accent)">👑 会员订阅（推荐）</h3>
-    <p style="text-align:center;font-size:0.78rem;color:var(--text-secondary);margin-bottom:12px">💡 会员比按次买划算<b> 5-9 倍</b> · 每日签到赠积分 · 年卡解锁 GPT-5.5 Pro</p>
+    <p style="text-align:center;font-size:0.78rem;color:var(--text-secondary);margin-bottom:12px">💡 会员比单独买积分便宜<b> 50%</b> · 年卡日均仅 ¥0.82 · 解锁 GPT-5.5 Pro</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
       <!-- 月卡 -->
       <div class="feature-card" style="text-align:center;padding:28px 20px">
         <div style="font-size:2rem;margin-bottom:6px">🥈</div>
         <h3>月度会员</h3>
-        <div style="font-size:1.6rem;font-weight:800;color:var(--accent);margin:8px 0">¥29<span style="font-size:0.78rem;font-weight:400">/月</span></div>
-        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:8px">900 积分/月（30分/天）</p>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--accent);margin:8px 0">¥39<span style="font-size:0.78rem;font-weight:400">/月</span></div>
+        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:8px">+800 积分/月（¥0.049/分）</p>
         <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">
-          ⚡ 国产模型 8 折<br>
+          ⚡ 收费模型 9 折<br>
           🎯 GPT-5 Chat 解锁<br>
           📚 知识库 100 条<br>
           📊 使用统计面板
         </div>
-        <button class="btn-send" onclick="subscribe('monthly')">订阅 ¥29</button>
+        <button class="btn-send" onclick="subscribe('monthly')">订阅 ¥39</button>
       </div>
       <!-- 季卡 -->
       <div class="feature-card" style="text-align:center;border:2px solid var(--accent);padding:28px 20px;position:relative">
         <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:3px 12px;border-radius:10px;font-size:0.72rem;font-weight:700">🔥 最受欢迎</div>
         <div style="font-size:2rem;margin-bottom:6px">🥇</div>
         <h3>季度会员</h3>
-        <div style="font-size:1.6rem;font-weight:800;color:var(--accent);margin:8px 0">¥119<span style="font-size:0.78rem;font-weight:400">/季</span></div>
-        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:4px"><s style="font-size:0.7rem">¥147</s> 省 ¥28 · 4500 积分（50分/天）</p>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--accent);margin:8px 0">¥99<span style="font-size:0.78rem;font-weight:400">/季</span></div>
+        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:4px">+2400 积分/季 · ¥0.041/分</p>
         <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">
-          ⚡ 国产模型 7 折<br>
+          ⚡ 收费模型 8 折<br>
           🎯 GPT-5 Pro / Claude Sonnet 解锁<br>
           💰 5% 积分返利<br>
           📖 导出无水印<br>
           📚 知识库 500 条
         </div>
-        <button class="btn-send" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="subscribe('quarterly')">订阅 ¥119</button>
+        <button class="btn-send" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="subscribe('quarterly')">订阅 ¥99</button>
       </div>
       <!-- 年卡 -->
       <div class="feature-card" style="text-align:center;padding:28px 20px;background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(99,102,241,0.05))">
         <div style="font-size:2rem;margin-bottom:6px">💎</div>
         <h3>年度会员</h3>
-        <div style="font-size:1.6rem;font-weight:800;color:#7c3aed;margin:8px 0">¥399<span style="font-size:0.78rem;font-weight:400">/年</span></div>
-        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:4px"><s style="font-size:0.7rem">¥468</s> 省 ¥69 · 18250 积分（50分/天）</p>
+        <div style="font-size:1.6rem;font-weight:800;color:#7c3aed;margin:8px 0">¥299<span style="font-size:0.78rem;font-weight:400">/年</span></div>
+        <p style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:4px"><s style="font-size:0.7rem">¥468</s> 省 ¥169 · +9600 积分（¥0.031/分）</p>
         <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">
-          ⚡ <b style="color:#7c3aed">国产模型 5 折</b><br>
+          ⚡ <b style="color:#7c3aed">收费模型 7 折</b><br>
           🔴 <b style="color:#ef4444">GPT-5.5 Pro / Claude Opus 解锁</b><br>
           💰 10% 积分返利<br>
-          🧊 3D 生成 5 折<br>
           📚 知识库无限<br>
           🎯 优先响应通道
         </div>
-        <button class="btn-send" style="background:linear-gradient(135deg,#7c3aed,#6366f1)" onclick="subscribe('yearly')">订阅 ¥399</button>
+        <button class="btn-send" style="background:linear-gradient(135deg,#7c3aed,#6366f1)" onclick="subscribe('yearly')">订阅 ¥299</button>
       </div>
     </div>
 
     <!-- 一次性充值 -->
     <h3 style="text-align:center;font-size:1.1rem;margin:36px 0 16px;color:var(--text-secondary)">🔋 一次性充值</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-      <div class="feature-card" style="text-align:center;padding:20px 16px;position:relative"><div id="firstPurchaseBadge" style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:2px 10px;border-radius:8px;font-size:0.65rem;font-weight:700;display:none">🔥 首购5折</div><div style="font-size:1.4rem;margin-bottom:4px">☕</div><h4>体验包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">150 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥9.9</div><p style="font-size:0.65rem;color:var(--green)">首次额外+30</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(150,'¥9.9')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:20px 16px;border:2px solid var(--accent)"><div style="font-size:1.4rem;margin-bottom:4px">⭐</div><h4>标准包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">700 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥39</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.056/积分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(700,'¥39')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:20px 16px"><div style="font-size:1.4rem;margin-bottom:4px">💎</div><h4>进阶包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">1500 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥69</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.046/积分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(1500,'¥69')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:20px 16px"><div style="font-size:1.4rem;margin-bottom:4px">🚀</div><h4>专业包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">2500 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥99</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.040/积分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(2500,'¥99')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:20px 16px;background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(99,102,241,0.05))"><div style="font-size:1.4rem;margin-bottom:4px">👑</div><h4>旗舰包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">6000 积分</p><div style="font-size:1.2rem;font-weight:800;color:#7c3aed;margin:6px 0">¥199</div><p style="font-size:0.65rem;color:var(--green)">¥0.033/积分 · 赠知识库</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem;background:linear-gradient(135deg,#7c3aed,#6366f1)" onclick="purchaseCredits(6000,'¥199')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px;position:relative"><div id="firstPurchaseBadge" style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:2px 10px;border-radius:8px;font-size:0.65rem;font-weight:700;display:none">🔥 首购5折</div><div style="font-size:1.4rem;margin-bottom:4px">☕</div><h4>体验包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">100 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥6.9</div><p style="font-size:0.65rem;color:var(--green)">¥0.069/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(100,'¥6.9')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px;border:2px solid var(--accent)"><div style="font-size:1.4rem;margin-bottom:4px">⭐</div><h4>标准包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">500 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥29</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.058/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(500,'¥29')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px"><div style="font-size:1.4rem;margin-bottom:4px">💎</div><h4>进阶包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">1000 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥49</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.049/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(1000,'¥49')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px"><div style="font-size:1.4rem;margin-bottom:4px">🚀</div><h4>专业包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">2500 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥99</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.040/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(2500,'¥99')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px;background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(99,102,241,0.05))"><div style="font-size:1.4rem;margin-bottom:4px">👑</div><h4>旗舰包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">6000 积分</p><div style="font-size:1.2rem;font-weight:800;color:#7c3aed;margin:6px 0">¥199</div><p style="font-size:0.65rem;color:var(--green)">¥0.033/分 · 赠知识库</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem;background:linear-gradient(135deg,#7c3aed,#6366f1)" onclick="purchaseCredits(6000,'¥199')">购买</button></div>
     </div>
 
     <!-- 功能消耗明细 -->
@@ -4583,18 +4614,18 @@ const MODEL_COST={
   ark_dsv4f:0, ark_dbs1_6:0, ark_dbs1_8:0, ark_dbs_code:0,
   ark_dsv32:0, ark_dsv4p:0, ark_dbs2_pro:0, ark_glm47:0,
   ark_dbp15p:0, ark_dbs_char:0,
-  // 3D 生成（成本 ¥12/次，定价 288 积分持平）
+  // 3D 生成（按量计费）
   meshy_text:288, meshy_image:288,
-  // API Nexus 海外旗舰（降价70%，毛利率70%+）
-  nx_gpt5:20, nx_gpt5mini:5, nx_gpt5chat:8, nx_gpt5nano:3, nx_gpt5all:20,
-  nx_gpt51chat:12, nx_gpt51codex:15, nx_gpt51codexmax:20,
-  nx_gpt52chat:15, nx_gpt52pro:20,
-  nx_gpt53chat:18, nx_gpt53codex:25,
-  nx_gpt54pro:25, nx_gpt54mini:8, nx_gpt54nano:5,
-  nx_gpt55pro:35, nx_gpt55:30,
-  nx_claude_opus:25, nx_claude_sonnet:15,
-  nx_claude_haiku:8, nx_gemini_pro:12, nx_o3mini:10,
-  nx_dalle3:15, nx_flux:8, nx_suno:15, nx_grok3:15,
+  // API Nexus 海外旗舰（毛利率70%）
+  nx_gpt5:8, nx_gpt5mini:3, nx_gpt5chat:5, nx_gpt5nano:2, nx_gpt5all:8,
+  nx_gpt51chat:6, nx_gpt51codex:8, nx_gpt51codexmax:10,
+  nx_gpt52chat:8, nx_gpt52pro:8,
+  nx_gpt53chat:8, nx_gpt53codex:12,
+  nx_gpt54pro:12, nx_gpt54mini:5, nx_gpt54nano:3,
+  nx_gpt55pro:15, nx_gpt55:15,
+  nx_claude_opus:12, nx_claude_sonnet:6,
+  nx_claude_haiku:5, nx_gemini_pro:6, nx_o3mini:5,
+  nx_dalle3:8, nx_flux:5, nx_suno:8, nx_grok3:8,
   // 百川智能
   bc_baichuan4:2, bc_baichuan3:1,
   ark_doubao_pro:0, ark_doubao_lite:0,
@@ -4705,7 +4736,7 @@ function purchaseCredits(a,p){const isFirst=!localStorage.getItem('has_purchased
     window.open('https://mbd.pub','_blank');showToast('付款后积分自动到账');
   }
 }
-function subscribe(type){const plans={monthly:{n:'月度会员',p:29,c:900},quarterly:{n:'季度会员',p:119,c:4500},yearly:{n:'年度会员',p:399,c:18250}};const plan=plans[type];if(!plan)return;
+function subscribe(type){const plans={monthly:{n:'月度会员',p:39,c:800},quarterly:{n:'季度会员',p:99,c:2400},yearly:{n:'年度会员',p:299,c:9600}};const plan=plans[type];if(!plan)return;
   if(confirm(`订阅 ${plan.n}
 ¥${plan.p} · ${plan.c} 积分/周期
 ─────────────────
@@ -6226,7 +6257,7 @@ function STUDIO_SET(k,v){if(k==='ratio')document.getElementById('stuRatio').valu
 async function STUDIO_GENERATE_IMAGE(){const prompt=document.getElementById('stuPromptText').textContent.trim();const subj=document.getElementById('stuPrompt').value.trim();const p=subj||prompt;if(!p){showToast('请输入创作描述');return}const load=document.getElementById('stuLoading'),img=document.getElementById('stuImage');load.style.display='block';img.style.display='none';document.getElementById('stuImgActions').style.display='none';try{const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=768&height=768&nologo=true&seed=${Math.floor(Math.random()*99999)}`;img.src=url;img.onload=()=>{load.style.display='none';img.style.display='block';document.getElementById('stuImgActions').style.display='flex';window._stuLastImage={url,prompt:document.getElementById('stuPrompt').value,full:p,cat:'绘画',time:new Date().toISOString()}};img.onerror=()=>{load.style.display='none';showToast('生成失败')}}catch(e){load.style.display='none';showToast('出错')}}
 function STUDIO_SAVE_IMAGE(){if(!window._stuLastImage){showToast('请先生成图像');return}const a=document.createElement('a');a.href=window._stuLastImage.url;a.download='ai-creation.png';a.click()}
 function STUDIO_ADD_TO_GALLERY(){if(!window._stuLastImage){showToast('请先生成图像');return}STUDIO_GALLERY.unshift({...window._stuLastImage,cat:'绘画'});STUDIO_GALLERY=STUDIO_GALLERY.slice(0,100);localStorage.setItem('stuGallery',JSON.stringify(STUDIO_GALLERY));showToast('已加入画廊')}
-function renderStudioGallery(){const g=document.getElementById('studioGalleryGrid');let items=STUDIO_GALLERY;if(GALLERY_FILTER_CURRENT!=='all')items=items.filter(i=>i.cat===GALLERY_FILTER_CURRENT);if(!items.length){g.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎨</div><p>没有找到作品</p></div>';return}g.innerHTML=items.map((s,i)=>{const idx=STUDIO_GALLERY.indexOf(s);return`<div class="gallery-card" onclick="STUDIO_GALLERY_USE(${idx})"><div class="gallery-preview" style="background:var(--bg-input);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center"><div class="gallery-placeholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:0.3;pointer-events:none">🎨</div><img src="${s.url}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:cover;position:relative;z-index:1;transition:transform 0.4s ease" onload="this.parentElement.querySelector('.gallery-placeholder').style.display='none';this.style.transform='scale(1)'" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform='scale(1)'"><div class="gallery-overlay" style="position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,0.7));z-index:2;display:flex;align-items:flex-end;justify-content:center;padding:16px;opacity:0;transition:opacity 0.3s ease;pointer-events:none"><span style="background:var(--accent);color:#fff;padding:6px 14px;border-radius:20px;font-size:0.75rem;font-weight:600">🖱️ 点击加载到创作区</span></div></div><div style="padding:12px"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escapeHtml(s.prompt.substring(0,50))}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:0.68rem;color:var(--text-secondary)">${s.cat||'绘画'} · ${new Date(s.time).toLocaleDateString('zh-CN')}</span><span style="font-size:0.65rem;color:var(--accent);font-weight:600;opacity:0;transition:opacity 0.2s">使用 →</span></div></div></div>`}).join('');
+function renderStudioGallery(){const g=document.getElementById('studioGalleryGrid');let items=STUDIO_GALLERY;if(GALLERY_FILTER_CURRENT!=='all')items=items.filter(i=>i.cat===GALLERY_FILTER_CURRENT);if(!items.length){g.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎨</div><p>没有找到作品</p></div>';return}g.innerHTML=items.map((s,i)=>{const idx=STUDIO_GALLERY.indexOf(s);return`<div class="gallery-card" onclick="STUDIO_GALLERY_USE(${idx})"><div class="gallery-preview" style="background:var(--bg-input);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center"><div class="gallery-placeholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:0.3;pointer-events:none">🎨</div><img src="${s.url}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:cover;position:relative;z-index:1;transition:transform 0.4s ease" onload="this.parentElement.querySelector('.gallery-placeholder').style.display='none';this.style.transform='scale(1)'" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22><rect fill=%22%230d0721%22 width=%22200%22 height=%22200%22/><text x=%22100%22 y=%22110%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22%23ffffff33%22>🎨</text></svg>';this.parentElement.querySelector('.gallery-placeholder').style.display='none'" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform='scale(1)'"><div class="gallery-overlay" style="position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,0.7));z-index:2;display:flex;align-items:flex-end;justify-content:center;padding:16px;opacity:0;transition:opacity 0.3s ease;pointer-events:none"><span style="background:var(--accent);color:#fff;padding:6px 14px;border-radius:20px;font-size:0.75rem;font-weight:600">🖱️ 点击加载到创作区</span></div></div><div style="padding:12px"><div style="font-weight:600;font-size:0.82rem;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escapeHtml(s.prompt.substring(0,50))}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:0.68rem;color:var(--text-secondary)">${s.cat||'绘画'} · ${new Date(s.time).toLocaleDateString('zh-CN')}</span><span style="font-size:0.65rem;color:var(--accent);font-weight:600;opacity:0;transition:opacity 0.2s">使用 →</span></div></div></div>`}).join('');
   document.querySelectorAll('.gallery-card').forEach(card=>{
     card.addEventListener('mouseenter',function(){this.querySelector('.gallery-overlay').style.opacity='1';const use=this.querySelector('[style*="使用"]');if(use)use.style.opacity='1'});
     card.addEventListener('mouseleave',function(){this.querySelector('.gallery-overlay').style.opacity='0';const use=this.querySelector('[style*="使用"]');if(use)use.style.opacity='0'});

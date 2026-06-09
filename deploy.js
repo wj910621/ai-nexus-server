@@ -18,8 +18,10 @@ if (!PASS && !KEY_FILE) {
 
 const files = [
   path.join(__dirname, 'index.html'),
-  path.join(__dirname, 'server', 'server.js'),
-  path.join(__dirname, 'server', 'package.json'),
+  path.join(__dirname, 'dashboard.html'),
+  path.join(__dirname, 'landing.html'),
+  path.join(__dirname, 'server.js'),
+  path.join(__dirname, 'package.json'),
 ];
 
 conn.on('ready', () => {
@@ -48,7 +50,7 @@ conn.on('ready', () => {
           
           if (uploaded >= files.filter(f => fs.existsSync(f)).length) {
             console.log('\n文件上传完成，安装依赖...');
-            conn.exec('cd ' + REMOTE_DIR + ' && npm install express cors dotenv 2>&1 && echo "依赖安装完成"', (err, stream) => {
+            conn.exec('cd ' + REMOTE_DIR + ' && npm install 2>&1 && echo "依赖安装完成"', (err, stream) => {
               if (err) { console.log('npm install 错误:', err); conn.end(); return; }
               stream.on('data', d => console.log(d.toString()));
               stream.stderr.on('data', d => console.log(d.toString()));
