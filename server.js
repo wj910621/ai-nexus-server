@@ -10,6 +10,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
 const SALT_ROUNDS = 10;
 // dotenv: 优先加载项目根目录 .env，兼容本地开发与服务器部署
 require('dotenv').config({ path: path.join(__dirname, '.env') });
@@ -29,7 +31,24 @@ let staticDir = path.resolve(__dirname, '..');
 if (!fs.existsSync(path.join(staticDir, 'index.html')) && !fs.existsSync(path.join(staticDir, 'dashboard.html'))) {
   staticDir = __dirname; // 部署时文件可能在同目录
 }
-console.log('静态文件目录:', staticDir);
+// JWT密钥 & 速率限制
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.JWT_SECRET) {
+  try {
+    var ec = require('fs').readFileSync(require('path').join(__dirname, '.env'), 'utf8');
+    if (!ec.includes('JWT_SECRET=')) {
+      require('fs').appendFileSync(require('path').join(__dirname, '.env'), '\n# JWT密钥（自动生成，请勿泄露）\nJWT_SECRET=' + JWT_SECRET + '\n');
+    }
+  } catch(e) {}
+}
+const authLimiter = require('express-rate-limit')({ windowMs: 15*60*1000, max: 10, message: { ok:false, error:'请求过于频繁，请15分钟后再试'} });
+function signToken(p) { return require('jsonwebtoken').sign(p, JWT_SECRET, { expiresIn:'7d' }); }
+function verifyToken(t) { return require('jsonwebtoken').verify(t, JWT_SECRET); }
+function authRequired(req,res,next) {
+  if (!req.headers.authorization?.startsWith('Bearer ')) return res.status(401).json({ ok:false, error:'未登录' });
+  try { req.user = verifyToken(req.headers.authorization.slice(7)); next(); }
+  catch(e) { return res.status(401).json({ ok:false, error:'登录已过期，请重新登录' }); }
+}
 
 // 首页 - 落地页
 app.get('/', (req, res) => {
@@ -1273,7 +1292,51 @@ async function initDB() {
   )`);
   // 为知识库建全文搜索索引
   try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge_base(category)`); } catch(e) {}
-  try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_updated ON knowledge_base(updated_at)`); } catch(e) {}
+  try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_updated ON knowledge_base(updated_at)`); 
+  // === AI 小说相关表 ===
+  db.run('CREATE TABLE IF NOT EXISTS novels (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL, title TEXT DEFAULT "未命名作品",
+    type TEXT DEFAULT "", outline TEXT DEFAULT "", core TEXT DEFAULT "",
+    total_words INTEGER DEFAULT 0, chapter_count INTEGER DEFAULT 0,
+    status TEXT DEFAULT "draft",
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    updated_at TEXT DEFAULT (datetime('now', 'localtime'))');
+  try { db.run('CREATE INDEX IF NOT EXISTS idx_novels_username ON novels(username)'); } catch(e) {}
+  db.run('CREATE TABLE IF NOT EXISTS novel_characters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL, novel_id INTEGER DEFAULT 0,
+    name TEXT NOT NULL, avatar TEXT DEFAULT "",
+    gender TEXT DEFAULT "", age TEXT DEFAULT "",
+    appearance TEXT DEFAULT "", personality TEXT DEFAULT "",
+    background TEXT DEFAULT "", goal TEXT DEFAULT "",
+    arc TEXT DEFAULT "", notes TEXT DEFAULT "",
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))');
+  try { db.run('CREATE INDEX IF NOT EXISTS idx_characters_novel ON novel_characters(novel_id)'); } catch(e) {}
+  db.run('CREATE TABLE IF NOT EXISTS novel_worlds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL, novel_id INTEGER DEFAULT 0,
+    category TEXT DEFAULT "general", key TEXT NOT NULL,
+    value TEXT DEFAULT "", description TEXT DEFAULT "",
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))');
+  try { db.run('CREATE INDEX IF NOT EXISTS idx_worlds_novel ON novel_worlds(novel_id)'); } catch(e) {}
+  db.run('CREATE TABLE IF NOT EXISTS novel_chapters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL, novel_id INTEGER DEFAULT 0,
+    chapter_index INTEGER DEFAULT 0, title TEXT DEFAULT "",
+    content TEXT DEFAULT "", outline TEXT DEFAULT "",
+    word_count INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    updated_at TEXT DEFAULT (datetime('now', 'localtime'))');
+  try { db.run('CREATE INDEX IF NOT EXISTS idx_chapters_novel ON novel_chapters(novel_id)'); } catch(e) {}
+  db.run('CREATE TABLE IF NOT EXISTS novel_chapter_versions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chapter_id INTEGER NOT NULL, username TEXT NOT NULL,
+    version INTEGER DEFAULT 1, content TEXT NOT NULL,
+    summary TEXT DEFAULT "",
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))');
+  try { db.run('CREATE INDEX IF NOT EXISTS idx_versions_chapter ON novel_chapter_versions(chapter_id)'); } catch(e) {}
+
   // 确保有 admin 用户
   const adminExists = db.exec("SELECT id FROM users WHERE username='admin'");
   if (!adminExists.length || !adminExists[0].values.length) {
@@ -1399,7 +1462,7 @@ function saveDB() {
 // ============================================================
 // 认证 API
 // ============================================================
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', authLimiter, (req, res) => {
   const { username, email, password, refCode, deviceFp } = req.body;
   if (!username || !password) {
     return res.json({ ok: false, error: '请填写用户名和密码' });
@@ -1455,14 +1518,14 @@ app.post('/api/auth/register', (req, res) => {
     const apiKey = 'nexus-' + username.substring(0,4).toLowerCase() + '-' + crypto.randomBytes(6).toString('hex');
     db.run("INSERT INTO api_keys (username, key_name, api_key, quota) VALUES (?,?,?,?)", [username, '默认Key', apiKey, 0]);
     saveDB();
-    const token = Buffer.from(JSON.stringify({ username, role: 'user', ts: Date.now() })).toString('base64');
+    const token = signToken({ username, role: 'user', ts: Date.now() });
     res.json({ ok: true, token, apiKey, user: { username, email, credits: bonus, refCode: refCodeGen }, bonus, referrerBonus: refCode ? 30 : 0 });
   } catch(e) {
     res.json({ ok: false, error: '注册失败: ' + e.message });
   }
 });
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', authLimiter, (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.json({ ok: false, error: '请输入用户名和密码' });
@@ -1481,7 +1544,7 @@ app.post('/api/auth/login', (req, res) => {
     if (!isBcryptHash(user[2])) {
       upgradePasswordToBcrypt(user[0], password);
     }
-    const token = Buffer.from(JSON.stringify({ username: user[0], role: user[4], ts: Date.now() })).toString('base64');
+    const token = signToken({ username: user[0], role: user[4], ts: Date.now() });
     const apiKeyResult = db.exec("SELECT api_key FROM api_keys WHERE username=? ORDER BY id LIMIT 1", [user[0]]);
     const apiKey = apiKeyResult.length && apiKeyResult[0].values.length ? apiKeyResult[0].values[0][0] : null;
     res.json({ ok: true, token, apiKey, user: { username: user[0], email: user[1], credits: user[3], role: user[4], refCode: user[5] } });
@@ -1499,7 +1562,7 @@ app.post('/api/user/spend', (req, res) => {
     return res.json({ ok: false, error: '金额无效' });
   }
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const payload = verifyToken(token);
     const username = payload.username;
     const user = db.exec("SELECT credits FROM users WHERE username=?", [username]);
     if (!user.length || !user[0].values.length) {
@@ -1524,7 +1587,7 @@ app.get('/api/user/credits', (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) return res.json({ ok: false, error: '未登录' });
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const payload = verifyToken(token);
     const user = db.exec("SELECT credits FROM users WHERE username=?", [payload.username]);
     if (!user.length || !user[0].values.length) {
       return res.json({ ok: false, error: '用户不存在' });
@@ -1544,7 +1607,7 @@ app.post('/api/user/refund', (req, res) => {
   const { amount } = req.body;
   if (!amount || amount <= 0) return res.json({ ok: false, error: '金额无效' });
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const payload = verifyToken(token);
     const username = payload.username;
     db.run("UPDATE users SET credits=credits+? WHERE username=?", [amount, username]);
     db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, amount, '退款-API失败']);
@@ -1592,7 +1655,7 @@ app.post('/api/admin/login', (req, res) => {
     if (!isBcryptHash(admin[1])) {
       upgradePasswordToBcrypt('admin', password);
     }
-    const token = Buffer.from(JSON.stringify({ username: 'admin', role: 'admin', ts: Date.now() })).toString('base64');
+    const token = signToken({ username: 'admin', role: 'admin', ts: Date.now() });
     res.json({ ok: true, token });
   } catch(e) {
     res.json({ ok: false, error: '登录失败: ' + e.message });
@@ -1877,6 +1940,166 @@ app.post('/api/knowledge/search', (req, res) => {
 const err404HTML = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>404 - Nexus Hub</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f8f7ff;color:#1a1035;text-align:center}.wrap{max-width:500px;padding:40px}h1{font-size:80px;font-weight:800;background:linear-gradient(135deg,#6c4ef5,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}p{font-size:18px;color:#6b5b95;margin:16px 0 24px}a{display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;border-radius:10px;text-decoration:none;font-weight:600}</style></head><body><div class="wrap"><h1>404</h1><p>页面不存在或已移动</p><a href="/">返回首页</a></div></body></html>`;
 const err500HTML = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>500 - Nexus Hub</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f8f7ff;color:#1a1035;text-align:center}.wrap{max-width:500px;padding:40px}h1{font-size:80px;font-weight:800;background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}p{font-size:18px;color:#6b5b95;margin:16px 0 24px}a{display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;border-radius:10px;text-decoration:none;font-weight:600}</style></head><body><div class="wrap"><h1>500</h1><p>服务器内部错误，请稍后重试</p><a href="/">返回首页</a></div></body></html>`;
 
+
+// ============================================================
+// AI 小说 API（角色卡片/世界观/章节/版本管理）
+// ============================================================
+// 获取用户作品列表
+app.get('/api/novels', authRequired, (req, res) => {
+  try {
+    var result = db.exec("SELECT id, username, title, type, outline, core, total_words, chapter_count, status, created_at, updated_at FROM novels WHERE username=? ORDER BY updated_at DESC", [req.user.username]);
+    res.json({ ok: true, novels: result.length && result[0].values.length ? result[0].values.map(v => ({ id: v[0], title: v[2], type: v[3], total_words: v[6], chapter_count: v[7], status: v[8], updated_at: v[10] })) : [] });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 创建作品
+app.post('/api/novels', authRequired, (req, res) => {
+  try {
+    var { title, type, core } = req.body;
+    db.run("INSERT INTO novels (username, title, type, core) VALUES (?,?,?,?)", [req.user.username, title || '未命名作品', type || '', core || '']);
+    saveDB();
+    var id = db.exec("SELECT last_insert_rowid()");
+    res.json({ ok: true, novel_id: id[0].values[0][0] });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 获取作品详情（含角色+世界观）
+app.get('/api/novels/:id', authRequired, (req, res) => {
+  try {
+    var nv = db.exec("SELECT * FROM novels WHERE id=? AND username=?", [req.params.id, req.user.username]);
+    if (!nv.length || !nv[0].values.length) return res.json({ ok: false, error: '作品不存在' });
+    var v = nv[0].values[0];
+    var chars = db.exec("SELECT * FROM novel_characters WHERE novel_id=?", [req.params.id]);
+    var worlds = db.exec("SELECT * FROM novel_worlds WHERE novel_id=?", [req.params.id]);
+    res.json({ ok: true, novel: { id: v[0], title: v[3], type: v[4], outline: v[5], core: v[6], total_words: v[7], chapter_count: v[8], status: v[9] }, characters: chars.length ? chars[0].values.map(r => ({ id: r[0], name: r[3], gender: r[5], age: r[6], appearance: r[7], personality: r[8], background: r[9], goal: r[10], arc: r[11], notes: r[12] })) : [], worlds: worlds.length ? worlds[0].values.map(r => ({ id: r[0], category: r[4], key: r[5], value: r[6] })) : [] });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 更新作品
+app.put('/api/novels/:id', authRequired, (req, res) => {
+  try {
+    var { title, type, outline, core } = req.body;
+    if (title !== undefined) db.run("UPDATE novels SET title=? WHERE id=? AND username=?", [title, req.params.id, req.user.username]);
+    if (type !== undefined) db.run("UPDATE novels SET type=? WHERE id=? AND username=?", [type, req.params.id, req.user.username]);
+    if (outline !== undefined) db.run("UPDATE novels SET outline=? WHERE id=? AND username=?", [outline, req.params.id, req.user.username]);
+    if (core !== undefined) db.run("UPDATE novels SET core=? WHERE id=? AND username=?", [core, req.params.id, req.user.username]);
+    db.run("UPDATE novels SET updated_at=datetime('now','localtime') WHERE id=?", [req.params.id]);
+    saveDB();
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 角色卡片 CRUD
+app.get('/api/novels/:id/characters', authRequired, (req, res) => {
+  try {
+    var chars = db.exec("SELECT * FROM novel_characters WHERE novel_id=? ORDER BY id", [req.params.id]);
+    res.json({ ok: true, characters: chars.length ? chars[0].values.map(r => ({ id: r[0], name: r[3], gender: r[5], age: r[6], appearance: r[7], personality: r[8], background: r[9], goal: r[10], arc: r[11], notes: r[12] })) : [] });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+app.post('/api/novels/:id/characters', authRequired, (req, res) => {
+  try {
+    var { name, gender, age, appearance, personality, background, goal, arc, notes } = req.body;
+    db.run("INSERT INTO novel_characters (username, novel_id, name, gender, age, appearance, personality, background, goal, arc, notes) VALUES (?,?,?,?,?,?,?,?,?,?,?)", [req.user.username, req.params.id, name || '新角色', gender || '', age || '', appearance || '', personality || '', background || '', goal || '', arc || '', notes || '']);
+    saveDB();
+    res.json({ ok: true, character_id: db.exec("SELECT last_insert_rowid()")[0].values[0][0] });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+app.put('/api/characters/:id', authRequired, (req, res) => {
+  try {
+    var fields = req.body;
+    Object.keys(fields).forEach(function(k) { db.run("UPDATE novel_characters SET " + k + "=? WHERE id=?", [fields[k], req.params.id]); });
+    saveDB();
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+app.delete('/api/characters/:id', authRequired, (req, res) => {
+  try { db.run("DELETE FROM novel_characters WHERE id=?", [req.params.id]); saveDB(); res.json({ ok: true }); } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 世界观设定
+app.post('/api/novels/:id/worlds', authRequired, (req, res) => {
+  try {
+    var { category, key, value } = req.body;
+    db.run("INSERT INTO novel_worlds (username, novel_id, category, key, value) VALUES (?,?,?,?,?)", [req.user.username, req.params.id, category || 'general', key || '', value || '']);
+    saveDB();
+    res.json({ ok: true, world_id: db.exec("SELECT last_insert_rowid()")[0].values[0][0] });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+app.delete('/api/worlds/:id', authRequired, (req, res) => {
+  try { db.run("DELETE FROM novel_worlds WHERE id=?", [req.params.id]); saveDB(); res.json({ ok: true }); } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 章节管理（含版本自动保存）
+app.get('/api/novels/:id/chapters', authRequired, (req, res) => {
+  try {
+    var chaps = db.exec("SELECT * FROM novel_chapters WHERE novel_id=? ORDER BY chapter_index", [req.params.id]);
+    res.json({ ok: true, chapters: chaps.length ? chaps[0].values.map(r => ({ id: r[0], index: r[4], title: r[5], content: r[6], outline: r[7], word_count: r[8] })) : [] });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+app.post('/api/novels/:id/chapters', authRequired, (req, res) => {
+  try {
+    var { title, content, outline, chapter_index } = req.body;
+    db.run("INSERT INTO novel_chapters (username, novel_id, chapter_index, title, content, outline, word_count) VALUES (?,?,?,?,?,?,?)", [req.user.username, req.params.id, chapter_index || 0, title || '', content || '', outline || '', (content || '').length]);
+    saveDB();
+    res.json({ ok: true, chapter_id: db.exec("SELECT last_insert_rowid()")[0].values[0][0] });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+app.put('/api/chapters/:id', authRequired, (req, res) => {
+  try {
+    var { title, content, outline } = req.body;
+    if (content !== undefined) {
+      db.run("UPDATE novel_chapters SET content=?, word_count=? WHERE id=?", [content, content.length, req.params.id]);
+      db.run("INSERT INTO novel_chapter_versions (chapter_id, username, version, content, summary) VALUES (?,(SELECT COALESCE(MAX(version),0)+1 FROM novel_chapter_versions WHERE chapter_id=?)),?)", [req.params.id, req.user.username, req.params.id, content, title || '']);
+    }
+    if (title !== undefined) db.run("UPDATE novel_chapters SET title=? WHERE id=?", [title, req.params.id]);
+    if (outline !== undefined) db.run("UPDATE novel_chapters SET outline=? WHERE id=?", [outline, req.params.id]);
+    db.run("UPDATE novel_chapters SET updated_at=datetime('now','localtime') WHERE id=?", [req.params.id]);
+    saveDB();
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 版本历史
+app.get('/api/chapters/:id/versions', authRequired, (req, res) => {
+  try {
+    var vers = db.exec("SELECT * FROM novel_chapter_versions WHERE chapter_id=? ORDER BY version DESC", [req.params.id]);
+    res.json({ ok: true, versions: vers.length ? vers[0].values.map(r => ({ id: r[0], version: r[3], content: r[4], summary: r[5], created_at: r[6] })) : [] });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+app.delete('/api/chapters/:id', authRequired, (req, res) => {
+  try { db.run("DELETE FROM novel_chapters WHERE id=?", [req.params.id]); db.run("DELETE FROM novel_chapter_versions WHERE chapter_id=?", [req.params.id]); saveDB(); res.json({ ok: true }); } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 导出 TXT
+app.get('/api/novels/:id/export', authRequired, (req, res) => {
+  try {
+    var nv = db.exec("SELECT * FROM novels WHERE id=? AND username=?", [req.params.id, req.user.username]);
+    if (!nv.length || !nv[0].values.length) return res.status(404).json({ ok: false, error: '作品不存在' });
+    var v = nv[0].values[0];
+    var chaps = db.exec("SELECT * FROM novel_chapters WHERE novel_id=? ORDER BY chapter_index", [req.params.id]);
+    var text = '《' + v[3] + '》\n\n';
+    if (chaps.length && chaps[0].values.length) { chaps[0].values.forEach(function(ch, i) { text += '第' + (i+1) + '章 ' + (ch[5]||'') + '\n\n' + (ch[6]||'') + '\n\n'; }); }
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="' + v[3] + '.txt"');
+    res.send(text);
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 删除作品（级联删除依赖数据）
+app.delete('/api/novels/:id', authRequired, (req, res) => {
+  try {
+    var nid = req.params.id;
+    db.run("DELETE FROM novels WHERE id=? AND username=?", [nid, req.user.username]);
+    db.run("DELETE FROM novel_characters WHERE novel_id=?", [nid]);
+    db.run("DELETE FROM novel_worlds WHERE novel_id=?", [nid]);
+    var chs = db.exec("SELECT id FROM novel_chapters WHERE novel_id=?", [nid]);
+    if (chs.length && chs[0].values.length) { chs[0].values.forEach(function(ch) { db.run("DELETE FROM novel_chapter_versions WHERE chapter_id=?", [ch[0]]); }); }
+    db.run("DELETE FROM novel_chapters WHERE novel_id=?", [nid]);
+    saveDB();
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
 // 404 处理 — 放在所有路由之后
 app.use((req, res) => {
   res.status(404).type('html').send(err404HTML);
@@ -1909,7 +2132,7 @@ app.get('/api/stats', (req, res) => {
 // 管理员认证（服务端存储密码，跨浏览器/缓存后不丢失）
 // ============================================================
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-app.post('/api/admin/auth', (req, res) => {
+app.post('/api/admin/auth', authLimiter, (req, res) => {
   const { password } = req.body || {};
   if (password === ADMIN_PASSWORD) {
     res.json({ ok: true, token: Buffer.from(password + ':' + Date.now()).toString('base64') });
@@ -1930,7 +2153,7 @@ app.post('/api/keys/create', (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) return res.json({ ok: false, error: '未登录' });
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const payload = verifyToken(token);
     const username = payload.username;
     const keyName = (req.body.name || '').trim() || '默认 Key';
     const apiKey = generateApiKey(username.substring(0, 3));
@@ -1946,7 +2169,7 @@ app.get('/api/keys', (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) return res.json({ ok: false, error: '未登录' });
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const payload = verifyToken(token);
     const result = db.exec("SELECT id, key_name, api_key, quota, used, active, created_at FROM api_keys WHERE username=? ORDER BY id DESC",
       [payload.username]);
     const keys = result.length ? result[0].values.map(v => ({
@@ -1961,7 +2184,7 @@ app.delete('/api/keys/:id', (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) return res.json({ ok: false, error: '未登录' });
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const payload = verifyToken(token);
     db.run("DELETE FROM api_keys WHERE id=? AND username=?", [req.params.id, payload.username]);
     saveDB();
     res.json({ ok: true });
@@ -2130,7 +2353,7 @@ app.post('/api/user/update-profile', (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) return res.json({ ok: false, error: '未登录' });
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    const payload = verifyToken(token);
     const { email, oldPassword, newPassword } = req.body;
     const user = db.exec("SELECT password FROM users WHERE username=?", [payload.username]);
     if (!user.length || !user[0].values.length) return res.json({ ok: false, error: '用户不存在' });
@@ -2142,7 +2365,7 @@ app.post('/api/user/update-profile', (req, res) => {
   } catch(e) { res.json({ ok: false, error: e.message }); }
 });
 
-app.post('/api/auth/forgot-password', (req, res) => {
+app.post('/api/auth/forgot-password', authLimiter, (req, res) => {
   const { phone, securityAnswer, newPassword } = req.body;
   if (!phone || !securityAnswer || !newPassword) {
     return res.json({ ok: false, error: '请填写完整信息' });
