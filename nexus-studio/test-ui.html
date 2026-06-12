@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>UI Test</title>
+  <style>
+    body { font-family: monospace; padding: 40px; background: #1a1a2e; color: #e0e0e0; }
+    h1 { color: #00d4ff; }
+    .pass { color: #00ff88; }
+    .fail { color: #ff4444; }
+    pre { background: #16213e; padding: 20px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🔬 NexusUI Test</h1>
+  <pre id="output">Loading...</pre>
+
+  <script src="js/storage.js"></script>
+  <script>
+    document.getElementById('output').textContent += '\n✅ storage.js loaded: ' + (typeof NexusStorage);
+  </script>
+  <script src="js/api.js"></script>
+  <script>
+    document.getElementById('output').textContent += '\n✅ api.js loaded: ' + (typeof NexusAPI);
+  </script>
+  <script src="js/models.js"></script>
+  <script>
+    document.getElementById('output').textContent += '\n✅ models.js loaded: ' + (typeof NexusModels);
+  </script>
+  <script src="js/ui.js"></script>
+  <script>
+    var out = document.getElementById('output');
+    out.textContent += '\n✅ ui.js loaded';
+    out.textContent += '\nNexusUI type: ' + (typeof NexusUI);
+    out.textContent += '\nNexusUI keys: ' + (NexusUI ? Object.keys(NexusUI).join(', ') : 'N/A');
+    out.textContent += '\ninit type: ' + (NexusUI ? typeof NexusUI.init : 'N/A');
+    out.textContent += '\nshowToast type: ' + (NexusUI ? typeof NexusUI.toast : 'N/A');
+
+    if (typeof NexusUI === 'object' && NexusUI !== null) {
+      if (typeof NexusUI.init === 'function') {
+        out.innerHTML += '\n\n<span class="pass">✅ PASS: NexusUI.init is a function</span>';
+      } else {
+        out.innerHTML += '\n\n<span class="fail">❌ FAIL: NexusUI.init is ' + (typeof NexusUI.init) + '</span>';
+      }
+    } else {
+      out.innerHTML += '\n\n<span class="fail">❌ FAIL: NexusUI is ' + (typeof NexusUI) + '</span>';
+    }
+  </script>
+</body>
+</html>

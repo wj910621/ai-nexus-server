@@ -6,16 +6,14 @@ const USER = 'root';
 const PASS = 'Wangjie910621';
 
 conn.on('ready', () => {
-  conn.exec('pm2 show nexus-hub', (err, stream) => {
+  // 检查 PM2 错误日志
+  conn.exec('tail -50 /root/.pm2/logs/nexus-hub-error.log', (err, stream) => {
     let output = '';
     stream.on('data', d => output += d.toString());
     stream.on('close', () => {
+      console.log('=== PM2 Error Log (last 50 lines) ===');
       console.log(output);
-      // Also check the uploaded server.js
-      conn.exec('head -90 /home/admin/ai-nexus/server.js | tail -20', (err2, stream2) => {
-        stream2.on('data', d => process.stdout.write(d.toString()));
-        stream2.on('close', () => conn.end());
-      });
+      conn.end();
     });
   });
 }).on('error', (err) => {

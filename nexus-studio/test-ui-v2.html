@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>UI Test v2</title>
+  <style>
+    body { font-family: monospace; padding: 40px; background: #1a1a2e; color: #e0e0e0; }
+    h1 { color: #00d4ff; }
+    .pass { color: #00ff88; }
+    .fail { color: #ff4444; }
+    .warn { color: #ffaa00; }
+    pre { background: #16213e; padding: 20px; border-radius: 8px; overflow: auto; max-height: 500px; }
+    #log { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>🔬 NexusUI Test v2</h1>
+  <pre id="output">Loading...</pre>
+  <pre id="log">Console output will appear here...</pre>
+
+  <!-- 拦截 console 输出 -->
+  <script>
+    var consoleBuffer = [];
+    var origConsole = { log: console.log, error: console.error, warn: console.warn };
+    console.log = function() {
+      var msg = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      consoleBuffer.push('[LOG] ' + msg);
+      origConsole.log.apply(console, arguments);
+    };
+    console.error = function() {
+      var msg = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      consoleBuffer.push('[ERR] ' + msg);
+      origConsole.error.apply(console, arguments);
+    };
+    console.warn = function() {
+      var msg = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      consoleBuffer.push('[WARN] ' + msg);
+      origConsole.warn.apply(console, arguments);
+    };
+  </script>
+
+  <script src="js/storage.js"></script>
+  <script>
+    var out = document.getElementById('output');
+    out.textContent += '\n✅ storage.js: ' + (typeof NexusStorage);
+    document.getElementById('log').textContent = consoleBuffer.join('\n');
+  </script>
+  <script src="js/api.js"></script>
+  <script>
+    out.textContent += '\n✅ api.js: ' + (typeof NexusAPI);
+    document.getElementById('log').textContent = consoleBuffer.join('\n');
+  </script>
+  <script src="js/models.js"></script>
+  <script>
+    out.textContent += '\n✅ models.js: ' + (typeof NexusModels);
+    document.getElementById('log').textContent = consoleBuffer.join('\n');
+  </script>
+
+  <!-- 加载修复后的 ui.js -->
+  <script src="js/ui.js"></script>
+  <script>
+    out.textContent += '\n✅ ui.js loaded';
+    out.textContent += '\nNexusUI type: ' + (typeof NexusUI);
+    if (NexusUI) {
+      out.textContent += '\nNexusUI keys: ' + Object.keys(NexusUI).join(', ');
+      out.textContent += '\ninit type: ' + (typeof NexusUI.init);
+    }
+    document.getElementById('log').textContent = consoleBuffer.join('\n');
+
+    if (typeof NexusUI === 'object' && NexusUI !== null && typeof NexusUI.init === 'function') {
+      out.innerHTML += '\n\n<span class="pass">✅ PASS: NexusUI.init is a function</span>';
+    } else {
+      out.innerHTML += '\n\n<span class="fail">❌ FAIL: NexusUI = ' + (typeof NexusUI);
+      if (NexusUI) out.innerHTML += ' (init=' + (typeof NexusUI.init) + ')';
+      out.innerHTML += '</span>';
+    }
+  </script>
+</body>
+</html>

@@ -77,7 +77,16 @@ app.use(express.static(staticDir));
 // 部署时前端文件位于 /home/admin/nexus-studio，可通过 /studio 访问
 const studioDir = process.env.STUDIO_DIR || '/home/admin/nexus-studio';
 if (fs.existsSync(studioDir)) {
-  app.use('/studio', express.static(studioDir));
+  app.use('/studio', express.static(studioDir, {
+    // 禁止缓存，防止 Service Worker 缓存旧版本导致 init is not defined 等错误
+    setHeaders: function(res, filePath) {
+      if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css') || filePath.endsWith('.json')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
+    }
+  }));
 }
 
 const PORT = process.env.PORT || 3001;
