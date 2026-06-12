@@ -9,7 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const SALT_ROUNDS = 10;
@@ -72,6 +72,13 @@ app.get('/dashboard', (req, res) => {
 
 // 其他静态资源
 app.use(express.static(staticDir));
+
+// Nexus Studio 前端 PWA 静态文件服务
+// 部署时前端文件位于 /home/admin/nexus-studio，可通过 /studio 访问
+const studioDir = process.env.STUDIO_DIR || '/home/admin/nexus-studio';
+if (fs.existsSync(studioDir)) {
+  app.use('/studio', express.static(studioDir));
+}
 
 const PORT = process.env.PORT || 3001;
 
@@ -622,6 +629,24 @@ app.post('/api/chat', async (req, res) => {
       if (cr.length && cr[0].values.length) remainingCredits = cr[0].values[0][0];
     }
 
+    // SSE 流式响应支持（前端设置 stream: true 时使用）
+    if (req.body.stream) {
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      // 将完整内容模拟为 SSE 流式输出（按句子拆分，改善体验）
+      const sentences = content.split(/(?<=[。！？.!?\n])\s*/);
+      for (const sentence of sentences) {
+        if (sentence.trim()) {
+          const payload = JSON.stringify({ choices: [{ delta: { content: sentence } }] });
+          res.write(`data: ${payload}\n\n`);
+        }
+      }
+      res.write('data: [DONE]\n\n');
+      res.end();
+      return;
+    }
+
     res.json({
       model: modelId,
       content,
@@ -666,6 +691,20 @@ app.get('/api/status', (req, res) => {
 // 模型列表 API
 // ============================================================
 app.get('/api/models-list', (req, res) => {
+  const allModels = Object.entries(MODEL_CONFIG).map(([id, cfg]) => ({
+    id,
+    name: cfg.model,
+    provider: cfg.baseUrl ? new URL(cfg.baseUrl).hostname : cfg.provider,
+    context: '128K',
+    inputPrice: '?',
+    outputPrice: '?',
+    tags: [],
+  }));
+  res.json({ count: allModels.length, models: allModels });
+});
+
+// 别名：前端调用 /api/models，后端实际为 /api/models-list
+app.get('/api/models', (req, res) => {
   const allModels = Object.entries(MODEL_CONFIG).map(([id, cfg]) => ({
     id,
     name: cfg.model,
@@ -1161,7 +1200,6 @@ app.get('/api/music/task', async (req, res) => {
 // ============================================================
 // 可灵 Kling 视频生成 API
 // ============================================================
-const jwt = require('jsonwebtoken');
 const KLING_AK = 'AFFtyyYeEbHGBmYfBTDdF4TDA9TNTnrf';
 const KLING_SK = 'adnGpEn3kAR4TdKGBTMa8E3KLmyKTEEL';
 const KLING_BASE = 'https://api.klingai.com';
@@ -1292,49 +1330,54 @@ async function initDB() {
   )`);
   // 为知识库建全文搜索索引
   try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge_base(category)`); } catch(e) {}
-  try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_updated ON knowledge_base(updated_at)`); 
+  try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_updated ON knowledge_base(updated_at)`); } catch(e) {}
   // === AI 小说相关表 ===
-  db.run('CREATE TABLE IF NOT EXISTS novels (
+  db.run(`CREATE TABLE IF NOT EXISTS novels (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL, title TEXT DEFAULT "未命名作品",
-    type TEXT DEFAULT "", outline TEXT DEFAULT "", core TEXT DEFAULT "",
+    username TEXT NOT NULL, title TEXT DEFAULT '未命名作品',
+    type TEXT DEFAULT '', outline TEXT DEFAULT '', core TEXT DEFAULT '',
     total_words INTEGER DEFAULT 0, chapter_count INTEGER DEFAULT 0,
-    status TEXT DEFAULT "draft",
+    status TEXT DEFAULT 'draft',
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
-    updated_at TEXT DEFAULT (datetime('now', 'localtime'))');
+    updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+  )`);
   try { db.run('CREATE INDEX IF NOT EXISTS idx_novels_username ON novels(username)'); } catch(e) {}
-  db.run('CREATE TABLE IF NOT EXISTS novel_characters (
+  db.run(`CREATE TABLE IF NOT EXISTS novel_characters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL, novel_id INTEGER DEFAULT 0,
-    name TEXT NOT NULL, avatar TEXT DEFAULT "",
-    gender TEXT DEFAULT "", age TEXT DEFAULT "",
-    appearance TEXT DEFAULT "", personality TEXT DEFAULT "",
-    background TEXT DEFAULT "", goal TEXT DEFAULT "",
-    arc TEXT DEFAULT "", notes TEXT DEFAULT "",
-    created_at TEXT DEFAULT (datetime('now', 'localtime'))');
+    name TEXT NOT NULL, avatar TEXT DEFAULT '',
+    gender TEXT DEFAULT '', age TEXT DEFAULT '',
+    appearance TEXT DEFAULT '', personality TEXT DEFAULT '',
+    background TEXT DEFAULT '', goal TEXT DEFAULT '',
+    arc TEXT DEFAULT '', notes TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+  )`);
   try { db.run('CREATE INDEX IF NOT EXISTS idx_characters_novel ON novel_characters(novel_id)'); } catch(e) {}
-  db.run('CREATE TABLE IF NOT EXISTS novel_worlds (
+  db.run(`CREATE TABLE IF NOT EXISTS novel_worlds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL, novel_id INTEGER DEFAULT 0,
-    category TEXT DEFAULT "general", key TEXT NOT NULL,
-    value TEXT DEFAULT "", description TEXT DEFAULT "",
-    created_at TEXT DEFAULT (datetime('now', 'localtime'))');
+    category TEXT DEFAULT 'general', key TEXT NOT NULL,
+    value TEXT DEFAULT '', description TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+  )`);
   try { db.run('CREATE INDEX IF NOT EXISTS idx_worlds_novel ON novel_worlds(novel_id)'); } catch(e) {}
-  db.run('CREATE TABLE IF NOT EXISTS novel_chapters (
+  db.run(`CREATE TABLE IF NOT EXISTS novel_chapters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL, novel_id INTEGER DEFAULT 0,
-    chapter_index INTEGER DEFAULT 0, title TEXT DEFAULT "",
-    content TEXT DEFAULT "", outline TEXT DEFAULT "",
+    chapter_index INTEGER DEFAULT 0, title TEXT DEFAULT '',
+    content TEXT DEFAULT '', outline TEXT DEFAULT '',
     word_count INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
-    updated_at TEXT DEFAULT (datetime('now', 'localtime'))');
+    updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+  )`);
   try { db.run('CREATE INDEX IF NOT EXISTS idx_chapters_novel ON novel_chapters(novel_id)'); } catch(e) {}
-  db.run('CREATE TABLE IF NOT EXISTS novel_chapter_versions (
+  db.run(`CREATE TABLE IF NOT EXISTS novel_chapter_versions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     chapter_id INTEGER NOT NULL, username TEXT NOT NULL,
     version INTEGER DEFAULT 1, content TEXT NOT NULL,
-    summary TEXT DEFAULT "",
-    created_at TEXT DEFAULT (datetime('now', 'localtime'))');
+    summary TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+  )`);
   try { db.run('CREATE INDEX IF NOT EXISTS idx_versions_chapter ON novel_chapter_versions(chapter_id)'); } catch(e) {}
 
   // 确保有 admin 用户
@@ -2444,6 +2487,7 @@ initDB().then(() => {
     console.log(`\n⚡ Nexus Hub 后端代理已启动`);
     console.log(`   本地访问: http://localhost:${PORT}`);
     console.log(`   API 状态: http://localhost:${PORT}/api/status`);
+    console.log(`   数据库: ${DB_FILE}`);
 
     // 检查各平台 Key 配置状态（按平台分组输出）
     const platforms = {};

@@ -12,13 +12,24 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "express-rate-limit": "^7.5.1",
     "jsonwebtoken": "^9.0.2",
-    "sql.js": "^1.11.0",
+    "sql.js": "^1.8.0",
     "ssh2": "^1.17.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://wj910621: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@github.com/wj910621/ai-nexus-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wj910621/ai-nexus-server/issues"
+  },
+  "homepage": "https://github.com/wj910621/ai-nexus-server#readme"
 }

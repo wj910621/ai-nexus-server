@@ -1,5 +1,11 @@
 node_modules/
+package-lock.json
 .env
+data.db
 *.log
+logs/
 .DS_Store
-.workbuddy/
+Thumbs.db
+server/.git/
+.history/
+*.backup

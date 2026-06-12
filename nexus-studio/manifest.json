@@ -1,0 +1,24 @@
+{
+  "name": "Nexus AI Studio",
+  "short_name": "Nexus AI",
+  "description": "下一代 AI 桌面工作台 - 300+ 模型、代码助手、Agent 编排",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0f0f23",
+  "theme_color": "#0f0f23",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%230f0f23' rx='32'/%3E%3Ccircle cx='96' cy='96' r='80' stroke='%2300d4ff' stroke-width='6' fill='none'/%3E%3Cpath d='M60 96 L80 76 L112 108 L140 80' stroke='%237b2ff7' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='96' cy='96' r='18' fill='%2300d4ff' opacity='0.6'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230f0f23' rx='64'/%3E%3Ccircle cx='256' cy='256' r='200' stroke='%2300d4ff' stroke-width='12' fill='none'/%3E%3Cpath d='M160 256 L200 216 L280 296 L360 216' stroke='%237b2ff7' stroke-width='18' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='256' cy='256' r='40' fill='%2300d4ff' opacity='0.6'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
