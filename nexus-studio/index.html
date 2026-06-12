@@ -24,7 +24,7 @@ if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){cach
   <meta name="theme-color" content="#0f0f23">
   <link rel="manifest" href="manifest.json">
   <title>Nexus AI Studio</title>
-  <link rel="stylesheet" href="css/style.css?v=0">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>  <!-- 启动加载画面 -->
   <div id="splashScreen" class="splash-screen">
@@ -373,7 +373,22 @@ if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){cach
       <button id="errorDismissBtn" class="btn btn-ghost">Dismiss</button>
     </div>
   </div>
-  <script>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+<div class="system-indicator"><span class="dot"></span><span>SYSTEM ONLINE</span></div>
+<script>
+/*** storage.js ***/
 /* ========================================
    NexusStorage - IndexedDB 持久化存储层
    替换 localStorage，支持 50MB+，异步非阻塞
@@ -570,8 +585,8 @@ var NexusStorage = (function() {
   };
 })();
 
-</script>
-  <script>
+
+/*** api.js ***/
 /* ========================================
    API 模块 - 多 Provider API 封装
    支持用户配置自有 API Key，按 model 自动路由
@@ -943,8 +958,8 @@ var NexusAPI = (function() {
   };
 })();
 
-</script>
-  <script>
+
+/*** models.js ***/
 /* ========================================
    模型管理模块 - 分组展示、搜索过滤、选择
    ======================================== */
@@ -1135,8 +1150,8 @@ var NexusModels = (function() {
   };
 })();
 
-</script>
-  <script>
+
+/*** chat.js ***/
 /* ========================================
    对话核心模块 - 流式响应、历史管理
    ======================================== */
@@ -1492,8 +1507,8 @@ var NexusChat = (function() {
 
 
 
-</script>
-  <script>
+
+/*** code.js ***/
 /* ========================================
    代码助手核心模块
    文件树、编辑器、语法高亮、终端、AI分析
@@ -1766,8 +1781,8 @@ var NexusCode = (function() {
       // 注释
       if (lang.js || lang.html) {
         escaped = escaped
-          .replace(/\/\/.*$/gm, '<span class="hl-comment"><script src="js/code.js?v=0"><\/script></span>')
-          .replace(/\/\*[\s\S]*?\*\//g, '<span class="hl-comment"><script src="js/code.js?v=0"><\/script></span>');
+          .replace(/\/\/.*$/gm, '<span class="hl-comment"></body></span>')
+          .replace(/\/\*[\s\S]*?\*\//g, '<span class="hl-comment"></body></span>');
       }
 
       // HTML 标签（如果文件中可能有 HTML）
@@ -2295,7 +2310,7 @@ var NexusCode = (function() {
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong></strong>');
     // 列表
     html = html.replace(/^- (.+)$/gm, '<li></li>');
-    html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul><script src="js/code.js?v=0"><\/script></ul>');
+    html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul></body></ul>');
     // 换行
     html = html.replace(/\n/g, '<br>');
     return html;
@@ -2662,8 +2677,8 @@ var NexusCode = (function() {
 
 
 
-</script>
-  <script>
+
+/*** agent.js ***/
 /* ========================================
    Agent 工作台核心模块 - P2
    20 个预设角色、工作流画布、配置、执行
@@ -3671,8 +3686,8 @@ function setupGallerySearch() {
 })();
 
 
-</script>
-  <script>
+
+/*** skills.js ***/
 /* ========================================
    Skill 商店核心模块 - P3
    30+ 预设技能、分类筛选、安装、自定义创建
@@ -4302,8 +4317,8 @@ var NexusSkills = (function() {
 })();
 
 
-</script>
-  <script>
+
+/*** plugin.js ***/
 /* ========================================
    Plugin Runtime - 插件运行时系统
    Skills 注册为运行时插件，支持 Hook 机制
@@ -4368,8 +4383,8 @@ var NexusPlugins = (function() {
   };
 })();
 
-</script>
-  <script>
+
+/*** particles.js ***/
 /* ========================================
    Nexus 粒子系统 - 未来感背景动画
    ======================================== */
@@ -4435,8 +4450,8 @@ var NexusPlugins = (function() {
   animate();
 })();
 
-</script>
-  <script>
+
+/*** autonomous.js ***/
 /* ========================================
    Autonomous Coding Agent - 自主编程智能体
    理解代码库 → 规划实现 → 逐文件编码 → 用户审批
@@ -4640,8 +4655,8 @@ var NexusAuto = (function() {
   };
 })();
 
-</script>
-  <script>
+
+/*** knowledge.js ***/
 /* ========================================
    知识库核心模块 - 文档管理、分类、搜索
    ======================================== */
@@ -5009,7 +5024,7 @@ var NexusKnowledge = (function() {
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
     // Lists
     html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
-    html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul><script src="js/knowledge.js?v=0"><\/script></ul>');
+    html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul></body></ul>');
     // Line breaks
     html = html.replace(/\n/g, '<br>');
     return '<div class="kb-preview-content">' + html + '</div>';
@@ -5034,8 +5049,8 @@ var NexusKnowledge = (function() {
 
 
 
-</script>
-  <script>
+
+/*** ui.js ***/
 /* ========================================
    UI 交互模块 - Toast、面板切换、快捷键
    ======================================== */
@@ -5533,7 +5548,7 @@ var NexusUI = (function() {
       return rowHtml;
     });
 
-    html = html.replace(/(<tr>.*<\/tr>\n?)+/g, '<table><script src="js/ui.js?v=0"><\/script></table>');
+    html = html.replace(/(<tr>.*<\/tr>\n?)+/g, '<table></body></table>');
 
     // 段落
     html = html.replace(/\n\n/g, '</p><p>');
@@ -6694,8 +6709,8 @@ var NexusUI = (function() {
 })();
 
 
-</script>
-  <script>
+
+/*** app.js ***/
 /* ========================================
    主入口模块 - 初始化、SW 注册、PWA 安装
    错误边界、加载管理
@@ -6890,8 +6905,9 @@ var NexusUI = (function() {
 
 
 
+
+
 </script>
-<div class="system-indicator"><span class="dot"></span><span>SYSTEM ONLINE</span></div>
 </body>
 </html>
 
