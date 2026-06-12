@@ -1,5 +1,4 @@
 const { Client } = require('ssh2');
-const fs = require('fs');
 const path = require('path');
 
 const conn = new Client();
@@ -10,54 +9,31 @@ const LOCAL_DIR = path.join(__dirname, 'nexus-studio');
 const REMOTE_DIR = '/home/admin/nexus-studio';
 
 conn.on('ready', () => {
-  console.log('已连接，上传前端文件...');
+  console.log('已连接，上传前端...');
 
-  function uploadDir(localDir, remoteDir) {
-    const items = fs.readdirSync(localDir);
-    for (const item of items) {
-      const localPath = path.join(localDir, item);
-      const remotePath = path.posix.join(remoteDir, item);
-      const stat = fs.statSync(localPath);
-      if (stat.isDirectory()) {
-        conn.exec('mkdir -p ' + remotePath, () => {});
-      }
-    }
-  }
-
+  // 只上传关键文件
   conn.sftp((err, sftp) => {
-    if (err) { console.error('SFTP error:', err); conn.end(); return; }
+    if (err) { conn.end(); return; }
+    let pending = 2;
 
-    let pending = 0;
+    sftp.fastPut(path.join(LOCAL_DIR, 'index.html'), path.posix.join(REMOTE_DIR, 'index.html'), (err) => {
+      if (err) console.log('index upload error:', err.message);
+      else console.log('index.html 已上传');
+      pending--;
+      if (pending === 0) done();
+    });
 
-    function uploadFile(localPath, remotePath) {
-      pending++;
-      sftp.fastPut(localPath, remotePath, (err) => {
-        if (err) console.error('上传失败:', remotePath, err.message);
-        else console.log('已上传:', remotePath);
-        pending--;
-        if (pending === 0) {
-          console.log('\n✅ 前端文件全部上传完成');
-          conn.end();
-        }
-      });
+    sftp.fastPut(path.join(LOCAL_DIR, 'sw.js'), path.posix.join(REMOTE_DIR, 'sw.js'), (err) => {
+      if (err) console.log('sw upload error:', err.message);
+      else console.log('sw.js 已上传');
+      pending--;
+      if (pending === 0) done();
+    });
+
+    function done() {
+      console.log('\n✅ 前端上传完成');
+      conn.end();
     }
-
-    function walkDir(localDir, remoteDir) {
-      const items = fs.readdirSync(localDir);
-      for (const item of items) {
-        const localPath = path.join(localDir, item);
-        const remotePath = path.posix.join(remoteDir, item);
-        const stat = fs.statSync(localPath);
-        if (stat.isDirectory()) {
-          conn.exec('mkdir -p ' + remotePath, () => {});
-          walkDir(localPath, remotePath);
-        } else {
-          uploadFile(localPath, remotePath);
-        }
-      }
-    }
-
-    walkDir(LOCAL_DIR, REMOTE_DIR);
   });
 }).on('error', (err) => {
   console.error('连接错误:', err.message);

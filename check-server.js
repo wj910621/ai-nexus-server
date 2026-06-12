@@ -6,15 +6,12 @@ const USER = 'root';
 const PASS = 'Wangjie910621';
 
 conn.on('ready', () => {
-  console.log('已连接，检查 Nginx 状态...');
+  console.log('已连接，检查 .env 文件...');
 
-  conn.exec('nginx -t 2>&1; echo "==="; curl -s -H "Host: j3trisheng.com" http://127.0.0.1/api/status 2>&1 | head -3', (err, stream) => {
+  conn.exec('echo "=== /home/admin/ai-nexus/.env ==="; cat /home/admin/ai-nexus/.env 2>/dev/null || echo "NOT FOUND"; echo "=== /home/admin/.env ==="; cat /home/admin/.env 2>/dev/null || echo "NOT FOUND"', (err, stream) => {
     if (err) { console.log('error:', err); conn.end(); return; }
     stream.on('data', d => process.stdout.write(d));
-    stream.on('close', () => {
-      console.log('\n---');
-      conn.end();
-    });
+    stream.on('close', () => conn.end());
   });
 }).on('error', (err) => {
   console.error('连接错误:', err.message);

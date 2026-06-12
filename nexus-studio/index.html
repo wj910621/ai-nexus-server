@@ -5036,7 +5036,7 @@ var NexusKnowledge = (function() {
 
 </script>
   <script>
-﻿﻿﻿/* ========================================
+/* ========================================
    UI 交互模块 - Toast、面板切换、快捷键
    ======================================== */
 var NexusUI = (function() {
@@ -5164,28 +5164,6 @@ var NexusUI = (function() {
           closeModelDropdown();
           showToast('已切换至 ' + modelId, 'info');
         });
-
-    function applyLineWrap(wrap) {
-      var editor = document.getElementById('codeEditor');
-      if (editor) {
-        editor.style.whiteSpace = wrap ? 'pre-wrap' : 'pre';
-        editor.style.wordWrap = wrap ? 'break-word' : 'normal';
-        editor.style.overflowX = wrap ? 'auto' : 'auto';
-      }
-      var highlights = document.querySelectorAll('.editor-highlight-layer');
-      highlights.forEach(function(el) { el.style.whiteSpace = wrap ? 'pre-wrap' : 'pre'; });
-    }
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
       })(options[i]);
     }
   }
@@ -5214,17 +5192,6 @@ var NexusUI = (function() {
         renderHistoryList();
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
     var panel = document.getElementById('historyPanel');
     if (!panel) return;
@@ -5324,17 +5291,6 @@ var NexusUI = (function() {
           showToast('Switched conversation', 'info');
         });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
         var delBtn = item.querySelector('.history-del');
         if (delBtn) {
           delBtn.addEventListener('click', function(e) {
@@ -5345,18 +5301,6 @@ var NexusUI = (function() {
             renderChatMessages();
             showToast('Deleted', 'info');
           });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
         }
       })(items[j]);
     var pinBtns = container.querySelectorAll('.history-pin');
@@ -5367,7 +5311,6 @@ var NexusUI = (function() {
           _togglePin(this.getAttribute('data-id'));
         });
       })(pinBtns[p]);
-    }
     }
   }
 
@@ -5435,30 +5378,7 @@ var NexusUI = (function() {
             showToast('复制失败', 'error');
           });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
         });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
       })(copyBtns[c]);
     var branchBtns = container.querySelectorAll('.branch-btn');
     for (var br = 0; br < branchBtns.length; br++) {
@@ -5476,19 +5396,8 @@ var NexusUI = (function() {
           var idx = parseInt(this.getAttribute('data-index'));
           NexusChat.deleteMessage(idx);
         });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
+      })(deleteBtns[d]);
     }
-      
 
     var editBtns = container.querySelectorAll('.edit-btn');
     for (var e = 0; e < editBtns.length; e++) {
@@ -5518,31 +5427,8 @@ var NexusUI = (function() {
             }
           });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
           textarea.addEventListener('blur', saveEdit);
         });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
       })(editBtns[e], parseInt(editBtns[e].getAttribute('data-index')));
     }
     var regenBtns = container.querySelectorAll('.regenerate-btn');
@@ -5564,18 +5450,6 @@ var NexusUI = (function() {
             NexusChat.sendMessage(lastUserMsg);
           }
         });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
       })(regenBtns[r]);
     }
 
@@ -5593,19 +5467,6 @@ var NexusUI = (function() {
             }
           }
         });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
-      }
   }
 
   /** 渲染消息内容（Markdown -> HTML） */
@@ -5625,18 +5486,6 @@ var NexusUI = (function() {
     html = html.replace(/`(\w*)\n([\s\S]*?)`/g, function(m, lang, code) {
       return '<pre><code class="language-' + lang + '">' + escapeHtml(code) + '</code></pre>';
     });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
 
     // 行内代码
     html = html.replace(/([^\n]+?)/g, '<code></code>');
@@ -5670,18 +5519,6 @@ var NexusUI = (function() {
       return '<ul>' + m.replace(/\n$/, '') + '</ul>';
     });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
-
     // 有序列表
     html = html.replace(/^\d+\. (.+)$/gm, '<li></li>');
 
@@ -5696,17 +5533,6 @@ var NexusUI = (function() {
       return rowHtml;
     });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     html = html.replace(/(<tr>.*<\/tr>\n?)+/g, '<table><script src="js/ui.js?v=0"><\/script></table>');
 
     // 段落
@@ -5731,18 +5557,6 @@ var NexusUI = (function() {
           var panel = this.getAttribute('data-panel');
           if (panel) switchPanel(panel);
         });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
       })(navItems[i]);
     }
 
@@ -5754,17 +5568,6 @@ var NexusUI = (function() {
         toggleModelDropdown();
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
 
     // 搜索模型
@@ -5774,17 +5577,6 @@ var NexusUI = (function() {
         renderModelList(this.value);
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
 
     // 点击外部关闭下拉
@@ -5796,16 +5588,6 @@ var NexusUI = (function() {
         }
       }
     });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
 
     }
 
@@ -5831,17 +5613,6 @@ var NexusUI = (function() {
         }
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
 
     // 新对话
@@ -5852,17 +5623,6 @@ var NexusUI = (function() {
         renderChatMessages();
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
 
     // 历史记录
@@ -5878,16 +5638,6 @@ var NexusUI = (function() {
       themeSelect.addEventListener('change', function() {
         document.documentElement.setAttribute('data-theme', this.value);
         localStorage.setItem('nx_theme', this.value);
-      });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
       });
 
     }
@@ -5908,17 +5658,6 @@ var NexusUI = (function() {
         localStorage.setItem('nx_font_size', this.value);
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
 
     // 清除数据
@@ -5931,35 +5670,12 @@ var NexusUI = (function() {
         }
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
 
     // 消息变更回调
     NexusChat.onMessagesChange(function() {
       renderChatMessages();
     });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
 
     // 聊天搜索
     var searchBtn = document.getElementById('chatSearchBtn');
@@ -6000,19 +5716,6 @@ var NexusUI = (function() {
       });
     }
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
-    }
-
     // 更新历史计数
     updateHistoryCount();
 
@@ -6033,17 +5736,6 @@ var NexusUI = (function() {
         showToast('Chat exported', 'success');
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
 
   function formatChatAsMarkdown(messages) {
@@ -6174,16 +5866,6 @@ var NexusUI = (function() {
       if (e.target === overlay) overlay.remove();
     });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
     }
   }
 // 键盘快捷键
@@ -6219,18 +5901,6 @@ var NexusUI = (function() {
       }
     });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
-
     // 初始渲染
     renderChatMessages();
 
@@ -6246,32 +5916,9 @@ var NexusUI = (function() {
             p.classList.remove('active');
           });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
           var panel = document.getElementById(target);
           if (panel) panel.classList.add('active');
         });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
       })(codeRightTabs[t]);
     }
   }
@@ -6319,16 +5966,6 @@ var NexusUI = (function() {
       langSelect.addEventListener('change', function() {
         setLanguage(this.value);
         NexusUI.toast(this.value === 'zh' ? '语言: 中文' : 'Language: English', 'info');
-      });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
       });
 
     }
@@ -6510,17 +6147,6 @@ var NexusUI = (function() {
       if (panel && label && navMap[panel]) label.textContent = __(navMap[panel]);
     });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     // Update welcome message
     var welcomeTitle = document.querySelector('.welcome-message h2');
     var welcomeDesc = document.querySelector('.welcome-message p');
@@ -6575,17 +6201,6 @@ var NexusUI = (function() {
         showToast(__('export.success'), 'success');
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
 
     if (importBtn) {
@@ -6593,17 +6208,6 @@ var NexusUI = (function() {
         fileInput.click();
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     }
 
     fileInput.addEventListener('change', function(e) {
@@ -6630,7 +6234,11 @@ var NexusUI = (function() {
       };
       reader.readAsText(file);
       fileInput.value = '';
-    })    // 自定义主题色
+    });
+
+  }
+
+  // 自定义主题色
     var ACCENTS = {
       cyan: { primary: '#00d4ff', primaryDim: 'rgba(0,212,255,0.15)', secondary: '#7b2ff7', secondaryDim: 'rgba(123,47,247,0.15)' },
       purple: { primary: '#a855f7', primaryDim: 'rgba(168,85,247,0.15)', secondary: '#6366f1', secondaryDim: 'rgba(99,102,241,0.15)' },
@@ -6659,24 +6267,12 @@ var NexusUI = (function() {
         NexusUI.toast(this.value === 'zh' ? '语言: 中文' : 'Language: English', 'info');
       });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
-      setLanguage(_lang);
     }
 
     // 数据备份
     setupDataBackup();
     setupAPIProviders();
-  } }
+
   // ===== 命令面板 (Ctrl+P) =====
   var COMMANDS = [
     // 面板导航
@@ -6747,34 +6343,11 @@ var NexusUI = (function() {
             overlay.remove();
           });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
           items[j].addEventListener('mouseenter', function() {
             results.querySelector('.selected')?.classList.remove('selected');
             this.classList.add('selected');
             selectedIndex = idx;
           });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
         })(j);
       }
     }
@@ -6785,18 +6358,6 @@ var NexusUI = (function() {
       selectedIndex = 0;
       renderResults();
     });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
 
     input.addEventListener('keydown', function(e) {
       if (e.key === 'ArrowDown') {
@@ -6818,33 +6379,9 @@ var NexusUI = (function() {
       }
     });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
-
     overlay.addEventListener('click', function(e) {
       if (e.target === overlay) overlay.remove();
     });
-
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
 
     setTimeout(function() { input.focus(); }, 50);
   }
@@ -6995,32 +6532,10 @@ var NexusUI = (function() {
       updateSearchCount();
     });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     input.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') { toggleChatSearch(); }
     });
 
-    // 主题色
-    var accentSelect = document.getElementById('accentSelect');
-    if (accentSelect) {
-      accentSelect.value = localStorage.getItem('nx_accent') || 'cyan';
-      setAccent(accentSelect.value);
-      accentSelect.addEventListener('change', function() {
-        setAccent(this.value);
-        NexusUI.toast('Accent: ' + this.value, 'info');
-      });
-
-    }
     bar.querySelector('.chat-search-close').addEventListener('click', toggleChatSearch);
   }
 
@@ -7177,22 +6692,6 @@ var NexusUI = (function() {
     setupAPIProviders: setupAPIProviders
   };
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 </script>

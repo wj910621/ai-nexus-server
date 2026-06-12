@@ -1,0 +1,51 @@
+# 每日 Git 自动备份 执行记录
+
+## 2026-06-12 02:55
+- **状态**: 无变更（nothing to commit）
+- **操作**: `git add .` 成功，但无新文件变更需暂存；仅 `server` 子模块有 modified/untracked 内容，父仓库不跟踪
+- **push 结果**: 未执行（commit 因无变更而跳过，push 步骤未触发）
+
+## 2026-06-11 03:00
+- **状态**: 成功
+- **操作**: `git add .` + commit `auto backup 2026-06-11`，4 文件变更（+331/-37 行），提交 352b6ff
+- **push 结果**: 成功 — 推送 8990103..352b6ff 至 origin/main
+
+## 2026-06-10 02:55
+- **状态**: 成功
+- **操作**: `git add .` + commit `auto backup 2026-06-10`，4 文件变更（+90/-57 行），修改 dashboard.html、deploy.js、landing.html、server.js，server 子模块变更，提交 8990103
+- **push 结果**: 成功 — 推送 70e225f..8990103 至 origin/main
+
+## 2026-06-09 02:55
+- **状态**: 部分成功（commit 成功，push 失败）
+- **操作**: `git add .` + commit `auto backup 2026-06-09`，9 文件变更（+1281/-249 行），新增 data.db，删除 service-worker.js、网站授权书.html，提交 1bab523
+- **push 结果**: 失败 — `Recv failure: Connection was aborted`（GitHub 连接中断），按策略不重试，下次再推
+
+## 2026-06-08 02:55
+- **状态**: 成功
+- **操作**: `git add .` + commit + push，8 个文件变更（+1520/-458 行），新增 deploy-ssh.js、ssh-pass.sh、ssh-test.js，修改 dashboard.html、landing.html、package-lock.json、package.json、server.js、server (submodule)，提交 70e225f 推送至 origin/main
+- **push 结果**: 成功
+
+## 2026-06-07 02:55
+- **状态**: 成功
+- **操作**: `git add .` + commit + push，4 个文件变更（+8653/-201 行），新增 dashboard.html、landing.html，修改 index.html、server.js，提交 a1ddac7 推送至 origin/main
+- **push 结果**: 成功
+
+## 2026-06-05 02:55
+- **状态**: 成功
+- **操作**: `git add .` + commit + push，3 个文件变更（+1079/-155 行），新增 网站授权书.html，提交 739497d 推送至 origin/main
+- **push 结果**: 成功
+
+## 2026-06-04 02:55
+- **状态**: 成功
+- **操作**: `git add .` + commit + push，1 个文件变更（+156/-80 行），提交 c34fdba 推送至 origin/main
+- **push 结果**: 成功
+
+## 2026-06-03 02:55
+- **状态**: 成功
+- **操作**: `git add .` + commit + push，2 个文件变更（+508/-195 行），提交 56134c7 推送至 origin/main
+- **push 结果**: 成功
+
+## 2026-06-02 02:55
+- **状态**: 成功
+- **操作**: `git add .` 无新变更暂存（server 子模块有变更但父仓库不跟踪）；推送了 4 个积压提交 (9d0c0f3..1ee02a2) 至 origin/main
+- **push 结果**: 成功
