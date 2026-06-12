@@ -6695,7 +6695,202 @@ var NexusUI = (function() {
 
 
 </script>
-  <script src="js/app.js?v=0"></script>
+  <script>
+/* ========================================
+   主入口模块 - 初始化、SW 注册、PWA 安装
+   错误边界、加载管理
+   ======================================== */
+(function() {
+  'use strict';
+
+  /** 全局错误边界 */
+  function setupErrorBoundary() {
+    // 未捕获异常
+    window.onerror = function(msg, url, line, col, err) {
+      showError('Uncaught: ' + (msg || 'Unknown error'));
+      return true;
+    };
+
+    // 未处理 Promise 拒绝
+    window.onunhandledrejection = function(e) {
+      showError('Promise: ' + (e.reason ? e.reason.message || String(e.reason) : 'Unknown'));
+    };
+
+    // 包裹所有模块初始化
+    var originalInit = appInit;
+    appInit = function() {
+      try {
+        originalInit();
+      } catch (e) {
+        showError('Init: ' + (e.message || String(e)));
+      }
+    };
+  }
+
+  /** 首次访问欢迎弹窗 */
+  function showWelcome() {
+    if (localStorage.getItem('nx_welcomed')) return;
+    var overlay = document.getElementById('welcomeOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('hidden');
+    var startBtn = document.getElementById('welcomeStartBtn');
+    var skipCheck = document.getElementById('welcomeDontShow');
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        if (skipCheck && skipCheck.checked) localStorage.setItem('nx_welcomed', 'true');
+        overlay.classList.add('hidden');
+      });
+    }
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) overlay.classList.add('hidden');
+    });
+  }
+
+  /** 显示错误 UI */
+  function showError(message) {
+    var boundary = document.getElementById('errorBoundary');
+    var msgEl = document.getElementById('errorMessage');
+    if (boundary && msgEl) {
+      boundary.classList.remove('hidden');
+      msgEl.textContent = message || 'An unexpected error occurred. Please reload the app.';
+    }
+  }
+
+  /** 隐藏启动画面 */
+  function hideSplash() {
+    var splash = document.getElementById('splashScreen');
+    if (splash) {
+      splash.classList.add('fade-out');
+      setTimeout(function() {
+        splash.style.display = 'none';
+      }, 600);
+    }
+  }
+
+  /** 主要初始化逻辑 */
+  function appInit() {
+    console.log('Nexus AI Studio initializing...');
+
+    // 加载历史对话
+    NexusChat.loadHistory();
+
+    // 初始化 UI
+    NexusUI.init();
+
+    // 注册 Service Worker
+    registerSW();
+
+    // 设置 PWA 安装提示
+    setupInstallPrompt();
+
+    console.log('Nexus AI Studio ready.');
+    if (typeof NexusChat.requestNotify === 'function') { NexusChat.requestNotify(); }
+    if (typeof NexusPlugins !== 'undefined' && NexusPlugins.dispatch) {
+      NexusPlugins.dispatch('onAppReady', { version: '1.0.0' });
+    }
+
+    // 隐藏启动画面
+    setTimeout(hideSplash, 300);
+    // 首次访问引导
+    setTimeout(showWelcome, 800);
+  }
+
+  /**
+   * 注册 Service Worker
+   */
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(function(reg) {
+        console.log('SW registered:', reg.scope);
+      }).catch(function(err) {
+        console.log('SW registration failed:', err);
+      });
+    }
+  }
+
+  /**
+   * PWA 安装提示
+   */
+  var deferredPrompt = null;
+
+  function setupInstallPrompt() {
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInstallPrompt();
+    });
+
+    window.addEventListener('appinstalled', function() {
+      deferredPrompt = null;
+      var prompt = document.getElementById('installPrompt');
+      if (prompt) prompt.classList.add('hidden');
+      console.log('App installed successfully');
+    });
+
+    // iOS 引导提示
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      if (!window.navigator.standalone) {
+        setTimeout(showIOSInstallGuide, 3000);
+      }
+    }
+  }
+
+  function showInstallPrompt() {
+    var prompt = document.getElementById('installPrompt');
+    if (!prompt) return;
+    if (localStorage.getItem('nx_install_dismissed')) return;
+    prompt.classList.remove('hidden');
+
+    document.getElementById('installBtn').addEventListener('click', function() {
+      prompt.classList.add('hidden');
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(choiceResult) {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted install');
+          }
+          deferredPrompt = null;
+        });
+      }
+    });
+
+    document.getElementById('installDismiss').addEventListener('click', function() {
+      prompt.classList.add('hidden');
+      localStorage.setItem('nx_install_dismissed', 'true');
+    });
+  }
+
+  function showIOSInstallGuide() {
+    try { NexusUI.toast('In Safari tap Share > Add to Home Screen', 'info', 5000); } catch(e) {}
+  }
+
+  // 设置错误边界
+  setupErrorBoundary();
+
+  // 绑定错误恢复按钮
+  document.addEventListener('DOMContentLoaded', function() {
+    var reloadBtn = document.getElementById('errorReloadBtn');
+    if (reloadBtn) reloadBtn.addEventListener('click', function() { location.reload(); });
+    var dismissBtn = document.getElementById('errorDismissBtn');
+    if (dismissBtn) dismissBtn.addEventListener('click', function() {
+      document.getElementById('errorBoundary')?.classList.add('hidden');
+    });
+  });
+
+  // DOM 就绪后初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', appInit);
+  } else {
+    // 微任务延迟确保所有模块加载完成
+    Promise.resolve().then(function() { setTimeout(appInit, 10); });
+  }
+})();
+
+
+
+
+</script>
 <div class="system-indicator"><span class="dot"></span><span>SYSTEM ONLINE</span></div>
 </body>
 </html>
