@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Nexus Hub">
+<meta name="apple-mobile-web-app-title" content="TriGen">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f8f7ff">
 <link rel="manifest" href="/manifest.json">
@@ -16,9 +16,9 @@
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}
 </script>
-<meta name="description" content="Nexus Hub - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，30+顶尖模型免费体验。">
+<meta name="description" content="TriGen - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，30+顶尖模型免费体验。">
 <meta name="keywords" content="AI写作,AI写小说,AI漫画,大模型,AI聊天,DeepSeek,GPT-4,Claude,Midjourney,AI绘画">
-<title>Nexus Hub - 智能创作平台</title>
+<title>TriGen - 智能创作平台</title>
 <style>
 :root{
   --bg:#f8f7ff;--bg-card:rgba(255,255,255,0.92);--bg-sidebar:#f0edff;--bg-input:#f0edff;
@@ -710,7 +710,7 @@ a{color:var(--accent);text-decoration:none}
 
 <!-- Top Bar -->
 <header class="top-bar">
-  <div class="top-logo"><div class="top-logo-icon" id="logoIcon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span>Nexus Hub</span></div>
+  <div class="top-logo"><div class="top-logo-icon" id="logoIcon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span>TriGen</span></div>
   <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileMenu()" aria-label="菜单">☰</button>
   <div class="top-actions">
     <span class="top-credit" onclick="dailyCheckin()" title="每日签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> <span id="checkinBadge">签到</span></span>
@@ -775,7 +775,7 @@ a{color:var(--accent);text-decoration:none}
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
         </div>
-        <div class="hp-tag">Nexus Hub · 模型星云</div>
+        <div class="hp-tag">TriGen · 模型星云</div>
       </div>
       <div class="hp-ring hp-ring-1" id="hpRing1"></div>
       <div class="hp-ring hp-ring-2" id="hpRing2"></div>
@@ -783,7 +783,7 @@ a{color:var(--accent);text-decoration:none}
     </div>
   </div>
   <section class="hero">
-    <h1>Nexus Hub 智能创作平台</h1>
+    <h1>TriGen 智能创作平台</h1>
     <p>接入顶级AI模型，不需要学提示词，不需要搭智能体 —— 一个网站，全搞定。对话30+顶级模型、写小说变漫剧做品牌去营销、16个预制智能体一键使用。</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px">
       <button class="btn-send" onclick="switchPage('chat');showToast('首次聊天不扣积分，试试吧~')" style="font-size:1rem;padding:14px 36px">🚀 免费体验</button>
@@ -1759,7 +1759,7 @@ a{color:var(--accent);text-decoration:none}
 <!-- ===== API Key 管理 ===== -->
 <div class="page" id="page-apikeys"><section class="section">
 <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> API Key 管理</h2>
-<p class="section-desc" style="font-size:0.85rem">生成你自己的 API Key，接入你的网站或应用中，直接调用 Nexus Hub 的 500+ 模型</p>
+<p class="section-desc" style="font-size:0.85rem">生成你自己的 API Key，接入你的网站或应用中，直接调用 TriGen 的 500+ 模型</p>
 
 <div class="feature-card" style="margin-bottom:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;text-align:center">
 <div><div style="font-size:1.5rem">🔌</div><div style="font-weight:600;font-size:0.82rem">OpenAI 兼容</div><div style="font-size:0.7rem;color:var(--text-secondary)">和 GPT API 一模一样<br>改一行URL就能用</div></div>
@@ -2535,7 +2535,7 @@ response = client.chat.completions.create(
 
     <!-- 竞争对手对比 -->
     <div class="feature-card" style="margin-top:20px">
-      <h4 style="text-align:center;margin-bottom:16px">💰 为什么选 Nexus Hub？</h4>
+      <h4 style="text-align:center;margin-bottom:16px">💰 为什么选 TriGen？</h4>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:0.82rem">
           <thead><tr style="border-bottom:2px solid var(--accent)"><th style="padding:10px;text-align:left">服务</th><th style="padding:10px;text-align:center">月费</th><th style="padding:10px;text-align:center">模型数</th><th style="padding:10px;text-align:center">多模型对比</th><th style="padding:10px;text-align:center">写小说</th><th style="padding:10px;text-align:center">绘画工具</th></tr></thead>
@@ -2545,12 +2545,12 @@ response = client.chat.completions.create(
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px">Midjourney</td><td style="text-align:center">¥220</td><td style="text-align:center">-</td><td style="text-align:center">-</td><td style="text-align:center">-</td><td style="text-align:center">✅</td></tr>
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px">Poe 订阅</td><td style="text-align:center">¥145</td><td style="text-align:center">10+</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px;color:var(--text-secondary)">各平台合计</td><td style="text-align:center;text-decoration:line-through;color:var(--text-secondary)">¥655</td><td style="text-align:center">3+</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
-            <tr style="background:var(--accent-soft)"><td style="padding:10px;font-weight:700;color:var(--accent)">⚡ Nexus Hub 月度</td><td style="text-align:center;font-weight:800;color:var(--accent)">¥39</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
-            <tr style="background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(99,102,241,0.04))"><td style="padding:10px;font-weight:700;color:#7c3aed">💎 Nexus Hub 年度</td><td style="text-align:center;font-weight:800;color:#7c3aed">¥31</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+            <tr style="background:var(--accent-soft)"><td style="padding:10px;font-weight:700;color:var(--accent)">⚡ TriGen 月度</td><td style="text-align:center;font-weight:800;color:var(--accent)">¥39</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+            <tr style="background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(99,102,241,0.04))"><td style="padding:10px;font-weight:700;color:#7c3aed">💎 TriGen 年度</td><td style="text-align:center;font-weight:800;color:#7c3aed">¥31</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="text-align:center;font-size:0.78rem;color:var(--green);margin-top:12px">🎯 一个 Nexus Hub = 500+ 模型 · 按用量付费 · 不用不花钱 · 永远比单买划算</p>
+      <p style="text-align:center;font-size:0.78rem;color:var(--green);margin-top:12px">🎯 一个 TriGen = 500+ 模型 · 按用量付费 · 不用不花钱 · 永远比单买划算</p>
     </div>
   </section>
 </div>
@@ -2657,7 +2657,7 @@ response = client.chat.completions.create(
       <p style="color:var(--text-secondary);margin-bottom:16px"><b>生效日期：</b>2026年5月28日<br><b>最后更新：</b>2026年5月28日</p>
 
       <h3>一、总则</h3>
-      <p>1.1 欢迎使用Nexus Hub智能创作平台（以下简称"本平台"）。本协议由您与本平台运营主体（以下简称"我们"）共同缔结。</p>
+      <p>1.1 欢迎使用TriGen智能创作平台（以下简称"本平台"）。本协议由您与本平台运营主体（以下简称"我们"）共同缔结。</p>
       <p>1.2 您在注册、登录或使用本平台服务前，请仔细阅读本协议。点击"同意"或实际使用本平台，即表示您已阅读并同意接受本协议全部条款。</p>
 
       <h3>二、账号管理</h3>
@@ -2956,7 +2956,7 @@ response = client.chat.completions.create(
 <div id="knowledgeManager" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:600;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px)">
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:700px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.6)">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)">
-      <h3 style="margin:0;font-size:1rem">📚 Nexus Hub 知识库</h3>
+      <h3 style="margin:0;font-size:1rem">📚 TriGen 知识库</h3>
       <div style="display:flex;gap:8px">
         <button onclick="knowledgeAddNew()" style="font-size:0.8rem;padding:6px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:600">+ 新建</button>
         <button onclick="document.getElementById('knowledgeManager').style.display='none'" style="font-size:0.8rem;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer">关闭</button>
@@ -2994,7 +2994,7 @@ response = client.chat.completions.create(
   <div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px">本次操作需要 <span style="color:var(--accent);font-weight:700">0</span> 积分</div>
   <div style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:12px">当前余额 <span id="creditLowBal" style="font-weight:700">0</span></div>
   <div style="background:rgba(16,185,129,0.08);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:0.72rem;color:var(--green)">
-    ⚡ GPT-4o 官方 ¥145/月 → Nexus Hub 仅 ¥39/月 · 700+ 模型随便用
+    ⚡ GPT-4o 官方 ¥145/月 → TriGen 仅 ¥39/月 · 700+ 模型随便用
   </div>
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
     <button class="btn-send" style="background:linear-gradient(135deg,#f59e0b,#d97706);font-size:0.82rem" onclick="closeCreditLow();switchPage('pricing')">💎 立即充值</button>
@@ -3061,7 +3061,7 @@ response = client.chat.completions.create(
 <div id="pwaToast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--bg-card);border:1px solid var(--accent-glow);border-radius:16px;padding:14px 20px;box-shadow:0 8px 40px rgba(0,0,0,0.4);display:flex;align-items:center;gap:12px;animation:fadeIn 0.3s ease">
   <span style="font-size:1.4rem">📱</span>
   <div>
-    <div style="font-size:0.85rem;font-weight:600;color:var(--text)">将 Nexus Hub 添加到桌面</div>
+    <div style="font-size:0.85rem;font-weight:600;color:var(--text)">将 TriGen 添加到桌面</div>
     <div style="font-size:0.72rem;color:var(--text-secondary)">一键打开，无需输入网址</div>
   </div>
   <button id="pwaInstallBtn" style="padding:6px 16px;border-radius:20px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:0.78rem;font-weight:600;white-space:nowrap">立即添加</button>
@@ -3788,9 +3788,9 @@ let RAG_ENABLED = localStorage.getItem('ragEnabled')!=='false'; // 默认开启
 
 // 平台级 system prompt — 每次对话自动注入
 const PLATFORM_SYSTEM_PROMPT = [
-  '你是 Nexus Hub 平台的 AI 助手。Nexus Hub 是一个智能创作平台，聚合全球顶尖大语言模型，提供聊天、写作、绘图、视频、3D、音乐等全方位 AI 创作服务。',
+  '你是 TriGen 平台的 AI 助手。TriGen 是一个智能创作平台，聚合全球顶尖大语言模型，提供聊天、写作、绘图、视频、3D、音乐等全方位 AI 创作服务。',
   '',
-  '【Nexus Hub 核心能力】',
+  '【TriGen 核心能力】',
   '- 多模型聊天：同时对话多个模型，直观对比回答',
   '- AI 小说：六步创作流程，支持百万字长篇不崩人设',
   '- AI 漫剧：小说转漫画分镜脚本',
@@ -3829,7 +3829,7 @@ async function buildRAGSystemPrompt(userQuery){
         '【知识片段'+(i+1)+'】'+item.title+'\n'+item.content
       ).join('\n\n');
 
-      sysPrompt += '\n\n【Nexus Hub 知识库】（优先参考以下信息回答）\n' + ragContext;
+      sysPrompt += '\n\n【TriGen 知识库】（优先参考以下信息回答）\n' + ragContext;
 
       const st = document.getElementById('ragStatus');
       if(st){ st.style.display='inline'; st.textContent = '已匹配 '+data.matched+' 条知识'; }
@@ -4929,7 +4929,7 @@ function doRegisterNew(){
       if(d.user&&d.user.credits!==undefined){userCredits=d.user.credits;localStorage.setItem('cr',userCredits)}
       if(d.apiKey)localStorage.setItem('user_api_key',d.apiKey);
       closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();
-      switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 Nexus Hub')},500);
+      switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 TriGen')},500);
       syncUserData();
     }else{
       // 后端不可用时降级到本地注册
@@ -5057,7 +5057,7 @@ async function runAiMarket(){
 }
 
 // === AI 编程助手（对话式） ===
-const CODE_SYS_PROMPT = `你是 Nexus Hub 平台的 AI 编程助手。你是一个专业、耐心、善于引导的全栈开发专家。
+const CODE_SYS_PROMPT = `你是 TriGen 平台的 AI 编程助手。你是一个专业、耐心、善于引导的全栈开发专家。
 
 【核心原则】
 1. 先理解，再动手：首先要充分理解用户想做什么，目标用户是谁，有什么具体需求
@@ -5571,7 +5571,7 @@ sendChatMessage=async function(){const m=document.getElementById('chatInput').va
 // === PWA ===
 (function(){
   if('serviceWorker' in navigator){
-    const swCode='self.addEventListener("install",e=>{e.waitUntil(caches.open("ainexus-v1").then(c=>c.addAll(["/","/index.html"])))});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})';
+    const swCode='self.addEventListener("install",e=>{e.waitUntil(caches.open("trigen-v1").then(c=>c.addAll(["/","/index.html"])))});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})';
     const blob=new Blob([swCode],{type:'application/javascript'});
     navigator.serviceWorker.register(URL.createObjectURL(blob));
   }

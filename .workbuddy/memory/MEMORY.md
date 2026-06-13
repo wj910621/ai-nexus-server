@@ -1,30 +1,20 @@
-# AI Nexus 项目长期记忆
+# 项目记忆
 
-## 架构
-- 单HTML文件架构（~205KB），所有CSS/JS内联
-- 前端部署：Netlify + j3trisheng.com
-- 后端：Netlify Functions（serverless），文件在 netlify/functions/chat.mjs
-- GitHub → Netlify 自动部署（git push触发）
-- 36个模型配置在 chat.mjs 中，5个有真实Key（DeepSeek/Qwen/Kimi/GLM/Yi）
-- localStorage存储用户数据（积分/章节/角色库/设置）
+## 品牌命名（最终确定，2026-06-12）
+- **中文名**: 三联
+- **英文名**: TriGen
+- **标语**: All from Three
+- **全称**: TriGen Studio
+- **哲学**: 一生二、二生三、三生万物，万物互联
+- **欢迎语**: "欢迎来到未来" + "All from Three"
 
-## 页面结构
-16个页面：home, models, chat, compare, novel(炼字工坊), media(漫剧工厂), agents, office, brand, market, art, video, pricing, admin, feedback, terms, privacy
+## 前端设计偏好
+- 浅色主题（背景 #f5f5f7，侧边栏 #ececf0）
+- 桌面应用布局：左侧边栏 + 顶部工具栏 + 底部输入栏
+- 四个核心模块：对话、知识库、Agent、Skills
+- 单文件架构（所有 CSS/JS 内联）
 
-## 炼字工坊 (novel)
-- 4标签页：大纲工坊/章节创作/炼字润色/作品管理
-- 大纲系统：全书大纲→卷纲→章纲，AI生成+内联编辑
-- 润色4模式：润色/去AI痕迹/扩写/缩写，左右对比视图
-- 存储：nOutline(大纲JSON), nOutlineRaw(大纲文本), nch(章节数组), novelHistory
-
-## 漫剧工厂 (media)
-- 3标签页：创作/分镜板/角色库
-- 批量生成：一次出分镜+角色+场景+对白
-- 分镜卡片：可视化解析+景别标注
-- 角色库(charLib)：支持跨集次管理
-
-## 关键状态变量
-- userCredits: 积分（localStorage 'cr'）
-- novelType/novelOutline/novelChars/novelWorld/novelHistory: 小说上下文
-- novelBookTitle/chapterCountWritten/totalWordsWritten: 进度
-- charLibrary: 角色库数组
+## 部署信息
+- 服务器: 120.79.17.184
+- 前端路径: /home/admin/nexus-studio/index.html
+- 访问: http://120.79.17.184:3001/studio/

@@ -1209,8 +1209,8 @@ app.get('/api/music/task', async (req, res) => {
 // ============================================================
 // 可灵 Kling 视频生成 API
 // ============================================================
-const KLING_AK = 'AFFtyyYeEbHGBmYfBTDdF4TDA9TNTnrf';
-const KLING_SK = 'adnGpEn3kAR4TdKGBTMa8E3KLmyKTEEL';
+const KLING_AK = process.env.KLING_AK || '';
+const KLING_SK = process.env.KLING_SK || '';
 const KLING_BASE = 'https://api.klingai.com';
 
 function generateKlingToken() {

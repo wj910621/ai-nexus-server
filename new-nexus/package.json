@@ -1,0 +1,67 @@
+{
+  "name": "trigen-desktop",
+  "version": "1.0.0",
+  "description": "TriGen Desktop — One Input. Anything. 135+ AI 模型 · 全能 AI 桌面端",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.trigen.desktop",
+    "productName": "TriGen Desktop",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "icons/"
+    ],
+    "extraResources": [
+      {
+        "from": "icons/",
+        "to": "icons/"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "icons/icon.png",
+      "artifactName": "TriGen-Desktop-${version}-win-Setup.${ext}"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "icons/icon.png",
+      "artifactName": "TriGen-Desktop-${version}-mac.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "icons/",
+      "artifactName": "TriGen-Desktop-${version}-linux.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TriGen Desktop",
+      "installerIcon": "icons/icon.png",
+      "uninstallDisplayName": "TriGen Desktop"
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.3"
+  }
+}

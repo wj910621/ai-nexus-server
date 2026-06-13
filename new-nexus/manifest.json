@@ -1,0 +1,26 @@
+{
+  "name": "TriGen — All from Three",
+  "short_name": "TriGen",
+  "description": "一个输入，无限可能。135+ AI 模型 · 三生万物 · 万物互联",
+  "start_url": "/studio/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#f5f5f7",
+  "theme_color": "#1a1a2e",
+  "orientation": "any",
+  "scope": "/studio/",
+  "lang": "zh-CN",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {"src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ],
+  "shortcuts": [
+    {
+      "name": "新建对话",
+      "short_name": "对话",
+      "description": "开始新的 AI 对话",
+      "url": "/studio/"
+    }
+  ]
+}

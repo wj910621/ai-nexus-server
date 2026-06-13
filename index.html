@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Nexus Hub">
+<meta name="apple-mobile-web-app-title" content="TriGen">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d0721">
 <link rel="manifest" href="/manifest.json">
@@ -16,9 +16,9 @@
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}
 </script>
-<meta name="description" content="Nexus Hub - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，30+顶尖模型免费体验。">
+<meta name="description" content="TriGen - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，30+顶尖模型免费体验。">
 <meta name="keywords" content="AI写作,AI写小说,AI漫画,大模型,AI聊天,DeepSeek,GPT-4,Claude,Midjourney,AI绘画">
-<title>Nexus Hub - 智能创作平台</title>
+<title>TriGen - 智能创作平台</title>
 <style>
 :root{
   --bg:#0d0721;--bg-card:#1a1035;--bg-sidebar:#100928;--bg-input:#261652;
@@ -634,7 +634,7 @@ a{color:var(--accent);text-decoration:none}
 
 <!-- Top Bar -->
 <header class="top-bar">
-  <div class="top-logo"><div class="top-logo-icon" id="logoIcon">⚡</div><span>Nexus Hub</span></div>
+  <div class="top-logo"><div class="top-logo-icon" id="logoIcon">⚡</div><span>TriGen</span></div>
   <div class="top-actions">
     <span class="top-credit" onclick="dailyCheckin()" title="每日签到">📅 <span id="checkinBadge">签到</span></span>
     <span class="top-credit" onclick="switchPage('pricing')" title="积分">💎 <span id="creditDisplay">0</span></span>
@@ -650,28 +650,33 @@ a{color:var(--accent);text-decoration:none}
 
 <!-- Left Sidebar -->
 <aside class="sidebar">
+  <!-- ===== 第一栏 ===== -->
   <button class="sidebar-link active" data-page="home"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#a855f7)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>首页</button>
-  <button class="sidebar-link" data-page="models"><span class="sidebar-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>模型</button>
   <button class="sidebar-link" data-page="chat"><span class="sidebar-icon" style="background:linear-gradient(135deg,#10b981,#34d399)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>聊天</button>
+  <button class="sidebar-link" data-page="models"><span class="sidebar-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>模型</button>
   <button class="sidebar-link" data-page="compare"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>对比</button>
-  <button class="sidebar-link primary" data-page="novel"><span class="sidebar-icon" style="background:linear-gradient(135deg,#ec4899,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>AI 小说</button>
-  <button class="sidebar-link" data-page="media"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#d946ef)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span>漫剧</button>
-  <button class="sidebar-link" data-page="agents"><span class="sidebar-icon" style="background:linear-gradient(135deg,#14b8a6,#06b6d4)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg></span>智能体</button>
+  <button class="sidebar-link" data-page="prompts"><span class="sidebar-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>提示词库</button>
+  <button class="sidebar-link" data-page="knowledge"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>知识库</button>
+
   <div class="sidebar-divider"></div>
+
+  <!-- ===== 第二栏 ===== -->
+  <button class="sidebar-link" data-page="agents"><span class="sidebar-icon" style="background:linear-gradient(135deg,#14b8a6,#06b6d4)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg></span>智能体</button>
+  <button class="sidebar-link primary" data-page="novel"><span class="sidebar-icon" style="background:linear-gradient(135deg,#ec4899,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>AI 小说</button>
+  <button class="sidebar-link" data-page="media"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#d946ef)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span>AI 漫剧</button>
+  <button class="sidebar-link" data-page="code"><span class="sidebar-icon" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>AI 编程</button>
+  <button class="sidebar-link" data-page="studio"><span class="sidebar-icon" style="background:linear-gradient(135deg,#a855f7,#c084fc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>AI 创作工场</button>
+  <button class="sidebar-link" data-page="music"><span class="sidebar-icon" style="background:linear-gradient(135deg,#ef4444,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>AI 音乐</button>
+  <button class="sidebar-link" data-page="3d"><span class="sidebar-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>3D 生成</button>
+
+  <div class="sidebar-divider"></div>
+
+  <!-- ===== 第三栏 ===== -->
   <button class="sidebar-link" data-page="office"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>办公</button>
   <button class="sidebar-link" data-page="brand"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f97316,#ef4444)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg></span>品牌</button>
   <button class="sidebar-link" data-page="market"><span class="sidebar-icon" style="background:linear-gradient(135deg,#22c55e,#10b981)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>营销</button>
-  <button class="sidebar-link" data-page="code"><span class="sidebar-icon" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>编程</button>
-  <button class="sidebar-link" data-page="apikeys"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#c084fc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>API Key</button>
-  <button class="sidebar-link" data-page="studio"><span class="sidebar-icon" style="background:linear-gradient(135deg,#a855f7,#c084fc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>AI 创作工场</button>
-  <button class="sidebar-link" data-page="prompts"><span class="sidebar-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>提示词库</button>
-  <button class="sidebar-link" data-page="knowledge"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>知识库</button>
-  <div class="sidebar-divider"></div>
   <button class="sidebar-link" data-page="pricing"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>充值</button>
   <button class="sidebar-link" data-page="tools"><span class="sidebar-icon" style="background:linear-gradient(135deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>工具箱</button>
-  <button class="sidebar-link" data-page="3d"><span class="sidebar-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>3D生成</button>
-  <button class="sidebar-link" data-page="music"><span class="sidebar-icon" style="background:linear-gradient(135deg,#ef4444,#f43f5e)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>AI音乐</button>
-  <button class="sidebar-link" data-page="admin" id="adminSidebarBtn" style="display:none"><span class="sidebar-icon" style="background:linear-gradient(135deg,#475569,#64748b)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>管理</button>
   <button class="sidebar-link" data-page="feedback"><span class="sidebar-icon" style="background:linear-gradient(135deg,#0284c7,#38bdf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>反馈</button>
   <div class="sidebar-bottom">
     <div class="sidebar-conn" id="sidebarConn"><span class="conn-dot checking"></span><span>检查连接</span></div>
@@ -695,7 +700,7 @@ a{color:var(--accent);text-decoration:none}
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
         </div>
-        <div class="hp-tag">Nexus Hub · 模型星云</div>
+        <div class="hp-tag">TriGen · 模型星云</div>
       </div>
       <div class="hp-ring hp-ring-1" id="hpRing1"></div>
       <div class="hp-ring hp-ring-2" id="hpRing2"></div>
@@ -703,7 +708,7 @@ a{color:var(--accent);text-decoration:none}
     </div>
   </div>
   <section class="hero">
-    <h1>Nexus Hub 智能创作平台</h1>
+    <h1>TriGen 智能创作平台</h1>
     <p>接入500+顶级AI模型，不需要学提示词，不需要搭智能体——一个网站，全搞定。对话30+顶级模型、写小说变漫剧做品牌去营销、16个预制智能体一键使用。</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px">
       <button class="btn-send" onclick="switchPage('chat');showToast('首次聊天不扣积分，试试吧~')" style="font-size:1rem;padding:14px 36px">🚀 免费体验</button>
@@ -1398,7 +1403,7 @@ a{color:var(--accent);text-decoration:none}
 <!-- ===== API Key 管理 ===== -->
 <div class="page" id="page-apikeys"><section class="section">
 <h2 class="section-title">🔑 API Key 管理</h2>
-<p class="section-desc" style="font-size:0.85rem">生成你自己的 API Key，接入你的网站或应用中，直接调用 Nexus Hub 的 500+ 模型</p>
+<p class="section-desc" style="font-size:0.85rem">生成你自己的 API Key，接入你的网站或应用中，直接调用 TriGen 的所有模型</p>
 
 <div class="feature-card" style="margin-bottom:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;text-align:center">
 <div><div style="font-size:1.5rem">🔌</div><div style="font-weight:600;font-size:0.82rem">OpenAI 兼容</div><div style="font-size:0.7rem;color:var(--text-secondary)">和 GPT API 一模一样<br>改一行URL就能用</div></div>
@@ -2170,7 +2175,7 @@ response = client.chat.completions.create(
 
     <!-- 竞争对手对比 -->
     <div class="feature-card" style="margin-top:20px">
-      <h4 style="text-align:center;margin-bottom:16px">💰 为什么选 Nexus Hub？</h4>
+      <h4 style="text-align:center;margin-bottom:16px">💰 为什么选 TriGen？</h4>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:0.82rem">
           <thead><tr style="border-bottom:2px solid var(--accent)"><th style="padding:10px;text-align:left">服务</th><th style="padding:10px;text-align:center">月费</th><th style="padding:10px;text-align:center">模型数</th><th style="padding:10px;text-align:center">多模型对比</th><th style="padding:10px;text-align:center">写小说</th><th style="padding:10px;text-align:center">绘画工具</th></tr></thead>
@@ -2180,12 +2185,12 @@ response = client.chat.completions.create(
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px">Midjourney</td><td style="text-align:center">¥220</td><td style="text-align:center">-</td><td style="text-align:center">-</td><td style="text-align:center">-</td><td style="text-align:center">✅</td></tr>
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px">Poe 订阅</td><td style="text-align:center">¥145</td><td style="text-align:center">10+</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px;color:var(--text-secondary)">各平台合计</td><td style="text-align:center;text-decoration:line-through;color:var(--text-secondary)">¥655</td><td style="text-align:center">3+</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
-            <tr style="background:var(--accent-soft)"><td style="padding:10px;font-weight:700;color:var(--accent)">⚡ Nexus Hub 月度</td><td style="text-align:center;font-weight:800;color:var(--accent)">¥49</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
-            <tr style="background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(99,102,241,0.04))"><td style="padding:10px;font-weight:700;color:#7c3aed">💎 Nexus Hub 年度</td><td style="text-align:center;font-weight:800;color:#7c3aed">¥31</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+            <tr style="background:var(--accent-soft)"><td style="padding:10px;font-weight:700;color:var(--accent)">⚡ TriGen 月度</td><td style="text-align:center;font-weight:800;color:var(--accent)">¥49</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+            <tr style="background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(99,102,241,0.04))"><td style="padding:10px;font-weight:700;color:#7c3aed">💎 TriGen 年度</td><td style="text-align:center;font-weight:800;color:#7c3aed">¥31</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="text-align:center;font-size:0.78rem;color:var(--green);margin-top:12px">🎯 一个 Nexus Hub = 500+ 模型 · 按用量付费 · 不用不花钱 · 永远比单买划算</p>
+      <p style="text-align:center;font-size:0.78rem;color:var(--green);margin-top:12px">🎯 一个 TriGen = 500+ 模型 · 按用量付费 · 不用不花钱 · 永远比单买划算</p>
     </div>
   </section>
 </div>
@@ -2292,7 +2297,7 @@ response = client.chat.completions.create(
       <p style="color:var(--text-secondary);margin-bottom:16px"><b>生效日期：</b>2026年5月28日<br><b>最后更新：</b>2026年5月28日</p>
 
       <h3>一、总则</h3>
-      <p>1.1 欢迎使用Nexus Hub智能创作平台（以下简称"本平台"）。本协议由您与本平台运营主体（以下简称"我们"）共同缔结。</p>
+      <p>1.1 欢迎使用TriGen智能创作平台（以下简称"本平台"）。本协议由您与本平台运营主体（以下简称"我们"）共同缔结。</p>
       <p>1.2 您在注册、登录或使用本平台服务前，请仔细阅读本协议。点击"同意"或实际使用本平台，即表示您已阅读并同意接受本协议全部条款。</p>
 
       <h3>二、账号管理</h3>
@@ -2569,7 +2574,7 @@ response = client.chat.completions.create(
 <div id="knowledgeManager" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:600;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px)">
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:700px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.6)">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)">
-      <h3 style="margin:0;font-size:1rem">📚 Nexus Hub 知识库</h3>
+      <h3 style="margin:0;font-size:1rem">📚 TriGen 知识库</h3>
       <div style="display:flex;gap:8px">
         <button onclick="knowledgeAddNew()" style="font-size:0.8rem;padding:6px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:600">+ 新建</button>
         <button onclick="document.getElementById('knowledgeManager').style.display='none'" style="font-size:0.8rem;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer">关闭</button>
@@ -2607,7 +2612,7 @@ response = client.chat.completions.create(
   <div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px">本次操作需要 <span style="color:var(--accent);font-weight:700">0</span> 积分</div>
   <div style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:12px">当前余额 <span id="creditLowBal" style="font-weight:700">0</span></div>
   <div style="background:rgba(16,185,129,0.08);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:0.72rem;color:var(--green)">
-    ⚡ GPT-4o 官方 ¥145/月 → Nexus Hub 仅 ¥49/月 · 500+ 模型随便用
+    ⚡ GPT-4o 官方 ¥145/月 → TriGen 仅 ¥49/月 · 500+ 模型随便用
   </div>
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
     <button class="btn-send" style="background:linear-gradient(135deg,#f59e0b,#d97706);font-size:0.82rem" onclick="closeCreditLow();switchPage('pricing')">💎 立即充值</button>
@@ -2674,7 +2679,7 @@ response = client.chat.completions.create(
 <div id="pwaToast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--bg-card);border:1px solid var(--accent-glow);border-radius:16px;padding:14px 20px;box-shadow:0 8px 40px rgba(0,0,0,0.4);display:flex;align-items:center;gap:12px;animation:fadeIn 0.3s ease">
   <span style="font-size:1.4rem">📱</span>
   <div>
-    <div style="font-size:0.85rem;font-weight:600;color:var(--text)">将 Nexus Hub 添加到桌面</div>
+    <div style="font-size:0.85rem;font-weight:600;color:var(--text)">将 TriGen 添加到桌面</div>
     <div style="font-size:0.72rem;color:var(--text-secondary)">一键打开，无需输入网址</div>
   </div>
   <button id="pwaInstallBtn" style="padding:6px 16px;border-radius:20px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:0.78rem;font-weight:600;white-space:nowrap">立即添加</button>
@@ -3014,11 +3019,10 @@ function updateNovelRightPanel(){
 
 // === API Config ===
 const API_BASE=(()=>{
-  if(typeof window!=='undefined'&&window.location.hostname&&window.location.hostname==='localhost')return 'http://localhost:3003';
+  if(typeof window!=='undefined'&&window.location.hostname&&window.location.hostname==='localhost')return 'http://localhost:3001';
   const saved=localStorage.getItem('api_base');
   if(saved) return saved;
-  if(window.location.hostname !== '120.79.17.184') return window.location.origin;
-  return 'http://120.79.17.184:3002';
+  return window.location.origin;
 })();
 let apiOnline=false;
 
@@ -3346,9 +3350,9 @@ let RAG_ENABLED = localStorage.getItem('ragEnabled')!=='false'; // 默认开启
 
 // 平台级 system prompt — 每次对话自动注入
 const PLATFORM_SYSTEM_PROMPT = [
-  '你是 Nexus Hub 平台的 AI 助手。Nexus Hub 是一个智能创作平台，聚合全球顶尖大语言模型，提供聊天、写作、绘图、视频、3D、音乐等全方位 AI 创作服务。',
+  '你是 TriGen 平台的 AI 助手。TriGen 是一个智能创作平台，聚合全球顶尖大语言模型，提供聊天、写作、绘图、视频、3D、音乐等全方位 AI 创作服务。',
   '',
-  '【Nexus Hub 核心能力】',
+  '【TriGen 核心能力】',
   '- 多模型聊天：同时对话多个模型，直观对比回答',
   '- AI 小说：六步创作流程，支持百万字长篇不崩人设',
   '- AI 漫剧：小说转漫画分镜脚本',
@@ -3387,7 +3391,7 @@ async function buildRAGSystemPrompt(userQuery){
         '【知识片段'+(i+1)+'】'+item.title+'\n'+item.content
       ).join('\n\n');
 
-      sysPrompt += '\n\n【Nexus Hub 知识库】（优先参考以下信息回答）\n' + ragContext;
+      sysPrompt += '\n\n【TriGen 知识库】（优先参考以下信息回答）\n' + ragContext;
 
       const st = document.getElementById('ragStatus');
       if(st){ st.style.display='inline'; st.textContent = '已匹配 '+data.matched+' 条知识'; }
@@ -4366,7 +4370,7 @@ function doRegisterNew(){
       localStorage.setItem('cuser',JSON.stringify(currentUser));
       if(d.user&&d.user.credits!==undefined){userCredits=d.user.credits;localStorage.setItem('cr',userCredits)}
       closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();
-      switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 Nexus Hub')},500);
+      switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 TriGen')},500);
       syncUserData();
     }else{
       // 后端不可用时降级到本地注册
@@ -4467,7 +4471,7 @@ async function runAiMarket(){
 }
 
 // === AI 编程助手（对话式） ===
-const CODE_SYS_PROMPT = `你是 Nexus Hub 平台的 AI 编程助手。你是一个专业、耐心、善于引导的全栈开发专家。
+const CODE_SYS_PROMPT = `你是 TriGen 平台的 AI 编程助手。你是一个专业、耐心、善于引导的全栈开发专家。
 
 【核心原则】
 1. 先理解，再动手：首先要充分理解用户想做什么，目标用户是谁，有什么具体需求
@@ -4975,7 +4979,7 @@ sendChatMessage=async function(){const m=document.getElementById('chatInput').va
 // === PWA ===
 (function(){
   if('serviceWorker' in navigator){
-    const swCode='self.addEventListener("install",e=>{e.waitUntil(caches.open("ainexus-v1").then(c=>c.addAll(["/","/index.html"])))});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})';
+    const swCode='self.addEventListener("install",e=>{e.waitUntil(caches.open("trigen-v1").then(c=>c.addAll(["/","/index.html"])))});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})';
     const blob=new Blob([swCode],{type:'application/javascript'});
     navigator.serviceWorker.register(URL.createObjectURL(blob));
   }

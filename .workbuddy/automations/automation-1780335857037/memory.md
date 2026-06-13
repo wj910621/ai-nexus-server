@@ -1,5 +1,10 @@
 # 每日 Git 自动备份 执行记录
 
+## 2026-06-13 02:55
+- **状态**: 部分成功（commit 成功，push 失败）
+- **操作**: `git add .`  + commit `auto backup 2026-06-13`，24 文件变更（+1001/-23 行），新增 18 个 `.js` 文件（部署/检测/修复脚本），另有 2 个 HTML 测试页、3 个修改、1 个子模块更新，提交 bf3f01e
+- **push 结果**: 失败 — GitHub Push Protection 拦截，检测到 `package.json:26` 包含 GitHub Personal Access Token（来自历史提交 0437e7e），按策略不重试，下次再推
+
 ## 2026-06-12 02:55
 - **状态**: 无变更（nothing to commit）
 - **操作**: `git add .` 成功，但无新文件变更需暂存；仅 `server` 子模块有 modified/untracked 内容，父仓库不跟踪

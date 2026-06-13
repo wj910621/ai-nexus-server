@@ -1,8 +1,9 @@
-name: Auto Deploy to Alibaba Cloud
+name: TriGen Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -10,22 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy via SCP
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "index.html,server.js,package.json"
-          target: "/opt/ai-nexus-server"
-          overwrite: true
+      - name: Deploy Frontend
+        run: |
+          scp -o StrictHostKeyChecking=no new-nexus/index.html root@120.79.17.184:/home/admin/nexus-studio/index.html
 
-      - name: Restart PM2
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /opt/ai-nexus-server
-            pm2 restart ai-nexus
+      - name: Deploy Backend
+        run: |
+          scp -o StrictHostKeyChecking=no server.js package.json root@120.79.17.184:/home/admin/nexus-hub/
+          ssh -o StrictHostKeyChecking=no root@120.79.17.184 "cd /home/admin/nexus-hub && pm2 restart nexus-server"
+
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
