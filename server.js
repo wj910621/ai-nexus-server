@@ -11,7 +11,7 @@ const path = require('path');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
-const rateLimit = require("express-rate-limit");
+// const rateLimit = require("express-rate-limit"); // CentOS 8/Node 14 不支持 node:buffer
 const SALT_ROUNDS = 10;
 // dotenv: 优先加载项目根目录 .env，兼容本地开发与服务器部署
 require('dotenv').config({ path: path.join(__dirname, '.env') });
@@ -21,9 +21,14 @@ if (process.platform === 'linux' && fs.existsSync('/home/admin/.env')) {
 }
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['https://j3trisheng.com', 'https://www.j3trisheng.com', 'http://localhost:3001', 'http://localhost'],
+  credentials: true,
+}));
+app.use(morgan('short'));
 app.use(express.json({ limit: '10mb' }));
 
 // 提供前端静态文件（支持多种目录结构：本地开发 / Railway 部署）
@@ -41,7 +46,36 @@ if (!process.env.JWT_SECRET) {
     }
   } catch(e) {}
 }
-const authLimiter = require('express-rate-limit')({ windowMs: 15*60*1000, max: 10, message: { ok:false, error:'请求过于频繁，请15分钟后再试'} });
+// ============================================================
+// 简单的内存速率限制（替代 express-rate-limit）
+// ============================================================
+const rateLimitStore = new Map();
+function simpleRateLimit(windowMs, max) {
+  return (req, res, next) => {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const key = ip + ':' + (req.originalUrl || req.url);
+    let entry = rateLimitStore.get(key);
+    if (!entry || now > entry.resetTime) {
+      entry = { count: 0, resetTime: now + windowMs };
+      rateLimitStore.set(key, entry);
+    }
+    entry.count++;
+    if (entry.count > max) {
+      return res.json({ ok: false, error: '请求过于频繁，请稍后再试' });
+    }
+    next();
+  };
+}
+// 定时清理过期记录
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of rateLimitStore) {
+    if (now > val.resetTime) rateLimitStore.delete(key);
+  }
+}, 60000);
+
+const authLimiter = simpleRateLimit(15*60*1000, 10);
 function signToken(p) { return require('jsonwebtoken').sign(p, JWT_SECRET, { expiresIn:'7d' }); }
 function verifyToken(t) { return require('jsonwebtoken').verify(t, JWT_SECRET); }
 function authRequired(req,res,next) {
@@ -503,7 +537,7 @@ app.post('/api/chat', async (req, res) => {
 
   let username = null;
   let userCredits = 0;
-  const creditCost = API_MODEL_COST[modelId] || 2;
+  const creditCost = API_MODEL_COST[modelId] !== undefined ? API_MODEL_COST[modelId] : 2;
 
   // 认证方式1：API Key（第三方接入）
   if (apiKey && apiKey.length > 10) {
@@ -537,6 +571,37 @@ app.post('/api/chat', async (req, res) => {
       return res.status(401).json({ 
         error: { message: '调用收费模型需要 API Key 或登录。请在网站注册并创建 API Key。', type: 'auth_error' } 
       });
+    }
+    if (modelId && !FREE_ALWAYS.includes(modelId)) {
+      return res.status(401).json({
+        error: { message: '请先登录或注册后使用该模型，免费注册即送30积分！', type: 'auth_error' }
+      });
+    }
+  } else {
+    // 登录用户：检查会员状态和每日免费模型使用限制
+    const userResult = db.exec("SELECT membership, membership_expires, daily_free_usage, daily_free_date FROM users WHERE username=?", [username]);
+    let membershipInfo = { membership: 'free', expires: '', dailyFreeUsage: 0, dailyFreeDate: '' };
+    if (userResult.length && userResult[0].values.length) {
+      const r = userResult[0].values[0];
+      membershipInfo = { membership: r[0], expires: r[1]||'', dailyFreeUsage: r[2]||0, dailyFreeDate: r[3]||'' };
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    // 非始终免费的模型且有成本 → 计入每日免费限额
+    if (creditCost === 0 && !FREE_ALWAYS.includes(modelId)) {
+      const dailyUsed = membershipInfo.dailyFreeDate === today ? membershipInfo.dailyFreeUsage : 0;
+      const tier = getMembership(membershipInfo);
+      if (modelId && dailyUsed >= tier.dailyFreeCalls) {
+        return res.status(402).json({
+          error: { message: `今日免费模型使用次数已达上限（${tier.dailyFreeCalls}次），开通会员可无限使用`, type: 'membership_required' }
+        });
+      }
+      // 记录使用次数
+      if (membershipInfo.dailyFreeDate === today) {
+        db.run("UPDATE users SET daily_free_usage=daily_free_usage+1 WHERE username=?", [username]);
+      } else {
+        db.run("UPDATE users SET daily_free_usage=1, daily_free_date=? WHERE username=?", [today, username]);
+      }
+      saveDB();
     }
   }
 
@@ -1279,7 +1344,9 @@ const DB_FILE = path.join(__dirname, 'data.db');
 const SQL = require('sql.js');
 async function initDB() {
   const initSql = fs.existsSync(DB_FILE) ? fs.readFileSync(DB_FILE) : null;
-  const sql = await SQL();
+  const sql = await SQL({
+    locateFile: file => path.join(__dirname, 'node_modules', 'sql.js', 'dist', file)
+  });
   db = new sql.Database(initSql);
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1298,6 +1365,23 @@ async function initDB() {
   try { db.run(`ALTER TABLE users ADD COLUMN device_fp TEXT DEFAULT ''`); } catch(e) {}
   try { db.run(`ALTER TABLE users ADD COLUMN security_q TEXT DEFAULT ''`); } catch(e) {}
   try { db.run(`ALTER TABLE users ADD COLUMN security_a TEXT DEFAULT ''`); } catch(e) {}
+  // === 会员体系 ===
+  try { db.run(`ALTER TABLE users ADD COLUMN membership TEXT DEFAULT 'free'`); } catch(e) {}
+  try { db.run(`ALTER TABLE users ADD COLUMN membership_expires TEXT DEFAULT ''`); } catch(e) {}
+  try { db.run(`ALTER TABLE users ADD COLUMN daily_free_usage INTEGER DEFAULT 0`); } catch(e) {}
+  try { db.run(`ALTER TABLE users ADD COLUMN daily_free_date TEXT DEFAULT ''`); } catch(e) {}
+  // === 访客设备指纹表（反作弊积分持久化） ===
+  db.run(`CREATE TABLE IF NOT EXISTS guest_fingerprints (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fingerprint TEXT NOT NULL,
+    ip TEXT DEFAULT '',
+    credits_used INTEGER DEFAULT 0,
+    daily_credits INTEGER DEFAULT 0,
+    last_reset_date TEXT DEFAULT '',
+    first_seen TEXT DEFAULT (datetime('now', 'localtime')),
+    last_seen TEXT DEFAULT (datetime('now', 'localtime'))
+  )`);
+  try { db.run(`CREATE INDEX IF NOT EXISTS idx_guest_fp ON guest_fingerprints(fingerprint)`); } catch(e) {}
   // === API Key 表 ===
   db.run(`CREATE TABLE IF NOT EXISTS api_keys (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1543,6 +1627,14 @@ app.post('/api/auth/register', authLimiter, (req, res) => {
   const currentCount = (ipCount.length && ipCount[0].values.length) ? ipCount[0].values[0][0] : 0;
   if (currentCount >= 2) {
     return res.json({ ok: false, error: '本网络已注册过 2 个账号，已达到上限' });
+  }
+  // === 防多账号：同一设备指纹最多注册 1 个账号 ===
+  if (deviceFp && deviceFp.length >= 8) {
+    const fpCount = db.exec("SELECT COUNT(*) FROM users WHERE device_fp=?", [deviceFp]);
+    const currentFpCount = (fpCount.length && fpCount[0].values.length) ? fpCount[0].values[0][0] : 0;
+    if (currentFpCount >= 1) {
+      return res.json({ ok: false, error: '该设备已注册过账号，每个设备限注册一个账号' });
+    }
   }
   try {
     const existing = db.exec("SELECT id FROM users WHERE username=? " + (email ? "OR email=?" : "") + " OR phone=?", 
@@ -2152,16 +2244,6 @@ app.delete('/api/novels/:id', authRequired, (req, res) => {
   } catch(e) { res.json({ ok: false, error: e.message }); }
 });
 
-// 404 处理 — 放在所有路由之后
-app.use((req, res) => {
-  res.status(404).type('html').send(err404HTML);
-});
-// 全局错误处理
-app.use((err, req, res, next) => {
-  console.error('Server error:', err.message);
-  res.status(500).type('html').send(err500HTML);
-});
-
 // ============================================================
 // 简易访问统计
 // ============================================================
@@ -2185,6 +2267,67 @@ app.get('/api/stats', (req, res) => {
 // ============================================================
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 app.post('/api/admin/auth', authLimiter, (req, res) => {
+
+// ============================================================
+// 会员体系
+// ============================================================
+const FREE_ALWAYS = ['dmx_qwen35_2b_free', 'dmx_qwen3_17b_free', 'dmx_spark_lite_free', 'dmx_glm_4_9b', 'ark_dbs2_mini', 'ark_dbp15l', 'qf_ernie_speed']; // 始终免费
+const MEMBERSHIP_TIERS = {
+  free:  { name: '免费用户', dailyFreeCalls: 30, discount: 0, price: 0, creditsPerMonth: 0, desc: '基础体验' },
+  silver:{ name: '月度会员', dailyFreeCalls: 999, discount: 0.2, price: 49, creditsPerMonth: 1000, desc: '高端模型8折' },
+  gold:  { name: '季度会员', dailyFreeCalls: 999, discount: 0.3, price: 119, creditsPerMonth: 3500, desc: '高端模型7折+返利5%' },
+  platinum:{name: '年度会员', dailyFreeCalls: 999, discount: 0.5, price: 369, creditsPerMonth: 15000, desc: '高端模型5折+返利10%+3D五折' },
+};
+function getMembership(user) {
+  if (!user) return MEMBERSHIP_TIERS.free;
+  const tier = user.membership || 'free';
+  const expires = user.membership_expires || '';
+  if (tier !== 'free' && expires && new Date(expires) < new Date()) return MEMBERSHIP_TIERS.free; // 过期降级
+  return MEMBERSHIP_TIERS[tier] || MEMBERSHIP_TIERS.free;
+}
+
+// 查看会员状态
+app.get('/api/membership/status', authRequired, (req, res) => {
+  const result = db.exec("SELECT membership, membership_expires, daily_free_usage, daily_free_date, credits FROM users WHERE username=?", [req.user.username]);
+  if (!result.length || !result[0].values.length) return res.json({ ok: false, error: '用户不存在' });
+  const u = result[0].values[0];
+  const tier = getMembership({ membership: u[0], membership_expires: u[1] });
+  res.json({
+    ok: true,
+    membership: u[0],
+    expires: u[1] || '',
+    tierName: tier.name,
+    dailyFreeCalls: tier.dailyFreeCalls,
+    discount: tier.discount,
+    dailyFreeUsed: u[2] || 0,
+    dailyFreeDate: u[3] || '',
+    credits: u[4] || 0,
+  });
+});
+
+// 订阅会员（记录在数据库中，实际支付待接入）
+app.post('/api/membership/subscribe', authRequired, (req, res) => {
+  const { tier, months } = req.body;
+  if (!MEMBERSHIP_TIERS[tier]) return res.json({ ok: false, error: '无效的会员等级' });
+  if (tier === 'free') return res.json({ ok: false, error: '已经是免费用户' });
+  const m = MEMBERSHIP_TIERS[tier];
+  // 计算到期时间
+  const now = new Date();
+  const currentResult = db.exec("SELECT membership_expires FROM users WHERE username=?", [req.user.username]);
+  let baseDate = now;
+  if (currentResult.length && currentResult[0].values.length && currentResult[0].values[0][0]) {
+    const existing = new Date(currentResult[0].values[0][0]);
+    if (existing > now) baseDate = existing; // 续期叠加
+  }
+  const expireDate = new Date(baseDate);
+  expireDate.setMonth(expireDate.getMonth() + (months || 1));
+  const totalPrice = m.price * (months || 1);
+  // 这里实际应接入支付，现在先直接记录
+  db.run("UPDATE users SET membership=?, membership_expires=?, credits=credits+? WHERE username=?", 
+    [tier, expireDate.toISOString(), m.creditsPerMonth * (months || 1), req.user.username]);
+  saveDB();
+  res.json({ ok: true, tier, expires: expireDate.toISOString(), creditsAdded: m.creditsPerMonth * (months || 1), price: totalPrice });
+});
   const { password } = req.body || {};
   if (password === ADMIN_PASSWORD) {
     res.json({ ok: true, token: Buffer.from(password + ':' + Date.now()).toString('base64') });
@@ -2488,6 +2631,145 @@ app.get('/api/admin/balances', async (req, res) => {
     );
   }
   res.json({ ok: true, balances: results, updated: new Date().toISOString() });
+});
+
+// ============================================================
+// 访客反作弊积分系统（设备指纹 + IP 限制 + 渐进式解锁）
+// ============================================================
+const GUEST_MAX_CREDITS = 30;       // 每个访客每日最大积分
+const GUEST_PROGRESSIVE_WARN = 20;   // 使用超过 20 分后提示注册
+const GUEST_REGISTER_BLOCK = 30;     // 使用 30 分后必须注册
+
+// 获取或创建访客记录
+function getOrCreateGuest(fingerprint, ip) {
+  if (!fingerprint || fingerprint.length < 8) return null;
+  const existing = db.exec("SELECT credits_used, daily_credits, last_reset_date FROM guest_fingerprints WHERE fingerprint=?", [fingerprint]);
+  const today = new Date().toISOString().slice(0, 10);
+  let record;
+  if (existing.length && existing[0].values.length) {
+    const r = existing[0].values[0];
+    // 如果上次重置不是今天，重置每日已用积分为0
+    const dailyReset = r[2] !== today;
+    record = {
+      credits_used: r[0],
+      daily_credits: dailyReset ? 0 : (r[1] || 0),
+      last_reset_date: today
+    };
+    if (dailyReset) {
+      db.run("UPDATE guest_fingerprints SET daily_credits=0, last_reset_date=?, last_seen=datetime('now','localtime') WHERE fingerprint=?", [today, fingerprint]);
+      saveDB();
+    } else {
+      db.run("UPDATE guest_fingerprints SET last_seen=datetime('now','localtime') WHERE fingerprint=?", [fingerprint]);
+    }
+  } else {
+    // 新建访客记录
+    db.run("INSERT INTO guest_fingerprints (fingerprint, ip, credits_used, daily_credits, last_reset_date) VALUES (?,?,0,0,?)",
+      [fingerprint, ip, today]);
+    saveDB();
+    record = { credits_used: 0, daily_credits: 0, last_reset_date: today };
+  }
+  return record;
+}
+
+// 同步访客积分（前端页面加载时调用）
+app.post('/api/guest/sync', (req, res) => {
+  const { deviceFp } = req.body;
+  const clientIP = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'unknown';
+  if (!deviceFp || deviceFp.length < 8) {
+    // 没有设备指纹时，返回默认30分（但前端发现后会生成指纹重试）
+    return res.json({ ok: true, credits: GUEST_MAX_CREDITS, max: GUEST_MAX_CREDITS, used: 0, isGuest: true });
+  }
+  try {
+    const record = getOrCreateGuest(deviceFp, clientIP);
+    if (!record) {
+      return res.json({ ok: true, credits: GUEST_MAX_CREDITS, max: GUEST_MAX_CREDITS, used: 0, isGuest: true });
+    }
+    const remaining = Math.max(0, GUEST_MAX_CREDITS - record.daily_credits);
+    // 渐进式状态
+    let progressiveStatus = 'normal';
+    if (record.daily_credits >= GUEST_REGISTER_BLOCK) {
+      progressiveStatus = 'blocked';
+    } else if (record.daily_credits >= GUEST_PROGRESSIVE_WARN) {
+      progressiveStatus = 'must_register';
+    } else if (record.daily_credits >= 15) {
+      progressiveStatus = 'suggest_register';
+    }
+    res.json({
+      ok: true,
+      credits: remaining,
+      max: GUEST_MAX_CREDITS,
+      used: record.daily_credits,
+      totalUsed: record.credits_used,
+      progressiveStatus,
+      isGuest: true
+    });
+  } catch(e) {
+    res.json({ ok: true, credits: GUEST_MAX_CREDITS, max: GUEST_MAX_CREDITS, used: 0, isGuest: true });
+  }
+});
+
+// 访客消费积分
+app.post('/api/guest/spend', (req, res) => {
+  const { deviceFp, amount } = req.body;
+  const clientIP = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'unknown';
+  if (!deviceFp || deviceFp.length < 8) {
+    return res.json({ ok: false, error: '设备指纹无效' });
+  }
+  if (!amount || amount <= 0) {
+    return res.json({ ok: false, error: '金额无效' });
+  }
+  try {
+    const record = getOrCreateGuest(deviceFp, clientIP);
+    if (!record) {
+      return res.json({ ok: false, error: '无法创建访客记录' });
+    }
+    // 检查是否已超过每日限额
+    if (record.daily_credits + amount > GUEST_MAX_CREDITS) {
+      const remaining = GUEST_MAX_CREDITS - record.daily_credits;
+      return res.json({
+        ok: false,
+        error: `访客每日积分已用完（今日已用 ${record.daily_credits}/${GUEST_MAX_CREDITS}）`,
+        credits: Math.max(0, remaining),
+        blocked: true,
+        progressiveStatus: 'blocked'
+      });
+    }
+    db.run("UPDATE guest_fingerprints SET credits_used=credits_used+?, daily_credits=daily_credits+?, last_seen=datetime('now','localtime') WHERE fingerprint=?",
+      [amount, amount, deviceFp]);
+    saveDB();
+    const remaining = GUEST_MAX_CREDITS - (record.daily_credits + amount);
+    let progressiveStatus = 'normal';
+    const newUsed = record.daily_credits + amount;
+    if (newUsed >= GUEST_REGISTER_BLOCK) {
+      progressiveStatus = 'blocked';
+    } else if (newUsed >= GUEST_PROGRESSIVE_WARN) {
+      progressiveStatus = 'must_register';
+    } else if (newUsed >= 15) {
+      progressiveStatus = 'suggest_register';
+    }
+    res.json({
+      ok: true,
+      credits: Math.max(0, remaining),
+      used: newUsed,
+      max: GUEST_MAX_CREDITS,
+      progressiveStatus
+    });
+  } catch(e) {
+    res.json({ ok: false, error: '消费失败: ' + e.message });
+  }
+});
+
+// 增强注册：同一设备指纹只能注册 1 个账号
+// 此逻辑集成在现有 /api/auth/register 的 IP 检查之后
+
+// 404 处理（必须在所有路由之后）
+app.use((req, res) => {
+  res.status(404).type('html').send(err404HTML);
+});
+// 全局错误处理
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.message);
+  res.status(500).type('html').send(err500HTML);
 });
 
 // ============================================================

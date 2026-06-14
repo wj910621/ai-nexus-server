@@ -17,4 +17,20 @@
 ## 部署信息
 - 服务器: 120.79.17.184
 - 前端路径: /home/admin/nexus-studio/index.html
-- 访问: http://120.79.17.184:3001/studio/
+- 后端路径: /home/admin/ai-nexus/server.js
+- 访问: http://j3trisheng.com → landing.html
+- SSL: /etc/nginx/ssl/origin.pem + origin.key
+- PM2: nexus-hub (端口 3001)
+
+## 反作弊积分系统（2026-06-14）
+- **访客积分后端持久化**: `guest_fingerprints` 表，设备指纹 + IP 追踪
+- **每日限额**: 30 积分/天/设备，刷新不重置（从后端同步）
+- **设备指纹限一**: 每个设备指纹最多注册 1 个账号
+- **IP 限二**: 每个 IP 最多注册 2 个账号（已有）
+- **渐进式解锁**:
+  - 0-14 分：正常使用
+  - 15-19 分：弹出"建议注册"提示
+  - 20-29 分：强制提示"必须注册"
+  - 30 分：锁定，显示注册弹窗
+- **API**: `POST /api/guest/sync`（同步积分）、`POST /api/guest/spend`（消费）
+- **前端**: Canvas 设备指纹 + 后端积分同步 + 渐进解锁 UI

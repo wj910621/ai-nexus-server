@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<script>// 强制清除旧 Service Worker 缓存（在页面加载前执行）
-(function(){try{caches.keys().then(n=>n.forEach(c=>caches.delete(c)));navigator.serviceWorker&&navigator.serviceWorker.getRegistrations().then(r=>r.forEach(s=>s.unregister()))}catch(e){}})();
-// 如果是从旧缓存加载，跳转到版本化 URL 绕过缓存
-if(!location.search.includes('_v=2')&&!location.pathname.includes('index.html')){location.replace('/studio/index.html?_v=2')}
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
@@ -654,11 +649,10 @@ a{color:var(--accent);text-decoration:none}
   <div class="top-actions">
     <span class="top-credit" onclick="dailyCheckin()" title="每日签到">📅 <span id="checkinBadge">签到</span></span>
     <span class="top-credit" onclick="switchPage('pricing')" title="积分">💎 <span id="creditDisplay">0</span></span>
-    <a href="/download/" target="_blank" class="top-credit" title="TriGenClaw 桌面客户端" style="text-decoration:none;cursor:pointer">🦀 <span>TriGenClaw</span></a>
     <span class="top-credit" onclick="DAILY_CHECKIN()" id="checkinBtn" title="每日签到" style="background:linear-gradient(135deg,#f59e0b,#d97706);display:none">📅 签到 +5</span>
     <span id="userNav" style="display:flex;align-items:center;gap:6px"></span>
     <button class="theme-toggle" id="themeToggle">☀️</button>
-    <span class="conn-status" id="connStatus"><span class="conn-dot online"></span><span>在线</span></span>
+    <span class="conn-status" id="connStatus"><span class="conn-dot checking"></span><span>检测</span></span>
   </div>
 </header>
 
@@ -692,16 +686,14 @@ a{color:var(--accent);text-decoration:none}
   <button class="sidebar-link" data-page="office"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>办公</button>
   <button class="sidebar-link" data-page="brand"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f97316,#ef4444)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg></span>品牌</button>
   <button class="sidebar-link" data-page="market"><span class="sidebar-icon" style="background:linear-gradient(135deg,#22c55e,#10b981)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>营销</button>
-  <button class="sidebar-link" data-page="pricing"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>充值/会员</button>
+  <button class="sidebar-link" data-page="pricing"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>充值</button>
   <button class="sidebar-link" data-page="tools"><span class="sidebar-icon" style="background:linear-gradient(135deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>工具箱</button>
   <button class="sidebar-link" data-page="feedback"><span class="sidebar-icon" style="background:linear-gradient(135deg,#0284c7,#38bdf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>反馈</button>
   <div class="sidebar-bottom">
     <button id="adminSidebarBtn" class="sidebar-link" data-page="admin" style="display:none"><span class="sidebar-icon" style="background:linear-gradient(135deg,#dc2626,#ef4444)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>⚙ 管理后台</button>
-    <button class="sidebar-link" onclick="openMembershipModal()" style="background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(99,102,241,0.05));border:1px solid rgba(124,58,237,0.2);margin-bottom:4px"><span style="font-size:1rem">🔥</span> 开通会员</button>
-    <div class="sidebar-conn" id="sidebarConn"><span class="conn-dot online"></span><span>在线</span></div>
-    <div class="sidebar-user" id="sidebarUser" onclick="openUserSettings()" style="cursor:pointer" title="点击用户设置">
+    <div class="sidebar-conn" id="sidebarConn"><span class="conn-dot checking"></span><span>检查连接</span></div>
+    <div class="sidebar-user" id="sidebarUser" onclick="openUserSettings()" style="cursor:pointer" title="点击修改密码">
       <span>👤</span><span id="sidebarUserName">未登录</span>
-      <span style="font-size:0.6rem;padding:1px 4px;border-radius:3px;margin-left:4px" id="sidebarMembershipBadge"></span>
       <span style="margin-left:auto;font-size:0.7rem;opacity:0.5">⚙️</span>
     </div>
   </div>
@@ -737,7 +729,7 @@ a{color:var(--accent);text-decoration:none}
     <div style="display:inline-block;background:rgba(16,185,129,0.15);color:var(--green);padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;margin-bottom:24px">✨ 新用户注册即送 <span style="font-size:1rem">30积分</span> 免费体验</div>
     <div style="margin-bottom:20px;font-size:0.72rem;color:var(--text-secondary);opacity:0.7">🟢 <span id="onlineUsers">128</span> 人在线 · 📈 今日已有 <span id="todayPurchases">47</span> 人充值 · ⭐ 4.9/5 好评</div>
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num" id="modelCount">360</div><div class="stat-label">收录模型</div></div>
+      <div class="stat"><div class="stat-num" id="modelCount">72</div><div class="stat-label">收录模型</div></div>
       <div class="stat"><div class="stat-num" id="providerCount">9</div><div class="stat-label">模型品牌</div></div>
       <div class="stat"><div class="stat-num" id="usedCount">0</div><div class="stat-label">今日使用</div></div>
     </div>
@@ -982,45 +974,6 @@ a{color:var(--accent);text-decoration:none}
                 <span class="filter-tag" onclick="NOVEL_SET('type',this,'历史')">历史</span>
                 <span class="filter-tag" onclick="NOVEL_SET('type',this,'轻小说')">轻小说</span>
                 <span class="filter-tag" onclick="NOVEL_SET('type',this,'游戏')">游戏</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'武侠')">武侠</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'奇幻')">奇幻</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'恐怖')">恐怖</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'灵异')">灵异</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'军事')">军事</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'竞技')">竞技</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'校园')">校园</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'职场')">职场</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'商战')">商战</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'种田')">种田</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'美食')">美食</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'直播')">直播</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'娱乐圈')">娱乐圈</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'末世')">末世</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'废土')">废土</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'克苏鲁')">克苏鲁</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'西幻')">西幻</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'赛博朋克')">赛博朋克</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'蒸汽朋克')">蒸汽朋克</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'宫斗')">宫斗</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'权谋')">权谋</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'谍战')">谍战</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'推理')">推理</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'冒险')">冒险</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'无限流')">无限流</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'末日')">末日</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'重生')">重生</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'穿越')">穿越</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'盗墓')">盗墓</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'系统流')">系统流</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'惊悚')">惊悚</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'神话')">神话</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'体育')">体育</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'官场')">官场</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'宅斗')">宅斗</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'群像')">群像</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'慢热')">慢热</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'治愈')">治愈</span>
-                <span class="filter-tag" onclick="NOVEL_SET('type',this,'致郁')">致郁</span>
               </div>
             </div>
             <div class="feature-card" style="margin-bottom:12px"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">🎯 写作风格</label>
@@ -2159,10 +2112,7 @@ response = client.chat.completions.create(
 <div class="page" id="page-pricing">
   <section class="section">
     <h2 class="section-title">💎 积分与会员</h2>
-    <p class="section-desc" style="font-size:0.85rem">🔥 <b>全网最低价</b> · 同模型比其他平台便宜 50-80% · 55 个模型永久免费 · 会员更划算</p>
-    <div style="text-align:center;margin-bottom:20px">
-      <span style="background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(6,182,212,0.1));color:var(--green);padding:8px 24px;border-radius:20px;font-size:0.82rem;font-weight:600">🏆 全网比价：DeepSeek-V3 我们 ¥0.04/次 vs 官方 ¥0.28/次 · 省 85%</span>
-    </div>
+    <p class="section-desc" style="font-size:0.85rem">💡 <b>订阅会员比单买划算 3-5 倍</b> · 积分永不过期 · 一个账户通吃所有模型</p>
     <div style="text-align:center;margin-bottom:20px">
       <span style="background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(217,119,6,0.1));color:#f59e0b;padding:8px 24px;border-radius:20px;font-size:0.82rem;font-weight:600">🎁 邀请好友双方各得 30 积分 · 每日签到 +5 积分 · 连续签到额外奖励</span>
     </div>
@@ -2354,9 +2304,9 @@ response = client.chat.completions.create(
 
   <!-- 忘记密码 -->
   <div class="auth-form" id="authFormForgot" style="text-align:center">
-    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px">输入注册邮箱或用户名，通过密保问题重置密码</p>
-    <div class="auth-field"><input id="forgotEmail" placeholder="注册邮箱或用户名" autocomplete="email"></div>
-    <button class="auth-btn" onclick="doForgotPwd()">验证密保并重置</button>
+    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px">输入注册邮箱，我们将发送重置链接</p>
+    <div class="auth-field"><input id="forgotEmail" placeholder="注册邮箱" autocomplete="email"></div>
+    <button class="auth-btn" onclick="doForgotPwd()">发送重置链接</button>
     <div class="auth-footer" style="margin-top:12px"><a onclick="switchAuthTab('login')">← 返回登录</a></div>
   </div>
 
@@ -3131,16 +3081,16 @@ getDeviceFingerprint();
 
 // === Models ===
 const models=[
-  {id:'gpt4o',name:'GPT-4o',provider:'OpenAI',desc:'最新旗舰多模态模型，文本/图像/音频全通。',avatar:'#10a37f',tags:['多模态','推理','编程','海外'],context:'128K',inputPrice:'$2.5/M',outputPrice:'$10/M',featured:true,free:false,backup:'or_gpt4o'},
-  {id:'claude4',name:'Claude 4 Sonnet',provider:'Anthropic',desc:'Claude最新旗舰，编程和深度推理业界顶尖。',avatar:'#d97706',tags:['推理','编程','长文本','海外'],context:'200K',inputPrice:'$3/M',outputPrice:'$15/M',featured:true,free:false,backup:'nx_claude_sonnet'},
+  {id:'gpt4o',name:'GPT-4o',provider:'OpenAI',desc:'最新旗舰多模态模型，文本/图像/音频全通。',avatar:'#10a37f',tags:['多模态','推理','编程','海外'],context:'128K',inputPrice:'$2.5/M',outputPrice:'$10/M',featured:true,free:false},
+  {id:'claude4',name:'Claude 4 Sonnet',provider:'Anthropic',desc:'Claude最新旗舰，编程和深度推理业界顶尖。',avatar:'#d97706',tags:['推理','编程','长文本','海外'],context:'200K',inputPrice:'$3/M',outputPrice:'$15/M',featured:true,free:false},
   {id:'gemini25pro',name:'Gemini 2.5 Pro',provider:'Google',desc:'Google最新旗舰，原生多模态。',avatar:'#4285f4',tags:['多模态','长文本','推理','海外'],context:'2M',inputPrice:'$1.25/M',outputPrice:'$5/M',featured:true,free:false,backup:'nx_gemini_pro'},
-  {id:'deepseekv3',name:'DeepSeek-V3 (0324)',provider:'DeepSeek',desc:'国产最强大模型，671B MoE。',avatar:'#4f46e5',tags:['开源','推理','编程','写作','国内'],context:'128K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:true,free:false,backup:'ali_deepseek_v4_pro'},
-  {id:'deepseekr1',name:'DeepSeek-R1',provider:'DeepSeek',desc:'深度推理专家，思维链超强。',avatar:'#4f46e5',tags:['推理','数学','开源','国内'],context:'128K',inputPrice:'¥4/M',outputPrice:'¥16/M',featured:true,free:false,backup:'sf_qwq_32b'},
-  {id:'qwen3',name:'通义千问 3.0',provider:'阿里云',desc:'阿里最新旗舰，中文能力顶尖。',avatar:'#ff6a00',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥2/M',outputPrice:'¥8/M',featured:true,free:false,backup:'ali_qwen37_max'},
-  {id:'kimi2',name:'Kimi K2',provider:'月之暗面',desc:'超长上下文200万字。',avatar:'#6c5ce7',tags:['长文本','中文优化','国内'],context:'2M',inputPrice:'¥12/M',outputPrice:'¥12/M',featured:true,free:false,backup:'ali_kimi_k26'},
-  {id:'gpt4omini',name:'GPT-4o Mini',provider:'OpenAI',desc:'轻量高效版，性价比极高。',avatar:'#10a37f',tags:['快速','编程','海外'],context:'128K',inputPrice:'$0.15/M',outputPrice:'$0.6/M',featured:false,free:false,backup:'nx_gpt5mini'},
-  {id:'glm4plus',name:'GLM-4 Plus',provider:'智谱AI',desc:'All-Tools智能体，中英双强。',avatar:'#3859ff',tags:['智能体','中文优化','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥0.5/M',featured:false,free:false,backup:'sf_glm5'},
-  {id:'hunyuan',name:'混元 TurboS',provider:'腾讯',desc:'腾讯最快大模型。',avatar:'#00a4ff',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥1/M',outputPrice:'¥2/M',featured:false,free:false,backup:'sf_hunyuan_a13b'},
+  {id:'deepseekv3',name:'DeepSeek-V3 (0324)',provider:'DeepSeek',desc:'国产最强大模型，671B MoE。',avatar:'#4f46e5',tags:['开源','推理','编程','写作','国内'],context:'128K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:true,free:false},
+  {id:'deepseekr1',name:'DeepSeek-R1',provider:'DeepSeek',desc:'深度推理专家，思维链超强。',avatar:'#4f46e5',tags:['推理','数学','开源','国内'],context:'128K',inputPrice:'¥4/M',outputPrice:'¥16/M',featured:true,free:false},
+  {id:'qwen3',name:'通义千问 3.0',provider:'阿里云',desc:'阿里最新旗舰，中文能力顶尖。',avatar:'#ff6a00',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥2/M',outputPrice:'¥8/M',featured:true,free:false},
+  {id:'kimi2',name:'Kimi K2',provider:'月之暗面',desc:'超长上下文200万字。',avatar:'#6c5ce7',tags:['长文本','中文优化','国内'],context:'2M',inputPrice:'¥12/M',outputPrice:'¥12/M',featured:true,free:false},
+  {id:'gpt4omini',name:'GPT-4o Mini',provider:'OpenAI',desc:'轻量高效版，性价比极高。',avatar:'#10a37f',tags:['快速','编程','海外'],context:'128K',inputPrice:'$0.15/M',outputPrice:'$0.6/M',featured:false,free:false},
+  {id:'glm4plus',name:'GLM-4 Plus',provider:'智谱AI',desc:'All-Tools智能体，中英双强。',avatar:'#3859ff',tags:['智能体','中文优化','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥0.5/M',featured:false,free:false},
+  {id:'hunyuan',name:'混元 TurboS',provider:'腾讯',desc:'腾讯最快大模型。',avatar:'#00a4ff',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥1/M',outputPrice:'¥2/M',featured:false,free:false},
   {id:'llama4',name:'Llama 4 Scout',provider:'Meta',desc:'最新开源，109B参数。',avatar:'#0668e1',tags:['开源','通用','海外','免费'],context:'10M',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
   // 硅基流动免费模型
   {id:'sf_qwen3_8b',name:'Qwen3-8B',provider:'通义千问',desc:'8B轻量级，快速响应。',avatar:'#ff6a00',tags:['中文优化','轻量','国内'],context:'32K',inputPrice:'¥0.5/M',outputPrice:'¥2/M',featured:false,free:false},
@@ -3306,11 +3256,9 @@ initHeroPlanet(); // 首页星球保留
   async function fetchDynamic(url){
     try{
       const r=await fetch(API_BASE+url);if(!r.ok)return[];
-      const d=await r.json();if(!d.data&&!d.models)return[];
-      // 支持 {data:[...]} 和 {models:[...]} 两种响应格式
-      const list=d.data||d.models||[];
+      const d=await r.json();if(!d.ok||!d.models)return[];
       const added=[];
-      list.forEach(m=>{if(!existingIds.has(m.id)){models.push(m);existingIds.add(m.id);added.push(m.id)}});
+      d.models.forEach(m=>{if(!existingIds.has(m.id)){models.push(m);existingIds.add(m.id);added.push(m.id)}});
       return added;
     }catch(e){return[]}
   }
@@ -3416,16 +3364,10 @@ async function sendChatMessage(){
     md.scrollTop=md.scrollHeight;
     try{
       let r=await callModelAPI(id,msg,ragSysPrompt);
-      // 多平台自动容灾切换：主渠道失败时自动切换到备用渠道
+      // 如果返回模拟回复且模型有 backup，自动切换到备用渠道
       const backup=m.backup;
-      if((r.simulated||r.error)&&backup){
-        const backupModel=models.find(x=>x.id===backup);
-        r=await callModelAPI(backup,msg,ragSysPrompt+'【系统提示：已自动切换到备用渠道】');
-        if(r&&!r.simulated&&!r.error){
-          showToast(`🔄 ${m.name} → ${backupModel?.name||backup} 已自动切换`);
-        }
-      }
-      const el=document.getElementById(pid);if(el){el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if(r.simulated)el.querySelector('.chat-msg-content').style.opacity='0.6';if(backup&&!r.simulated&&!r.error)el.innerHTML+=`<div style="font-size:0.6rem;color:var(--orange);margin-top:4px">🔄 已自动切换到备用渠道（${backup}）</div>`}
+      if(r.simulated&&backup){r=await callModelAPI(backup,msg,ragSysPrompt+'【系统提示：已自动切换到备用渠道】');if(!r.simulated){showToast(`🔄 ${m.name} 已自动切换到备用渠道`)}}
+      const el=document.getElementById(pid);if(el){el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if(r.simulated)el.querySelector('.chat-msg-content').style.opacity='0.6';if(backup&&!r.simulated)el.innerHTML+=`<div style="font-size:0.6rem;color:var(--orange);margin-top:4px">🔄 已自动切换到备用渠道</div>`}
     }catch(e){const el=document.getElementById(pid);if(el)el.querySelector('.chat-msg-content').innerHTML=`<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`}
     md.scrollTop=md.scrollHeight;
   });
@@ -3455,9 +3397,9 @@ async function callModelAPI(modelId,question,sysPrompt){
     if(r.ok) return await r.json();
     const errBody=await r.json().catch(()=>({}));
     const errMsg=errBody?.error?.message||errBody?.error||`服务器错误 ${r.status}`;
-    return {model:modelId,content:`❌ ${errMsg}`,simulated:true,error:errMsg};
+    return {model:modelId,content:`❌ ${errMsg}\n\n💡 免费模型无需登录即可使用，付费模型请注册并登录。`,simulated:true,error:errMsg};
   }catch(e){
-    return {model:modelId,content:`❌ 网络连接失败：${e.message}`,simulated:true,error:e.message};
+    return {model:modelId,content:`❌ 网络连接失败：${e.message}\n\n请检查网络或稍后重试。`,simulated:true};
   }
 }
 
@@ -4237,62 +4179,55 @@ function showGuestBlockedModal(used,max){
 
 // === 模型积分分级 ===
 const MODEL_COST={
-  // 🆓 免费模型（对应平台免费供应）
+  // 🆓 免费模型 (仅保留3个最轻量引流用)
   dmx_qwen35_2b_free:0, dmx_qwen3_17b_free:0, dmx_spark_lite_free:0,
-  sf_qwen3_8b:0, sf_deepseek_v3_free:0, dmx_qwen3_8b_free:0, dmx_qwen_flash_free:0,
-  sf_glm47:0,
-  dmx_minimax_m25_free:0, dmx_glm_47_free:0, dmx_glm_47_flash:0, dmx_glm_45_flash:0,
-  dmx_glm_4_9b:0, dmx_hunyuan_lite:0, dmx_qwen35_plus_free:0,
-  dmx_qwen3_5_plus_free:0, dmx_qwen35_35b_free:0, dmx_qwen25_coder_7b:0,
-  dmx_doubao_seed_lite:0, dmx_mimo_v25_free:0, sf_qwen3_32b:0,
-  dmx_minimax_m27_free:0, dmx_glm_5_turbo_free:0, dmx_qwen3_coder_plus_free:0,
-  dmx_qwen3_coder_next_free:0, dmx_doubao_seed_code:0, dmx_mimo_v2_pro_free:0,
-  dmx_code_free:0, dmx_codex_free:0, dmx_kat_coder_free:0,
-  dmx_qwen36_plus_free:0, dmx_code_free_x:0,
-  dmx_kimi_k25_free:0, dmx_kimi_k26_free:0, dmx_doubao_seed_pro:0, dmx_qwen3_max_free:0,
+  // 🟢 1积分
+  deepseekv3:1, glm4:1, kimi:1, sf_glm47:1, ali_qwen36_flash:1,
+  sf_qwen3_8b:1, dmx_qwen3_8b_free:1, dmx_qwen_flash_free:1,
+  dmx_minimax_m25_free:1, dmx_glm_47_free:1, dmx_glm_47_flash:1, dmx_glm_45_flash:1,
+  dmx_glm_4_9b:1, dmx_hunyuan_lite:1, dmx_qwen35_plus_free:1,
+  dmx_qwen3_5_plus_free:1, dmx_qwen35_35b_free:1, dmx_qwen25_coder_7b:1,
+  dmx_doubao_seed_lite:1, dmx_mimo_v25_free:1, sf_qwen3_32b:1, or_codeqwen:1,
+  // 🟡 2积分
+  glm4plus:2, minimax:2, spark4:2, ali_qwen36_plus:2, ali_deepseek_v4_flash:2,
+  sf_hunyuan_a13b:2, sf_qwen35_397b:2, sf_qwq_32b:2,
+  dmx_minimax_m27_free:2, dmx_glm_5_turbo_free:2, dmx_qwen3_coder_plus_free:2,
+  dmx_qwen3_coder_next_free:2, dmx_doubao_seed_code:2, dmx_mimo_v2_pro_free:2,
+  dmx_code_free:2, dmx_codex_free:2, dmx_kat_coder_free:2,
+  dmx_qwen36_plus_free:2, dmx_code_free_x:2,
+  // 百度千帆
+  qf_ernie4:5, qf_ernie35:2, qf_ernie_speed:0,
+  // 火山引擎 Ark（分级定价，比原平台便宜）
   ark_dbs2_mini:0, ark_dbp15l:0, ark_dbs2_lite:0,
-  ark_dsv4f:0, ark_dbs1_6:0, ark_dbs1_8:0, ark_dbs_code:0,
-  ark_dsv32:0, ark_dsv4p:0, ark_dbs2_pro:0, ark_glm47:0,
-  ark_dbp15p:0, ark_dbs_char:0,
-  ark_doubao_pro:0, ark_doubao_lite:0,
-  qf_ernie_speed:0,
-  dmx_glm_5_free:0, dmx_glm_51_free:0, dmx_glm_5_turbo_free:0,
-  // 🟢 1积分（入门级）
-  deepseekv3:1, glm4:1, kimi:1, ali_qwen36_flash:1,
-  glm4plus:1, minimax:1, spark4:1, ali_qwen36_plus:1, ali_deepseek_v4_flash:1,
-  sf_hunyuan_a13b:1, sf_qwen35_397b:1, sf_qwq_32b:1,
-  sf_deepseek_v32:1, bc_baichuan3:1, qf_ernie35:1,
-  or_codeqwen:1,
-  // 🟡 2积分（进阶）
-  qwen3:2, kimi2:2, minimax1:2, doubao:2, doubao15:2, gpt4omini:2, gemini15flash:2,
-  ali_qwen37_max:2, ali_deepseek_v4_pro:2, ali_kimi_k26:2,
-  sf_glm5:2, bc_baichuan4:2,
-  // 🟠 3积分（高级）
-  nx_gpt5mini:3, nx_gpt54nano:3, llama4:3,
-  // 🔴 5积分（旗舰）
+  ark_dsv4f:1, ark_dbs1_6:1, ark_dbs1_8:1, ark_dbs_code:1,
+  ark_dsv32:2, ark_dsv4p:2, ark_dbs2_pro:2, ark_glm47:2,
+  ark_dbp15p:3, ark_dbs_char:1,
+  // 3D 生成
+  meshy_text:12, meshy_image:12,
+  // API Nexus 海外旗舰
+  nx_gpt5:20, nx_gpt5mini:5, nx_claude_opus:25, nx_claude_sonnet:15,
+  nx_claude_haiku:8, nx_gemini_pro:15, nx_o3mini:10,
+  nx_dalle3:15, nx_flux:8, nx_suno:10, nx_grok3:15,
+  // 百川智能
+  bc_baichuan4:3, bc_baichuan3:1,
+  // 🟠 3积分
+  qwen3:3, kimi2:3, minimax1:3, doubao:3, doubao15:3, gpt4omini:3, gemini15flash:3,
+  ali_qwen37_max:3, ali_deepseek_v4_pro:3, ali_kimi_k26:3,
+  sf_deepseek_v32:3, sf_glm5:3,
+  dmx_glm_5_free:3, dmx_glm_51_free:3, dmx_kimi_k25_free:3,
+  dmx_kimi_k26_free:3, dmx_doubao_seed_pro:3, dmx_qwen3_max_free:3,
+  // 🔴 5积分
   deepseekr1:5, gpt4o:5, hunyuan:5, gemini15pro:5, gemini25flash:5,
   grok3:5, ali_glm51:5, 'mistral-large2':5,
-  or_llama3_70b:5, or_mistral_large:5, or_perplexity:5,
-  qf_ernie4:5, nx_gpt5chat:5, nx_gpt54mini:5,
-  // 🔵 8积分（高端）
-  nx_gpt5:8, nx_gpt5all:8, nx_gpt51codex:8, nx_gpt52chat:8, nx_gpt52pro:8,
-  nx_claude_haiku:8, nx_flux:8, ali_qwen37_max:8,
-  // 💎 10积分（尊享）
-  nx_gpt51codexmax:10, nx_o3mini:10,
+  or_llama3_70b:5, or_mistral_large:5, or_perplexity:5, llama4:3,
+  // 💎 10积分
   gpt4turbo:10, claude35:10, claude3opus:10, claude4:10,
   gemini25pro:10,
   or_gpt4o:10, or_claude_sonnet:10, or_gemini25pro:10,
   qiniu_claude37:10, qiniu_claudeopus4:10, qiniu_gpt4o:10, qiniu_o3:10,
   qiniu_gemini25pro:10,
-  // 💎💎 12-15积分（顶级旗舰）
-  nx_gpt54pro:12, nx_gemini_pro:12,
-  nx_gpt55pro:15, nx_gpt55:15, nx_claude_sonnet:15, nx_dalle3:15, nx_suno:15, nx_grok3:15,
+  // 💎💎 15积分 (顶级旗舰)
   claude4opus:15,
-  // 👑 18-25积分（至尊）
-  nx_gpt53chat:18,
-  nx_gpt53codex:25, nx_claude_opus:25,
-  // 3D（特殊高价）
-  meshy_text:12, meshy_image:12,
 };
 function getModelCost(id){const m=models.find(x=>x.id===id);if(m&&m.cost!==undefined)return m.cost;return MODEL_COST[id]??2}
 function getModelCostLabel(id){const c=getModelCost(id);return c===0?'<span style="font-size:0.65rem;padding:1px 5px;border-radius:3px;background:#10b981;color:#fff;margin-left:4px">免费</span>':'<span style="font-size:0.65rem;padding:1px 5px;border-radius:3px;background:var(--accent-light);color:var(--accent);margin-left:4px">⚡'+c+'</span>'}
@@ -4441,7 +4376,6 @@ function renderUserNav(){
     el.innerHTML=`<button class="btn-sm primary" onclick="openAuth()">登录</button>`;
   }
   const su=document.getElementById('sidebarUserName');if(su)su.textContent=currentUser?currentUser.username:'未登录';
-  renderMembershipBadge();
 }
 function showRefCode(){
   if(!currentUser)return;
@@ -4596,109 +4530,17 @@ function showRegister(){document.getElementById('authModal').classList.add('show
 function genRefCode(u){return 'J3'+u.substring(0,3).toUpperCase()+String(Math.floor(Math.random()*9000+1000))}
 function atobFix(s){try{return decodeURIComponent(escape(atob(s)))}catch(e){try{return atob(s)}catch(e2){return s}}}
 function doLogout(){currentUser=null;setAuthToken(null);localStorage.removeItem('cuser');localStorage.removeItem('cr');renderUserNav();updateCreditDisplay();updateCheckinBtn();showToast('已退出')}
-
-// === 会员体系 ===
-const MEMBERSHIP_PLANS={
-  free:{name:'免费用户',price:0,monthlyCredits:0,benefits:['30积分体验','基础模型免费使用（有限制）','对话功能'],color:'#64748b'},
-  silver:{name:'月度会员',price:49,monthlyCredits:1000,benefits:['👑 高端模型8折','📚 知识库100条','📊 使用统计面板','🚫 无广告','🆓 免费模型无限用'],color:'#3b82f6',popular:false},
-  gold:{name:'季度会员',price:119,monthlyCredits:3500,benefits:['🔥 高端模型7折','💰 5%积分返利','📖 小说导出无水印','📚 知识库200条','💎 专属模型优先','🆓 免费模型无限用'],color:'#f59e0b',popular:true},
-  platinum:{name:'年度会员',price:369,monthlyCredits:15000,benefits:['💎 高端模型5折','💰 10%积分返利','🧊 3D生成5折','📚 知识库无限','🎯 专属模型优先','🆓 免费模型无限用','🏆 客服优先响应'],color:'#7c3aed'},
-};
-function renderMembershipBadge(){
-  const badge=document.getElementById('sidebarMembershipBadge');
-  if(!badge)return;
-  if(!currentUser){badge.textContent='';badge.style.display='none';return}
-  // 从 localStorage 读取会员信息
-  const m=localStorage.getItem('membership')||'free';
-  const expires=localStorage.getItem('membership_expires')||'';
-  if(m==='free'){badge.textContent='';badge.style.display='none';return}
-  const plan=MEMBERSHIP_PLANS[m];
-  badge.textContent=plan?plan.name:'会员';
-  badge.style.display='inline';
-  badge.style.background=plan?plan.color+'22':'var(--accent-light)';
-  badge.style.color=plan?plan.color:'var(--accent)';
-}
-function openMembershipModal(){
-  const m=document.getElementById('membershipModal');
-  if(m){m.classList.add('show');return}
-  const modal=document.createElement('div');modal.id='membershipModal';
-  modal.className='modal';
-  modal.innerHTML=\`<div class="modal-content" style="max-width:700px">
-    <div class="modal-header"><h2>💎 升级会员</h2><button class="modal-close" onclick="this.closest('.modal').classList.remove('show')">✕</button></div>
-    <div class="modal-body">
-      <p style="text-align:center;color:var(--text-secondary);margin-bottom:20px">比单买划算 3-5 倍 · 免费模型无限用 · 高端模型最低 5 折</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
-        \${Object.entries(MEMBERSHIP_PLANS).filter(([k])=>k!=='free').map(([k,v])=>{
-          const currentMembership=localStorage.getItem('membership')||'free';
-          const isCurrent=k===currentMembership;
-          return \`<div class="feature-card" style="text-align:center;padding:24px 16px;position:relative;\${v.popular?'border:2px solid var(--accent)':''};\${isCurrent?'opacity:0.7':''}">
-            \${v.popular?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:3px 12px;border-radius:10px;font-size:0.72rem;font-weight:700">🔥 最受欢迎</div>':''}
-            \${isCurrent?'<div style="position:absolute;top:-12px;right:10px;background:var(--green);color:#fff;padding:3px 10px;border-radius:10px;font-size:0.68rem">当前</div>':''}
-            <div style="font-size:2rem;margin-bottom:6px">\${k==='silver'?'🥈':k==='gold'?'🥇':'💎'}</div>
-            <h3>\${v.name}</h3>
-            <div style="font-size:1.8rem;font-weight:800;color:\${v.color};margin:8px 0">¥\${k==='gold'?v.price+'<span style="font-size:0.7rem;font-weight:400">/季</span>':k==='platinum'?v.price+'<span style="font-size:0.7rem;font-weight:400">/年</span>':v.price+'<span style="font-size:0.7rem;font-weight:400">/月</span>'}</div>
-            <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:8px">赠送 \${v.monthlyCredits} 积分/月</p>
-            <div style="text-align:left;font-size:0.72rem;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding-left:8px">
-              \${v.benefits.map(b=>'✅ '+b).join('<br>')}
-            </div>
-            <button class="btn-send" style="\${v.popular?'background:linear-gradient(135deg,#f59e0b,#d97706)':''};\${isCurrent?'opacity:0.5;cursor:default':''}" \${isCurrent?'disabled':''} onclick="subscribeMembership('\${k}')">\${isCurrent?'已订阅':'立即开通'}</button>
-          </div>\`;
-        }).join('')}
-      </div>
-      <p style="text-align:center;font-size:0.7rem;color:var(--text-secondary);margin-top:14px">⚡ 会员积分每月自动到账 · 积分永不过期 · 可随时取消</p>
-    </div>
-  </div>\`;
-  document.body.appendChild(modal);
-  setTimeout(()=>modal.classList.add('show'),10);
-}
-async function subscribeMembership(tier){
-  if(!currentUser){showToast('请先登录');openAuth();return}
-  // 当前仅记录会员信息（支付待接入）
-  const months=tier==='platinum'?12:tier==='gold'?3:1;
-  const plan=MEMBERSHIP_PLANS[tier];
-  if(!confirm(\`确认订阅\${plan.name} ¥\${plan.price}？\`))return;
-  try{
-    const r=await fetch(API_BASE+'/api/membership/subscribe',{
-      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(authToken||'')},
-      body:JSON.stringify({tier,months})
-    });
-    const d=await r.json();
-    if(d.ok){
-      localStorage.setItem('membership',tier);
-      localStorage.setItem('membership_expires',d.expires);
-      renderMembershipBadge();
-      document.getElementById('membershipModal')?.classList.remove('show');
-      showToast(\`🎉 欢迎成为\${plan.name}！已到账 \${d.creditsAdded} 积分\`);
-      setTimeout(()=>{window.location.reload()},1000);
-    }else{
-      showToast('❌ '+(d.error||'订阅失败'));
-    }
-  }catch(e){showToast('❌ 网络错误')}
-}
-
 function openUserSettings(){
-  if(!currentUser){showToast('请先���录');return}
+  if(!currentUser){showToast('请先登录');return}
   const oldPwd=prompt('当前密码（验证身份）：');
   if(!oldPwd)return;
   const users=getUsers();
   const user=users.find(x=>x.username===currentUser.username||x.email===currentUser.email);
   if(!user||user.password!==btoa(oldPwd)){showToast('❌ 当前密码错误');return}
-  const act=prompt('选择操作：\n1. 修改密码\n2. 查看会员信息');
-  if(act==='1'){
-    const np=prompt('请输入新密码（至少6位）：');
-    if(!np||np.length<6){showToast('密码至少6位');return}
-    user.password=btoa(np);saveUsers(users);
-    showToast('✅ 密码修改成功');
-  }else if(act==='2'){
-    // 获取服务器会员信息
-    fetch(API_BASE+'/api/membership/status',{headers:{'Authorization':'Bearer '+(authToken||'')}})
-      .then(r=>r.json()).then(d=>{
-        if(d.ok){
-          const plan=MEMBERSHIP_PLANS[d.membership]||MEMBERSHIP_PLANS.free;
-          alert(\`📊 会员信息\n━━━━━━━━━━━━━━━\n等级：\${plan.name}\n到期：\${d.expires||'永久'}\n每日免费调用：\${d.dailyFreeUsed||0}/\${d.dailyFreeCalls}\n积分：\${d.credits||0}\n折扣：\${(d.discount*100).toFixed(0)}%\`);
-        }else{alert('获取失败')}
-      }).catch(()=>alert('网络错误'));
-  }
+  const np=prompt('请输入新密码（至少6位）：');
+  if(!np||np.length<6){showToast('密码至少6位');return}
+  user.password=btoa(np);saveUsers(users);
+  showToast('✅ 密码修改成功');
 }
 
 // === AI Office ===
@@ -5244,13 +5086,12 @@ function renderContinue(){const el=document.getElementById('continueContent');if
 const _origSendChat=sendChatMessage;
 sendChatMessage=async function(){const m=document.getElementById('chatInput').value.trim();if(m)saveChatToHistory(m,'');await _origSendChat();setTimeout(renderContinue,1000)};
 
-// === PWA: 清除旧Service Worker，不注册新的（避免缓存冲突） ===
+// === PWA ===
 (function(){
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(reg => reg.unregister());
-    });
-    caches.keys().then(names => names.forEach(name => caches.delete(name)));
+    const swCode='self.addEventListener("install",e=>{e.waitUntil(caches.open("trigen-v1").then(c=>c.addAll(["/","/index.html"])))});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})';
+    const blob=new Blob([swCode],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob));
   }
 })();
 
@@ -5599,7 +5440,7 @@ function closePwdModal(){document.getElementById('pwdModal').classList.remove('s
 function changePassword(){const c=document.getElementById('pwdCurrent').value,n=document.getElementById('pwdNew').value,cf=document.getElementById('pwdConfirm').value;const s=localStorage.getItem(ADMIN_STORAGE_KEY)||DEFAULT_PASSWORD;if(c!==s){showToast('密码错');return}if(!n||n.length<4){showToast('至少4位');return}if(n!==cf){showToast('不一致');return}localStorage.setItem(ADMIN_STORAGE_KEY,n);closePwdModal();showToast('已修改')}
 
 // === Connection ===
-async function checkConnection(){const d=document.querySelector('#connStatus .conn-dot'),l=document.querySelector('#connStatus span:last-child');const sd=document.querySelector('#sidebarConn .conn-dot'),sl=document.querySelector('#sidebarConn span:last-child');if(!d)return;d.className='conn-dot checking';try{const c=new AbortController();setTimeout(()=>c.abort(),5000);const r=await fetch(API_BASE+'/api/status',{signal:c.signal});if(r.ok){apiOnline=true;d.className='conn-dot online';if(sd)sd.className='conn-dot online';if(l)l.textContent='在线';if(sl)sl.textContent='API 在线'}else throw new Error()}catch{apiOnline=false;d.className='conn-dot offline';if(sd)sd.className='conn-dot offline';if(l)l.textContent='离线';if(sl)sl.textContent='API 离线'}}
+async function checkConnection(){const d=document.querySelector('#connStatus .conn-dot'),l=document.querySelector('#connStatus span:last-child');const sd=document.querySelector('#sidebarConn .conn-dot'),sl=document.querySelector('#sidebarConn span:last-child');d.className='conn-dot checking';try{const r=await fetch(API_BASE+'/api/status');if(r.ok){apiOnline=true;d.className='conn-dot online';sd.className='conn-dot online';l.textContent='在线';if(sl)sl.textContent='API 在线'}else throw new Error()}catch{apiOnline=false;d.className='conn-dot offline';sd.className='conn-dot offline';l.textContent='离线';if(sl)sl.textContent='API 离线'}}
 checkConnection();setInterval(checkConnection,30000);
 
 // Studio tabs init
