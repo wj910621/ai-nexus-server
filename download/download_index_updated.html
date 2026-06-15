@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TriGenClaw - AI 桌面工作台 下载</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:#0f0a1a;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.card{background:linear-gradient(135deg,#1a1040,#2a1a50);border:1px solid rgba(108,78,245,.3);border-radius:16px;padding:48px;max-width:600px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+h1{font-size:28px;margin-bottom:8px;background:linear-gradient(135deg,#6c4ef5,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+p{color:#a090c0;margin:12px 0 24px;font-size:14px;line-height:1.6}
+
+/* Download button */
+.dl-btn{display:inline-flex;align-items:center;gap:8px;padding:16px 40px;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;border-radius:12px;text-decoration:none;font-size:16px;font-weight:600;transition:transform .2s,box-shadow .2s;margin:6px;position:relative}
+.dl-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(108,78,245,.4)}
+.dl-btn::after{content:"点击后看下方步骤② →";position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);font-size:11px;color:#a855f7;white-space:nowrap;font-weight:400;animation:pulse-text 2s ease-in-out infinite}
+@keyframes pulse-text{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* Step visual - browser mockup */
+.browser-mockup{background:#1a1a2e;border-radius:10px;overflow:hidden;border:1px solid rgba(108,78,245,.2);margin:32px 0 20px;text-align:left}
+.browser-bar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#16162a;border-bottom:1px solid rgba(255,255,255,.06)}
+.browser-dot{width:10px;height:10px;border-radius:50%}
+.browser-dot.r{background:#ff5f57}
+.browser-dot.y{background:#ffbd2e}
+.browser-dot.g{background:#28c840}
+.browser-url{flex:1;text-align:center;font-size:11px;color:#6b5b95;background:rgba(255,255,255,.04);padding:4px 12px;border-radius:4px;margin:0 8px}
+.browser-body{position:relative}
+.browser-content{padding:20px;text-align:center}
+.browser-content .icon{font-size:36px;margin-bottom:8px}
+.browser-content .fname{font-size:13px;color:#b8a8d8;margin-bottom:4px}
+.browser-content .fsize{font-size:11px;color:#6b5b95}
+
+/* Download warning bar - the key visual */
+.dl-warning-bar{background:#1e1e3a;border-top:1px solid rgba(255,200,0,.2);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:relative}
+.dl-warning-bar .warn-icon{font-size:16px;flex-shrink:0}
+.dl-warning-bar .warn-text{flex:1;font-size:12px;color:#a090c0;min-width:120px}
+.dl-warning-bar .warn-text strong{color:#ddd}
+.dl-action-btn{background:transparent;border:1px solid #6c4ef5;color:#b87fff;padding:5px 14px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .2s}
+.dl-action-btn:hover{background:#6c4ef5;color:#fff}
+.dl-keep-btn{background:#10b981;border:1px solid #10b981;color:#fff;padding:5px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;transition:all .2s;position:relative}
+.dl-keep-btn:hover{background:#059669}
+.arrow-point{position:absolute;top:-28px;left:50%;transform:translateX(-50%);font-size:24px;color:#10b981;animation:bounce-arrow 1.5s ease-in-out infinite}
+@keyframes bounce-arrow{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-6px)}}
+.arrow-label{position:absolute;top:-48px;left:50%;transform:translateX(-50%);font-size:11px;color:#10b981;white-space:nowrap;font-weight:600}
+
+/* Step cards */
+.steps{display:flex;gap:10px;margin:24px 0;flex-wrap:wrap}
+.step-card{flex:1;min-width:160px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;text-align:center;transition:border-color .2s}
+.step-card:hover{border-color:rgba(108,78,245,.3)}
+.step-num{display:inline-flex;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:700;margin-bottom:8px}
+.step-card h4{font-size:13px;color:#e0d8f0;margin-bottom:4px}
+.step-card p{font-size:11px;color:#6b5b95;margin:0}
+.step-card.highlight{border-color:#10b981;background:rgba(16,185,129,.06)}
+.step-card.highlight .step-num{background:linear-gradient(135deg,#10b981,#059669)}
+
+.features{text-align:left;margin:16px 0;padding:16px;background:rgba(255,255,255,.03);border-radius:12px}
+.features li{list-style:none;padding:5px 0;font-size:13px;color:#b8a8d8}
+.features li::before{content:"✓ ";color:#10b981;font-weight:bold}
+.info{font-size:12px;color:#6b5b95;margin-top:16px;line-height:1.8}
+.badge{display:inline-block;padding:3px 10px;background:rgba(16,185,129,.15);color:#10b981;border-radius:6px;font-size:12px;margin:4px}
+
+/* Chrome/Edge specific */
+.browser-tabs{display:none;margin-top:12px;font-size:11px;color:#6b5b95}
+@media(max-width:600px){
+  .card{padding:24px}
+  .browser-mockup{font-size:11px}
+  .step-card{min-width:100%}
+}
+</style></head>
+<body>
+<div class="card">
+
+  <div style="font-size:48px;margin-bottom:16px">🦀</div>
+  <h1>TriGenClaw</h1>
+  <p>AI 桌面工作台 · 真正的独立客户端<br>代码编辑器 · Agent 编排 · 知识库 · 技能商店</p>
+
+  <!-- Download button -->
+  <div style="margin-bottom:8px">
+    <a class="dl-btn" href="/download/TriGenClaw-1.0.0-win-Setup.exe">⬇ 下载安装包 (EXE · 97MB)</a>
+  </div>
+
+  <!-- ═══ Visual Step Guide ═══ -->
+  <div style="margin-top:40px;border-top:1px solid rgba(255,255,255,.06);padding-top:24px">
+
+    <!-- Step 1: Click button -->
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h4>点击下载按钮</h4>
+        <p>点击上方紫色按钮开始下载</p>
+      </div>
+      <div class="step-card highlight">
+        <div class="step-num">2</div>
+        <h4>⚠️ 点击「保留」</h4>
+        <p>浏览器底部会出现安全提示条，务必点击绿色「保留」按钮</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h4>运行安装</h4>
+        <p>下载完成后双击 .exe 文件，一键安装</p>
+      </div>
+    </div>
+
+    <!-- ═══ Browser Visual Simulation ═══ -->
+    <p style="font-size:12px;color:#8b7cf5;margin-bottom:8px">↓ 浏览器界面参考（以 Chrome/Edge 为例）↓</p>
+    <div class="browser-mockup">
+      <div class="browser-bar">
+        <span class="browser-dot r"></span>
+        <span class="browser-dot y"></span>
+        <span class="browser-dot g"></span>
+        <div class="browser-url">j3trisheng.com/download/</div>
+      </div>
+
+      <!-- Browser content area -->
+      <div class="browser-body">
+        <div class="browser-content">
+          <div class="icon">📦</div>
+          <div class="fname">TriGenClaw-1.0.0-win-Setup.exe</div>
+          <div class="fsize">97 MB · 正在下载...</div>
+        </div>
+
+        <!-- ⬇⬇⬇ THE CRITICAL DOWNLOAD BAR ⬇⬇⬇ -->
+        <div class="dl-warning-bar">
+          <span class="warn-icon">⚠️</span>
+          <span class="warn-text">
+            <strong>此文件类型可能损害您的设备</strong><br>
+            保留 TriGenClaw-1.0.0-win-Setup.exe
+          </span>
+          <button class="dl-action-btn" disabled>丢弃</button>
+          <button class="dl-keep-btn" disabled>
+            <span class="arrow-label">👆 就点这里！</span>
+            <span class="arrow-point">↓</span>
+            保留
+          </button>
+        </div>
+        <!-- ⬆⬆⬆ ⬆⬆⬆ -->
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:#6b5b95;margin-top:6px;padding:8px 12px;background:rgba(255,200,0,.06);border-radius:8px;border:1px solid rgba(255,200,0,.12);text-align:left;line-height:1.6">
+      <b>🔍 找不到「保留」按钮？</b><br>
+      • 下载按钮点击后，<b style="color:#10b981">浏览器底部会弹出黄色提示条</b><br>
+      • 点击提示条上的 <b style="color:#10b981">「保留」</b> 或 <b style="color:#10b981">「仍要下载」</b> 按钮<br>
+      • <span style="color:#8b7cf5">如果提示条消失了</span> → 按 <kbd style="background:#2a1a50;padding:2px 6px;border-radius:3px;border:1px solid #555">Ctrl+J</kbd> 打开下载列表，找到文件点击「保留」<br>
+      • 这是 Windows 对 .exe 文件的正常安全保护，<b style="color:#f59e0b">并非病毒提示</b>
+    </div>
+  </div>
+
+  <ul class="features">
+    <li>300+ AI 大模型聚合，一次安装全部可用</li>
+    <li>内置代码编辑器，支持语法高亮和项目管理</li>
+    <li>Agent 可视化编排工作流</li>
+    <li>知识库管理 + 技能商店生态</li>
+    <li>Alt+Space 全局唤起，系统托盘驻留</li>
+  </ul>
+
+  <div class="info">
+    <span class="badge">Windows 10/11 64位</span>
+    <span class="badge">v1.0.0</span>
+    <span class="badge">NSIS 安装程序</span><br>
+    下载后双击安装即可使用
+  </div>
+
+  <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.05);font-size:12px;color:#6b5b95">
+    <a href="/app/" style="color:#8b7cf5;text-decoration:none">← 返回 TriGen 控制台</a>
+  </div>
+
+</div>
+</body>
+</html>

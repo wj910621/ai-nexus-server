@@ -1,5 +1,10 @@
 # 每日 Git 自动备份 执行记录
 
+## 2026-06-15 02:55
+- **状态**: 部分成功（commit 成功，push 失败）
+- **操作**: `git add .` + commit `auto backup 2026-06-15`，322 文件变更（+759777/-3309 行），新增大量 download/ 目录下 TriGen Desktop 构建产物（dist + release）、source 源码（Electron 桌面应用 + FastAPI 后端）、Python 部署/修复脚本，新增 ssl/ 证书文件，删除 34 个旧的 JS 部署/检查脚本、package.json、package-lock.json 等，提交 27a5559
+- **push 结果**: 失败 — `Recv failure: Connection was aborted`（GitHub 连接中断），与 06-09、06-14 同类故障，按策略不重试，下次再推
+
 ## 2026-06-14 02:55
 - **状态**: 部分成功（commit 成功，push 失败）
 - **操作**: `git add .` + commit `auto backup 2026-06-14`，71 文件变更（+3615/-110 行），新增 65 个文件（部署脚本 new-nexus 桌面应用套件等），另有 6 个修改文件，提交 6951593

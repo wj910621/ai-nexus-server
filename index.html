@@ -4,7 +4,7 @@
 <script>// 强制清除旧 Service Worker 缓存（在页面加载前执行）
 (function(){try{caches.keys().then(n=>n.forEach(c=>caches.delete(c)));navigator.serviceWorker&&navigator.serviceWorker.getRegistrations().then(r=>r.forEach(s=>s.unregister()))}catch(e){}})();
 // 如果是从旧缓存加载，跳转到版本化 URL 绕过缓存
-if(!location.search.includes('_v=2')&&!location.pathname.includes('index.html')){location.replace('/studio/index.html?_v=2')}
+if(!location.search.includes('_v=2')&&!location.pathname.includes('app')){location.replace('/app/?_v=2')}
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -654,7 +654,7 @@ a{color:var(--accent);text-decoration:none}
   <div class="top-actions">
     <span class="top-credit" onclick="dailyCheckin()" title="每日签到">📅 <span id="checkinBadge">签到</span></span>
     <span class="top-credit" onclick="switchPage('pricing')" title="积分">💎 <span id="creditDisplay">0</span></span>
-    <a href="/download/" target="_blank" class="top-credit" title="TriGenClaw 桌面客户端" style="text-decoration:none;cursor:pointer">🦀 <span>TriGenClaw</span></a>
+    <a href="/download/TriGenClaw-1.0.0-win-Setup.exe" target="_blank" class="top-credit" title="TriGenClaw 桌面客户端 - 真正的 AI 桌面工作台" style="text-decoration:none;cursor:pointer">🦀 <span>TriGenClaw</span></a>
     <span class="top-credit" onclick="DAILY_CHECKIN()" id="checkinBtn" title="每日签到" style="background:linear-gradient(135deg,#f59e0b,#d97706);display:none">📅 签到 +5</span>
     <span id="userNav" style="display:flex;align-items:center;gap:6px"></span>
     <button class="theme-toggle" id="themeToggle">☀️</button>
@@ -2300,9 +2300,10 @@ response = client.chat.completions.create(
   <!-- 注册表单 -->
   <div class="auth-form" id="authFormRegister">
     <div class="auth-field">
-      <input id="regUser" placeholder="用户名（2-20位字母/数字/下划线/中文）" autocomplete="username" oninput="checkUsername()">
+      <input id="regUser" placeholder="用户名（2-20位字母或数字）" autocomplete="username" oninput="checkUsername()">
       <span class="field-icon">👤</span>
-      <div class="field-hint" id="regUserHint">用户名格式：2-20位字母/数字/下划线/中文</div>
+      <div class="field-hint" id="regUserHint">请输入2-20位字母或数字</div>
+      <div class="field-status" id="regUserStatus" style="font-size:0.68rem;margin-top:2px;height:16px;transition:all 0.3s"></div>
     </div>
     <div class="auth-field">
       <input id="regEmail" type="email" placeholder="邮箱地址（选填，用于找回账号）" autocomplete="email" oninput="checkEmail()">
@@ -4460,10 +4461,19 @@ function clearFieldError(el){el.classList.remove('error');const hint=el.parentEl
 function showFieldError(el,msg){el.classList.add('error');const hint=el.parentElement.querySelector('.field-hint');if(hint){hint.textContent=msg;hint.style.display='block'}}
 function checkUsername(){
   const v=document.getElementById('regUser').value.trim();
-  const re=/^[a-zA-Z0-9_\u4e00-\u9fa5]{2,20}$/;
-  if(!v){document.getElementById('regUserHint').style.display='none';return false}
-  if(!re.test(v)){showFieldError(document.getElementById('regUser'),'2-20位字母、数字、下划线或中文');return false}
-  document.getElementById('regUserHint').style.display='none';return true;
+  const el=document.getElementById('regUser');
+  const status=document.getElementById('regUserStatus');
+  if(!v){clearFieldError(el);status.textContent='';status.style.color='';return false}
+  if(!/^[a-zA-Z0-9]{2,20}$/.test(v)){
+    showFieldError(el,'仅限2-20位字母或数字，不能使用中文或符号');
+    status.textContent='❌ 格式错误：仅允许字母和数字';
+    status.style.color='#ef4444';
+    return false
+  }
+  clearFieldError(el);
+  status.textContent='✅ 格式正确';
+  status.style.color='#10b981';
+  return true;
 }
 function checkEmail(){
   const v=document.getElementById('regEmail').value.trim();
@@ -4623,31 +4633,33 @@ function openMembershipModal(){
   if(m){m.classList.add('show');return}
   const modal=document.createElement('div');modal.id='membershipModal';
   modal.className='modal';
-  modal.innerHTML=\`<div class="modal-content" style="max-width:700px">
-    <div class="modal-header"><h2>💎 升级会员</h2><button class="modal-close" onclick="this.closest('.modal').classList.remove('show')">✕</button></div>
-    <div class="modal-body">
-      <p style="text-align:center;color:var(--text-secondary);margin-bottom:20px">比单买划算 3-5 倍 · 免费模型无限用 · 高端模型最低 5 折</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
-        \${Object.entries(MEMBERSHIP_PLANS).filter(([k])=>k!=='free').map(([k,v])=>{
-          const currentMembership=localStorage.getItem('membership')||'free';
-          const isCurrent=k===currentMembership;
-          return \`<div class="feature-card" style="text-align:center;padding:24px 16px;position:relative;\${v.popular?'border:2px solid var(--accent)':''};\${isCurrent?'opacity:0.7':''}">
-            \${v.popular?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:3px 12px;border-radius:10px;font-size:0.72rem;font-weight:700">🔥 最受欢迎</div>':''}
-            \${isCurrent?'<div style="position:absolute;top:-12px;right:10px;background:var(--green);color:#fff;padding:3px 10px;border-radius:10px;font-size:0.68rem">当前</div>':''}
-            <div style="font-size:2rem;margin-bottom:6px">\${k==='silver'?'🥈':k==='gold'?'🥇':'💎'}</div>
-            <h3>\${v.name}</h3>
-            <div style="font-size:1.8rem;font-weight:800;color:\${v.color};margin:8px 0">¥\${k==='gold'?v.price+'<span style="font-size:0.7rem;font-weight:400">/季</span>':k==='platinum'?v.price+'<span style="font-size:0.7rem;font-weight:400">/年</span>':v.price+'<span style="font-size:0.7rem;font-weight:400">/月</span>'}</div>
-            <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:8px">赠送 \${v.monthlyCredits} 积分/月</p>
-            <div style="text-align:left;font-size:0.72rem;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding-left:8px">
-              \${v.benefits.map(b=>'✅ '+b).join('<br>')}
-            </div>
-            <button class="btn-send" style="\${v.popular?'background:linear-gradient(135deg,#f59e0b,#d97706)':''};\${isCurrent?'opacity:0.5;cursor:default':''}" \${isCurrent?'disabled':''} onclick="subscribeMembership('\${k}')">\${isCurrent?'已订阅':'立即开通'}</button>
-          </div>\`;
-        }).join('')}
-      </div>
-      <p style="text-align:center;font-size:0.7rem;color:var(--text-secondary);margin-top:14px">⚡ 会员积分每月自动到账 · 积分永不过期 · 可随时取消</p>
-    </div>
-  </div>\`;
+  let html='<div class="modal-content" style="max-width:700px">';
+  html+='<div class="modal-header"><h2>🔥 开通会员</h2><button class="modal-close" onclick="this.closest(\'.modal\').classList.remove(\'show\')">✕</button></div>';
+  html+='<div class="modal-body">';
+  html+='<p style="text-align:center;color:var(--text-secondary);margin-bottom:20px">比单买划算 3-5 倍 · 免费模型无限用 · 高端模型最低 5 折</p>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">';
+  Object.entries(MEMBERSHIP_PLANS).filter(([k])=>k!=='free').forEach(([k,v])=>{
+    const currentMembership=localStorage.getItem('membership')||'free';
+    const isCurrent=k===currentMembership;
+    html+='<div class="feature-card" style="text-align:center;padding:24px 16px;position:relative;'+(v.popular?'border:2px solid var(--accent)':'')+';'+(isCurrent?'opacity:0.7':'')+'">';
+    if(v.popular) html+='<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:3px 12px;border-radius:10px;font-size:0.72rem;font-weight:700">🔥 最受欢迎</div>';
+    if(isCurrent) html+='<div style="position:absolute;top:-12px;right:10px;background:var(--green);color:#fff;padding:3px 10px;border-radius:10px;font-size:0.68rem">当前</div>';
+    html+='<div style="font-size:2rem;margin-bottom:6px">'+(k==='silver'?'🥈':k==='gold'?'🥇':'💎')+'</div>';
+    html+='<h3>'+v.name+'</h3>';
+    const priceStr=k==='gold'?v.price+'<span style="font-size:0.7rem;font-weight:400">/季</span>':k==='platinum'?v.price+'<span style="font-size:0.7rem;font-weight:400">/年</span>':v.price+'<span style="font-size:0.7rem;font-weight:400">/月</span>';
+    html+='<div style="font-size:1.8rem;font-weight:800;color:'+v.color+';margin:8px 0">¥'+priceStr+'</div>';
+    html+='<p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:8px">赠送 '+v.monthlyCredits+' 积分/月</p>';
+    html+='<div style="text-align:left;font-size:0.72rem;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding-left:8px">';
+    v.benefits.forEach(b=>{html+='✅ '+b+'<br>'});
+    html+='</div>';
+    const btnStyle=v.popular?'background:linear-gradient(135deg,#f59e0b,#d97706)':'';
+    html+='<button class="btn-send" style="'+btnStyle+';'+((isCurrent?'opacity:0.5;cursor:default':''))+'" '+(isCurrent?'disabled':'')+' onclick="subscribeMembership(\''+k+'\')">'+(isCurrent?'已订阅':'立即开通')+'</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  html+='<p style="text-align:center;font-size:0.7rem;color:var(--text-secondary);margin-top:14px">⚡ 会员积分每月自动到账 · 积分永不过期 · 可随时取消</p>';
+  html+='</div></div>';
+  modal.innerHTML=html;
   document.body.appendChild(modal);
   setTimeout(()=>modal.classList.add('show'),10);
 }
@@ -4656,7 +4668,7 @@ async function subscribeMembership(tier){
   // 当前仅记录会员信息（支付待接入）
   const months=tier==='platinum'?12:tier==='gold'?3:1;
   const plan=MEMBERSHIP_PLANS[tier];
-  if(!confirm(\`确认订阅\${plan.name} ¥\${plan.price}？\`))return;
+  if(!confirm(`确认订阅${plan.name} ¥${plan.price}？`))return;
   try{
     const r=await fetch(API_BASE+'/api/membership/subscribe',{
       method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(authToken||'')},
@@ -4668,7 +4680,7 @@ async function subscribeMembership(tier){
       localStorage.setItem('membership_expires',d.expires);
       renderMembershipBadge();
       document.getElementById('membershipModal')?.classList.remove('show');
-      showToast(\`🎉 欢迎成为\${plan.name}！已到账 \${d.creditsAdded} 积分\`);
+      showToast(`🎉 欢迎成为${plan.name}！已到账 ${d.creditsAdded} 积分`);
       setTimeout(()=>{window.location.reload()},1000);
     }else{
       showToast('❌ '+(d.error||'订阅失败'));
@@ -4695,7 +4707,7 @@ function openUserSettings(){
       .then(r=>r.json()).then(d=>{
         if(d.ok){
           const plan=MEMBERSHIP_PLANS[d.membership]||MEMBERSHIP_PLANS.free;
-          alert(\`📊 会员信息\n━━━━━━━━━━━━━━━\n等级：\${plan.name}\n到期：\${d.expires||'永久'}\n每日免费调用：\${d.dailyFreeUsed||0}/\${d.dailyFreeCalls}\n积分：\${d.credits||0}\n折扣：\${(d.discount*100).toFixed(0)}%\`);
+          alert(`📊 会员信息\n━━━━━━━━━━━━━━━\n等级：${plan.name}\n到期：${d.expires||'永久'}\n每日免费调用：${d.dailyFreeUsed||0}/${d.dailyFreeCalls}\n积分：${d.credits||0}\n折扣：${(d.discount*100).toFixed(0)}%`);
         }else{alert('获取失败')}
       }).catch(()=>alert('网络错误'));
   }

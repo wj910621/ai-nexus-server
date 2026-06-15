@@ -21,22 +21,27 @@
       "preload.js",
       "index.html",
       "css/",
+      "js/",
       "icons/"
     ],
     "extraResources": [
-      { "from": "icons/", "to": "icons/" }
+      { "from": "icons/", "to": "icons/" },
+      { "from": "build/", "to": "build/" }
     ],
     "win": {
       "target": ["nsis"],
-      "artifactName": "TriGenClaw-${version}-win-Setup.${ext}"
+      "artifactName": "TriGenClaw-${version}-win-Setup.${ext}",
+      "icon": "build/icon.png"
     },
     "mac": {
       "target": ["dmg"],
-      "artifactName": "TriGenClaw-${version}-mac.${ext}"
+      "artifactName": "TriGenClaw-${version}-mac.${ext}",
+      "icon": "build/icon.png"
     },
     "linux": {
       "target": ["AppImage", "deb"],
-      "artifactName": "TriGenClaw-${version}-linux.${ext}"
+      "artifactName": "TriGenClaw-${version}-linux.${ext}",
+      "icon": "build/icon.png"
     },
     "nsis": {
       "oneClick": false,
