@@ -825,6 +825,10 @@ a{color:var(--accent);text-decoration:none}
               <input type="checkbox" id="ragToggle" checked onchange="RAG_ENABLED=this.checked;localStorage.setItem('ragEnabled',this.checked)">
               <span>🧠 RAG知识增强</span>
             </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-secondary);cursor:pointer;user-select:none;margin-left:4px" title="启用Agent模式后，AI能自主搜索网页、执行代码、读写文件来完成复杂任务">
+              <input type="checkbox" id="agentModeToggle" onchange="AGENT_MODE=this.checked;localStorage.setItem('agentMode',this.checked);if(this.checked)showToast('🤖 Agent模式已开启，AI将自主调用工具完成任务')">
+              <span>🤖 Agent模式</span>
+            </label>
             <button onclick="openKnowledgeManager()" style="font-size:0.72rem;padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;transition:all var(--transition)">📚 知识库</button>
             <span id="ragStatus" style="font-size:0.7rem;color:var(--accent);opacity:0.8;display:none"></span>
           </div>
@@ -2110,6 +2114,21 @@ response = client.chat.completions.create(
 
       <!-- 右侧创作记录 -->
       <div>
+        <!-- API Key 配置 -->
+        <div class="feature-card" style="padding:14px 20px;margin-bottom:12px;font-size:0.82rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="const n=this.nextElementSibling;n.style.display=n.style.display==='none'?'flex':'none';this.querySelector('.toggle-arrow').textContent=n.style.display==='none'?'▶':'▼'">
+            <span>🔑 API Key 配置</span>
+            <span class="toggle-arrow" style="font-size:0.7rem;color:var(--text-secondary)">▶</span>
+          </div>
+          <div style="display:none;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)" id="musicApiRow">
+            <select id="musicApiPlatform" style="padding:6px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem">
+              <option value="suno">Suno AI (平台配置)</option>
+              <option value="custom">自定义 API</option>
+            </select>
+            <input id="musicApiKey" type="password" style="width:200px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.78rem" placeholder="输入自定义 API Key">
+            <button class="btn-sm" onclick="MUSIC_SAVE_KEY()" style="font-size:0.72rem">💾 保存</button>
+          </div>
+        </div>
         <div class="feature-card" style="padding:20px;min-height:400px">
           <h3 style="font-size:1rem;margin-bottom:14px">📀 创作记录</h3>
           <div id="musicHistoryList" style="max-height:500px;overflow-y:auto">
@@ -2288,6 +2307,7 @@ response = client.chat.completions.create(
     </div>
     <div class="auth-field">
       <input id="loginPwd" type="password" placeholder="密码" autocomplete="current-password" oninput="if(this.value.length>0&&this.value.length<6){showFieldError(this,'密码至少6位')}else{clearFieldError(this)}">
+      <span class="field-icon toggle-pwd" onclick="togglePwd('loginPwd',this)" style="cursor:pointer;right:38px;opacity:0.7;z-index:2">👁️</span>
       <span class="field-icon">🔒</span>
       <div class="field-hint" id="loginPwdHint">请输入密码</div>
     </div>
@@ -2317,6 +2337,7 @@ response = client.chat.completions.create(
     </div>
     <div class="auth-field">
       <input id="regPwd" type="password" placeholder="密码（至少6位，包含字母+数字更安全）" autocomplete="new-password" oninput="checkPwdStrength()">
+      <span class="field-icon toggle-pwd" onclick="togglePwd('regPwd',this)" style="cursor:pointer;right:38px;opacity:0.7;z-index:2">👁️</span>
       <span class="field-icon">🔒</span>
       <div class="pwd-strength" id="pwdBar"></div>
       <div style="font-size:0.68rem;margin-top:4px;height:16px;transition:all 0.3s" id="pwdStrengthText"></div>
@@ -3389,6 +3410,12 @@ function renderPlanet(){
 document.getElementById('modelSearch').addEventListener('input',initAllModels);
 document.querySelectorAll('#page-models .filter-tag').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('#page-models .filter-tag').forEach(x=>x.classList.remove('active'));t.classList.add('active');initAllModels()}));
 
+// === Agent 模式开关 ===
+let AGENT_MODE = localStorage.getItem('agentMode') === 'true';
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('agentModeToggle');
+  if (toggle) toggle.checked = AGENT_MODE;
+});
 
 // === Chat ===
 function initChatModels(){
@@ -3397,6 +3424,12 @@ function initChatModels(){
 }
 async function sendChatMessage(){
   const msg=document.getElementById('chatInput').value.trim();if(!msg)return;
+
+  // Agent 模式：调用 Agent 引擎
+  if (AGENT_MODE) {
+    return await sendAgentMessage(msg);
+  }
+
   const selList=document.getElementById('chatModelList');
   const sel=selList?[...selList.querySelectorAll('input:checked')].map(cb=>cb.value):['deepseekv3','qwen3'];
   if(!sel.length){showToast('请在右侧面板选择模型');return}
@@ -3431,6 +3464,125 @@ async function sendChatMessage(){
     md.scrollTop=md.scrollHeight;
   });
   await Promise.all(ps);btn.disabled=false;
+}
+
+/**
+ * Agent 模式发送消息 — 使用 ReAct 循环引擎（SSE 流式）
+ */
+async function sendAgentMessage(msg) {
+  const md = document.getElementById('chatMessages');
+  if (md.querySelector('[data-p]')) md.innerHTML = '';
+  md.innerHTML += `<div class="chat-msg user"><div class="chat-msg-header"><span class="chat-msg-model">你</span></div><div class="chat-msg-content">${escapeHtml(msg)}</div></div>`;
+
+  const pid = 'agent-' + Date.now();
+  const container = document.createElement('div');
+  container.className = 'chat-msg';
+  container.id = pid;
+  container.innerHTML = `<div class="chat-msg-header"><div class="chat-msg-avatar" style="background:linear-gradient(135deg,#14b8a6,#06b6d4)">A</div><span class="chat-msg-model">🤖 Agent</span></div><div class="chat-msg-content" style="white-space:pre-wrap"><span class="spinner"></span>思考中…</div>`;
+  md.appendChild(container);
+  md.scrollTop = md.scrollHeight;
+
+  document.getElementById('chatInput').value = '';
+  const btn = document.getElementById('btnSend');
+  btn.disabled = true;
+
+  let planHtml = '';
+  let currentContentEl = null;
+
+  try {
+    // 先获取任务计划
+    const planRes = await fetch(API_BASE + '/api/agent/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: msg, model: 'deepseekv3' })
+    });
+    const planData = await planRes.json();
+    
+    if (planData.ok && planData.plan && planData.plan.steps) {
+      planHtml = '<div style="font-size:0.75rem;background:rgba(20,184,166,0.1);border-radius:8px;padding:10px;margin:8px 0;border:1px solid rgba(20,184,166,0.2)">📋 <b>计划</b><br>';
+      planData.plan.steps.forEach((s, i) => {
+        planHtml += `  ${i+1}. ${s.description}<br>`;
+      });
+      planHtml += '</div>';
+    }
+
+    // 空容器占位
+    let sseHtml = planHtml + '<div id="agentSteps' + pid + '"></div><div id="agentAnswer' + pid + '" style="font-size:0.9rem;line-height:1.7;margin-top:8px"></div>';
+    const el = document.getElementById(pid);
+    if (el) el.querySelector('.chat-msg-content').innerHTML = sseHtml;
+    currentContentEl = document.getElementById('agentAnswer' + pid);
+    const stepsEl = document.getElementById('agentSteps' + pid);
+
+    // 调用流式 Agent 引擎
+    const res = await fetch(API_BASE + '/api/agent/chat/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: msg, model: 'deepseekv3', maxIterations: 10 })
+    });
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let iterationCount = 0;
+    let stepLog = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // 保留最后一个不完整的行
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const dataStr = line.substring(6).trim();
+        if (!dataStr) continue;
+
+        try {
+          const evt = JSON.parse(dataStr);
+
+          if (evt.type === 'thought') {
+            // Agent 正在思考/执行工具
+            if (stepsEl) {
+              stepLog += `<div style="padding:4px 0;font-size:0.78rem;color:var(--cyan)">🤔 思考 → <b>${escapeHtml(evt.action||'分析')}</b></div>`;
+              stepsEl.innerHTML = '<div style="font-size:0.7rem;color:var(--text-secondary);margin:8px 0;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px">' + stepLog + '</div>';
+            }
+          } else if (evt.type === 'observation') {
+            // 工具执行结果
+            if (stepsEl) {
+              const resultStr = JSON.stringify(evt.result||{}).substring(0, 80);
+              stepLog += `<div style="padding:4px 0;font-size:0.75rem;color:var(--green)">  ✅ ${escapeHtml(evt.action)} → ${escapeHtml(resultStr)}</div>`;
+              stepsEl.innerHTML = '<div style="font-size:0.7rem;color:var(--text-secondary);margin:8px 0;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px">' + stepLog + '</div>';
+            }
+            iterationCount++;
+          } else if (evt.type === 'final') {
+            // 最终回答
+            if (currentContentEl) {
+              currentContentEl.innerHTML = escapeHtml(evt.content);
+            }
+          } else if (evt.type === 'done') {
+            // 完成
+            if (currentContentEl && evt.answer) {
+              currentContentEl.innerHTML = escapeHtml(evt.answer);
+            }
+            if (stepsEl && evt.iterations) {
+              stepLog += `<div style="padding:4px 0;font-size:0.65rem;color:var(--text-secondary);border-top:1px solid rgba(255,255,255,0.05);margin-top:4px">⚡ 执行 ${evt.iterations} 步</div>`;
+              stepsEl.innerHTML = '<div style="font-size:0.7rem;color:var(--text-secondary);margin:8px 0;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px">' + stepLog + '</div>';
+            }
+          } else if (evt.type === 'error') {
+            if (currentContentEl) currentContentEl.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(evt.error)}</span>`;
+          }
+        } catch(e) { /* skip parse errors */ }
+      }
+    }
+  } catch (e) {
+    const el = document.getElementById(pid);
+    if (el) el.querySelector('.chat-msg-content').innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`;
+  }
+
+  btn.disabled = false;
+  md.scrollTop = md.scrollHeight;
 }
 function escapeHtml(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
 function escapeAttr(t){return (t||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
@@ -4477,15 +4629,17 @@ function checkUsername(){
 }
 function checkEmail(){
   const v=document.getElementById('regEmail').value.trim();
-  if(!v){document.getElementById('regEmailHint').style.display='none';return true} // 邮箱选填
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){showFieldError(document.getElementById('regEmail'),'⚠️ 邮箱格式错误（如 name@qq.com）');return false}
-  document.getElementById('regEmailHint').style.display='none';return true;
+  const el=document.getElementById('regEmail');
+  if(!v){clearFieldError(el);return true} // 邮箱选填，清除可能残留的错误状态
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){showFieldError(el,'⚠️ 邮箱格式错误（如 name@qq.com）');return false}
+  clearFieldError(el);return true;
 }
 function checkPhone(){
   const v=document.getElementById('regPhone').value.trim();
-  if(!v){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号必填，是您账号的唯一身份凭证');return false}
-  if(!/^1[3-9]\d{9}$/.test(v)){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号格式不正确（11位数字）');return false}
-  document.getElementById('regPhoneHint').style.display='none';return true;
+  const el=document.getElementById('regPhone');
+  if(!v){clearFieldError(el);return false} // 初始为空时清除错误，不显示报错
+  if(!/^1[3-9]\d{9}$/.test(v)){showFieldError(el,'⚠️ 手机号格式不正确（11位数字，如13800138000）');return false}
+  clearFieldError(el);return true;
 }
 function checkPwdStrength(){
   const v=document.getElementById('regPwd').value,bar=document.getElementById('pwdBar'),txt=document.getElementById('pwdStrengthText');
@@ -4524,13 +4678,15 @@ function doLoginNew(){
   });
 }
 function doRegisterNew(){
+  try {
   const u=document.getElementById('regUser').value.trim(),e=document.getElementById('regEmail').value.trim(),p=document.getElementById('regPwd').value,ref=document.getElementById('regRefCode').value.trim();
   let valid=true;
   if(!checkUsername())valid=false;
   if(!checkEmail())valid=false;
   const phone=document.getElementById('regPhone').value.trim();
-  if(!phone){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号必填');valid=false}
-  if(phone&&!/^1[3-9]\d{9}$/.test(phone)){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号格式不正确');valid=false}
+  if(!phone){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号必填，是您账号的唯一身份凭证');valid=false}
+  else if(!/^1[3-9]\d{9}$/.test(phone)){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号格式不正确（11位数字）');valid=false}
+  else{clearFieldError(document.getElementById('regPhone'))}
   if(p.length<6){showFieldError(document.getElementById('regPwd'),'密码至少6位');valid=false}
   const secQ=document.getElementById('regSecQ').value;
   const customQ=document.getElementById('regCustomQ').value.trim();
@@ -4548,7 +4704,7 @@ function doRegisterNew(){
   // 邮箱唯一性检查
   if(e){const users=getUsers();if(users.find(x=>x.email===e)){showFieldError(document.getElementById('regEmail'),'该邮箱已被注册');return}}
 
-  const btn=document.querySelector('.auth-btn');btn.textContent='注册中...';btn.disabled=true;
+  const btn=document.getElementById('registerBtn');btn.textContent='注册中...';btn.disabled=true;
   apiFetch('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,email:e||undefined,password:p,phone:phone||undefined,deviceFp,refCode:ref||undefined})}).then(d=>{
     btn.textContent='注 册';btn.disabled=false;
     if(d.ok&&d.token){
@@ -4573,6 +4729,7 @@ function doRegisterNew(){
       switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast(`🎉 注册成功！赠送${bonus}积分。试试第一次AI对话吧~`)},500);
     }
   });
+  } catch(e) { console.error('Register error:', e); showToast('注册出错: '+e.message); }
 }
 function showForgotPwd(){switchAuthTab('forgot')}
 function doForgotPwd(){
@@ -4598,6 +4755,11 @@ document.getElementById('regSecQ').addEventListener('change',function(){
 });
 function closeAuth(){document.getElementById('authModal').classList.remove('show')}
 function showLogin(){document.getElementById('authModal').classList.add('show');switchAuthTab('login');document.getElementById('loginUser').focus()}
+function togglePwd(inputId,btn){
+  const input=document.getElementById(inputId);
+  if(input.type==='password'){input.type='text';btn.textContent='🙈'}
+  else{input.type='password';btn.textContent='👁️'}
+}
 
 // 保留旧函数兼容性
 function doLogin(){doLoginNew()}
@@ -5314,13 +5476,88 @@ async function runAgent(){
   if(!i){showToast('请输入需求');return}
   if(!currentAgent)return;
   if(!spendCredits(5))return;
-  const o=document.getElementById('agentOutput');o.style.display='block';o.innerHTML='<span class="spinner"></span> 执行中...';
+  const o=document.getElementById('agentOutput');o.style.display='block';o.innerHTML='<span class="spinner"></span> Agent 引擎启动中...';
   document.getElementById('agentActions').style.display='none';
   try{
-    const r=await callModelAPI('deepseekv3',i,currentAgent.sys);
-    o.innerHTML=escapeHtml(r.content);
+    // 使用 Agent 引擎（ReAct 循环 + 工具调用）
+    const task = currentAgent.sys ? `【角色指令】\n${currentAgent.sys}\n\n【用户需求】\n${i}` : i;
+    
+    // 先获取计划
+    const planRes = await fetch(API_BASE + '/api/agent/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task, model: 'deepseekv3' })
+    });
+    const planData = await planRes.json();
+
+    let html = '';
+    if (planData.ok && planData.plan && planData.plan.steps) {
+      html = '<div style="font-size:0.75rem;background:rgba(20,184,166,0.1);border-radius:8px;padding:10px;margin-bottom:12px;border:1px solid rgba(20,184,166,0.2)">📋 <b>执行计划</b><br>';
+      planData.plan.steps.forEach((s, j) => {
+        html += `  ${j+1}. ${escapeHtml(s.description || '')}<br>`;
+      });
+      html += '</div>';
+    }
+
+    // 调用 Agent 引擎（SSE 流式）
+    const res = await fetch(API_BASE + '/api/agent/chat/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task, model: 'deepseekv3', maxIterations: 12 })
+    });
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let stepLog = '';
+    let answerText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const dataStr = line.substring(6).trim();
+        if (!dataStr) continue;
+
+        try {
+          const evt = JSON.parse(dataStr);
+
+          if (evt.type === 'thought') {
+            stepLog += `<div style="padding:3px 0;font-size:0.78rem;color:var(--cyan)">🤔 思考 → <b>${escapeHtml(evt.action||'分析')}</b></div>`;
+          } else if (evt.type === 'observation') {
+            const r = JSON.stringify(evt.result||{}).substring(0, 60);
+            stepLog += `<div style="padding:3px 0;font-size:0.75rem;color:var(--green)">  ✅ ${escapeHtml(evt.action)} → ${escapeHtml(r)}</div>`;
+          } else if (evt.type === 'final' && evt.content) {
+            answerText = evt.content;
+          } else if (evt.type === 'done' && evt.answer) {
+            answerText = evt.answer;
+          } else if (evt.type === 'error') {
+            answerText = '❌ ' + evt.error;
+          }
+        } catch(e) {}
+      }
+
+      // 实时更新 UI
+      let output = html;
+      if (stepLog) {
+        output += '<div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:12px;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px">' + stepLog;
+        if (answerText) output += '</div><div style="font-size:0.9rem;line-height:1.7;margin-top:8px">' + escapeHtml(answerText) + '</div>';
+        else output += '</div>';
+      } else if (answerText) {
+        output += '<div style="font-size:0.9rem;line-height:1.7">' + escapeHtml(answerText) + '</div>';
+      }
+      o.innerHTML = output;
+      md?.scrollTo?.(0, md.scrollHeight);
+    }
+
     document.getElementById('agentResultActions').style.display='flex';
-  }catch(e){o.innerHTML=`<span style="color:var(--red)">❌ ${e.message}</span>`}
+  }catch(e){o.innerHTML=`<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`;document.getElementById('agentActions').style.display='flex'}
 }
 function retryAgent(){runAgent()}
 function copyAgentOutput(){
@@ -5779,6 +6016,13 @@ function initStudioData(){
     document.getElementById('vidAgnesHint').style.display='none';
     if(savedKey){const ke=document.getElementById('vidApiKey');if(ke)ke.value=savedKey}
   }
+  // 加载已保存的音乐 API Key
+  const musicKey=localStorage.getItem('music_api_key');
+  const musicPlatform=localStorage.getItem('music_api_platform')||'suno';
+  const mpEl=document.getElementById('musicApiPlatform');
+  const mkEl=document.getElementById('musicApiKey');
+  if(mpEl)mpEl.value=musicPlatform;
+  if(mkEl&&musicKey&&musicPlatform!=='suno')mkEl.value=musicKey;
 }
 function GALLERY_FILTER(cat,el){
   GALLERY_FILTER_CURRENT=cat;
@@ -6436,14 +6680,37 @@ function d3ViewerBg(c){
   document.getElementById('d3Viewer').style.background=c;
 }
 
-function D3_IMAGE_TO_3D(){
+async function D3_IMAGE_TO_3D(){
   const file=document.getElementById('d3ImageInput').files[0];
   const r=document.getElementById('d3ImageResult');
   if(!file){showToast('请选择参考图片');return}
   if(!spendCredits(12))return;
   r.style.display='block';
-  r.innerHTML='<span class="spinner"></span> 图片已选中，建议用文本描述以获得最快结果...<p style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">描述越详细，效果越好</p>';
-  setTimeout(()=>D3_TEXT_TO_3D(),1000);
+  r.innerHTML='<span class="spinner"></span> 正在上传图片并提交 3D 模型...<p style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px">生成需要5-15分钟，自动等待中…</p>';
+  try{
+    // 将图片转为 base64
+    const imgData = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const resp = await fetch(API_BASE + '/api/meshy/img2d', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image_data: imgData, prompt: document.getElementById('d3TextPrompt').value.trim() })
+    });
+    const data = await resp.json();
+    if(data.id || data.result){
+      const taskId = data.id || data.result;
+      r.innerHTML = `<div style="text-align:center"><div style="font-size:2rem">⏳</div><p>图生3D 生成中...</p><p id="d3ProgressImg" style="font-size:0.75rem;color:var(--text-secondary)">初始化中</p></div>`;
+      D3_POLL_VIEWER(taskId, r);
+    } else {
+      r.innerHTML = `<p style="color:var(--orange)">⚠️ ${data.message || data.error || '提交失败，请稍后重试'}</p>`;
+    }
+  }catch(e){
+    r.innerHTML = `<p style="color:var(--orange)">❌ 连接失败：${e.message}</p>`;
+  }
 }
 function D3_TOGGLE_FAQ(el){
   const answer=el.querySelector('.d3FaqAnswer');
@@ -6462,8 +6729,12 @@ document.getElementById('d3ImageInput')?.addEventListener('change',function(){
 let MUSIC_SELECTED_STYLES=[];
 let MUSIC_HISTORY=JSON.parse(localStorage.getItem('musicHistory')||'[]');
 function MUSIC_SAVE_KEY(){
-  const key=document.getElementById('musicApiKey').value.trim();
-  const platform=document.getElementById('musicApiPlatform').value;
+  const keyEl=document.getElementById('musicApiKey');
+  const platformEl=document.getElementById('musicApiPlatform');
+  if(!keyEl||!platformEl){showToast('配置界面未加载');return}
+  const key=keyEl.value.trim();
+  const platform=platformEl.value;
+  if(platform==='suno'){localStorage.setItem('music_api_platform','suno');localStorage.removeItem('music_api_key');showToast('✅ 已切换为平台配置模式');return}
   if(!key){showToast('请输入 API Key');return}
   localStorage.setItem('music_api_key',key);
   localStorage.setItem('music_api_platform',platform);

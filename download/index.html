@@ -2238,6 +2238,7 @@ response = client.chat.completions.create(
     </div>
     <div class="auth-field">
       <input id="loginPwd" type="password" placeholder="密码" autocomplete="current-password" oninput="if(this.value.length>0&&this.value.length<6){showFieldError(this,'密码至少6位')}else{clearFieldError(this)}">
+      <span class="field-icon toggle-pwd" onclick="togglePwd('loginPwd',this)" style="cursor:pointer;right:38px;opacity:0.7;z-index:2">👁️</span>
       <span class="field-icon">🔒</span>
       <div class="field-hint" id="loginPwdHint">请输入密码</div>
     </div>
@@ -2266,6 +2267,7 @@ response = client.chat.completions.create(
     </div>
     <div class="auth-field">
       <input id="regPwd" type="password" placeholder="密码（至少6位，包含字母+数字更安全）" autocomplete="new-password" oninput="checkPwdStrength()">
+      <span class="field-icon toggle-pwd" onclick="togglePwd('regPwd',this)" style="cursor:pointer;right:38px;opacity:0.7;z-index:2">👁️</span>
       <span class="field-icon">🔒</span>
       <div class="pwd-strength" id="pwdBar"></div>
       <div style="font-size:0.68rem;margin-top:4px;height:16px;transition:all 0.3s" id="pwdStrengthText"></div>
@@ -4401,15 +4403,17 @@ function checkUsername(){
 }
 function checkEmail(){
   const v=document.getElementById('regEmail').value.trim();
-  if(!v){document.getElementById('regEmailHint').style.display='none';return true} // 邮箱选填
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){showFieldError(document.getElementById('regEmail'),'⚠️ 邮箱格式错误（如 name@qq.com）');return false}
-  document.getElementById('regEmailHint').style.display='none';return true;
+  const el=document.getElementById('regEmail');
+  if(!v){clearFieldError(el);return true} // 邮箱选填，清除可能残留的错误状态
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){showFieldError(el,'⚠️ 邮箱格式错误（如 name@qq.com）');return false}
+  clearFieldError(el);return true;
 }
 function checkPhone(){
   const v=document.getElementById('regPhone').value.trim();
-  if(!v){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号必填，是您账号的唯一身份凭证');return false}
-  if(!/^1[3-9]\d{9}$/.test(v)){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号格式不正确（11位数字）');return false}
-  document.getElementById('regPhoneHint').style.display='none';return true;
+  const el=document.getElementById('regPhone');
+  if(!v){clearFieldError(el);return false} // 初始为空时清除错误，不显示报错
+  if(!/^1[3-9]\d{9}$/.test(v)){showFieldError(el,'⚠️ 手机号格式不正确（11位数字，如13800138000）');return false}
+  clearFieldError(el);return true;
 }
 function checkPwdStrength(){
   const v=document.getElementById('regPwd').value,bar=document.getElementById('pwdBar'),txt=document.getElementById('pwdStrengthText');
@@ -4448,13 +4452,15 @@ function doLoginNew(){
   });
 }
 function doRegisterNew(){
+  try {
   const u=document.getElementById('regUser').value.trim(),e=document.getElementById('regEmail').value.trim(),p=document.getElementById('regPwd').value,ref=document.getElementById('regRefCode').value.trim();
   let valid=true;
   if(!checkUsername())valid=false;
   if(!checkEmail())valid=false;
   const phone=document.getElementById('regPhone').value.trim();
-  if(!phone){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号必填');valid=false}
-  if(phone&&!/^1[3-9]\d{9}$/.test(phone)){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号格式不正确');valid=false}
+  if(!phone){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号必填，是您账号的唯一身份凭证');valid=false}
+  else if(!/^1[3-9]\d{9}$/.test(phone)){showFieldError(document.getElementById('regPhone'),'⚠️ 手机号格式不正确（11位数字）');valid=false}
+  else{clearFieldError(document.getElementById('regPhone'))}
   if(p.length<6){showFieldError(document.getElementById('regPwd'),'密码至少6位');valid=false}
   const secQ=document.getElementById('regSecQ').value;
   const customQ=document.getElementById('regCustomQ').value.trim();
@@ -4472,7 +4478,7 @@ function doRegisterNew(){
   // 邮箱唯一性检查
   if(e){const users=getUsers();if(users.find(x=>x.email===e)){showFieldError(document.getElementById('regEmail'),'该邮箱已被注册');return}}
 
-  const btn=document.querySelector('.auth-btn');btn.textContent='注册中...';btn.disabled=true;
+  const btn=document.getElementById('registerBtn');btn.textContent='注册中...';btn.disabled=true;
   apiFetch('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,email:e||undefined,password:p,phone:phone||undefined,deviceFp,refCode:ref||undefined})}).then(d=>{
     btn.textContent='注 册';btn.disabled=false;
     if(d.ok&&d.token){
@@ -4497,6 +4503,7 @@ function doRegisterNew(){
       switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast(`🎉 注册成功！赠送${bonus}积分。试试第一次AI对话吧~`)},500);
     }
   });
+  } catch(e) { console.error('Register error:', e); showToast('注册出错: '+e.message); }
 }
 function showForgotPwd(){switchAuthTab('forgot')}
 function doForgotPwd(){
@@ -4522,6 +4529,11 @@ document.getElementById('regSecQ').addEventListener('change',function(){
 });
 function closeAuth(){document.getElementById('authModal').classList.remove('show')}
 function showLogin(){document.getElementById('authModal').classList.add('show');switchAuthTab('login');document.getElementById('loginUser').focus()}
+function togglePwd(inputId,btn){
+  const input=document.getElementById(inputId);
+  if(input.type==='password'){input.type='text';btn.textContent='🙈'}
+  else{input.type='password';btn.textContent='👁️'}
+}
 
 // 保留旧函数兼容性
 function doLogin(){doLoginNew()}

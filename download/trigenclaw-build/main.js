@@ -66,6 +66,11 @@ function createWindow() {
 
 // ===== 系统托盘 =====
 function createTray() {
+  // 创建 16x16 托盘图标（使用 Canvas 生成）
+  const iconSize = 16;
+  const canvas = document?.createElement?.('canvas');
+  // 由于 Electron 主进程没有 DOM，使用 nativeImage 从文件创建
+  // 备用：使用内置图标或引用 build 目录
   const iconPath = path.join(__dirname, 'build', 'tray-icon.png');
   let trayIcon;
   try {

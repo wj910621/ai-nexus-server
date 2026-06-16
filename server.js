@@ -1164,10 +1164,61 @@ app.get('/api/meshy/result/:taskId', async (req, res) => {
     const apiKey = process.env.MESHY_API_KEY;
     if (!apiKey) return res.json({ ok: false });
 
-    const r = await fetch('https://api.meshy.ai/openapi/v2/text-to-3d/' + req.params.taskId, {
+    // 先尝试 text-to-3d，如果失败再尝试 image-to-3d
+    let r = await fetch('https://api.meshy.ai/openapi/v2/text-to-3d/' + req.params.taskId, {
       headers: { 'Authorization': 'Bearer ' + apiKey },
     });
-    res.json(await r.json());
+    let data = await r.json();
+    // 如果 text-to-3d 返回错误，尝试 image-to-3d
+    if (data.error) {
+      r = await fetch('https://api.meshy.ai/openapi/v2/image-to-3d/' + req.params.taskId, {
+        headers: { 'Authorization': 'Bearer ' + apiKey },
+      });
+      data = await r.json();
+    }
+    res.json(data);
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// Meshy 图生 3D
+app.post('/api/meshy/img2d', async (req, res) => {
+  try {
+    const apiKey = process.env.MESHY_API_KEY;
+    if (!apiKey) return res.json({ ok: false, error: 'Meshy API Key 未配置' });
+
+    const { image_data, prompt = '' } = req.body;
+    if (!image_data) return res.json({ ok: false, error: '请提供图片数据' });
+
+    // 保存 base64 图片到临时文件并获取可访问 URL
+    const base64Data = image_data.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    const fs = require('fs');
+    const path = require('path');
+    const imgDir = path.join(staticDir, 'uploads');
+    fs.mkdirSync(imgDir, { recursive: true });
+    const fileName = 'meshy_' + Date.now() + '.png';
+    const filePath = path.join(imgDir, fileName);
+    fs.writeFileSync(filePath, buffer);
+
+    // 构造可访问的图片 URL（使用服务器外部域名）
+    const imgUrl = (process.env.BASE_URL || 'http://localhost:3001') + '/uploads/' + fileName;
+
+    const r = await fetch('https://api.meshy.ai/openapi/v2/image-to-3d', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey,
+      },
+      body: JSON.stringify({
+        image_url: imgUrl,
+        enable_pbr: true,
+        prompt: prompt || undefined,
+      }),
+    });
+    const data = await r.json();
+    res.json(data);
   } catch (e) {
     res.json({ ok: false, error: e.message });
   }
@@ -1423,7 +1474,7 @@ async function initDB() {
   )`);
   // 为知识库建全文搜索索引
   try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge_base(category)`); } catch(e) {}
-  try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_updated ON knowledge_base(updated_at)`); } catch(e) {}
+  try { db.run(`CREATE INDEX IF NOT EXISTS idx_knowledge_updated ON knowledge_base(updated_at));try{db.run("CREATE TABLE IF NOT EXISTS knowledge_chunks(id INTEGER PRIMARY KEY AUTOINCREMENT,knowledge_id INTEGER NOT NULL,chunk_text TEXT NOT NULL,chunk_order INTEGER DEFAULT 0,embedding TEXT DEFAULT '',created_at TEXT DEFAULT(datetime('now','localtime')))")}catch(e){};try{db.run("CREATE INDEX IF NOT EXISTS idx_chunks_kid ON knowledge_chunks(knowledge_id)")}catch(e){}`); } catch(e) {}
   // === AI 小说相关表 ===
   db.run(`CREATE TABLE IF NOT EXISTS novels (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2762,6 +2813,9 @@ app.post('/api/guest/spend', (req, res) => {
 // 增强注册：同一设备指纹只能注册 1 个账号
 // 此逻辑集成在现有 /api/auth/register 的 IP 检查之后
 
+const ag=require('./agent-engine');const am=ag.createAgentRouter();app.use('/api/agent',am.router);console.log('Agent:'+am.toolRegistry.list().length+' tools');
+// Agentic RAG v2 routes (registered before 404 handler, uses global.__rag_db lazily)
+try { var rag = require('./rag-vector'); if (rag && rag.registerRoutes) { rag.registerRoutes(app); console.log('[RAG] Routes registered'); } } catch(e) { console.log('[RAG] Route init:', e.message); }
 // 404 处理（必须在所有路由之后）
 app.use((req, res) => {
   res.status(404).type('html').send(err404HTML);
@@ -2810,5 +2864,7 @@ initDB().then(() => {
     }
     console.log(`   管理员默认密码: admin888`);
     console.log(`   数据库文件: ${DB_FILE}\n`);
+    // Set global DB ref for RAG module
+    global.__rag_db = db;
   });
 });

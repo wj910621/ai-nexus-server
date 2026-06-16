@@ -349,6 +349,60 @@ var NexusAPI = (function() {
     }).then(function(r) { return r.json(); });
   }
 
+  /* ===== Agent 引擎 API ===== */
+
+  /**
+   * Agent 执行：调用服务端 Agent 引擎（ReAct 循环 + 工具）
+   */
+  function agentExecute(task, model, maxIterations) {
+    return fetch(_defaultBaseUrl + '/api/agent/chat', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        task: task,
+        model: model || 'deepseekv3',
+        maxIterations: maxIterations || 10
+      })
+    }).then(function(r) { return r.json(); });
+  }
+
+  /**
+   * Agent 计划：分解任务为子步骤
+   */
+  function agentPlan(task, model) {
+    return fetch(_defaultBaseUrl + '/api/agent/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        task: task,
+        model: model || 'deepseekv3'
+      })
+    }).then(function(r) { return r.json(); });
+  }
+
+  /**
+   * 直接执行一个工具
+   */
+  function toolExecute(toolName, args) {
+    return fetch(_defaultBaseUrl + '/api/agent/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tool: toolName,
+        args: args || {}
+      })
+    }).then(function(r) { return r.json(); });
+  }
+
+  /**
+   * 列出所有可用工具
+   */
+  function listTools() {
+    return fetch(_defaultBaseUrl + '/api/agent/tools', {
+      headers: { 'Content-Type': 'application/json' }
+    }).then(function(r) { return r.json(); });
+  }
+
   /* ---------- Provider 管理 ---------- */
   function getProviders() { return PROVIDERS; }
   function getModelProviderMap() { return MODEL_PROVIDER; }
@@ -365,6 +419,10 @@ var NexusAPI = (function() {
     setProviderConfig: setProviderConfig,
     getProviders: getProviders,
     getModelProviderMap: getModelProviderMap,
-    resolveProvider: resolveProvider
+    resolveProvider: resolveProvider,
+    agentExecute: agentExecute,
+    agentPlan: agentPlan,
+    toolExecute: toolExecute,
+    listTools: listTools
   };
 })();

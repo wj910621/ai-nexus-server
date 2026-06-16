@@ -894,6 +894,59 @@ function setupGallerySearch() {
 
       addLog(agent.id, agent.name + ' 正在处理中 (' + model + ')...', 'info');
 
+      // 检查是否有工具需要 → 使用 Agent 引擎（ReAct 循环）
+      var hasTools = agent.config && agent.config.tools && (
+        agent.config.tools.code || agent.config.tools.terminal || 
+        agent.config.tools.file || agent.config.tools.web
+      );
+
+      if (hasTools && typeof NexusAPI !== 'undefined' && NexusAPI.agentExecute) {
+        // 使用 Agent 引擎
+        addLog(agent.id, agent.name + ' 使用 Agent 引擎（工具模式）', 'info');
+        var taskText = fullPrompt + '\n\n用户请求: ' + inputText;
+        
+        NexusAPI.agentExecute(taskText, model, 10).then(function(data) {
+          var output = '';
+          
+          // 显示工具调用历史
+          if (data.history && data.history.length > 0) {
+            output += '--- 工具调用 ---\n';
+            data.history.forEach(function(h) {
+              var r = JSON.stringify(h.result).substring(0, 100);
+              output += '🔧 ' + h.action + ' → ' + r + '\n';
+            });
+            output += '---\n\n';
+          }
+          
+          // 最终答案
+          output += data.answer || '暂无回答';
+          
+          if (data.iterations) {
+            output += '\n\n(⚡ ' + data.iterations + ' 步)';
+          }
+          
+          agentOutputs[agent.id] = output;
+          addLog(agent.id, agent.name + ' 完成（Agent 引擎）', 'success');
+          
+          // 找下游 & 入队
+          for (var c2 = 0; c2 < connections.length; c2++) {
+            if (connections[c2].from === agent.id) {
+              for (var a3 = 0; a3 < canvasAgents.length; a3++) {
+                if (canvasAgents[a3].id === connections[c2].to && !processed[canvasAgents[a3].id]) {
+                  pendingQueue.push({ agent: canvasAgents[a3], input: output.substring(0, 500) });
+                }
+              }
+            }
+          }
+          processNext();
+        }).catch(function(err) {
+          addLog(agent.id, agent.name + ' Agent 引擎错误: ' + err.message, 'error');
+          processNext();
+        });
+        return;
+      }
+
+      // 无工具 → 使用普通聊天
       var fullResponse = '';
 
       if (typeof NexusAPI !== 'undefined' && NexusAPI.chatStream) {
