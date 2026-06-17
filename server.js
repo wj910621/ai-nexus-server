@@ -2944,6 +2944,132 @@ app.post('/api/guest/spend', (req, res) => {
 const ag=require('./agent-engine');const am=ag.createAgentRouter();app.use('/api/agent',am.router);console.log('Agent:'+am.toolRegistry.list().length+' tools');
 // Agentic RAG v2 routes (registered before 404 handler, uses global.__rag_db lazily)
 try { var rag = require('./rag-vector'); if (rag && rag.registerRoutes) { rag.registerRoutes(app); console.log('[RAG] Routes registered'); } } catch(e) { console.log('[RAG] Route init:', e.message); }
+// ============================================================
+// Phase 5-3: 桌面端 — 聊天历史云同步
+// ============================================================
+
+// 创建聊天历史表
+;(function(){try{db.run(`CREATE TABLE IF NOT EXISTS chat_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL,
+  session_id TEXT,
+  title TEXT DEFAULT '新对话',
+  messages TEXT,
+  model TEXT,
+  created_at TEXT,
+  updated_at TEXT
+)`);db.run(`CREATE INDEX IF NOT EXISTS idx_chat_history_user ON chat_history(username)`)}catch(e){}})();
+
+// 上传聊天记录
+app.post('/api/sync/history/upload', authRequired, (req, res) => {
+  try {
+    const { sessions } = req.body;
+    if (!sessions || !Array.isArray(sessions)) return res.json({ ok: false, error: '无效数据' });
+    db.run("DELETE FROM chat_history WHERE username=?", [req.user.username]);
+    sessions.forEach(s => {
+      db.run("INSERT INTO chat_history (username, session_id, title, messages, model, created_at, updated_at) VALUES (?,?,?,?,?,?,?)",
+        [req.user.username, s.sessionId || s.session_id, s.title || '新对话', 
+         JSON.stringify(s.messages || []), s.model || '', s.createdAt || new Date().toISOString(), new Date().toISOString()]);
+    });
+    saveDB();
+    res.json({ ok: true, count: sessions.length });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 下载聊天记录
+app.get('/api/sync/history/download', authRequired, (req, res) => {
+  try {
+    const result = db.exec("SELECT * FROM chat_history WHERE username=? ORDER BY updated_at DESC LIMIT 100", [req.user.username]);
+    if (!result.length || !result[0].values.length) return res.json({ ok: true, sessions: [] });
+    const cols = result[0].columns;
+    const sessions = result[0].values.map(row => {
+      const o = {}; cols.forEach((c, i) => { o[c] = row[i]; });
+      try { o.messages = JSON.parse(o.messages); } catch(e) {}
+      return o;
+    });
+    res.json({ ok: true, sessions });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 插件市场
+app.get('/api/plugins/list', (req, res) => {
+  try {
+    const fs = require('fs'), path = require('path');
+    const productsDir = path.join(__dirname, 'products');
+    let plugins = [];
+    if (fs.existsSync(productsDir)) {
+      const files = fs.readdirSync(productsDir);
+      plugins = files.filter(f => f.endsWith('.md') || f.endsWith('.html')).map(f => {
+        const stat = fs.statSync(path.join(productsDir, f));
+        return { id: f.replace(/\.[^.]+$/, ''), name: f.replace(/^\d+-/, '').replace(/\.(md|html)$/, ''), type: f.endsWith('.md') ? 'skill' : 'tool', file: f, size: stat.size, updated: stat.mtime };
+      });
+    }
+    res.json({ ok: true, plugins });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+app.get('/api/plugins/:id', (req, res) => {
+  try {
+    const fs = require('fs'), path = require('path');
+    const productsDir = path.join(__dirname, 'products');
+    const files = fs.readdirSync(productsDir);
+    const match = files.find(f => f.replace(/\.[^.]+$/, '') === req.params.id);
+    if (!match) return res.json({ ok: false, error: '插件不存在' });
+    const content = fs.readFileSync(path.join(productsDir, match), 'utf-8');
+    res.json({ ok: true, id: req.params.id, name: match, content });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// ============================================================
+// Phase 5-4: AI 漫剧创作
+// ============================================================
+
+// 生成分镜剧本
+app.post('/api/manga/generate', authRequired, async (req, res) => {
+  try {
+    const { prompt, style } = req.body;
+    if (!prompt) return res.json({ ok: false, error: '请输入故事创意' });
+    const styleOpt = style || '日系漫画';
+    const title = prompt.length > 20 ? prompt.substring(0, 20) + '...' : prompt;
+    const scenes = [
+      { id: 1, scene: '开场', description: `远景：${prompt}的开场场景，${styleOpt}风格，色彩鲜明`, characters: '主要角色登场', dialog: '...' },
+      { id: 2, scene: '冲突引入', description: `中景：角色面对第一个挑战，表情紧张`, characters: '主角', dialog: '"这该怎么办？"' },
+      { id: 3, scene: '发展', description: `特写：关键道具或线索出现，氛围神秘`, characters: '场景特写', dialog: '' },
+      { id: 4, scene: '转折', description: `中景：意外事件发生，构图有冲击力`, characters: '主角+配角', dialog: '"什么？！"' },
+      { id: 5, scene: '高潮', description: `全景：最激烈的冲突场面，动态构图`, characters: '所有角色', dialog: '"就是现在！"' },
+      { id: 6, scene: '结局', description: `远景：故事结局，氛围温馨或留有悬念`, characters: '主要角色', dialog: '"一切都结束了..."' }
+    ];
+    res.json({ ok: true, title, style: styleOpt, panels: scenes, total: scenes.length });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 编译漫剧
+app.post('/api/manga/compile', authRequired, async (req, res) => {
+  try {
+    const { panels, style } = req.body;
+    if (!panels || !Array.isArray(panels)) return res.json({ ok: false, error: '缺少分镜数据' });
+    const mangaPages = [];
+    for (let i = 0; i < panels.length; i += 2) {
+      mangaPages.push({ page: Math.floor(i / 2) + 1, panels: panels.slice(i, i + 2) });
+    }
+    const videoConfig = { fps: 24, durationPerPanel: 3, totalDuration: panels.length * 3,
+      panels: panels.map(p => ({ imagePrompt: p.description, duration: 3, narration: p.dialog || '' }))
+    };
+    res.json({ ok: true, mangaPages, videoConfig, totalPanels: panels.length });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
+// 渲染单帧（调用外部图片API）
+app.post('/api/manga/render-panel', authRequired, async (req, res) => {
+  try {
+    const { description, style, width, height } = req.body;
+    if (!description) return res.json({ ok: false, error: '缺少画面描述' });
+    const encodedPrompt = encodeURIComponent(description + (style ? ', ' + style : '') + ', comic style, manga');
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width || 512}&height=${height || 768}&nologo=true`;
+    res.json({ ok: true, imageUrl, description, style });
+  } catch(e) { res.json({ ok: false, error: e.message }); }
+});
+
 // 404 处理（必须在所有路由之后）
 app.use((req, res) => {
   res.status(404).type('html').send(err404HTML);
