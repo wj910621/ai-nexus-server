@@ -1,5 +1,10 @@
 # 每日 Git 自动备份 执行记录
 
+## 2026-06-17 02:55
+- **状态**: 部分成功（commit 成功，push 失败）
+- **操作**: `git add .` + commit `auto backup 2026-06-17`，53 文件变更（+15329/-123 行），新增 agent-engine.js/agent-engine-clean.js/agent-engine-fixed.js/mcp-server.js/package.json/rag-vector.js、.github/workflows/desktop-build.yml、.workbuddy/memory/2026-06-16.md、download/icons/*、download/source/js/*（mcp-client/model3d/music）、download/trigenclaw-build/**/*（JS/CSS 前端资源），删除 final-verify.js，提交 77c3364
+- **push 结果**: 失败 — GitHub pre-receive hook 拒绝，5 个大文件超限：TriGenClaw.exe 221.71 MB、ai-nexus.exe 221.51 MB、TriGen Desktop.exe 221.51 MB、TriGenClaw-1.0.0-win-Setup.exe 100.01 MB（>100 MB 硬限制）、TriGen-Desktop-1.0.0-win-Setup.exe 96.97 MB（>50 MB 建议限制）。与 06-14、06-16 同类故障，需使用 Git LFS 或将构建产物加入 .gitignore。按策略不重试
+
 ## 2026-06-16 02:55
 - **状态**: 部分成功（commit 成功，push 失败）
 - **操作**: `git add .` + commit `auto backup 2026-06-16`，125 文件变更（+367933/-6552 行），新增 download/ 下大量 TriGenClaw Electron 桌面应用构建产物（release 安装包 + win-unpacked + JS 源码 + icons），新增 3 个 Python/JS 部署上传脚本，提交 6c3ddc9
