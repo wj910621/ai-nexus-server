@@ -109,6 +109,8 @@ function createTray() {
     { label: '打开代码', click: function() { sendToRenderer('action', 'open-code'); showWindow(); } },
     { label: 'Agent 工作台', click: function() { sendToRenderer('action', 'open-agent'); showWindow(); } },
     { type: 'separator' },
+    { label: '? 贾维斯模式', click: function() { sendToRenderer('action', 'toggle-jarvis'); showWindow(); } },
+    { type: 'separator' },
     { label: '退出', click: function() { isQuitting = true; app.quit(); } }
   ]);
 
@@ -310,6 +312,12 @@ function registerShortcuts() {
       }
     }
   });
+
+  // Ctrl+Shift+V 切换贾维斯模式
+  globalShortcut.register('Ctrl+Shift+V', function() {
+    sendToRenderer('action', 'toggle-jarvis');
+    showWindow();
+  });
 }
 
 // ===== 文件系统 IPC =====
@@ -412,6 +420,46 @@ function setupIPC() {
   // 设置窗口大小
   ipcMain.handle('window:set-size', function(event, width, height) {
     if (mainWindow) mainWindow.setSize(width, height);
+  });
+
+  // 搜索文件
+  ipcMain.handle('device:search-file', async function(event, query) {
+    try {
+      const homeDir = require('os').homedir();
+      const results = [];
+      function walk(dir, depth) {
+        if (depth > 3) return; // 限制递归深度
+        try {
+          const entries = fs.readdirSync(dir, { withFileTypes: true });
+          for (const entry of entries) {
+            if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+            const fullPath = path.join(dir, entry.name);
+            if (entry.name.toLowerCase().includes(query.toLowerCase())) {
+              results.push({ name: entry.name, path: fullPath, type: entry.isDirectory() ? 'directory' : 'file' });
+              if (results.length >= 10) return;
+            }
+            if (entry.isDirectory()) {
+              walk(fullPath, depth + 1);
+              if (results.length >= 10) return;
+            }
+          }
+        } catch(e) {}
+      }
+      walk(homeDir, 0);
+      return { success: true, results: results };
+    } catch(e) {
+      return { success: false, error: e.message, results: [] };
+    }
+  });
+
+  // 打开文件/文件夹
+  ipcMain.handle('shell:open-path', async function(event, filePath) {
+    try {
+      shell.openPath(filePath);
+      return { success: true };
+    } catch(e) {
+      return { success: false, error: e.message };
+    }
   });
 }
 

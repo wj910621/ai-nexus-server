@@ -447,8 +447,161 @@
   <script src="js/music.js"></script>
   <script src="js/model3d.js"></script>
   <script src="js/mcp-client.js"></script>
+  
+  <!-- === 贾维斯语音模式 === -->
+  <script src="js/speech.js"></script>
+  <script src="js/device.js"></script>
+  <script src="js/jarvis.js"></script>
+  
   <script src="js/ui.js"></script>
   <script src="js/app.js"></script>
+
+<!-- 贾维斯模式 UI -->
+<div id="jarvisOverlay" class="jarvis-overlay" style="display:none">
+  <div class="jarvis-visualizer">
+    <div class="jarvis-ring jarvis-ring-1"></div>
+    <div class="jarvis-ring jarvis-ring-2"></div>
+    <div class="jarvis-ring jarvis-ring-3"></div>
+    <div class="jarvis-avatar">J</div>
+  </div>
+  <div class="jarvis-status" id="jarvisStatus">语音待命</div>
+  <div class="jarvis-transcript" id="jarvisTranscript"></div>
+  <div class="jarvis-response" id="jarvisResponse"></div>
+  <button id="jarvisToggleBtn" class="jarvis-toggle-btn" title="切换贾维斯模式">🎤</button>
+</div>
+<style>
+.jarvis-overlay {
+  position:fixed; bottom:20px; right:20px; z-index:9999;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  pointer-events:none;
+}
+.jarvis-toggle-btn {
+  pointer-events:auto;
+  width:56px; height:56px; border-radius:50%;
+  background:linear-gradient(135deg,#00d4ff,#7b2ff7);
+  border:none; color:#fff; font-size:24px; cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,212,255,0.4);
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.jarvis-toggle-btn:hover { transform:scale(1.1); box-shadow:0 6px 30px rgba(0,212,255,0.6); }
+.jarvis-toggle-btn.active { background:linear-gradient(135deg,#ff4444,#ff6b6b); animation:jarvisPulse 2s infinite; }
+@keyframes jarvisPulse { 0%,100%{box-shadow:0 4px 20px rgba(255,68,68,0.4)} 50%{box-shadow:0 4px 40px rgba(255,68,68,0.8)} }
+.jarvis-visualizer { position:relative; width:80px; height:80px; display:flex; align-items:center; justify-content:center; }
+.jarvis-ring { position:absolute; border-radius:50%; border:2px solid rgba(0,212,255,0.3); animation:jarvisRingAnim 3s infinite; }
+.jarvis-ring-1 { width:80px; height:80px; animation-delay:0s; }
+.jarvis-ring-2 { width:60px; height:60px; animation-delay:0.5s; border-color:rgba(123,47,247,0.3); }
+.jarvis-ring-3 { width:40px; height:40px; animation-delay:1s; border-color:rgba(0,212,255,0.5); }
+@keyframes jarvisRingAnim { 0%{transform:scale(0.8);opacity:0.5} 50%{transform:scale(1.1);opacity:1} 100%{transform:scale(0.8);opacity:0.5} }
+.jarvis-avatar { font-family:'Georgia',serif; font-size:24px; font-weight:bold; color:#00d4ff; text-shadow:0 0 10px rgba(0,212,255,0.5); z-index:1; }
+.jarvis-status { font-size:11px; color:rgba(255,255,255,0.6); text-align:center; }
+.jarvis-transcript { max-width:300px; font-size:12px; color:rgba(255,255,255,0.8); text-align:center; padding:4px 12px; background:rgba(0,0,0,0.5); border-radius:8px; display:none; }
+.jarvis-response { max-width:300px; font-size:12px; color:#00d4ff; text-align:center; padding:4px 12px; background:rgba(0,0,0,0.3); border-radius:8px; display:none; }
+</style>
+<script>
+// 贾维斯 UI 控制
+(function(){
+  var isJarvisActive = false;
+  var btn = document.getElementById('jarvisToggleBtn');
+  var overlay = document.getElementById('jarvisOverlay');
+  var statusEl = document.getElementById('jarvisStatus');
+  var transcriptEl = document.getElementById('jarvisTranscript');
+  var responseEl = document.getElementById('jarvisResponse');
+
+  if (!btn) return;
+
+  // 监听主进程的 toggle 事件
+  if (window.electronAPI) {
+    window.electronAPI.onMessage('action', function(data) {
+      if (data === 'toggle-jarvis') toggleJarvis();
+    });
+  }
+
+  // 快捷键覆盖
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'V') {
+      e.preventDefault();
+      toggleJarvis();
+    }
+  });
+
+  function toggleJarvis() {
+    isJarvisActive = !isJarvisActive;
+    if (isJarvisActive) {
+      startJarvis();
+    } else {
+      stopJarvis();
+    }
+  }
+
+  function startJarvis() {
+    btn.classList.add('active');
+    btn.textContent = '⏹';
+    if (overlay) overlay.style.display = 'flex';
+    
+    window.jarvis.setCallbacks({
+      onStatusChange: function(status) {
+        var labels = {
+          'off': '已关闭',
+          'listening': '🎤 聆听中...',
+          'awake': '✅ 贾维斯已唤醒',
+          'thinking': '🧠 思考中...',
+          'speaking': '🔊 说话中...'
+        };
+        if (statusEl) statusEl.textContent = labels[status] || status;
+      },
+      onTranscript: function(data) {
+        if (transcriptEl) {
+          if (data.role === 'interim') {
+            transcriptEl.textContent = data.text;
+            transcriptEl.style.display = data.text ? 'block' : 'none';
+          } else if (data.role === 'user') {
+            transcriptEl.textContent = '您: ' + data.text;
+            transcriptEl.style.display = 'block';
+          }
+        }
+      },
+      onResponse: function(text) {
+        if (responseEl) {
+          responseEl.textContent = text;
+          responseEl.style.display = 'block';
+        }
+      },
+      onWakeWord: function() {
+        if (transcriptEl) {
+          transcriptEl.textContent = '🔔 唤醒词已检测';
+          transcriptEl.style.display = 'block';
+        }
+      }
+    });
+
+    window.jarvis.start();
+    showToast('🎤 贾维斯模式已开启，说"贾维斯"唤醒我');
+  }
+
+  function stopJarvis() {
+    btn.classList.remove('active');
+    btn.textContent = '🎤';
+    window.jarvis.stop();
+    if (overlay) overlay.style.display = 'none';
+    if (statusEl) statusEl.textContent = '已关闭';
+    if (transcriptEl) { transcriptEl.style.display = 'none'; transcriptEl.textContent = ''; }
+    if (responseEl) { responseEl.style.display = 'none'; responseEl.textContent = ''; }
+  }
+
+  btn.addEventListener('click', toggleJarvis);
+
+  // 暴露给其他模块
+  window.toggleJarvisMode = toggleJarvis;
+})();
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;background:rgba(0,0,0,0.8);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;animation:fadeIn 0.3s;max-width:400px';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity 0.5s'; setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },500); }, 3000);
+}
+</script>
 <div class="system-indicator"><span class="dot"></span><span>SYSTEM ONLINE</span></div>
 </body>
 </html>
