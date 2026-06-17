@@ -2379,6 +2379,134 @@ app.post('/api/membership/subscribe', authRequired, (req, res) => {
   saveDB();
   res.json({ ok: true, tier, expires: expireDate.toISOString(), creditsAdded: m.creditsPerMonth * (months || 1), price: totalPrice });
 });
+
+// ============================================================
+// Phase 5-2: 支付/订单系统
+// ============================================================
+
+// 商品定义
+const PAYMENT_PRODUCTS = {
+  credits_starter: { name: '体验包', type: 'credits', credits: 150, price: 9.9, desc: '150积分' },
+  credits_standard: { name: '标准包', type: 'credits', credits: 700, price: 39, desc: '700积分' },
+  credits_premium: { name: '进阶包', type: 'credits', credits: 1500, price: 69, desc: '1500积分' },
+  credits_pro: { name: '专业包', type: 'credits', credits: 2500, price: 99, desc: '2500积分' },
+  credits_ultimate: { name: '旗舰包', type: 'credits', credits: 6000, price: 199, desc: '6000积分' },
+  membership_silver: { name: '月度会员', type: 'membership', tier: 'silver', creditsPerMonth: 1000, price: 49, months: 1, desc: '月度会员' },
+  membership_gold: { name: '季度会员', type: 'membership', tier: 'gold', creditsPerMonth: 3500, price: 119, months: 3, desc: '季度会员' },
+  membership_platinum: { name: '年度会员', type: 'membership', tier: 'platinum', creditsPerMonth: 15000, price: 369, months: 12, desc: '年度会员' }
+};
+
+// 创建支付订单
+app.post('/api/payments/create-order', authRequired, (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!productId || !PAYMENT_PRODUCTS[productId]) {
+      return res.json({ ok: false, error: '无效的商品ID' });
+    }
+    const product = PAYMENT_PRODUCTS[productId];
+    const orderId = 'ORD' + Date.now() + Math.random().toString(36).substring(2, 6).toUpperCase();
+    
+    // 确保 orders 表存在
+    db.run(`CREATE TABLE IF NOT EXISTS orders (
+      order_id TEXT PRIMARY KEY,
+      username TEXT,
+      product_id TEXT,
+      product_name TEXT,
+      amount REAL,
+      credits INTEGER,
+      status TEXT DEFAULT 'pending',
+      created_at TEXT,
+      paid_at TEXT
+    )`);
+
+    // 检查是否已有待处理订单
+    const existing = db.exec("SELECT order_id FROM orders WHERE username=? AND status='pending' AND product_id=?", [req.user.username, productId]);
+    if (existing.length && existing[0].values.length) {
+      return res.json({ ok: true, orderId: existing[0].values[0][0], product, status: 'pending', existing: true });
+    }
+
+    // 创建订单
+    const credits = product.credits || 0;
+    db.run("INSERT INTO orders (order_id, username, product_id, product_name, amount, credits, status, created_at) VALUES (?,?,?,?,?,?,'pending',?)",
+      [orderId, req.user.username, productId, product.name, product.price, credits, new Date().toISOString()]);
+    saveDB();
+    
+    res.json({ ok: true, orderId, product, status: 'pending' });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// 确认支付（模拟支付 — 接入真实支付后替换此逻辑）
+app.post('/api/payments/confirm', authRequired, (req, res) => {
+  try {
+    const { orderId } = req.body;
+    if (!orderId) return res.json({ ok: false, error: '缺少订单ID' });
+
+    const order = db.exec("SELECT * FROM orders WHERE order_id=? AND username=?", [orderId, req.user.username]);
+    if (!order.length || !order[0].values.length) {
+      return res.json({ ok: false, error: '订单不存在' });
+    }
+    
+    const row = order[0].values[0];
+    const columns = order[0].columns;
+    const colMap = {};
+    columns.forEach((c, i) => { colMap[c] = i; });
+    
+    if (row[colMap['status']] !== 'pending') {
+      return res.json({ ok: false, error: '订单状态异常', status: row[colMap['status']] });
+    }
+
+    const productId = row[colMap['product_id']];
+    const product = PAYMENT_PRODUCTS[productId];
+    const price = row[colMap['amount']];
+
+    // 更新订单状态
+    db.run("UPDATE orders SET status='completed', paid_at=? WHERE order_id=?", [new Date().toISOString(), orderId]);
+
+    if (product.type === 'credits') {
+      // 积分包：直接增加积分
+      const credits = product.credits;
+      db.run("UPDATE users SET credits=credits+? WHERE username=?", [credits, req.user.username]);
+      db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [req.user.username, credits, '购买积分包: ' + product.name]);
+    } else if (product.type === 'membership') {
+      // 会员订阅：更新会员等级
+      const now = new Date();
+      const currentResult = db.exec("SELECT membership_expires FROM users WHERE username=?", [req.user.username]);
+      let baseDate = now;
+      if (currentResult.length && currentResult[0].values.length && currentResult[0].values[0][0]) {
+        const existing = new Date(currentResult[0].values[0][0]);
+        if (existing > now) baseDate = existing;
+      }
+      const expireDate = new Date(baseDate);
+      expireDate.setMonth(expireDate.getMonth() + (product.months || 1));
+      db.run("UPDATE users SET membership=?, membership_expires=?, credits=credits+? WHERE username=?", 
+        [product.tier, expireDate.toISOString(), product.creditsPerMonth || 0, req.user.username]);
+    }
+
+    saveDB();
+    res.json({ ok: true, status: 'completed', message: '支付成功' });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// 查询用户订单
+app.get('/api/payments/orders', authRequired, (req, res) => {
+  try {
+    const result = db.exec("SELECT * FROM orders WHERE username=? ORDER BY created_at DESC LIMIT 20", [req.user.username]);
+    if (!result.length || !result[0].values.length) return res.json({ ok: true, orders: [] });
+    const columns = result[0].columns;
+    const orders = result[0].values.map(row => {
+      const o = {};
+      columns.forEach((c, i) => { o[c] = row[i]; });
+      return o;
+    });
+    res.json({ ok: true, orders });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
   const { password } = req.body || {};
   if (password === ADMIN_PASSWORD) {
     res.json({ ok: true, token: Buffer.from(password + ':' + Date.now()).toString('base64') });

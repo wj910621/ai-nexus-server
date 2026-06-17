@@ -4337,6 +4337,11 @@ let guestProgressiveStatus='normal';
   }
 })();
 function updateCreditDisplay(){const e=document.getElementById('creditDisplay');if(e){e.textContent=userCredits;if(userCredits<=5){e.style.color='#ef4444';e.parentElement.parentElement.title='积分即将用完';e.style.animation='pulse 1.5s infinite'}else{e.style.color='';e.style.animation=''}}const b=document.getElementById('creditBalance');if(b)b.textContent=userCredits}
+async function refreshUserCredits(){
+  if(authToken){
+    try{const r=await fetch(API_BASE+'/api/user/credits',{headers:getAuthHeader()});if(r.ok){const d=await r.json();if(d.credits!==undefined){userCredits=d.credits;localStorage.setItem('cr',userCredits);updateCreditDisplay()}}}catch(e){}
+  }
+}
 function showLowCreditHint(){if(userCredits>0&&userCredits<=5&&!document.getElementById('lowCreditHint')){const hint=document.createElement('div');hint.id='lowCreditHint';hint.style='position:fixed;top:70px;right:20px;z-index:400;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:10px 16px;font-size:0.78rem;max-width:220px;animation:fadeIn 0.5s';hint.innerHTML='💡 <b>积分即将用完</b><br><span style="font-size:0.7rem;color:var(--text-secondary)">充值最低 ¥9.9 起 · GPT-4o 官方 ¥145/月</span><div style="margin-top:6px"><button class="btn-send" style="font-size:0.7rem;padding:3px 12px;background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="switchPage(\'pricing\');hint.remove()">充值</button><button style="font-size:0.7rem;padding:3px 8px;background:none;border:none;color:var(--text-secondary);cursor:pointer;margin-left:4px" onclick="hint.remove()">✕</button></div>';document.body.appendChild(hint);setTimeout(()=>{if(hint.parentNode)hint.remove()},15000)}}
 function spendCredits(a,t){
 // 管理员不扣积分
@@ -4507,21 +4512,67 @@ function checkAchievement(){
     setTimeout(()=>showToast('🏆 活跃用户成就达成！+50 积分 · 继续加油'),5000);
   }
 }
-function purchaseCredits(a,p){const isFirst=!localStorage.getItem('has_purchased');const disc=a>99&&isFirst?'\n\n🎉 首次充值特惠！':'';
-  if(confirm(`${disc?disc+'\n':''}购买 ${a} 积分 (¥${p})
+function purchaseCredits(a,p){ 
+  const productMap = { '150':'credits_starter', '700':'credits_standard', '1500':'credits_premium', '2500':'credits_pro', '6000':'credits_ultimate' };
+  const productId = productMap[a.toString()];
+  if(!productId) return;
+  const isFirst=!localStorage.getItem('has_purchased');const disc=a>99&&isFirst?'\n\n🎉 首次充值特惠！':'';
+  if(!confirm(`${disc?disc+'\n':''}购买 ${a} 积分 (¥${p})
 ─────────────────
 💡 温馨提示：
 • 积分为虚拟商品，充值后立即到账
 • 已消耗积分无法退还
 • 积分永久有效，无过期时间
 ─────────────────
-确认支付表示同意用户协议及免责声明`)){
-    localStorage.setItem('has_purchased','1');
-    window.open('https://mbd.pub','_blank');showToast('付款后积分自动到账');
+确认支付表示同意用户协议及免责声明`)) return;
+  // 调用支付 API
+  createPaymentOrder(productId);
+}
+async function createPaymentOrder(productId) {
+  if(!currentUser){ showToast('请先登录'); openAuth(); return; }
+  try {
+    const r = await fetch(API_BASE+'/api/payments/create-order', {
+      method:'POST', 
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(authToken||'')},
+      body:JSON.stringify({productId})
+    });
+    const d = await r.json();
+    if(!d.ok) { showToast(d.error || '下单失败'); return; }
+    // 直接确认支付（模拟支付模式）
+    const confirmR = await fetch(API_BASE+'/api/payments/confirm', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(authToken||'')},
+      body:JSON.stringify({orderId: d.orderId})
+    });
+    const confirmD = await confirmR.json();
+    if(confirmD.ok) {
+      const isMembership = productId.startsWith('membership_');
+      if(isMembership) {
+        // 会员订阅成功后刷新
+        const tier = productId.replace('membership_','');
+        localStorage.setItem('membership',tier);
+        renderMembershipBadge();
+        document.getElementById('membershipModal')?.classList.remove('show');
+        showToast('🎉 欢迎成为'+d.product.name+'！');
+        setTimeout(()=>{window.location.reload()},1000);
+      } else {
+        showToast('🎉 '+d.product.name+' 购买成功！积分已到账');
+        localStorage.setItem('has_purchased','1');
+      }
+      refreshUserCredits();
+    } else {
+      showToast(confirmD.error || '支付失败');
+    }
+  } catch(e) {
+    showToast('网络错误，请重试');
   }
 }
-function subscribe(type){const plans={monthly:{n:'月度会员',p:49,c:1000},quarterly:{n:'季度会员',p:119,c:3500},yearly:{n:'年度会员',p:369,c:15000}};const plan=plans[type];if(!plan)return;
-  if(confirm(`订阅 ${plan.n}
+function subscribe(type){
+  const productMap = { 'monthly':'membership_silver', 'quarterly':'membership_gold', 'yearly':'membership_platinum' };
+  const productId = productMap[type];
+  if(!productId) return;
+  const plans={monthly:{n:'月度会员',p:49,c:1000},quarterly:{n:'季度会员',p:119,c:3500},yearly:{n:'年度会员',p:369,c:15000}};const plan=plans[type];if(!plan)return;
+  if(!confirm(`订阅 ${plan.n}
 ¥${plan.p} · ${plan.c} 积分/周期
 ─────────────────
 💡 温馨提示：
@@ -4530,8 +4581,9 @@ function subscribe(type){const plans={monthly:{n:'月度会员',p:49,c:1000},qua
 • 可随时取消，权益保留至周期结束
 ─────────────────
 确认支付表示同意用户协议及免责声明`)){
-    window.open('https://mbd.pub','_blank');showToast('订阅后将自动开通会员权益');
+    return;
   }
+  createPaymentOrder(productId);
 }
 
 // === 每日签到 ===
@@ -4828,27 +4880,12 @@ function openMembershipModal(){
 }
 async function subscribeMembership(tier){
   if(!currentUser){showToast('请先登录');openAuth();return}
-  // 当前仅记录会员信息（支付待接入）
   const months=tier==='platinum'?12:tier==='gold'?3:1;
   const plan=MEMBERSHIP_PLANS[tier];
   if(!confirm(`确认订阅${plan.name} ¥${plan.price}？`))return;
-  try{
-    const r=await fetch(API_BASE+'/api/membership/subscribe',{
-      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(authToken||'')},
-      body:JSON.stringify({tier,months})
-    });
-    const d=await r.json();
-    if(d.ok){
-      localStorage.setItem('membership',tier);
-      localStorage.setItem('membership_expires',d.expires);
-      renderMembershipBadge();
-      document.getElementById('membershipModal')?.classList.remove('show');
-      showToast(`🎉 欢迎成为${plan.name}！已到账 ${d.creditsAdded} 积分`);
-      setTimeout(()=>{window.location.reload()},1000);
-    }else{
-      showToast('❌ '+(d.error||'订阅失败'));
-    }
-  }catch(e){showToast('❌ 网络错误')}
+  // 改用统一支付流程
+  const productMap = { 'silver':'membership_silver', 'gold':'membership_gold', 'platinum':'membership_platinum' };
+  createPaymentOrder(productMap[tier]);
 }
 
 function openUserSettings(){
