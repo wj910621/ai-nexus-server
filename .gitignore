@@ -9,3 +9,25 @@ Thumbs.db
 server/.git/
 .history/
 *.backup
+
+# Build artifacts - 超过 GitHub 100MB 限制
+download/release/
+download/dist/
+download/trigenclaw-build/release/
+download/trigenclaw-build/dist/
+download/*.exe
+download/*.dmg
+download/*.AppImage
+*.exe
+*.dmg
+*.AppImage
+release/
+dist/
+
+# Python backend artifacts
+download/source/server/venv/
+download/source/server/*.db
+download/source/server/alembic/versions/
+__pycache__/
+*.pyc
+*.egg-info/
