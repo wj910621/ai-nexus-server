@@ -31,3 +31,8 @@ download/source/server/alembic/versions/
 __pycache__/
 *.pyc
 *.egg-info/
+
+# Security - 敏感文件不应进 Git
+ssl/
+products/openclaw-enhanced-config.json
+auto-deploy.js

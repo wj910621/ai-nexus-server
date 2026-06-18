@@ -13,6 +13,7 @@
   "build": {
     "appId": "com.trigen.claw",
     "productName": "TriGenClaw",
+    "publish": null,
     "directories": {
       "output": "release"
     },

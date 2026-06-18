@@ -12,14 +12,23 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy Frontend
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' }}
         run: |
-          scp -o StrictHostKeyChecking=no new-nexus/index.html root@120.79.17.184:/home/admin/nexus-studio/index.html
+          which ssh-agent || apt-get update && apt-get install -y openssh-client
+          eval $(ssh-agent -s)
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | ssh-add -
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          scp -o StrictHostKeyChecking=no index.html js/i18n.js root@120.79.17.184:/home/admin/nexus-studio/
 
       - name: Deploy Backend
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' }}
         run: |
-          scp -o StrictHostKeyChecking=no server.js package.json root@120.79.17.184:/home/admin/nexus-hub/
-          ssh -o StrictHostKeyChecking=no root@120.79.17.184 "cd /home/admin/nexus-hub && pm2 restart nexus-server"
+          eval $(ssh-agent -s)
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | ssh-add -
+          scp -o StrictHostKeyChecking=no server.js root@120.79.17.184:/home/admin/ai-nexus/
+          ssh -o StrictHostKeyChecking=no root@120.79.17.184 "cd /home/admin/ai-nexus && pm2 restart server.js"
 
-    env:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      - name: Skip Deploy (secrets not configured)
+        if: ${{ secrets.SSH_PRIVATE_KEY == '' }}
+        run: echo "SSH secrets not configured - skipping auto-deploy"

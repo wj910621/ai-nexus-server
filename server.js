@@ -117,6 +117,16 @@ if (fs.existsSync(studioDir)) {
       if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css') || filePath.endsWith('.json')) {
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
+      }
+    }
+  }));
+  // 同时将 studio 目录挂载到根路径，确保 /js/i18n.js 等静态资源可访问
+  app.use(express.static(studioDir));
+    // 禁止缓存，防止 Service Worker 缓存旧版本导致 init is not defined 等错误
+    setHeaders: function(res, filePath) {
+      if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css') || filePath.endsWith('.json')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
       }
     }
