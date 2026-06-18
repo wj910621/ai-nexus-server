@@ -36,3 +36,4 @@ __pycache__/
 ssl/
 products/openclaw-enhanced-config.json
 auto-deploy.js
+.workbuddy/
