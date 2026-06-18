@@ -2,6 +2,8 @@
   "name": "trigenclaw",
   "version": "1.0.0",
   "description": "TriGenClaw - AI Desktop Workbench. 300+ AI 模型 · 代码助手 · Agent 编排 · 知识库",
+  "homepage": "https://j3trisheng.com",
+  "repository": "github:wj910621/ai-nexus-server",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
