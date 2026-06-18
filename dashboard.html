@@ -5651,7 +5651,7 @@ function submitFeedback(){
 }
 
 // === Admin ===
-const DEFAULT_PASSWORD='wangjie910621',ADMIN_STORAGE_KEY='apwd',MODELS_STORAGE_KEY='amod',API_KEYS_KEY='akeys',SETTINGS_KEY='aset';
+const DEFAULT_PASSWORD='CHANGE_ME',ADMIN_STORAGE_KEY='apwd',MODELS_STORAGE_KEY='amod',API_KEYS_KEY='akeys',SETTINGS_KEY='aset';
 let adminModels=[],editingModelId=null;
 function initAdmin(){const s=localStorage.getItem(MODELS_STORAGE_KEY);adminModels=[];if(s){try{const p=JSON.parse(s);if(Array.isArray(p))adminModels=p}catch(e){}}if(!adminModels.length)adminModels=JSON.parse(JSON.stringify(models))}
 function toggleKeyDashboard(){

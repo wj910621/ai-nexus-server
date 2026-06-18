@@ -5,7 +5,7 @@ import sys
 host = "120.79.17.184"
 port = 22
 username = "root"
-password = "Wangjie910621"
+password = os.environ.get("DEPLOY_PASS", "CHANGE_ME")
 
 # File to upload
 local_file = r"G:\大模型聚合网站\download\release\TriGen-Desktop-1.0.0-win-Setup.exe"

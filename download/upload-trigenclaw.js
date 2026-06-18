@@ -8,7 +8,8 @@ const fs = require('fs');
 
 const HOST = '120.79.17.184';
 const USER = 'admin';
-const PASS = 'Wangjie910621';
+const { DEPLOY_PASS } = require('./deploy-config');
+const PASS = DEPLOY_PASS;
 const KEY_FILE = 'C:\\Users\\WBS—JCNC\\.ssh\\id_ed25519';
 const INSTALLER = path.join(__dirname, 'trigenclaw-build', 'release', 'TriGenClaw-1.0.0-win-Setup.exe');
 const REMOTE_DIR = '/home/admin/ai-nexus';

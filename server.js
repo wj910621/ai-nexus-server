@@ -1537,8 +1537,9 @@ async function initDB() {
   // 确保有 admin 用户
   const adminExists = db.exec("SELECT id FROM users WHERE username='admin'");
   if (!adminExists.length || !adminExists[0].values.length) {
+    const adminPass = process.env.ADMIN_PASSWORD || 'admin888';
     db.run("INSERT INTO users (username, email, password, credits, role) VALUES (?, ?, ?, ?, ?)",
-      ['admin', 'admin@j3trisheng.com', hashPasswordSync('admin888'), 9999, 'admin']);
+      ['admin', 'admin@j3trisheng.com', hashPasswordSync(adminPass), 9999, 'admin']);
   }
   // 初始化知识库种子数据（仅当表为空时）
   const kbCount = db.exec("SELECT COUNT(*) FROM knowledge_base");
@@ -2326,7 +2327,10 @@ app.get('/api/stats', (req, res) => {
 // ============================================================
 // 管理员认证（服务端存储密码，跨浏览器/缓存后不丢失）
 // ============================================================
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;  // 必须从环境变量读取，无默认值！
+if (!ADMIN_PASSWORD) {
+  console.warn('⚠️  警告: 未设置 ADMIN_PASSWORD 环境变量！请在 .env 中配置强密码。');
+}
 app.post('/api/admin/auth', authLimiter, (req, res) => {
 
 // ============================================================
@@ -3126,7 +3130,7 @@ initDB().then(() => {
     } else {
       console.log(`\n✅ 所有模型均已配置 API Key`);
     }
-    console.log(`   管理员默认密码: admin888`);
+    console.log(`   管理员密码: 从 ADMIN_PASSWORD 环境变量读取`);
     console.log(`   数据库文件: ${DB_FILE}\n`);
     // Set global DB ref for RAG module
     global.__rag_db = db;

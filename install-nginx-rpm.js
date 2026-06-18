@@ -2,7 +2,8 @@ const { Client } = require('ssh2');
 
 const HOST = '120.79.17.184';
 const USER = 'root';
-const PASS = 'Wangjie910621';
+const { DEPLOY_PASS } = require('./deploy-config');
+const PASS = DEPLOY_PASS;
 
 const commands = [
   // 直接通过 nginx.org 官方 RPM 安装（不依赖 yum 仓库）

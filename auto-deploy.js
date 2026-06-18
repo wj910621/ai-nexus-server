@@ -8,7 +8,8 @@ const path = require('path');
 
 const HOST = '120.79.17.184';
 const USER = 'root';
-const PASS = 'Wangjie910621';
+const { DEPLOY_PASS } = require('./deploy-config');
+const PASS = DEPLOY_PASS;
 const FRONTEND_DIR = '/home/admin/nexus-studio';
 const BACKEND_DIR = '/home/admin/ai-nexus';
 const BASE = 'G:/大模型聚合网站';

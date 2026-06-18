@@ -2,7 +2,8 @@ const { Client } = require('ssh2');
 const conn = new Client();
 const HOST = '120.79.17.184';
 const USER = 'root';
-const PASS = 'Wangjie910621';
+const { DEPLOY_PASS } = require('./deploy-config');
+const PASS = DEPLOY_PASS;
 
 conn.on('ready', () => {
   // 创建一个最小测试 HTML，只加载 ui.js

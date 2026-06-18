@@ -3,7 +3,8 @@ const { Client } = require('ssh2');
 const conn = new Client();
 const HOST = '120.79.17.184';
 const USER = 'root';
-const PASS = 'Wangjie910621';
+const { DEPLOY_PASS } = require('./deploy-config');
+const PASS = DEPLOY_PASS;
 
 conn.on('ready', () => {
   console.log('已连接，更新 Nginx 配置...');

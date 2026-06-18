@@ -8,5 +8,5 @@ conn.on('ready', () => {
   });
 }).connect({
   host: '120.79.17.184', port: 22,
-  username: 'root', password: 'Wangjie910621'
+  username: 'root', password: CHANGE_ME
 });

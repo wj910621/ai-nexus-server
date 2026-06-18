@@ -4,7 +4,7 @@ import sys
 host = "120.79.17.184"
 port = 22
 username = "root"
-password = "Wangjie910621"
+password = os.environ.get("DEPLOY_PASS", "CHANGE_ME")
 
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

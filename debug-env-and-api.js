@@ -24,4 +24,4 @@ function run(i) {
     s.on('close', () => { if (o.trim()) console.log(o.trim()); run(i+1); });
   });
 }
-conn.connect({ host: '120.79.17.184', port: 22, username: 'root', password: 'Wangjie910621' });
+conn.connect({ host: '120.79.17.184', port: 22, username: 'root', password: CHANGE_ME });

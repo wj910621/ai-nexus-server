@@ -5,7 +5,7 @@ import time
 
 HOST = '120.79.17.184'
 USER = 'admin'
-PASS = 'Wangjie910621'
+PASS = 'CHANGE_ME'
 PORT = 22
 
 local_file = r'G:\大模型聚合网站\download\trigenclaw-build\release\TriGenClaw-1.0.0-win-Setup.exe'
