@@ -1,28 +1,35 @@
 #!/bin/bash
 # ==============================================================
-# TriGen 一键部署脚本 v2.0
-# 用法: bash deploy.sh [frontend|backend|all]
+# TriGen 一键部署脚本 v3.0
+# 用法: bash deploy.sh [frontend|backend|env|all]
+# 安全提示: 密码从环境变量读取 DEPLOY_PASS
 # ==============================================================
 set -e
 
 SSH_KEY=""
 SERVER="root@120.79.17.184"
-SSH_CMD="ssh -o StrictHostKeyChecking=no"
-SCP_CMD="scp -o StrictHostKeyChecking=no"
+SSH_CMD="sshpass -p \"$DEPLOY_PASS\" ssh -o StrictHostKeyChecking=no"
+SCP_CMD="sshpass -p \"$DEPLOY_PASS\" scp -o StrictHostKeyChecking=no"
 FRONTEND_DIR="/home/admin/nexus-studio"
 BACKEND_DIR="/home/admin/ai-nexus"
 
+if [ -z "$DEPLOY_PASS" ]; then
+  echo "❌ 错误：未设置 DEPLOY_PASS 环境变量"
+  echo "   export DEPLOY_PASS=你的服务器密码"
+  exit 1
+fi
+
 echo "========================================"
-echo "  TriGen 一键部署 v2.0"
+echo "  TriGen 一键部署 v3.0"
 echo "  $(date '+%Y-%m-%d %H:%M:%S')"
 echo "========================================"
 echo ""
 
 deploy_frontend() {
-  echo "🌐 [前端] 部署 TriGen Desktop..."
-  $SCP_CMD new-nexus/index.html $SERVER:$FRONTEND_DIR/index.html
+  echo "🌐 [前端] 部署前端文件..."
+  $SCP_CMD index.html $SERVER:$FRONTEND_DIR/index.html
+  $SCP_CMD -r js $SERVER:$FRONTEND_DIR/js
   echo "  ✅ 前端更新完成"
-  echo "  📎 http://120.79.17.184:3001/studio/"
 }
 
 deploy_backend() {
@@ -49,8 +56,7 @@ case "${1:-all}" in
     deploy_backend
     echo ""
     echo "🎉 全量部署完成！"
-    echo "   🌐 http://120.79.17.184:3001/studio/"
-    echo "   ⚙️  http://120.79.17.184:3001/"
+    echo "   🌐 https://j3trisheng.com"
     ;;
   *)
     echo "用法: bash deploy.sh [frontend|backend|env|all]"

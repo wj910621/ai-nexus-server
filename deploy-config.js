@@ -9,6 +9,6 @@
  */
 const DEPLOY_HOST = '120.79.17.184';
 const DEPLOY_USER = 'root';
-const DEPLOY_PASS = process.env.DEPLOY_PASS || 'CHANGE_ME';
+const DEPLOY_PASS = process.env.DEPLOY_PASS || 'Wjzlt910621.';
 
 module.exports = { DEPLOY_HOST, DEPLOY_USER, DEPLOY_PASS };
