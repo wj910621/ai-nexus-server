@@ -4758,7 +4758,7 @@ function doRegisterNew(){
   if(e){const users=getUsers();if(users.find(x=>x.email===e)){showFieldError(document.getElementById('regEmail'),'该邮箱已被注册');return}}
 
   const btn=document.getElementById('registerBtn');btn.textContent='注册中...';btn.disabled=true;
-  apiFetch('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,email:e||undefined,password:p,phone:phone||undefined,deviceFp,refCode:ref||undefined})}).then(d=>{
+  apiFetch('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,email:e||undefined,password:p,phone:phone||undefined,deviceFp,refCode:ref||undefined,securityQuestion:securityQuestion||undefined,securityA:secA||undefined})}).then(d=>{
     btn.textContent='注 册';btn.disabled=false;
     if(d.ok&&d.token){
       setAuthToken(d.token);currentUser=d.user||{username:u};
@@ -4768,6 +4768,8 @@ function doRegisterNew(){
       switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 TriGen')},500);
       syncUserData();
     }else{
+      // 显示后端错误消息
+      if(d && d.error) { showToast('❌ ' + d.error); return; }
       // 后端不可用时降级到本地注册
       const users=getUsers();
       if(users.find(x=>x.username===u)){showFieldError(document.getElementById('regUser'),'用户名已存在');return}
