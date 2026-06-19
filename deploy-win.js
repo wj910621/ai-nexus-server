@@ -100,9 +100,9 @@ function deployBackend(cb) {
   console.log('\n⚙️  [后端] 部署 API Server...');
   uploadFile(BASE + '/server.js', BACKEND_DIR + '/server.js', () => {
     console.log('🔄 重启服务...');
-    sshExec('cd ' + BACKEND_DIR + ' && pm2 restart server.js', (err, out) => {
+    sshExec('fuser -k 3001/tcp 2>/dev/null; sleep 1; cd ' + BACKEND_DIR + ' && pm2 delete nexus-hub 2>/dev/null; pm2 start server.js --name nexus-hub -f --update-env 2>&1', (err, out) => {
       if (err) console.error('  ❌ 重启失败');
-      else console.log('  ✅ 服务已重启');
+      else { console.log('  ✅ 服务已重启'); if(out) console.log(out.substring(0,200)); }
       cb();
     });
   });
@@ -112,9 +112,9 @@ function deployEnv(cb) {
   console.log('\n🔑 [环境] 部署 .env 配置...');
   uploadFile(BASE + '/.env', BACKEND_DIR + '/.env', () => {
     console.log('🔄 重启服务...');
-    sshExec('cd ' + BACKEND_DIR + ' && pm2 restart server.js', (err, out) => {
+    sshExec('fuser -k 3001/tcp 2>/dev/null; sleep 1; cd ' + BACKEND_DIR + ' && pm2 delete nexus-hub 2>/dev/null; pm2 start server.js --name nexus-hub -f --update-env 2>&1', (err, out) => {
       if (err) console.error('  ❌ 重启失败');
-      else console.log('  ✅ 服务已重启');
+      else { console.log('  ✅ 服务已重启'); if(out) console.log(out.substring(0,200)); }
       cb();
     });
   });

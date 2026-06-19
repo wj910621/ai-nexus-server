@@ -1,0 +1,54 @@
+name: Desktop Build
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'download/trigenclaw-build/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            target: --win
+            artifact: TriGenClaw-*-win-Setup.exe
+          - os: macos-latest
+            target: --mac
+            artifact: TriGenClaw-*-mac.dmg
+          - os: ubuntu-latest
+            target: --linux
+            artifact: TriGenClaw-*-linux.AppImage
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        working-directory: download/trigenclaw-build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build desktop app
+        run: npx electron-builder ${{ matrix.target }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trigenclaw-${{ matrix.os }}
+          path: download/trigenclaw-build/release/${{ matrix.artifact }}
+          if-no-files-found: warn

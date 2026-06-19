@@ -13,6 +13,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 // const rateLimit = require("express-rate-limit"); // CentOS 8/Node 14 不支持 node:buffer
 const SALT_ROUNDS = 10;
+
+// 全局未捕获异常处理 — 防止 async handler 崩溃导致进程退出
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] uncaughtException:', err.message);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] unhandledRejection:', reason?.message || reason);
+});
 // dotenv: 优先加载项目根目录 .env，兼容本地开发与服务器部署
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 // 服务器部署时也尝试加载 /home/admin/.env（不覆盖已有变量）
@@ -2331,12 +2339,21 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;  // 必须从环境变量读�
 if (!ADMIN_PASSWORD) {
   console.warn('⚠️  警告: 未设置 ADMIN_PASSWORD 环境变量！请在 .env 中配置强密码。');
 }
+
+// 管理员登录
 app.post('/api/admin/auth', authLimiter, (req, res) => {
+  const { password } = req.body || {};
+  if (password === ADMIN_PASSWORD) {
+    res.json({ ok: true, token: Buffer.from(password + ':' + Date.now()).toString('base64') });
+  } else {
+    res.json({ ok: false, error: '密码错误' });
+  }
+});
 
 // ============================================================
 // 会员体系
 // ============================================================
-const FREE_ALWAYS = ['dmx_qwen35_2b_free', 'dmx_qwen3_17b_free', 'dmx_spark_lite_free', 'dmx_glm_4_9b', 'ark_dbs2_mini', 'ark_dbp15l', 'qf_ernie_speed']; // 始终免费
+const FREE_ALWAYS = ['dmx_qwen35_2b_free', 'dmx_qwen3_17b_free', 'dmx_spark_lite_free', 'dmx_glm_4_9b', 'ark_dbs2_mini', 'ark_dbp15l', 'qf_ernie_speed', 'sf_deepseek_v3_free', 'sf_glm47', 'sf_qwen3_8b']; // 始终免费
 const MEMBERSHIP_TIERS = {
   free:  { name: '免费用户', dailyFreeCalls: 30, discount: 0, price: 0, creditsPerMonth: 0, desc: '基础体验' },
   silver:{ name: '月度会员', dailyFreeCalls: 999, discount: 0.2, price: 49, creditsPerMonth: 1000, desc: '高端模型8折' },
@@ -2519,13 +2536,6 @@ app.get('/api/payments/orders', authRequired, (req, res) => {
     res.json({ ok: true, orders });
   } catch (e) {
     res.json({ ok: false, error: e.message });
-  }
-});
-  const { password } = req.body || {};
-  if (password === ADMIN_PASSWORD) {
-    res.json({ ok: true, token: Buffer.from(password + ':' + Date.now()).toString('base64') });
-  } else {
-    res.json({ ok: false, error: '密码错误' });
   }
 });
 
