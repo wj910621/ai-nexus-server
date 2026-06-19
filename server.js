@@ -178,7 +178,7 @@ const MODEL_CONFIG = {
   qwen3:        { provider: 'openai',   model: 'qwen3-235b-a22b',    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
   kimi2:        { provider: 'openai',   model: 'moonshot-v1-128k',   baseUrl: 'https://api.moonshot.cn/v1' },
   glm4plus:     { provider: 'openai',   model: 'glm-4-plus',         baseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
-  hunyuan:      { provider: 'openai',   model: 'hunyuan-turbos-latest', baseUrl: 'https://api.hunyuan.cloud.tencent.com/v1' },
+  hunyuan:      { provider: 'openai',   model: 'hunyuan-lite',              baseUrl: 'https://www.dmxapi.cn/v1' },
 
   // === 硅基流动 SiliconFlow ===
   sf_qwen3_8b:       { provider: 'openai', model: 'Qwen/Qwen3-8B',                 baseUrl: 'https://api.siliconflow.cn/v1' },
@@ -236,10 +236,7 @@ const MODEL_CONFIG = {
   dmx_qwen36_plus_free:  { provider: 'openai', model: 'qwen3.6-plus-free',         baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_code_free_x:       { provider: 'openai', model: 'DMXAPI-Code-Free-X',        baseUrl: 'https://www.dmxapi.cn/v1' },
 
-  // === 百度千帆 ===
-  qf_ernie4:         { provider: 'qianfan',  model: 'ernie-4.0-8k',             baseUrl: 'https://qianfan.baidubce.com/v2' },
-  qf_ernie35:        { provider: 'qianfan',  model: 'ernie-3.5-8k',             baseUrl: 'https://qianfan.baidubce.com/v2' },
-  qf_ernie_speed:    { provider: 'qianfan',  model: 'ernie-speed-128k',         baseUrl: 'https://qianfan.baidubce.com/v2' },
+  // == 百度千帆 (已下线，使用 DMXAPI/Ark 替代) ==
 
   // === 火山引擎 Ark（DeepSeek/豆包/GLM 全免费接入） ===
   ark_dsv32:          { provider: 'openai', model: 'ep-20260606020151-4qv8h',  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
@@ -332,8 +329,6 @@ const MODEL_CONFIG = {
 // API Key 管理
 // ============================================================
 function getApiKey(provider, modelId) {
-  // 百度千帆 (专用token)
-  if (modelId.startsWith('qf_') || provider === 'qianfan') return 'qianfan'; // 标记，实际token从getQianfanToken()获取
   // 火山引擎
   if (modelId.startsWith('ark_'))    return process.env.ARK_API_KEY;
   // 百川智能
@@ -345,7 +340,7 @@ function getApiKey(provider, modelId) {
   if (modelId.startsWith('qwen'))     return process.env.DASHSCOPE_API_KEY;
   if (modelId.startsWith('kimi'))     return process.env.MOONSHOT_API_KEY;
   if (modelId.startsWith('glm'))      return process.env.ZHIPU_API_KEY;
-  if (modelId.startsWith('hunyuan'))  return process.env.HUNYUAN_API_KEY;
+  if (modelId.startsWith('hunyuan'))  return process.env.DMXAPI_API_KEY;  // 改为走 DMXAPI 渠道
   if (modelId.startsWith('sf_'))     return process.env.SILICONFLOW_API_KEY;
   if (modelId.startsWith('ali_'))    return process.env.DASHSCOPE_API_KEY;  // 百炼共用阿里云Key
   if (modelId.startsWith('dmx_'))    return process.env.DMXAPI_API_KEY;
@@ -457,7 +452,7 @@ function checkIpRate(ip, modelId) {
     ['gpt4o','deepseekr1','claude4','claude4opus','gemini25pro','grok3'].includes(modelId);
   // 免费模型：DMXAPI、硅基、火山引擎
   const isFree = modelId.startsWith('dmx_') || modelId.startsWith('ark_') || 
-    ['sf_qwen3_8b','sf_deepseek_v3_free','sf_qwen3_32b','sf_glm47','qf_ernie_speed'].includes(modelId);
+    ['sf_qwen3_8b','sf_deepseek_v3_free','sf_qwen3_32b','sf_glm47'].includes(modelId);
   
   // 免费模型不限
   if (isFree) return { blocked: false };
@@ -526,7 +521,6 @@ const API_MODEL_COST = {
   nx_claude_opus:25, nx_claude_sonnet:15, nx_claude_haiku:8,
   nx_gemini_pro:12, nx_o3mini:10, nx_dalle3:15, nx_flux:8, nx_suno:15, nx_grok3:15,
   meshy_text:288, meshy_image:288,
-  qf_ernie4:5, qf_ernie35:2, qf_ernie_speed:0,
   ark_doubao_pro:0, ark_doubao_lite:0,
   bc_baichuan4:2, bc_baichuan3:1,
   qwen3:2, kimi2:2, minimax1:2, doubao:2, doubao15:2, gpt4omini:2, gemini15flash:2,
@@ -2353,7 +2347,7 @@ app.post('/api/admin/auth', authLimiter, (req, res) => {
 // ============================================================
 // 会员体系
 // ============================================================
-const FREE_ALWAYS = ['dmx_qwen35_2b_free', 'dmx_qwen3_17b_free', 'dmx_spark_lite_free', 'dmx_glm_4_9b', 'ark_dbs2_mini', 'ark_dbp15l', 'qf_ernie_speed', 'sf_deepseek_v3_free', 'sf_glm47', 'sf_qwen3_8b']; // 始终免费
+const FREE_ALWAYS = ['dmx_qwen35_2b_free', 'dmx_qwen3_17b_free', 'dmx_spark_lite_free', 'dmx_glm_4_9b', 'ark_dbs2_mini', 'ark_dbp15l', 'sf_deepseek_v3_free', 'sf_glm47', 'sf_qwen3_8b']; // 始终免费
 const MEMBERSHIP_TIERS = {
   free:  { name: '免费用户', dailyFreeCalls: 30, discount: 0, price: 0, creditsPerMonth: 0, desc: '基础体验' },
   silver:{ name: '月度会员', dailyFreeCalls: 999, discount: 0.2, price: 49, creditsPerMonth: 1000, desc: '高端模型8折' },
@@ -2654,7 +2648,6 @@ app.post('/v1/chat/completions', async (req, res) => {
   nx_claude_haiku:5, nx_gemini_pro:6, nx_o3mini:5,
   nx_dalle3:8, nx_flux:5, nx_suno:8, nx_grok3:8,
     meshy_text:288, meshy_image:288,
-    qf_ernie4:5, qf_ernie35:2, qf_ernie_speed:0,
     ark_doubao_pro:0, ark_doubao_lite:0,
     bc_baichuan4:2, bc_baichuan3:1,
     qwen3:2, kimi2:2, minimax1:2, doubao:2, doubao15:2, gpt4omini:2, gemini15flash:2,
