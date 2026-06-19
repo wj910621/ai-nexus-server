@@ -551,6 +551,13 @@ app.post('/api/chat', async (req, res) => {
   let userCredits = 0;
   const creditCost = API_MODEL_COST[modelId] !== undefined ? API_MODEL_COST[modelId] : 2;
 
+  // 内部服务令牌（供 Agent Engine 进程内调用，无需积分）
+  const internalToken = req.headers['x-internal-token'] || '';
+  if (internalToken && internalToken === global.__INTERNAL_SERVICE_TOKEN) {
+    username = 'admin';
+    userCredits = 99999;
+  }
+
   // 认证方式1：API Key（第三方接入）
   if (apiKey && apiKey.length > 10) {
     const keyResult = db.exec(
@@ -568,13 +575,13 @@ app.post('/api/chat', async (req, res) => {
   // 认证方式2：登录 Token（网站自身前端）
   else if (authToken && authToken.length > 10) {
     try {
-      const payload = JSON.parse(Buffer.from(authToken, 'base64').toString());
-      if (payload.username && payload.role && payload.ts) {
+      const payload = verifyToken(authToken);
+      if (payload && payload.username) {
         username = payload.username;
         const ur = db.exec("SELECT credits FROM users WHERE username=?", [username]);
         if (ur.length && ur[0].values.length) userCredits = ur[0].values[0][0] || 0;
       }
-    } catch(e) { /* token parse error */ }
+    } catch(e) { /* token invalid */ }
   }
 
   // 未认证 → 仅允许免费模型
@@ -1625,9 +1632,9 @@ function btoaPwd(pwd) {
   return Buffer.from(pwd).toString('base64');
 }
 
-// 判断是否为 bcrypt 哈希格式
+// 判断是否为 bcrypt 哈希格式（兼容 $2a$ 和 $2b$ 两种前缀）
 function isBcryptHash(hash) {
-  return typeof hash === 'string' && hash.startsWith('$2b$');
+  return typeof hash === 'string' && (hash.startsWith('$2a$') || hash.startsWith('$2b$'));
 }
 
 // 使用 bcrypt 哈希密码（同步，用于最小化代码改动）
@@ -1836,9 +1843,16 @@ function requireAdmin(req, res, next) {
     return res.status(401).json({ ok: false, error: '未登录' });
   }
   try {
-    const payload = JSON.parse(Buffer.from(auth.slice(7), 'base64').toString());
-    if (payload.role !== 'admin') {
-      return res.status(403).json({ ok: false, error: '无管理员权限' });
+    const token = auth.slice(7);
+    let payload;
+    // 尝试 JWT 验证（兼容 /api/admin/login 返回的 JWT）
+    try {
+      payload = verifyToken(token);
+      if (!payload || payload.role !== 'admin') throw new Error('not_admin');
+    } catch(jwtErr) {
+      // 降级为 Base64 JSON 解码（兼容旧格式）
+      payload = JSON.parse(Buffer.from(token, 'base64').toString());
+      if (payload.role !== 'admin') throw new Error('not_admin');
     }
     req.adminUser = payload.username;
     next();
@@ -2757,31 +2771,51 @@ app.post('/api/user/update-profile', (req, res) => {
 });
 
 app.post('/api/auth/forgot-password', authLimiter, (req, res) => {
-  const { phone, securityAnswer, newPassword } = req.body;
-  if (!phone || !securityAnswer || !newPassword) {
+  const { input, securityAnswer, newPassword } = req.body;  // input 支持用户名/邮箱/手机号
+  if (!input || !securityAnswer || !newPassword) {
     return res.json({ ok: false, error: '请填写完整信息' });
   }
   if (newPassword.length < 6) {
     return res.json({ ok: false, error: '新密码至少6位' });
   }
   try {
-    const result = db.exec("SELECT username, security_a FROM users WHERE phone=?", [phone]);
+    // 支持通过用户名、邮箱或手机号查找
+    const result = db.exec("SELECT username, security_q, security_a FROM users WHERE username=? OR email=? OR phone=?", [input, input, input]);
     if (!result.length || !result[0].values.length) {
-      return res.json({ ok: false, error: '未找到该手机号关联的账号' });
+      return res.json({ ok: false, error: '未找到该邮箱或用户名对应的账号' });
     }
     const user = result[0].values[0];
-    const storedAnswer = user[1];
+    const storedAnswer = user[2];
     if (!storedAnswer) {
       return res.json({ ok: false, error: '该账号未设置密保，无法找回' });
     }
     if (!verifyPasswordSync(securityAnswer, storedAnswer)) {
       return res.json({ ok: false, error: '密保答案错误' });
     }
-    db.run("UPDATE users SET password=? WHERE phone=?", [hashPasswordSync(newPassword), phone]);
+    db.run("UPDATE users SET password=? WHERE username=?", [hashPasswordSync(newPassword), user[0]]);
     saveDB();
     res.json({ ok: true, message: '密码已重置，请使用新密码登录', username: user[0] });
   } catch(e) {
     res.json({ ok: false, error: '重置失败: ' + e.message });
+  }
+});
+
+// 忘记密码 — 查询用户密保问题
+app.post('/api/auth/forgot-password-query', authLimiter, (req, res) => {
+  const { input } = req.body;
+  if (!input) return res.json({ ok: false, error: '请输入用户名、邮箱或手机号' });
+  try {
+    const result = db.exec("SELECT username, email, security_q FROM users WHERE username=? OR email=? OR phone=?", [input, input, input]);
+    if (!result.length || !result[0].values.length) {
+      return res.json({ ok: false, error: '未找到该邮箱或用户名对应的账号' });
+    }
+    const user = result[0].values[0];
+    if (!user[2]) {
+      return res.json({ ok: false, error: '该账号未设置密保，无法找回' });
+    }
+    res.json({ ok: true, username: user[0], email: user[1], securityQ: user[2] });
+  } catch(e) {
+    res.json({ ok: false, error: '查询失败: ' + e.message });
   }
 });
 // ============================================================
@@ -2957,6 +2991,10 @@ app.post('/api/guest/spend', (req, res) => {
 
 // 增强注册：同一设备指纹只能注册 1 个账号
 // 此逻辑集成在现有 /api/auth/register 的 IP 检查之后
+
+// 生成内部服务令牌，供 Agent Engine 调用本地 /api/chat 时使用
+const INTERNAL_SERVICE_TOKEN = crypto.randomBytes(32).toString('hex');
+global.__INTERNAL_SERVICE_TOKEN = INTERNAL_SERVICE_TOKEN;
 
 const ag=require('./agent-engine');const am=ag.createAgentRouter();app.use('/api/agent',am.router);console.log('Agent:'+am.toolRegistry.list().length+' tools');
 // Agentic RAG v2 routes (registered before 404 handler, uses global.__rag_db lazily)

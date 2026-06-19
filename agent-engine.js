@@ -98,7 +98,10 @@ class AgentEngine {
     try {
       const r = await fetch('http://localhost:3001/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-internal-token': global.__INTERNAL_SERVICE_TOKEN || process.env.INTERNAL_SERVICE_TOKEN || ''
+        },
         body: JSON.stringify({ model: modelToUse, messages, stream: false }),
         signal: AbortSignal.timeout(60000)
       });

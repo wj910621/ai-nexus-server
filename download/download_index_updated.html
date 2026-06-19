@@ -75,8 +75,9 @@ p{color:#a090c0;margin:12px 0 24px;font-size:14px;line-height:1.6}
 
   <!-- Download button -->
   <div style="margin-bottom:8px">
-    <a class="dl-btn" href="/download/TriGenClaw-1.0.0-win-Setup.exe">⬇ 下载安装包 (EXE · 97MB)</a>
+    <a class="dl-btn" href="/download/TriGenClaw-1.0.0-win-Setup.exe" onclick="setTimeout(function(){if(!confirm('如果下载没有自动开始，点确定手动下载？'))event.preventDefault()},300);showToast('⏳ 下载已开始...');return true">⬇ 下载安装包 (EXE · 97MB)</a>
   </div>
+  <p style="font-size:11px;color:#6b5b95;margin-top:6px">⏬ 点击后自动开始下载，无需跳转</p>
 
   <!-- ═══ Visual Step Guide ═══ -->
   <div style="margin-top:40px;border-top:1px solid rgba(255,255,255,.06);padding-top:24px">

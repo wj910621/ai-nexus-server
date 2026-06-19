@@ -655,7 +655,7 @@ a{color:var(--accent);text-decoration:none}
   <div class="top-actions">
     <span class="top-credit" onclick="dailyCheckin()" title="每日签到">📅 <span id="checkinBadge">签到</span></span>
     <span class="top-credit" onclick="switchPage('pricing')" title="积分">💎 <span id="creditDisplay">0</span></span>
-    <a href="/download/TriGenClaw-1.0.0-win-Setup.exe" target="_blank" class="top-credit" title="TriGenClaw 桌面客户端 - 真正的 AI 桌面工作台" style="text-decoration:none;cursor:pointer">🦀 <span>TriGenClaw</span></a>
+    <span class="top-credit" onclick="downloadDesktopApp()" title="TriGenClaw 桌面客户端 - 直接下载到桌面" style="text-decoration:none;cursor:pointer;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;padding:4px 10px;border-radius:6px">🦀 <span>下载桌面端</span></span>
     <span class="top-credit" onclick="DAILY_CHECKIN()" id="checkinBtn" title="每日签到" style="background:linear-gradient(135deg,#f59e0b,#d97706);display:none">📅 签到 +5</span>
     <span id="userNav" style="display:flex;align-items:center;gap:6px"></span>
     <button class="theme-toggle" id="themeToggle">☀️</button>
@@ -4318,6 +4318,18 @@ function copyMediaOutput(){navigator.clipboard.writeText(document.getElementById
 function downloadMedia(){
   const t=document.getElementById('mediaOutput').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='漫剧_'+new Date().toISOString().slice(0,10)+'.txt';a.click()
+}
+
+// 桌面端直接下载 — 点击即下载，无中间页面
+function downloadDesktopApp(){
+  showToast('⏳ 正在准备下载 TriGenClaw 桌面客户端...');
+  const a=document.createElement('a');
+  a.href='/download/TriGenClaw-1.0.0-win-Setup.exe';
+  a.download='TriGenClaw-1.0.0-win-Setup.exe';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>showToast('✅ 下载已开始！安装包约 100MB，下载后双击安装即可'), 800);
 }
 
 // === Credits ===
