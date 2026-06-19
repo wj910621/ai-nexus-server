@@ -4790,19 +4790,55 @@ function showForgotPwd(){switchAuthTab('forgot')}
 function doForgotPwd(){
   const input=document.getElementById('forgotEmail').value.trim();
   if(!input){showToast('请输入注册邮箱或用户名');return}
-  const users=getUsers();
-  const user=users.find(x=>x.email===input||x.username===input);
-  if(!user){showToast('未找到该邮箱或用户名对应的账号');return}
-  if(!user.securityQ){showToast('该账号未设置密保，无法找回。请联系管理员');return}
-  // 显示密保验证
-  const answer=prompt(`密保问题：${atobFix(user.securityQ)}\n\n请输入你的答案：`);
-  if(!answer)return;
-  if(atobFix(user.securityA).toLowerCase() !== answer.toLowerCase()){showToast('❌ 密保答案错误！');return}
-  const np=prompt('密保验证通过！请输入新密码（至少6位）：');
-  if(!np||np.length<6){showToast('密码至少6位');return}
-  user.password=btoa(np);saveUsers(users);
-  showToast('✅ 密码已重置，请用新密码登录');
-  switchAuthTab('login');
+  
+  // 先尝试通过服务器 API 查询
+  fetch('/api/auth/forgot-password-query', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({input})
+  }).then(r=>r.json()).then(d=>{
+    if(!d.ok){
+      // 服务器查询失败，降级到 localStorage
+      const users=getUsers();
+      const user=users.find(x=>x.email===input||x.username===input);
+      if(!user){showToast(d.error||'未找到该邮箱或用户名对应的账号');return}
+      if(!user.securityQ){showToast('该账号未设置密保，无法找回。请联系管理员');return}
+      const answer=prompt('密保问题：'+atobFix(user.securityQ)+'\n\n请输入你的答案：');
+      if(!answer)return;
+      if(atobFix(user.securityA).toLowerCase()!==answer.toLowerCase()){showToast('❌ 密保答案错误！');return}
+      const np=prompt('密保验证通过！请输入新密码（至少6位）：');
+      if(!np||np.length<6){showToast('密码至少6位');return}
+      user.password=btoa(np);saveUsers(users);
+      showToast('✅ 密码已重置，请用新密码登录');
+      switchAuthTab('login');
+      return;
+    }
+    // 服务器查询成功，通过服务器 API 重置密码
+    const answer=prompt('密保问题：'+d.securityQ+'\n\n请输入你的答案：');
+    if(!answer)return;
+    const np=prompt('密保验证通过！请输入新密码（至少6位）：');
+    if(!np||np.length<6){showToast('密码至少6位');return}
+    fetch('/api/auth/forgot-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({input, securityAnswer:answer, newPassword:np})
+    }).then(r=>r.json()).then(d2=>{
+      if(d2.ok) { showToast('✅ 密码已重置，请用新密码登录'); switchAuthTab('login'); }
+      else { showToast('❌ '+d2.error); }
+    }).catch(()=>{showToast('❌ 网络错误，请稍后重试')});
+  }).catch(()=>{
+    // 网络错误，降级到 localStorage
+    const users=getUsers();
+    const user=users.find(x=>x.email===input||x.username===input);
+    if(!user){showToast('网络异常，请稍后重试');return}
+    if(!user.securityQ){showToast('该账号未设置密保，无法找回。请联系管理员');return}
+    const answer=prompt('密保问题：'+atobFix(user.securityQ)+'\n\n请输入你的答案：');
+    if(!answer)return;
+    if(atobFix(user.securityA).toLowerCase()!==answer.toLowerCase()){showToast('❌ 密保答案错误！');return}
+    const np=prompt('密保验证通过！请输入新密码（至少6位）：');
+    if(!np||np.length<6){showToast('密码至少6位');return}
+    user.password=btoa(np);saveUsers(users);
+    showToast('✅ 密码已重置，请用新密码登录');
+    switchAuthTab('login');
+  });
 }
 // 密保问题切换
 document.getElementById('regSecQ').addEventListener('change',function(){
@@ -5017,7 +5053,7 @@ function selectCodeModel(modelId, el){
       if(m){
         opt = document.createElement('option');
         opt.value = modelId;
-        opt.textContent = m.name + ' ⚡' + getModelCost(modelId);
+        opt.textContent = m.name + (getModelCost(modelId)===0 ? ' 🆓免费' : ' ⚡' + getModelCost(modelId));
         sel.appendChild(opt);
       }
     }
@@ -7006,7 +7042,7 @@ function renderModelBar(pageId,containerId){
   if(!el||!rec)return;
   const saved=localStorage.getItem('pageModel_'+pageId)||rec.id;
   // 动态生成全部模型选项
-  const allOpts=models.filter(m=>!m.hidden&&(!rec.filter||(m.tags&&m.tags.includes(rec.filter)))).map(m=>`<option value="${m.id}" ${saved===m.id?'selected':''}>${m.name} ${getModelCost(m.id)===0?'🆓':'⚡'+getModelCost(m.id)}</option>`).join('');
+  const allOpts=models.filter(m=>!m.hidden&&(!rec.filter||(m.tags&&m.tags.includes(rec.filter)))).map(m=>`<option value="${m.id}" ${saved===m.id?'selected':''}>${m.name} ${getModelCost(m.id)===0?'🆓免费':'⚡'+getModelCost(m.id)}</option>`).join('');
   el.innerHTML=`
     <div class="feature-card" style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:12px;background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(99,102,241,0.05))">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">

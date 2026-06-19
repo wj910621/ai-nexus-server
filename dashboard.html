@@ -5127,7 +5127,7 @@ function selectCodeModel(modelId, el){
       if(m){
         opt = document.createElement('option');
         opt.value = modelId;
-        opt.textContent = m.name + ' ⚡' + getModelCost(modelId);
+        opt.textContent = m.name + (getModelCost(modelId)===0 ? ' 🆓免费' : ' ⚡' + getModelCost(modelId));
         sel.appendChild(opt);
       }
     }
@@ -7415,7 +7415,7 @@ function renderModelBar(pageId,containerId){
   const baseFilter=models.filter(m=>!m.hidden);
   const freeModels=baseFilter.filter(m=>getModelCost(m.id)===0);
   const paidModels=baseFilter.filter(m=>getModelCost(m.id)>0);
-  const optGroup=(label,list)=>list.length?`<optgroup label="${label}">${list.map(m=>`<option value="${m.id}" ${saved===m.id?'selected':''}>${m.name} ⚡${getModelCost(m.id)}</option>`).join('')}</optgroup>`:'';
+  const optGroup=(label,list)=>list.length?`<optgroup label="${label}">${list.map(m=>{const c=getModelCost(m.id);return `<option value="${m.id}" ${saved===m.id?'selected':''}>${m.name} ${c===0?'🆓免费':'⚡'+c}</option>`}).join('')}</optgroup>`:'';
   const allOpts=(paidModels.length?optGroup('💰 收费模型',paidModels):'')+(freeModels.length?optGroup('🆓 免费模型',freeModels):'');
   el.innerHTML=`
     <div class="right-panel-card" style="padding:8px 12px;background:linear-gradient(135deg,rgba(124,58,237,0.04),rgba(99,102,241,0.04))">

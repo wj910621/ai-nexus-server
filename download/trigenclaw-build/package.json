@@ -44,7 +44,11 @@
     "linux": {
       "target": ["AppImage", "deb"],
       "artifactName": "TriGenClaw-${version}-linux.${ext}",
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "maintainer": "TriGen <admin@j3trisheng.com>",
+      "category": "Utility",
+      "desktopName": "trigenclaw",
+      "synopsis": "AI Desktop Workbench"
     },
     "nsis": {
       "oneClick": false,
@@ -60,6 +64,6 @@
     "electron-builder": "^26.15.3"
   },
   "keywords": ["ai", "desktop", "workbench", "llm", "chat"],
-  "author": "TriGen",
+  "author": "TriGen <admin@j3trisheng.com>",
   "license": "MIT"
 }
