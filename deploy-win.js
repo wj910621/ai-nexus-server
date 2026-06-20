@@ -91,8 +91,10 @@ function deployFrontend(cb) {
   uploadFile(BASE + '/index.html', FRONTEND_DIR + '/index.html', () => {
     uploadFile(BASE + '/landing.html', FRONTEND_DIR + '/landing.html', () => {
       uploadFile(BASE + '/dashboard.html', FRONTEND_DIR + '/dashboard.html', () => {
-        console.log('📁 上传 js/ 目录...');
-        uploadDir(BASE + '/js', FRONTEND_DIR + '/js', cb);
+        uploadFile(BASE + '/manifest.json', FRONTEND_DIR + '/manifest.json', () => {
+          console.log('📁 上传 js/ 目录...');
+          uploadDir(BASE + '/js', FRONTEND_DIR + '/js', cb);
+        });
       });
     });
   });

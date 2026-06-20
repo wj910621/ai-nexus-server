@@ -43,6 +43,7 @@ deploy_frontend() {
   $SCP_CMD index.html $SERVER:$FRONTEND_DIR/index.html
   $SCP_CMD dashboard.html $SERVER:$FRONTEND_DIR/dashboard.html
   $SCP_CMD landing.html $SERVER:$FRONTEND_DIR/landing.html
+  $SCP_CMD manifest.json $SERVER:$FRONTEND_DIR/manifest.json
   $SCP_CMD -r js $SERVER:$FRONTEND_DIR/js
   echo "  ✅ 前端更新完成"
 }

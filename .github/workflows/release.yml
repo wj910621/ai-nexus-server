@@ -1,0 +1,104 @@
+name: TriGenClaw Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'download/source/**'
+      - 'download/trigenclaw-build/**'
+      - 'download/package.json'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (如 1.0.2，留空自动递增)'
+        required: false
+        default: ''
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: download/trigenclaw-build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Sync source files
+        run: |
+          Copy-Item -Path ..\source\main.js -Destination .\ -Force
+          Copy-Item -Path ..\source\preload.js -Destination .\ -Force
+          Copy-Item -Path ..\source\index.html -Destination .\ -Force
+          Copy-Item -Path ..\source\css\ -Destination .\css\ -Recurse -Force
+          Copy-Item -Path ..\source\js\ -Destination .\js\ -Recurse -Force
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        run: |
+          $ver = "${{ github.event.inputs.version }}"
+          if (-not $ver) {
+            $now = Get-Date -Format "yyyyMMdd.HHmm"
+            $sha = "${{ github.sha }}".Substring(0, 7)
+            $ver = "1.0.$now+$sha"
+          }
+          echo "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          echo "Using version: $ver"
+
+      - name: Build portable ZIP
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.version.outputs.version }}"
+          $root = "G:\大模型聚合网站\download"
+          
+          # 先用 electron-builder 打包安装包
+          npm run dist:win
+          
+          # 同时创建便携版 ZIP（包含 Electron + app 文件）
+          $releaseDir = "release\win"
+          if (Test-Path "release\TriGenClaw-*-win-Setup.exe") {
+            $setup = Get-ChildItem "release\TriGenClaw-*-win-Setup.exe" | Select-Object -First 1
+            echo "Setup built: $($setup.Name)"
+          }
+          
+          # 创建 ZIP 便携版
+          $zipName = "TriGenClaw-$ver-Portable.zip"
+          # 从已安装的 nsis 安装包中提取文件太复杂
+          # 改用 electron-builder 的 unpacked 目录
+          if (Test-Path "release\win-unpacked") {
+            Compress-Archive -Path "release\win-unpacked\*" -DestinationPath "release\$zipName" -Force
+            echo "Portable ZIP created: $zipName"
+          }
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: TriGenClaw v${{ steps.version.outputs.version }}
+          body: |
+            ## TriGenClaw v${{ steps.version.outputs.version }}
+            
+            ### 下载
+            - ⬇️ **安装包**: `TriGenClaw-*-win-Setup.exe`
+            - 📦 **便携版 (免安装)**: `TriGenClaw-*-Portable.zip`
+            
+            ### 更新内容
+            - 安全加固: CSP + 文件系统沙箱 + URL校验
+            - 修复: 桌面端启动崩溃问题
+            - 同步: 最新模型列表与前端功能
+            
+            > 便携版解压后直接运行 `TriGenClaw.exe` 即可，无需安装。
+          draft: false
+          prerelease: false
+          files: |
+            download/trigenclaw-build/release/TriGenClaw-*.exe
+            download/trigenclaw-build/release/TriGenClaw-*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -569,22 +569,34 @@ app.post('/api/chat', async (req, res) => {
     userCredits = 99999;
   }
 
-  // 认证方式1：API Key（第三方接入）
+  // 认证方式1：先尝试 JWT 登录令牌（主站前端 Authorization: Bearer 传的是JWT）
   if (apiKey && apiKey.length > 10) {
-    const keyResult = db.exec(
-      "SELECT a.username, a.active, u.credits FROM api_keys a JOIN users u ON a.username=u.username WHERE a.api_key=?",
-      [apiKey]
-    );
-    if (!keyResult.length || !keyResult[0].values.length) {
-      return res.status(401).json({ error: { message: '无效的 API Key', type: 'auth_error' } });
+    let isJwt = false;
+    try {
+      const payload = verifyToken(apiKey);
+      if (payload && payload.username) {
+        username = payload.username;
+        const ur = db.exec("SELECT credits FROM users WHERE username=?", [username]);
+        if (ur.length && ur[0].values.length) userCredits = ur[0].values[0][0] || 0;
+        isJwt = true;
+      }
+    } catch(e) { /* 不是 JWT，当作 API Key 处理 */ }
+    if (!isJwt) {
+      const keyResult = db.exec(
+        "SELECT a.username, a.active, u.credits FROM api_keys a JOIN users u ON a.username=u.username WHERE a.api_key=?",
+        [apiKey]
+      );
+      if (!keyResult.length || !keyResult[0].values.length) {
+        return res.status(401).json({ error: { message: '无效的 API Key', type: 'auth_error' } });
+      }
+      const ki = keyResult[0].values[0];
+      if (!ki[1]) return res.status(403).json({ error: { message: 'API Key 已被禁用', type: 'auth_error' } });
+      username = ki[0];
+      userCredits = ki[2] || 0;
     }
-    const ki = keyResult[0].values[0];
-    if (!ki[1]) return res.status(403).json({ error: { message: 'API Key 已被禁用', type: 'auth_error' } });
-    username = ki[0];
-    userCredits = ki[2] || 0;
   }
-  // 认证方式2：登录 Token（网站自身前端）
-  else if (authToken && authToken.length > 10) {
+  // 认证方式2：x-auth-token 头（nexus-studio 前端使用）
+  if (!username && authToken && authToken.length > 10) {
     try {
       const payload = verifyToken(authToken);
       if (payload && payload.username) {

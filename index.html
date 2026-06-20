@@ -3143,9 +3143,11 @@ function getDeviceFingerprint(){
     const scr=screen.width+'x'+screen.height;
     deviceFp='tg'+Math.abs(hash).toString(36).slice(0,20)+btoa(nav+scr).slice(0,8).replace(/[^a-zA-Z0-9]/g,'');
     localStorage.setItem('dfp',deviceFp);
+    localStorage.setItem('device_fp',deviceFp);
   }catch(e){
     deviceFp='tg_'+Math.random().toString(36).slice(2,14);
     localStorage.setItem('dfp',deviceFp);
+    localStorage.setItem('device_fp',deviceFp);
   }
   return deviceFp;
 }
@@ -3213,9 +3215,8 @@ const models=[
   {id:'dmx_qwen36_plus_free',name:'Qwen3.6 Plus',provider:'通义千问',desc:'通义千问3.6增强免费版。',avatar:'#0984e3',tags:['推理','中文优化','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
   {id:'dmx_code_free_x',name:'编程模型 Pro',provider:'合作伙伴',desc:'高级编程加速版。',avatar:'#00cec9',tags:['编程','代码','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
   // === 百度千帆 ===
-  {id:'qf_ernie4',name:'文心一言 4.0',provider:'百度',desc:'中文理解顶尖，知识增强。',avatar:'#2932e1',tags:['中文优化','知识增强','国内'],context:'8K',inputPrice:'¥120/M',outputPrice:'¥120/M',featured:true,free:false},
-  {id:'qf_ernie35',name:'文心一言 3.5',provider:'百度',desc:'高性价比中文模型。',avatar:'#2932e1',tags:['中文优化','对话','国内'],context:'8K',inputPrice:'¥12/M',outputPrice:'¥12/M',featured:false,free:false},
-  {id:'qf_ernie_speed',name:'ERNIE Speed',provider:'百度',desc:'轻量快速，免费额度。',avatar:'#2932e1',tags:['快速','中文优化','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:true},
+  // 百度千帆 ERNIE 系列已下线（配额不足），使用 DMXAPI/Ark 替代
+  // - qf_ernie4, qf_ernie35, qf_ernie_speed (已移除)
   // === 火山引擎 Ark（全免费接入） ===
   {id:'ark_dsv4p',name:'DeepSeek-V4 Pro',provider:'DeepSeek',desc:'DeepSeek最新旗舰，火山直连免费。',avatar:'#4f46e5',tags:['推理','编程','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
   {id:'ark_dsv4f',name:'DeepSeek-V4 Flash',provider:'DeepSeek',desc:'轻量极速版，火山直连免费。',avatar:'#4f46e5',tags:['快速','编程','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
@@ -4426,13 +4427,12 @@ const MODEL_COST={
   ark_dsv32:0, ark_dsv4p:0, ark_dbs2_pro:0, ark_glm47:0,
   ark_dbp15p:0, ark_dbs_char:0,
   ark_doubao_pro:0, ark_doubao_lite:0,
-  qf_ernie_speed:0,
   dmx_glm_5_free:0, dmx_glm_51_free:0, dmx_glm_5_turbo_free:0,
   // 🟢 1积分（入门级）
   deepseekv3:1, glm4:1, kimi:1, ali_qwen36_flash:1,
   glm4plus:1, minimax:1, spark4:1, ali_qwen36_plus:1, ali_deepseek_v4_flash:1,
   sf_hunyuan_a13b:1, sf_qwen35_397b:1, sf_qwq_32b:1,
-  sf_deepseek_v32:1, bc_baichuan3:1, qf_ernie35:1,
+  sf_deepseek_v32:1, bc_baichuan3:1,
   or_codeqwen:1,
   // 🟡 2积分（进阶）
   qwen3:2, kimi2:2, minimax1:2, doubao:2, doubao15:2, gpt4omini:2, gemini15flash:2,
@@ -4444,7 +4444,7 @@ const MODEL_COST={
   deepseekr1:5, gpt4o:5, hunyuan:5, gemini15pro:5, gemini25flash:5,
   grok3:5, ali_glm51:5, 'mistral-large2':5,
   or_llama3_70b:5, or_mistral_large:5, or_perplexity:5,
-  qf_ernie4:5, nx_gpt5chat:5, nx_gpt54mini:5,
+  nx_gpt5chat:5, nx_gpt54mini:5,
   // 🔵 8积分（高端）
   nx_gpt5:8, nx_gpt5all:8, nx_gpt51codex:8, nx_gpt52chat:8, nx_gpt52pro:8,
   nx_claude_haiku:8, nx_flux:8, ali_qwen37_max:8,
@@ -5687,7 +5687,6 @@ function getKeyConfig(){
     {platform:'腾讯混元',prefix:'HUNYUAN',models:['hunyuan','hunyuan-large'],status:'ok',usagePercent:3,manageUrl:'https://console.cloud.tencent.com/hunyuan/start'},
     {platform:'七牛云合规',prefix:'QINIU',models:['qiniu_claude37','qiniu_claudeopus4','qiniu_gpt4o','qiniu_o3','qiniu_gemini25pro'],status:'down',usagePercent:0,manageUrl:'https://portal.qiniu.com/'},
     {platform:'DeepSeek',prefix:'DEEPSEEK',models:['deepseekv3','deepseekr1'],status:'ok',usagePercent:25,manageUrl:'https://platform.deepseek.com/usage'},
-    {platform:'百度千帆',prefix:'QF',models:['qf_ernie4','qf_ernie35','qf_ernie_speed'],status:'ok',usagePercent:8,manageUrl:'https://console.bce.baidu.com/qianfan'},
     {platform:'火山引擎',prefix:'ARK',models:['ark_doubao_pro','ark_doubao_lite'],status:'ok',usagePercent:5,manageUrl:'https://console.volcengine.com/ark'},
     {platform:'百川智能',prefix:'BC',models:['bc_baichuan4','bc_baichuan3'],status:'ok',usagePercent:3,manageUrl:'https://platform.baichuan-ai.com'},
     {platform:'科大讯飞星火',prefix:'SPARK',models:['spark4','spark-lite'],status:'ok',usagePercent:4,manageUrl:'https://xinghuo.xfyun.cn/'},
@@ -5904,6 +5903,103 @@ function renderAdminTable(){
 function openAddModel(){editingModelId=null;['modalTitle','editId','editName','editProvider','editDesc','editContext','editInputPrice','editOutputPrice'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});document.getElementById('editId').disabled=false;document.getElementById('editAvatar').value='#6366f1';document.getElementById('editFeatured').checked=false;document.getElementById('btnDeleteModel').style.display='none';document.getElementById('modelModal').classList.add('show')}
 function openEditModel(id){const m=adminModels.find(x=>x.id===id);if(!m)return;editingModelId=id;document.getElementById('modalTitle').textContent='编辑: '+m.name;document.getElementById('editId').value=m.id;document.getElementById('editId').disabled=true;document.getElementById('editName').value=m.name;document.getElementById('editProvider').value=m.provider;document.getElementById('editDesc').value=m.desc;document.getElementById('editAvatar').value=m.avatar;document.getElementById('editContext').value=m.context;document.getElementById('editInputPrice').value=m.inputPrice;document.getElementById('editOutputPrice').value=m.outputPrice;document.getElementById('editFeatured').checked=m.featured;document.getElementById('btnDeleteModel').style.display='inline-block';document.getElementById('modelModal').classList.add('show')}
 function closeModal(){document.getElementById('modelModal').classList.remove('show')}
+
+// 自定义模型下拉组件
+var _cmdDropdownId=0;
+function createCustomModelSelect(containerEl,pageId,allModels,saved,onChange){
+  if(!containerEl)return;
+  _cmdDropdownId++;
+  var id=_cmdDropdownId;
+  var wrap=document.createElement('div');
+  wrap.style.cssText='position:relative;flex:1;min-width:0';
+  wrap.setAttribute('data-dropdown-id',id);
+  
+  var trigger=document.createElement('div');
+  trigger.style.cssText='padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none';
+  
+  var arrow=document.createElement('span');
+  arrow.textContent='▾';
+  arrow.style.cssText='margin-left:auto;font-size:0.6rem;transition:transform 0.2s';
+  
+  var sm=allModels.find(function(m){return m.id===saved})||allModels[0];
+  if(sm){
+    var c1=getModelCost(sm.id);
+    trigger.innerHTML=sm.name+(c1===0?' <span style="font-size:0.6rem;padding:1px 5px;border-radius:3px;background:#10b981;color:#fff;font-weight:600;margin-left:4px">免费</span>':' <span style="font-size:0.6rem;color:var(--accent);font-weight:600;margin-left:4px">⚡'+c1+'</span>');
+  }
+  trigger.appendChild(arrow);
+  
+  var panel=document.createElement('div');
+  panel.className='cmd-panel';
+  panel.style.cssText='position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,0.15);max-height:280px;overflow-y:auto;display:none;margin-top:2px';
+  
+  var paid=[],free=[];
+  for(var i=0;i<allModels.length;i++){
+    var m=allModels[i];
+    if(getModelCost(m.id)>0)paid.push(m);
+    else free.push(m);
+  }
+  
+  function renderOptions(list,label){
+    if(!list.length)return'';
+    var h='<div style="padding:5px 10px;font-size:0.65rem;color:var(--text-secondary);font-weight:600;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0">'+label+'</div>';
+    for(var j=0;j<list.length;j++){
+      var m=list[j],c=getModelCost(m.id),sel=m.id===saved;
+      h+='<div class="cmd-opt" data-id="'+m.id+'" style="padding:6px 10px;cursor:pointer;font-size:0.72rem;display:flex;align-items:center;gap:4px;background:'+(sel?'var(--accent-light)':'transparent')+'">';
+      if(c===0)h+='<span style="font-size:0.6rem;padding:1px 5px;border-radius:3px;background:#10b981;color:#fff;font-weight:600">免费</span>';
+      else h+='<span style="font-size:0.6rem;color:var(--accent);font-weight:600">⚡'+c+'</span>';
+      h+='<span>'+m.name+'</span></div>';
+    }
+    return h;
+  }
+  panel.innerHTML=renderOptions(paid,'💰 收费模型')+renderOptions(free,'🆓 免费模型');
+  
+  trigger.onclick=function(e){
+    e.stopPropagation();
+    var others=document.querySelectorAll('.cmd-panel');
+    for(var k=0;k<others.length;k++)others[k].style.display='none';
+    var allArrows=document.querySelectorAll('[data-dropdown-id] .cmd-arrow-self');
+    for(var k2=0;k2<allArrows.length;k2++)allArrows[k2].style.transform='';
+    if(panel.style.display!=='block'){
+      panel.style.display='block';
+      arrow.style.transform='rotate(180deg)';
+    }
+  };
+  
+  panel.onclick=function(e){
+    var el=e.target;
+    while(el&&el!==panel){
+      if(el.classList&&el.classList.contains('cmd-opt')){
+        var val=el.getAttribute('data-id');
+        var model=null;
+        for(var q=0;q<allModels.length;q++){if(allModels[q].id===val){model=allModels[q];break}}
+        if(model){
+          var c2=getModelCost(model.id);
+          trigger.innerHTML=model.name+(c2===0?' <span style="font-size:0.6rem;padding:1px 5px;border-radius:3px;background:#10b981;color:#fff;font-weight:600;margin-left:4px">免费</span>':' <span style="font-size:0.6rem;color:var(--accent);font-weight:600;margin-left:4px">⚡'+c2+'</span>');
+          trigger.appendChild(arrow);
+          panel.style.display='none';
+          arrow.style.transform='';
+          localStorage.setItem('pageModel_'+pageId,val);
+          if(onChange)onChange(pageId,val);
+        }
+        break;
+      }
+      el=el.parentNode;
+    }
+  };
+  
+  document.addEventListener('click',function _cmdCloseHandler(ce){
+    if(!wrap.contains(ce.target)){
+      panel.style.display='none';
+      arrow.style.transform='';
+    }
+  });
+  
+  arrow.className='cmd-arrow-self';
+  wrap.appendChild(trigger);
+  wrap.appendChild(panel);
+  containerEl.innerHTML='';
+  containerEl.appendChild(wrap);
+}
 function saveModel(){const id=document.getElementById('editId').value.trim(),name=document.getElementById('editName').value.trim(),prov=document.getElementById('editProvider').value.trim();if(!id||!name||!prov){showToast('ID/名称/供应商必填');return}if(!editingModelId&&adminModels.find(m=>m.id===id)){showToast('ID已存在');return}const md={id,name,provider:prov,desc:document.getElementById('editDesc').value.trim(),avatar:document.getElementById('editAvatar').value,tags:editingModelId?(adminModels.find(m=>m.id===editingModelId)?.tags||[]):[],context:document.getElementById('editContext').value.trim()||'128K',inputPrice:document.getElementById('editInputPrice').value.trim()||'--',outputPrice:document.getElementById('editOutputPrice').value.trim()||'--',featured:document.getElementById('editFeatured').checked,free:false};if(editingModelId){const i=adminModels.findIndex(m=>m.id===editingModelId);if(i>=0)adminModels[i]=md}else adminModels.push(md);saveAndRefresh();closeModal();showToast(editingModelId?'已更新':'已添加')}
 function deleteModelConfirm(id){if(confirm('确定删除？')){adminModels=adminModels.filter(m=>m.id!==id);saveAndRefresh();closeModal();showToast('已删除')}}
 function toggleFeatured(id){const m=adminModels.find(x=>x.id===id);if(m){m.featured=!m.featured;saveAndRefresh()}}
@@ -7053,15 +7149,12 @@ function renderModelBar(pageId,containerId){
   const el=document.getElementById(containerId);
   if(!el||!rec)return;
   const saved=localStorage.getItem('pageModel_'+pageId)||rec.id;
-  // 动态生成全部模型选项
-  const allOpts=models.filter(m=>!m.hidden&&(!rec.filter||(m.tags&&m.tags.includes(rec.filter)))).map(m=>`<option value="${m.id}" ${saved===m.id?'selected':''}>${m.name} ${getModelCost(m.id)===0?'🆓免费':'⚡'+getModelCost(m.id)}</option>`).join('');
+  const baseFilter=models.filter(m=>!m.hidden&&(!rec.filter||(m.tags&&m.tags.includes(rec.filter))));
   el.innerHTML=`
     <div class="feature-card" style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:12px;background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(99,102,241,0.05))">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="font-size:0.75rem;font-weight:600;">🤖 模型选择</span>
-        <select id="pm_${pageId}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.75rem;min-width:200px;max-width:280px" onchange="PAGE_MODEL_CHANGE('${pageId}',this.value)">
-          ${allOpts}
-        </select>
+        <div id="customPm_${pageId}" style="min-width:200px;max-width:280px"></div>
         <span style="font-size:0.65rem;padding:2px 8px;background:rgba(245,158,11,0.15);color:#f59e0b;border-radius:10px;font-weight:600">✨ 推荐 ${rec.name}</span>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -7069,6 +7162,7 @@ function renderModelBar(pageId,containerId){
       </div>
     </div>
   `;
+  setTimeout(()=>createCustomModelSelect(document.getElementById('customPm_'+pageId),pageId,baseFilter,saved,PAGE_MODEL_CHANGE),50);
 }
 function PAGE_MODEL_CHANGE(pageId,val){
   localStorage.setItem('pageModel_'+pageId,val);
