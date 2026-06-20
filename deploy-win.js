@@ -90,8 +90,10 @@ function deployFrontend(cb) {
   console.log('\n🌐 [前端] 部署前端文件...');
   uploadFile(BASE + '/index.html', FRONTEND_DIR + '/index.html', () => {
     uploadFile(BASE + '/landing.html', FRONTEND_DIR + '/landing.html', () => {
-      console.log('📁 上传 js/ 目录...');
-      uploadDir(BASE + '/js', FRONTEND_DIR + '/js', cb);
+      uploadFile(BASE + '/dashboard.html', FRONTEND_DIR + '/dashboard.html', () => {
+        console.log('📁 上传 js/ 目录...');
+        uploadDir(BASE + '/js', FRONTEND_DIR + '/js', cb);
+      });
     });
   });
 }

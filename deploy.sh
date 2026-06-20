@@ -41,6 +41,8 @@ echo ""
 deploy_frontend() {
   echo "🌐 [前端] 部署前端文件..."
   $SCP_CMD index.html $SERVER:$FRONTEND_DIR/index.html
+  $SCP_CMD dashboard.html $SERVER:$FRONTEND_DIR/dashboard.html
+  $SCP_CMD landing.html $SERVER:$FRONTEND_DIR/landing.html
   $SCP_CMD -r js $SERVER:$FRONTEND_DIR/js
   echo "  ✅ 前端更新完成"
 }
