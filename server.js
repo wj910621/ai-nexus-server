@@ -1463,6 +1463,9 @@ async function initDB() {
   try { db.run(`ALTER TABLE users ADD COLUMN membership_expires TEXT DEFAULT ''`); } catch(e) {}
   try { db.run(`ALTER TABLE users ADD COLUMN daily_free_usage INTEGER DEFAULT 0`); } catch(e) {}
   try { db.run(`ALTER TABLE users ADD COLUMN daily_free_date TEXT DEFAULT ''`); } catch(e) {}
+  // === 签到系统字段 ===
+  try { db.run(`ALTER TABLE users ADD COLUMN checkin_date TEXT DEFAULT ''`); } catch(e) {}
+  try { db.run(`ALTER TABLE users ADD COLUMN checkin_streak INTEGER DEFAULT 0`); } catch(e) {}
   // === 访客设备指纹表（反作弊积分持久化） ===
   db.run(`CREATE TABLE IF NOT EXISTS guest_fingerprints (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1835,6 +1838,70 @@ app.get('/api/user/credits', (req, res) => {
       return res.json({ ok: false, error: '用户不存在' });
     }
     res.json({ ok: true, credits: user[0].values[0][0] });
+  } catch(e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// ===== 签到系统 =====
+// 执行签到
+app.post('/api/user/checkin', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.json({ ok: false, error: '未登录' });
+  try {
+    const payload = verifyToken(token);
+    const username = payload.username;
+    const today = new Date().toISOString().slice(0, 10);
+    // 检查今天是否已签到
+    const existing = db.exec("SELECT checkin_date FROM users WHERE username=?", [username]);
+    let lastCheckin = '';
+    if (existing.length && existing[0].values.length && existing[0].values[0]) {
+      lastCheckin = existing[0].values[0];
+    }
+    if (lastCheckin === today) {
+      return res.json({ ok: false, error: '今天已经签到过了', already: true });
+    }
+    // 计算连续签到
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    let streak = 0;
+    const streakResult = db.exec("SELECT checkin_streak FROM users WHERE username=?", [username]);
+    if (streakResult.length && streakResult[0].values.length && streakResult[0].values[0] !== null && streakResult[0].values[0] !== undefined) {
+      streak = streakResult[0].values[0] || 0;
+    }
+    if (lastCheckin === yesterday) {
+      streak += 1;
+    } else {
+      streak = 1;
+    }
+    let bonus = 5;
+    if (streak % 7 === 0) bonus += 5;
+    if (streak % 30 === 0) bonus += 20;
+    db.run("UPDATE users SET credits=credits+?, checkin_date=?, checkin_streak=? WHERE username=?", [bonus, today, streak, username]);
+    db.run("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)", [username, bonus, '每日签到']);
+    saveDB();
+    const newCredits = db.exec("SELECT credits FROM users WHERE username=?", [username]);
+    const credits = newCredits.length && newCredits[0].values.length ? newCredits[0].values[0][0] : 0;
+    res.json({ ok: true, bonus, streak, credits });
+  } catch(e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// 查询签到状态
+app.get('/api/user/checkin-status', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.json({ ok: false, error: '未登录' });
+  try {
+    const payload = verifyToken(token);
+    const today = new Date().toISOString().slice(0, 10);
+    const result = db.exec("SELECT checkin_date, checkin_streak FROM users WHERE username=?", [payload.username]);
+    if (result.length && result[0].values.length) {
+      const lastDate = result[0].values[0] || '';
+      const streak = result[0].values[1] || 0;
+      res.json({ ok: true, checkedIn: lastDate === today, streak: streak || 0, lastDate });
+    } else {
+      res.json({ ok: true, checkedIn: false, streak: 0, lastDate: '' });
+    }
   } catch(e) {
     res.json({ ok: false, error: e.message });
   }

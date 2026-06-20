@@ -3606,7 +3606,7 @@ async function callModelAPI(modelId,question,sysPrompt){
   const body={model:modelId,messages:msgs};
   if(m&&m.rawModel) body.rawModel=m.rawModel;
   try{
-    const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify(body)});
     if(r.ok) return await r.json();
     const errBody=await r.json().catch(()=>({}));
     const errMsg=errBody?.error?.message||errBody?.error||`服务器错误 ${r.status}`;
@@ -4601,30 +4601,48 @@ function subscribe(type){
 // === 每日签到 ===
 function DAILY_CHECKIN(){
   if(!currentUser){showToast('请先登录');return}
-  const today=new Date().toDateString();
-  const streak=JSON.parse(localStorage.getItem('checkin_streak')||'{"date":"","count":0}');
-  if(streak.date===today){showToast('今天已经签到过了，明天再来吧~');return}
-  const yesterday=new Date(Date.now()-86400000).toDateString();
-  if(streak.date===yesterday)streak.count++; else streak.count=1;
-  streak.date=today;
-  // 连续签到奖励
-  let bonus=5;
-  if(streak.count%7===0)bonus+=5; // 每7天额外+5
-  if(streak.count%30===0)bonus+=20; // 每30天额外+20
-  localStorage.setItem('checkin_streak',JSON.stringify(streak));
-  userCredits+=bonus;localStorage.setItem('cr',userCredits);updateCreditDisplay();
-  const bonusMsg=streak.count%7===0?'🎉 连续7天! +8':streak.count%30===0?'🔥 连续30天! +23':`+${bonus}`;
-  showToast(`✅ 签到成功! ${bonusMsg}积分 · 连续${streak.count}天 · 余额${userCredits}`);
-  updateCheckinBtn();
+  // 先通过服务端验证（防止跨设备/跨浏览器重复签到）
+  fetch(API_BASE+'/api/user/checkin',{method:'POST',headers:getAuthHeader()})
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.ok){
+        userCredits=d.credits;
+        localStorage.setItem('cr',userCredits);
+        updateCreditDisplay();
+        const msg=d.streak%7===0?'🎉 连续7天!':d.streak%30===0?'🔥 连续30天!':`+${d.bonus}`;
+        showToast(`✅ 签到成功! ${msg}积分 · 连续${d.streak}天 · 余额${d.credits}`);
+        updateCheckinBtn();
+      }else if(d.already){
+        showToast('今天已经签到过了，明天再来吧~');
+      }else{
+        showToast(d.error||'签到失败');
+      }
+    })
+    .catch(()=>{showToast('网络错误，签到失败')});
 }
 function updateCheckinBtn(){
   const btn=document.getElementById('checkinBtn');
   if(!currentUser){btn.style.display='none';return}
   btn.style.display='inline-flex';
-  const today=new Date().toDateString();
-  const streak=JSON.parse(localStorage.getItem('checkin_streak')||'{"date":"","count":0}');
-  if(streak.date===today){btn.textContent='✅ 已签到';btn.style.background='var(--bg-card)';btn.style.opacity='0.6'}
-  else{btn.textContent='📅 签到 +5';btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)';btn.style.opacity='1'}
+  // 从服务端查询签到状态
+  fetch(API_BASE+'/api/user/checkin-status',{headers:getAuthHeader()})
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.ok && d.checkedIn){
+        btn.textContent='✅ 已签到';
+        btn.style.background='var(--bg-card)';
+        btn.style.opacity='0.6';
+      }else{
+        btn.textContent='📅 签到 +5';
+        btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)';
+        btn.style.opacity='1';
+      }
+    })
+    .catch(()=>{
+      btn.textContent='📅 签到 +5';
+      btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)';
+      btn.style.opacity='1';
+    });
 }
 
 // === User Auth ===
