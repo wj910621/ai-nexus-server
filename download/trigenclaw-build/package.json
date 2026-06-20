@@ -46,9 +46,7 @@
       "artifactName": "TriGenClaw-${version}-linux.${ext}",
       "icon": "build/icon.png",
       "maintainer": "TriGen <admin@j3trisheng.com>",
-      "category": "Utility",
-      "desktopName": "trigenclaw",
-      "synopsis": "AI Desktop Workbench"
+      "category": "Utility"
     },
     "nsis": {
       "oneClick": false,

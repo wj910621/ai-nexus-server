@@ -40,6 +40,15 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
+  // 添加 Content-Security-Policy 安全策略
+  mainWindow.webContents.session.webRequest.onHeadersReceived(function(details, callback) {
+    callback({
+      responseHeaders: Object.assign({
+        'Content-Security-Policy': ["default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://j3trisheng.com https://api.j3trisheng.com; img-src 'self' data: blob:;"]
+      }, details.responseHeaders)
+    });
+  });
+
   // 窗口就绪后显示（避免白屏）
   mainWindow.once('ready-to-show', function() {
     mainWindow.show();
@@ -66,11 +75,7 @@ function createWindow() {
 
 // ===== 系统托盘 =====
 function createTray() {
-  // 创建 16x16 托盘图标（使用 Canvas 生成）
-  const iconSize = 16;
-  const canvas = document?.createElement?.('canvas');
-  // 由于 Electron 主进程没有 DOM，使用 nativeImage 从文件创建
-  // 备用：使用内置图标或引用 build 目录
+  // Electron 主进程没有 DOM，使用 nativeImage 从文件创建
   const iconPath = path.join(__dirname, 'build', 'tray-icon.png');
   let trayIcon;
   try {
@@ -414,6 +419,12 @@ function setupIPC() {
 
   // 打开外部链接
   ipcMain.handle('shell:open-external', async function(event, url) {
+    // 安全校验：仅允许 https 和 http 协议
+    if (typeof url !== 'string') return;
+    try {
+      var parsed = new URL(url);
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
+    } catch(e) { return; }
     shell.openExternal(url);
   });
 

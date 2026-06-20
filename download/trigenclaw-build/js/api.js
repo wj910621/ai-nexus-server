@@ -7,7 +7,7 @@ var NexusAPI = (function() {
   'use strict';
 
   /* ---------- 内部状态 ---------- */
-  var _authToken = localStorage.getItem('nx_auth_token') || '';
+  var _authToken = localStorage.getItem('nx_auth_token') || localStorage.getItem('auth_token') || '';
   var _defaultBaseUrl = 'https://j3trisheng.com';
   var _worker = null;
   var _callbacks = {};

@@ -76,9 +76,12 @@
 
   async function callTriGenAPI(messages) {
     try {
+      var authToken = localStorage.getItem('nx_auth_token') || localStorage.getItem('auth_token') || '';
+      var headers = { 'Content-Type': 'application/json' };
+      if (authToken) headers['x-auth-token'] = authToken;
       var response = await fetch(API_BASE + '/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({
           messages: messages,
           model: 'deepseek-v3',
