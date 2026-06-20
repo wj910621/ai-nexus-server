@@ -4888,7 +4888,7 @@ function doRegister(){doRegisterNew()}
 function showRegister(){document.getElementById('authModal').classList.add('show');switchAuthTab('register')}
 function genRefCode(u){return 'J3'+u.substring(0,3).toUpperCase()+String(Math.floor(Math.random()*9000+1000))}
 function atobFix(s){try{return decodeURIComponent(escape(atob(s)))}catch(e){try{return atob(s)}catch(e2){return s}}}
-function doLogout(){currentUser=null;setAuthToken(null);localStorage.removeItem('cuser');localStorage.removeItem('cr');renderUserNav();updateCreditDisplay();updateCheckinBtn();showToast('已退出')}
+function doLogout(){currentUser=null;setAuthToken(null);localStorage.removeItem('cuser');localStorage.removeItem('cr');localStorage.removeItem('membership');localStorage.removeItem('membership_expires');location.reload()}
 
 // === 会员体系 ===
 const MEMBERSHIP_PLANS={
@@ -5770,8 +5770,8 @@ let adminToken=localStorage.getItem('admin_token')||null;
 function adminLogin(){
   const p=document.getElementById('adminPwd').value;
   if(!p){showToast('请输入密码');return}
-  // 优先用 /api/admin/auth（读取 .env ADMIN_PASSWORD）
-  fetch(API_BASE+'/api/admin/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})})
+  // 调用服务端 admin 登录（JWT 认证）
+  fetch(API_BASE+'/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})})
   .then(r=>r.json()).then(d=>{
     if(d.ok&&d.token){
       adminToken=d.token;
@@ -5782,20 +5782,10 @@ function adminLogin(){
       loadAdminUsers();
       showToast('✅ 管理员登录成功');
     }else{
-      // 降级到本地密码 (admin123)
-      const s=localStorage.getItem(ADMIN_STORAGE_KEY)||DEFAULT_PASSWORD;
-      if(p===s){
-        localStorage.setItem(ADMIN_STORAGE_KEY,p);
-        document.getElementById('adminLogin').style.display='none';
-        document.getElementById('adminDashboard').style.display='block';
-        renderAdminTable();renderFeedback();
-        showToast('登录成功（本地模式）');
-      }else{showToast(d.error||'密码错误')}
+      showToast(d.error||'密码错误');
     }
   }).catch(()=>{
-    const s=localStorage.getItem(ADMIN_STORAGE_KEY)||DEFAULT_PASSWORD;
-    if(p===s){document.getElementById('adminLogin').style.display='none';document.getElementById('adminDashboard').style.display='block';renderAdminTable();renderFeedback();showToast('登录成功（本地模式）')}
-    else showToast('密码错误');
+    showToast('服务器连接失败');
   });
 }
 function adminLogout(){document.getElementById('adminLogin').style.display='block';document.getElementById('adminDashboard').style.display='none';adminToken=null;localStorage.removeItem('admin_token')}
@@ -5909,7 +5899,29 @@ function renderPlatformBalances(){
     </div>`;
   }).join('');
 }
-function refreshBalanceUI(){renderPlatformBalances();showToast('✅ 已刷新')}
+function refreshBalanceUI(){
+  // 从服务端实时拉取余额
+  showToast('🔄 正在查询各平台余额...');
+  adminFetch('/api/admin/balances').then(d=>{
+    if(d.ok && d.balances){
+      // 存入 localStorage 供展示使用
+      const balMap = {};
+      Object.entries(d.balances).forEach(([key, val]) => {
+        balMap[key.toUpperCase()] = parseFloat(val.balance) || 0;
+      });
+      localStorage.setItem('platform_balances', JSON.stringify(balMap));
+      renderPlatformBalances();
+      const count = Object.keys(d.balances).length;
+      showToast(`✅ 已查询 ${count} 个平台余额`);
+    } else {
+      renderPlatformBalances();
+      showToast('余额查询失败，显示本地数据');
+    }
+  }).catch(()=>{
+    renderPlatformBalances();
+    showToast('网络错误，显示本地数据');
+  });
+}
 
 function renderAdminTable(){
   // 渲染平台余额概览
