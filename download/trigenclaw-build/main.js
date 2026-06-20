@@ -19,6 +19,24 @@ let tray = null;
 let isQuitting = false;
 let currentProjectPath = null;
 
+// ===== 文件系统沙箱：限制 IPC 文件操作到项目目录 =====
+const ALLOWED_BASE_DIR = path.resolve(__dirname);
+
+function isPathSafe(targetPath) {
+  try {
+    const resolved = path.resolve(targetPath);
+    const allowed = [ALLOWED_BASE_DIR];
+    if (currentProjectPath) {
+      allowed.push(path.resolve(currentProjectPath));
+    }
+    return allowed.some(function(base) {
+      return resolved.startsWith(base + path.sep) || resolved === base;
+    });
+  } catch(e) {
+    return false;
+  }
+}
+
 // ===== 主窗口 =====
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -34,7 +52,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: false
+      sandbox: true
     }
   });
 
@@ -327,18 +345,21 @@ function registerShortcuts() {
 
 // ===== 文件系统 IPC =====
 function setupIPC() {
-  // 读取目录树
+  // 读取目录树（安全路径校验）
   ipcMain.handle('file:list', async function(event, dirPath) {
     try {
-      return readDirectoryTree(dirPath || currentProjectPath || __dirname);
+      const target = dirPath || currentProjectPath || __dirname;
+      if (!isPathSafe(target)) return { error: '无权访问该目录', path: target, items: [] };
+      return readDirectoryTree(target);
     } catch (e) {
       return { error: e.message, path: dirPath, items: [] };
     }
   });
 
-  // 读取文件
+  // 读取文件（安全路径校验）
   ipcMain.handle('file:read', async function(event, filePath) {
     try {
+      if (!isPathSafe(filePath)) return { success: false, error: '无权访问该文件' };
       const content = fs.readFileSync(filePath, 'utf-8');
       return { success: true, content: content };
     } catch (e) {
@@ -346,9 +367,10 @@ function setupIPC() {
     }
   });
 
-  // 写入文件
+  // 写入文件（安全路径校验）
   ipcMain.handle('file:write', async function(event, filePath, content) {
     try {
+      if (!isPathSafe(filePath)) return { success: false, error: '无权写入该路径' };
       const dir = path.dirname(filePath);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(filePath, content, 'utf-8');
@@ -358,9 +380,10 @@ function setupIPC() {
     }
   });
 
-  // 删除文件
+  // 删除文件（安全路径校验）
   ipcMain.handle('file:delete', async function(event, filePath) {
     try {
+      if (!isPathSafe(filePath)) return { success: false, error: '无权删除该文件' };
       fs.unlinkSync(filePath);
       return { success: true };
     } catch (e) {
@@ -368,9 +391,10 @@ function setupIPC() {
     }
   });
 
-  // 创建文件
+  // 创建文件（安全路径校验）
   ipcMain.handle('file:create', async function(event, filePath) {
     try {
+      if (!isPathSafe(filePath)) return { success: false, error: '无权在该路径创建文件' };
       const dir = path.dirname(filePath);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(filePath, '', 'utf-8');

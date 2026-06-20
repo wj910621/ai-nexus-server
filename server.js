@@ -39,6 +39,17 @@ app.use(cors({
 app.use(morgan('short'));
 app.use(express.json({ limit: '10mb' }));
 
+// ===== 安全响应头 =====
+app.use(function(req, res, next) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
+  res.removeHeader('X-Powered-By');
+  next();
+});
+
 // 提供前端静态文件（支持多种目录结构：本地开发 / Railway 部署）
 let staticDir = path.resolve(__dirname, '..');
 if (!fs.existsSync(path.join(staticDir, 'index.html')) && !fs.existsSync(path.join(staticDir, 'dashboard.html'))) {
@@ -116,9 +127,9 @@ app.get('/dashboard', (req, res) => {
 app.use(express.static(staticDir));
 
 // Nexus Studio 前端 PWA 静态文件服务
-// 部署时前端文件位于 /home/admin/nexus-studio，可通过 /studio 访问
+// 安全校验：只允许 /home/admin/nexus-studio 路径
 const studioDir = process.env.STUDIO_DIR || '/home/admin/nexus-studio';
-if (fs.existsSync(studioDir)) {
+if (fs.existsSync(studioDir) && path.resolve(studioDir).startsWith('/home/admin/')) {
   app.use('/studio', express.static(studioDir, {
     // 禁止缓存，防止 Service Worker 缓存旧版本导致 init is not defined 等错误
     setHeaders: function(res, filePath) {
@@ -515,11 +526,11 @@ const API_MODEL_COST = {
   ark_dbp15p:0, ark_dbs_char:0,
   nx_gpt5:8, nx_gpt5mini:3, nx_gpt5chat:5, nx_gpt5nano:2, nx_gpt5all:8,
   nx_gpt51chat:6, nx_gpt51codex:8, nx_gpt51codexmax:10,
-  nx_gpt52chat:8, nx_gpt52pro:8, nx_gpt53chat:18, nx_gpt53codex:25,
+  nx_gpt52chat:8, nx_gpt52pro:8, nx_gpt53chat:8, nx_gpt53codex:12,
   nx_gpt54pro:12, nx_gpt54mini:5, nx_gpt54nano:3,
   nx_gpt55pro:15, nx_gpt55:15,
-  nx_claude_opus:25, nx_claude_sonnet:15, nx_claude_haiku:8,
-  nx_gemini_pro:12, nx_o3mini:10, nx_dalle3:15, nx_flux:8, nx_suno:15, nx_grok3:15,
+  nx_claude_opus:12, nx_claude_sonnet:6, nx_claude_haiku:5,
+  nx_gemini_pro:6, nx_o3mini:5, nx_dalle3:8, nx_flux:5, nx_suno:8, nx_grok3:8,
   meshy_text:288, meshy_image:288,
   ark_doubao_pro:0, ark_doubao_lite:0,
   bc_baichuan4:2, bc_baichuan3:1,
@@ -1546,7 +1557,11 @@ async function initDB() {
   // 确保有 admin 用户
   const adminExists = db.exec("SELECT id FROM users WHERE username='admin'");
   if (!adminExists.length || !adminExists[0].values.length) {
-    const adminPass = process.env.ADMIN_PASSWORD || 'admin888';
+    const adminPass = process.env.ADMIN_PASSWORD;
+    if (!adminPass || adminPass.length < 8) {
+      console.error('❌ 首次启动必须设置 ADMIN_PASSWORD 环境变量（至少8位），请配置 .env 文件后重启');
+      process.exit(1);
+    }
     db.run("INSERT INTO users (username, email, password, credits, role) VALUES (?, ?, ?, ?, ?)",
       ['admin', 'admin@j3trisheng.com', hashPasswordSync(adminPass), 9999, 'admin']);
   }
@@ -1844,15 +1859,9 @@ function requireAdmin(req, res, next) {
   }
   try {
     const token = auth.slice(7);
-    let payload;
-    // 尝试 JWT 验证（兼容 /api/admin/login 返回的 JWT）
-    try {
-      payload = verifyToken(token);
-      if (!payload || payload.role !== 'admin') throw new Error('not_admin');
-    } catch(jwtErr) {
-      // 降级为 Base64 JSON 解码（兼容旧格式）
-      payload = JSON.parse(Buffer.from(token, 'base64').toString());
-      if (payload.role !== 'admin') throw new Error('not_admin');
+    const payload = verifyToken(token);
+    if (!payload || payload.role !== 'admin') {
+      return res.status(403).json({ ok: false, error: '无管理员权限' });
     }
     req.adminUser = payload.username;
     next();
@@ -2229,7 +2238,11 @@ app.post('/api/novels/:id/characters', authRequired, (req, res) => {
 app.put('/api/characters/:id', authRequired, (req, res) => {
   try {
     var fields = req.body;
-    Object.keys(fields).forEach(function(k) { db.run("UPDATE novel_characters SET " + k + "=? WHERE id=?", [fields[k], req.params.id]); });
+    var ALLOWED_COLS = ['name','age','gender','personality','appearance','background','traits','role','status','description','goal','motivation','relationship','notes'];
+    Object.keys(fields).forEach(function(k) {
+      if(ALLOWED_COLS.indexOf(k)===-1)return; // 跳过非白名单字段
+      db.run("UPDATE novel_characters SET " + k + "=? WHERE id=?", [fields[k], req.params.id]);
+    });
     saveDB();
     res.json({ ok: true });
   } catch(e) { res.json({ ok: false, error: e.message }); }
@@ -2762,9 +2775,9 @@ app.post('/api/user/update-profile', (req, res) => {
     const { email, oldPassword, newPassword } = req.body;
     const user = db.exec("SELECT password FROM users WHERE username=?", [payload.username]);
     if (!user.length || !user[0].values.length) return res.json({ ok: false, error: '用户不存在' });
-    if (user[0].values[0][0] !== oldPassword) return res.json({ ok: false, error: '当前密码错误' });
+    if (!verifyPasswordSync(oldPassword, user[0].values[0][0])) return res.json({ ok: false, error: '当前密码错误' });
     if (email) db.run("UPDATE users SET email=? WHERE username=?", [email, payload.username]);
-    if (newPassword) db.run("UPDATE users SET password=? WHERE username=?", [newPassword, payload.username]);
+    if (newPassword) db.run("UPDATE users SET password=? WHERE username=?", [hashPasswordSync(newPassword), payload.username]);
     saveDB();
     res.json({ ok: true, message: '已保存' });
   } catch(e) { res.json({ ok: false, error: e.message }); }
