@@ -51,30 +51,23 @@ jobs:
           echo "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           echo "Using version: $ver"
 
-      - name: Build portable ZIP
+      - name: Build installer + portable ZIP
         shell: pwsh
         run: |
           $ver = "${{ steps.version.outputs.version }}"
-          $root = "G:\大模型聚合网站\download"
           
-          # 先用 electron-builder 打包安装包
+          # 打包安装程序 (electron-builder)
           npm run dist:win
           
-          # 同时创建便携版 ZIP（包含 Electron + app 文件）
-          $releaseDir = "release\win"
-          if (Test-Path "release\TriGenClaw-*-win-Setup.exe") {
-            $setup = Get-ChildItem "release\TriGenClaw-*-win-Setup.exe" | Select-Object -First 1
-            echo "Setup built: $($setup.Name)"
-          }
-          
-          # 创建 ZIP 便携版
+          # 同时创建 ZIP 便携版
           $zipName = "TriGenClaw-$ver-Portable.zip"
-          # 从已安装的 nsis 安装包中提取文件太复杂
-          # 改用 electron-builder 的 unpacked 目录
           if (Test-Path "release\win-unpacked") {
             Compress-Archive -Path "release\win-unpacked\*" -DestinationPath "release\$zipName" -Force
-            echo "Portable ZIP created: $zipName"
+            echo "✅ Portable ZIP: $zipName"
           }
+          
+          # 列出产物
+          Get-ChildItem release\ | Select-Object Name, Length
 
       - name: Create Release
         id: create_release
