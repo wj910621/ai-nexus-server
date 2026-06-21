@@ -3112,7 +3112,9 @@ app.post('/api/guest/spend', (req, res) => {
 const INTERNAL_SERVICE_TOKEN = crypto.randomBytes(32).toString('hex');
 global.__INTERNAL_SERVICE_TOKEN = INTERNAL_SERVICE_TOKEN;
 
-const ag=require('./agent-engine');const am=ag.createAgentRouter();app.use('/api/agent',am.router);console.log('Agent:'+am.toolRegistry.list().length+' tools');
+const ag=require('./agent-engine');const am=ag.createAgentRouter();app.use('/api/agent',am.router);console.log('Agent v1:'+am.toolRegistry.list().length+' tools');
+// Agent v2 — Harness Engineering 对齐（Claude Code 架构）
+try{const av2=require('./agent-engine-v2');const amv2=av2.createAgentRouter();app.use('/api/agent/v2',amv2.router);console.log('Agent v2:'+amv2.toolRegistry.list().length+' tools, mode:'+amv2.agentEngine.permissions.mode);}catch(e){console.log('[Agent v2] Init:',e.message);}
 // Agentic RAG v2 routes (registered before 404 handler, uses global.__rag_db lazily)
 try { var rag = require('./rag-vector'); if (rag && rag.registerRoutes) { rag.registerRoutes(app); console.log('[RAG] Routes registered'); } } catch(e) { console.log('[RAG] Route init:', e.message); }
 // ============================================================

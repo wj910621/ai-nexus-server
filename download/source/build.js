@@ -2,7 +2,7 @@ const fs = require('fs'), path = require('path');
 const V = process.argv.includes('--version') ? process.argv[process.argv.indexOf('--version') + 1] : '0';
 const $ROOT = __dirname;
 
-// 所有需要内联的 JS 文件（按依赖顺序�?const INL = ['storage.js','api.js','models.js','chat.js','code.js','agent.js','skills.js','plugin.js','particles.js','autonomous.js','knowledge.js','ui.js','app.js'];
+// 所有需要内联的 JS 文件（按依赖顺序�?const INL = ['storage.js','api.js','models.js','chat.js','code.js','agent.js','agent-v2.js','skills.js','plugin.js','particles.js','autonomous.js','knowledge.js','ui.js','app.js'];
 
 function esc(h) {
   return h.replace(/<\/script>(?!\s*[\r\n])/g, '<\\/script>');

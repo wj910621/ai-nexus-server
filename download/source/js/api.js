@@ -7,7 +7,7 @@ var NexusAPI = (function() {
   'use strict';
 
   /* ---------- 内部状态 ---------- */
-  var _authToken = localStorage.getItem('nx_auth_token') || localStorage.getItem('auth_token') || '';
+  var _authToken = localStorage.getItem('nx_auth_token') || '';
   var _defaultBaseUrl = 'https://j3trisheng.com';
   var _worker = null;
   var _callbacks = {};
@@ -403,6 +403,89 @@ var NexusAPI = (function() {
     }).then(function(r) { return r.json(); });
   }
 
+  /* ========== Agent v2 API — Harness Engineering 引擎 ========== */
+
+  /** 流式 Agent 对话（SSE） */
+  function agentChatStream(task, model, maxIterations, onEvent, onDone, onError) {
+    var url = _defaultBaseUrl + '/api/agent/v2/chat/stream';
+    return fetch(url, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ task: task, model: model || 'deepseekv3', maxIterations: maxIterations || 30, stream: true })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Agent v2 HTTP ' + r.status);
+      var reader = r.body.getReader();
+      var decoder = new TextDecoder();
+      var buffer = '';
+      function pump() {
+        return reader.read().then(function(result) {
+          if (result.done) { if (onDone) onDone(); return; }
+          buffer += decoder.decode(result.value, { stream: true });
+          var lines = buffer.split('\n');
+          buffer = lines.pop();
+          lines.forEach(function(line) {
+            if (line.startsWith('data: ')) {
+              try { var d = JSON.parse(line.slice(6)); if (onEvent) onEvent(d); } catch(e) {}
+            }
+          });
+          return pump();
+        });
+      }
+      return pump();
+    }).catch(function(e) { if (onError) onError(e); });
+  }
+
+  /** 非流式 Agent 对话 */
+  function agentV2Chat(task, model, maxIterations) {
+    return fetch(_defaultBaseUrl + '/api/agent/v2/chat', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ task: task, model: model || 'deepseekv3', maxIterations: maxIterations || 30 })
+    }).then(function(r) { return r.json(); });
+  }
+
+  /** 派发子 Agent */
+  function agentSpawn(task, model, maxIterations) {
+    return fetch(_defaultBaseUrl + '/api/agent/v2/agent/spawn', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ task: task, model: model || 'deepseekv3', maxIterations: maxIterations || 10 })
+    }).then(function(r) { return r.json(); });
+  }
+
+  /** 任务管理 */
+  function taskCreate(subject, description) {
+    return fetch(_defaultBaseUrl + '/api/agent/v2/tasks', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ subject: subject, description: description })
+    }).then(function(r) { return r.json(); });
+  }
+  function taskList(status) {
+    var q = status ? '?status=' + status : '';
+    return fetch(_defaultBaseUrl + '/api/agent/v2/tasks' + q, { headers: getHeaders() }).then(function(r) { return r.json(); });
+  }
+  function taskUpdate(id, updates) {
+    return fetch(_defaultBaseUrl + '/api/agent/v2/tasks/' + id, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify(updates || {})
+    }).then(function(r) { return r.json(); });
+  }
+
+  /** 权限 */
+  function permissions() { return fetch(_defaultBaseUrl + '/api/agent/v2/permissions', { headers: getHeaders() }).then(function(r) { return r.json(); }); }
+  function setPermissionMode(mode) {
+    return fetch(_defaultBaseUrl + '/api/agent/v2/permissions', {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify({ mode: mode })
+    }).then(function(r) { return r.json(); });
+  }
+
+  /** 技能列表 */
+  function listSkills() { return fetch(_defaultBaseUrl + '/api/agent/v2/skills', { headers: getHeaders() }).then(function(r) { return r.json(); }); }
+
   /* ---------- Provider 管理 ---------- */
   function getProviders() { return PROVIDERS; }
   function getModelProviderMap() { return MODEL_PROVIDER; }
@@ -423,6 +506,16 @@ var NexusAPI = (function() {
     agentExecute: agentExecute,
     agentPlan: agentPlan,
     toolExecute: toolExecute,
-    listTools: listTools
+    listTools: listTools,
+    // v2
+    agentChatStream: agentChatStream,
+    agentV2Chat: agentV2Chat,
+    agentSpawn: agentSpawn,
+    taskCreate: taskCreate,
+    taskList: taskList,
+    taskUpdate: taskUpdate,
+    permissions: permissions,
+    setPermissionMode: setPermissionMode,
+    listSkills: listSkills
   };
 })();
