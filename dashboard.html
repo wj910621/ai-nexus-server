@@ -4765,21 +4765,24 @@ function subscribe(type){const plans={monthly:{n:'月度会员',p:39,c:800},quar
 // === 每日签到 ===
 function DAILY_CHECKIN(){
   if(!currentUser){showToast('请先登录');return}
-  const today=new Date().toDateString();
-  const streak=JSON.parse(localStorage.getItem('checkin_streak')||'{"date":"","count":0}');
-  if(streak.date===today){showToast('今天已经签到过了，明天再来吧~');return}
-  const yesterday=new Date(Date.now()-86400000).toDateString();
-  if(streak.date===yesterday)streak.count++; else streak.count=1;
-  streak.date=today;
-  // 连续签到奖励
-  let bonus=5;
-  if(streak.count%7===0)bonus+=5; // 每7天额外+5
-  if(streak.count%30===0)bonus+=20; // 每30天额外+20
-  localStorage.setItem('checkin_streak',JSON.stringify(streak));
-  userCredits+=bonus;localStorage.setItem('cr',userCredits);updateCreditDisplay();
-  const bonusMsg=streak.count%7===0?'🎉 连续7天! +8':streak.count%30===0?'🔥 连续30天! +23':`+${bonus}`;
-  showToast(`✅ 签到成功! ${bonusMsg}积分 · 连续${streak.count}天 · 余额${userCredits}`);
-  updateCheckinBtn();
+  const btn=document.getElementById('checkinBtn');
+  if(btn){btn.textContent='签到中...';btn.style.opacity='0.6'}
+  fetch(BASE_URL+'/api/user/checkin',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+localStorage.getItem('nx_auth_token'),'Content-Type':'application/json'}
+  }).then(r=>r.json()).then(d=>{
+    if(btn){btn.textContent='✅ 已签到';btn.style.background='var(--bg-card)';btn.style.opacity='0.6'}
+    if(d.ok){
+      userCredits=d.credits;localStorage.setItem('cr',userCredits);updateCreditDisplay();
+      showToast(`✅ 签到成功! +${d.bonus}积分 · 连续${d.streak}天 · 余额${userCredits}`)
+    }else{
+      if(d.already){showToast('今天已经签到过了，明天再来吧~')}
+      else{showToast('签到失败: '+d.error);if(btn){btn.textContent='📅 签到 +5';btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)';btn.style.opacity='1'}}
+    }
+  }).catch(e=>{
+    if(btn){btn.textContent='📅 签到 +5';btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)';btn.style.opacity='1'}
+    showToast('网络错误，请稍后重试')
+  })
 }
 function updateCheckinBtn(){
   const btn=document.getElementById('checkinBtn');
@@ -5556,16 +5559,21 @@ function updateStreakUI(){
   }
 }
 function doCheckin(){
-  const today=new Date().toDateString();const last=localStorage.getItem('checkin_date');if(last===today){showToast('今天已签到');closeCheckin();return}
-  const yesterday=new Date(Date.now()-86400000).toDateString();
-  let s=last===yesterday?parseInt(localStorage.getItem('checkin_streak')||'0'):0;
-  if(isNaN(s))s=0;s=Math.min(s+1,7);
-  const reward=CHECKIN_REWARDS[s-1];
-  userCredits+=reward;localStorage.setItem('cr',userCredits);localStorage.setItem('checkin_date',today);localStorage.setItem('checkin_streak',s.toString());
-  updateCreditDisplay();updateStreakUI();
-  if(s===7){showToast(`🎉 连续7天！获得${reward}积分（包含连签奖励）`)}else{showToast(`签到成功 +${reward}积分 · 连续${s}天`)}
-  setTimeout(closeCheckin,1500);
-}
+  const btn=document.getElementById('checkinBtn');
+  if(!currentUser){showToast('请先登录');return}
+  if(btn)btn.disabled=true
+  fetch(BASE_URL+'/api/user/checkin',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+localStorage.getItem('nx_auth_token'),'Content-Type':'application/json'}
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      userCredits=d.credits;localStorage.setItem('cr',userCredits);updateCreditDisplay();
+      updateStreakUI();showToast(`✅ 签到成功! +${d.bonus}积分 · 连续${d.streak}天`)
+      setTimeout(closeCheckin,1500)
+    }else{
+      showToast(d.already?'今天已签到':d.error);if(btn)btn.disabled=false
+    }
+  }).catch(e=>{showToast('网络错误');if(btn)btn.disabled=false})
 
 // === Chat History ===
 function saveChatToHistory(msg,replies){
@@ -6085,7 +6093,7 @@ const IMITATE_BOOKS = [
 let IMITATE_STATE = {mode:'rank',filter:'all',book:null};
 
 // 统一获取当前小说页选择的模型
-function NOVEL_GET_MODEL(){const el=document.getElementById('pm_novel');return el?el.value:'deepseekv3'}
+function NOVEL_GET_MODEL(){return getPageModel('novel')||'deepseekv3'}
 
 // ==== 仿写立项函数 ====
 function NOVEL_IMITATE_MODE(mode,el){IMITATE_STATE.mode=mode;document.querySelectorAll('#novelImitate .filter-tag').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');['imitateRankMode','imitatePasteMode','imitateUploadMode'].forEach(id=>document.getElementById(id).style.display='none');if(mode==='rank')document.getElementById('imitateRankMode').style.display='block';else if(mode==='paste')document.getElementById('imitatePasteMode').style.display='block';else if(mode==='upload')document.getElementById('imitateUploadMode').style.display='block';document.getElementById('imitateResult').style.display='none'}
