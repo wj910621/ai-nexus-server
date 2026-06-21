@@ -1,66 +1,70 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TriGenClaw - AI 桌面工作台 下载</title>
+<title>下载 TriGenClaw — AI 桌面工作台</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 body{background:#0f0a1a;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-.card{background:linear-gradient(135deg,#1a1040,#2a1a50);border:1px solid rgba(108,78,245,.3);border-radius:16px;padding:48px;max-width:640px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-h1{font-size:28px;margin-bottom:8px;background:linear-gradient(135deg,#6c4ef5,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-p{color:#a090c0;margin:12px 0 24px;font-size:14px;line-height:1.6}
-.dl-btn{display:inline-flex;align-items:center;gap:8px;padding:16px 40px;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;border-radius:12px;text-decoration:none;font-size:16px;font-weight:600;transition:transform .2s,box-shadow .2s;margin:8px 4px}
-.dl-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(108,78,245,.4)}
-.dl-btn-sm{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;background:rgba(108,78,245,.15);border:1px solid rgba(108,78,245,.3);color:#b87fff;border-radius:10px;text-decoration:none;font-size:13px;font-weight:500;transition:all .2s;margin:4px}
-.dl-btn-sm:hover{background:rgba(108,78,245,.25);border-color:#6c4ef5}
-.features{text-align:left;margin:16px 0;padding:16px;background:rgba(255,255,255,.03);border-radius:12px}
-.features li{list-style:none;padding:5px 0;font-size:13px;color:#b8a8d8}
+.card{background:linear-gradient(135deg,#1a1040,#2a1a50);border:1px solid rgba(108,78,245,.3);border-radius:16px;padding:40px;max-width:640px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+h1{font-size:28px;margin-bottom:6px;background:linear-gradient(135deg,#6c4ef5,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+p{color:#a090c0;margin:8px 0 20px;font-size:14px;line-height:1.6}
+.dl-btn{display:inline-flex;align-items:center;gap:10px;padding:18px 44px;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;border-radius:14px;text-decoration:none;font-size:17px;font-weight:600;transition:all .2s;margin:8px 4px;border:none;cursor:pointer}
+.dl-btn:hover{transform:translateY(-2px);box-shadow:0 10px 35px rgba(108,78,245,.5)}
+.dl-btn.ghost{background:rgba(108,78,245,.12);border:1px solid rgba(108,78,245,.3);color:#b87fff}
+.dl-btn.ghost:hover{background:rgba(108,78,245,.22)}
+.dl-btn.green{background:linear-gradient(135deg,#10b981,#059669)}
+.dl-btn.green:hover{box-shadow:0 10px 35px rgba(16,185,129,.4)}
+.features{text-align:left;margin:20px 0;padding:16px 20px;background:rgba(255,255,255,.03);border-radius:12px}
+.features li{list-style:none;padding:6px 0;font-size:13px;color:#b8a8d8}
 .features li::before{content:"✓ ";color:#10b981;font-weight:bold}
-.info{font-size:12px;color:#6b5b95;margin-top:16px;line-height:1.8}
-.badge{display:inline-block;padding:3px 10px;background:rgba(16,185,129,.15);color:#10b981;border-radius:6px;font-size:12px;margin:4px}
-.sep{border-top:1px solid rgba(255,255,255,.06);margin:24px 0;padding-top:20px}
-.alt-option{background:rgba(255,200,0,.04);border:1px solid rgba(255,200,0,.12);border-radius:10px;padding:16px;margin:16px 0;text-align:left}
-.alt-option h3{font-size:14px;color:#f59e0b;margin-bottom:8px}
-.alt-option p{font-size:12px;color:#a090c0;margin:4px 0}
-.alt-option code{background:#1a1a2e;padding:2px 6px;border-radius:3px;font-size:11px;color:#10b981}
+.info{font-size:12px;color:#6b5b95;margin-top:12px;line-height:1.8}
+.badge{display:inline-block;padding:3px 10px;background:rgba(16,185,129,.15);color:#10b981;border-radius:6px;font-size:11px;margin:4px}
+.step-box{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:20px;margin:16px 0;text-align:left}
+.step-box h3{font-size:15px;color:#e0d8f0;margin-bottom:12px}
+.step-box code{background:#1a1a2e;padding:4px 8px;border-radius:4px;font-size:12px;color:#10b981;display:block;margin:6px 0;word-break:break-all;line-height:1.6}
+.step-box .note{font-size:11px;color:#7b6b95;margin-top:8px}
+hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:24px 0}
 </style></head>
 <body>
 <div class="card">
-  <div style="font-size:48px;margin-bottom:16px">🦀</div>
-  <h1>TriGenClaw</h1>
-  <p>AI 桌面工作台 · 真正的独立客户端<br>300+ AI 模型 · 代码编辑器 · Agent 工坊 · 知识库</p>
+  <div style="font-size:48px;margin-bottom:12px">🦀</div>
+  <h1>下载 TriGenClaw</h1>
+  <p>AI 桌面工作台 · 独立客户端<br>300+ AI 模型 · 代码编辑器 · Agent 工坊 · 知识库</p>
 
+  <!-- 方案一：install.bat（推荐） -->
+  <div style="margin-bottom:16px">
+    <a class="dl-btn green" href="/download/install.bat" download>
+      📥 下载一键安装脚本
+      <span style="font-size:12px;font-weight:400;opacity:.8">(install.bat · 2KB)</span>
+    </a>
+    <p style="font-size:12px;color:#10b981;margin-top:6px">⬆ 推荐！双击自动安装到桌面，无需手动操作</p>
+  </div>
+
+  <!-- 方案二：直接下载 -->
   <div>
-    <a class="dl-btn" href="/download/TriGenClaw-1.0.0-win-Setup.exe" target="_blank">⬇ 下载安装包 (EXE · 97MB)</a>
+    <a class="dl-btn ghost" href="https://github.com/wj910621/ai-nexus-server/releases/latest/download/TriGenClaw-Portable.zip" target="_blank">
+      📦 直接下载便携版
+      <span style="font-size:12px;font-weight:400;opacity:.8">(ZIP · ~155MB)</span>
+    </a>
+    <p style="font-size:12px;color:#7b6b95;margin-top:6px">从 GitHub 下载，解压即用</p>
   </div>
 
-  <div class="alt-option">
-    <h3>🚀 不想看到安全警告？试试这两个方案</h3>
-    <p><b>方案一：下载 install.bat 一键安装（推荐）</b></p>
-    <div style="margin:8px 0">
-      <a class="dl-btn-sm" href="/download/install.bat">📥 下载 install.bat (仅3KB)</a>
-    </div>
-    <p>双击 install.bat → 自动下载解压到桌面 → 生成快捷方式 → 完成 ✅</p>
-    <p style="margin-top:8px"><b>方案二：从 GitHub 下载 ZIP 便携版（推荐！无任何警告）</b></p>
-    <div style="margin:8px 0">
-      <a class="dl-btn-sm" href="https://github.com/wj910621/ai-nexus-server/releases/latest/download/TriGenClaw-Portable.zip" target="_blank">📦 下载 ZIP 便携版 (解压即用)</a>
-    </div>
-    <p>解压后直接运行 TriGenClaw.exe，无需安装，不弹任何警告 ✅</p>
-  </div>
-
-  <div class="sep">
-    <h3 style="font-size:15px;color:#e0d8f0;margin-bottom:12px">📖 安装教程</h3>
+  <!-- 安装步骤 -->
+  <div class="step-box">
+    <h3>📖 使用 install.bat 安装（推荐）</h3>
+    <p style="font-size:13px;color:#a090c0;margin:4px 0 12px">只需三步，全程自动</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <div style="flex:1;min-width:120px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px">
+      <div style="flex:1;min-width:120px;background:rgba(255,255,255,.02);border-radius:10px;padding:12px">
         <div style="font-size:20px;font-weight:700;color:#6c4ef5">1</div>
-        <div style="font-size:12px;color:#a090c0">点击上方按钮下载 EXE</div>
+        <div style="font-size:12px;color:#a090c0;margin-top:4px">点击上方绿色按钮<br>下载 install.bat</div>
       </div>
       <div style="flex:1;min-width:120px;background:rgba(16,185,129,.06);border:1px solid #10b981;border-radius:10px;padding:12px">
         <div style="font-size:20px;font-weight:700;color:#10b981">2</div>
-        <div style="font-size:12px;color:#a090c0">浏览器底部黄条 → 点「保留」</div>
+        <div style="font-size:12px;color:#a090c0;margin-top:4px">双击 install.bat<br>自动下载并安装</div>
       </div>
-      <div style="flex:1;min-width:120px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px">
+      <div style="flex:1;min-width:120px;background:rgba(255,255,255,.02);border-radius:10px;padding:12px">
         <div style="font-size:20px;font-weight:700;color:#6c4ef5">3</div>
-        <div style="font-size:12px;color:#a090c0">双击 EXE → 下一步 → 完成</div>
+        <div style="font-size:12px;color:#a090c0;margin-top:4px">桌面出现快捷方式<br>双击运行 ✅</div>
       </div>
     </div>
   </div>
@@ -75,12 +79,12 @@ p{color:#a090c0;margin:12px 0 24px;font-size:14px;line-height:1.6}
 
   <div class="info">
     <span class="badge">Windows 10/11 64位</span>
-    <span class="badge">v1.0.0</span>
-    <span class="badge">NSIS 安装程序</span><br>
-    下载后双击安装即可使用
+    <span class="badge">解压即用</span>
+    <span class="badge">无安全警告</span>
+    <span class="badge">自动更新</span>
   </div>
 
-  <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.05);font-size:12px;color:#6b5b95">
+  <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05);font-size:12px;color:#6b5b95">
     <a href="/app/" style="color:#8b7cf5;text-decoration:none">← 返回 TriGen 控制台</a>
     <span style="margin:0 8px">|</span>
     <a href="/" style="color:#8b7cf5;text-decoration:none">🏠 首页</a>
