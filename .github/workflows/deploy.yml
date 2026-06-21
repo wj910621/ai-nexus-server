@@ -19,16 +19,16 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | ssh-add -
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          scp -o StrictHostKeyChecking=no index.html landing.html dashboard.html manifest.json root@120.79.17.184:/home/admin/nexus-studio/
-          scp -o StrictHostKeyChecking=no -r js root@120.79.17.184:/home/admin/nexus-studio/js/
+          scp -o StrictHostKeyChecking=no index.html landing.html dashboard.html manifest.json admin@120.79.17.184:/home/admin/nexus-studio/
+          scp -o StrictHostKeyChecking=no -r js admin@120.79.17.184:/home/admin/nexus-studio/js/
 
       - name: Deploy Backend
         if: ${{ secrets.SSH_PRIVATE_KEY != '' }}
         run: |
           eval $(ssh-agent -s)
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | ssh-add -
-          scp -o StrictHostKeyChecking=no server.js root@120.79.17.184:/home/admin/ai-nexus/
-          ssh -o StrictHostKeyChecking=no root@120.79.17.184 "cd /home/admin/ai-nexus && pm2 restart server.js"
+          scp -o StrictHostKeyChecking=no server.js agent-engine-v2.js admin@120.79.17.184:/home/admin/ai-nexus/
+          ssh -o StrictHostKeyChecking=no admin@120.79.17.184 "cd /home/admin/ai-nexus && pm2 restart nexus-hub"
 
       - name: Skip Deploy (secrets not configured)
         if: ${{ secrets.SSH_PRIVATE_KEY == '' }}
