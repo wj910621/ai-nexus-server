@@ -7193,7 +7193,12 @@ function renderModelBar(pageId,containerId){
   const el=document.getElementById(containerId);
   if(!el||!rec)return;
   const saved=localStorage.getItem('pageModel_'+pageId)||rec.id;
-  const baseFilter=models.filter(m=>!m.hidden&&(!rec.filter||(m.tags&&m.tags.includes(rec.filter))));
+  // 安全取所有非隐藏模型（确保从全局models读取，不被adminModels污染）
+  const baseFilter=rec.filter
+    ? models.filter(m=>!m.hidden&&m.tags&&m.tags.includes(rec.filter))
+    : models.filter(m=>!m.hidden);
+  // 防御：若筛选结果异常少（<3个），回退到全部模型
+  const allModels=baseFilter.length>=3?baseFilter:models.filter(m=>!m.hidden);
   el.innerHTML=`
     <div class="feature-card" style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:12px;background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(99,102,241,0.05))">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -7206,7 +7211,7 @@ function renderModelBar(pageId,containerId){
       </div>
     </div>
   `;
-  setTimeout(()=>createCustomModelSelect(document.getElementById('customPm_'+pageId),pageId,baseFilter,saved,PAGE_MODEL_CHANGE),50);
+  setTimeout(()=>createCustomModelSelect(document.getElementById('customPm_'+pageId),pageId,allModels,saved,PAGE_MODEL_CHANGE),50);
 }
 function PAGE_MODEL_CHANGE(pageId,val){
   localStorage.setItem('pageModel_'+pageId,val);
