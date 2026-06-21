@@ -1425,7 +1425,7 @@ a{color:var(--accent);text-decoration:none}
               <textarea id="wizChapPoints" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="本章要发生什么？关键情节、冲突、转折..."></textarea>
             </div>
             <div style="display:flex;gap:8px">
-              <select id="wizWriteModel" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="deepseekv3">DeepSeek-V3 ⚡1</option><option value="deepseekr1">DeepSeek-R1 ⚡5</option><option value="ali_kimi_k26">Kimi-K2.6 ⚡3</option><option value="gpt4o">GPT-4o ⚡5</option></select>
+              <span style="font-size:0.72rem;color:var(--text-secondary);padding:8px">✍️ 使用顶部面板选择的模型</span>
               <button class="btn-send" onclick="NOVEL_STEP_6_WRITE()">✍️ 开始写作</button>
             </div>
           </div>
@@ -1528,7 +1528,7 @@ a{color:var(--accent);text-decoration:none}
         <div>
           <textarea id="refineInput" rows="10" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical"></textarea>
           <div style="display:flex;gap:8px;margin-top:8px">
-            <select id="refineModel" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option value="deepseekv3">DeepSeek-V3 ⚡1</option><option value="deepseekr1">DeepSeek-R1 ⚡5</option><option value="ali_kimi_k26">Kimi-K2.6 ⚡3</option></select>
+            <span style="font-size:0.72rem;color:var(--text-secondary);padding:8px">🔧 使用顶部面板选择的模型</span>
             <button class="btn-send" onclick="NOVEL_REFINE_EXEC()">🔧 开始炼字</button>
           </div>
         </div>
@@ -4041,7 +4041,7 @@ async function generateOutline(){
   if(!spendCredits(5))return;
   const type=document.getElementById('wizType')?.value||'玄幻';
   novelType=type;
-  const modelId=document.getElementById('wizOutlineModel')?.value||'deepseekr1';
+  const modelId=NOVEL_GET_MODEL();
   const tree=document.getElementById('outlineTree');
   tree.innerHTML='<div style="text-align:center;padding:60px"><span class="spinner"></span><p style="margin-top:8px">AI 正在规划三层大纲...</p></div>';
   const sys='你是顶级小说架构师。请按以下格式生成三层大纲:\n\n【全书大纲】(100-200字概括全书核心主线)\n\n【卷纲】(3-5卷,每卷标题+50字概要,格式:第一卷·卷名 | 概要)\n\n【章纲】(每卷3-5章,每章标题+20字概要,格式:第一章·章名 | 概要)';
@@ -4786,12 +4786,21 @@ function DAILY_CHECKIN(){
 }
 function updateCheckinBtn(){
   const btn=document.getElementById('checkinBtn');
+  if(!btn)return;
   if(!currentUser){btn.style.display='none';return}
   btn.style.display='inline-flex';
-  const today=new Date().toDateString();
-  const streak=JSON.parse(localStorage.getItem('checkin_streak')||'{"date":"","count":0}');
-  if(streak.date===today){btn.textContent='✅ 已签到';btn.style.background='var(--bg-card)';btn.style.opacity='0.6'}
-  else{btn.textContent='📅 签到 +5';btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)';btn.style.opacity='1'}
+  // 查询后端签到状态
+  fetch(BASE_URL+'/api/user/checkin-status',{
+    headers:{'Authorization':'Bearer '+localStorage.getItem('nx_auth_token'),'Content-Type':'application/json'}
+  })  .then(r=>r.json()).then(d=>{
+    if(d.ok&&d.checkedIn){
+      btn.textContent='✅ 已签到';btn.style.background='var(--bg-card)';btn.style.opacity='0.6'
+    }else{
+      btn.textContent='📅 签到 +5';btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)';btn.style.opacity='1'
+    }
+  }).catch(()=>{
+    btn.textContent='📅 签到 +5';btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)';btn.style.opacity='1'
+  })
 }
 
 // === User Auth ===
@@ -5541,22 +5550,24 @@ function applyStyle(style,name){
 
 // === Daily Checkin ===
 const CHECKIN_REWARDS=[2,2,3,3,3,5,5];// day 1-7: 23/week total
-function dailyCheckin(){const d=openCheckin();updateStreakUI();}
+function dailyCheckin(){DAILY_CHECKIN()}
 function openCheckin(){const m=document.getElementById('checkinModal');m.classList.add('show');updateStreakUI();}
 function closeCheckin(){document.getElementById('checkinModal').classList.remove('show')}
 function updateStreakUI(){
-  const today=new Date().toDateString();
-  const last=localStorage.getItem('checkin_date');
-  const streak=localStorage.getItem('checkin_streak');
-  let s=0;if(last===today){s=parseInt(streak||'0')}else{const yesterday=new Date(Date.now()-86400000).toDateString();if(last===yesterday){s=parseInt(streak||'0')}else{s=0}}
-  // Highlight streak dots
-  const dots=document.querySelectorAll('#checkinStreak span');
-  dots.forEach((d,i)=>{d.style.background=i<s?((s-i<=1&&last===today)?'var(--green)':'var(--accent)'):'var(--bg-input)'});
-  if(last===today){
-    document.getElementById('checkinEmoji').textContent='✅';document.getElementById('checkinTitle').textContent='今日已签到';document.getElementById('checkinMsg').textContent=`连续${s}天，明天继续!`;document.getElementById('checkinBtn').textContent='已完成';document.getElementById('checkinBtn').disabled=true;document.getElementById('checkinBadge').textContent='✅';
-  }else{
-    document.getElementById('checkinEmoji').textContent='🎁';document.getElementById('checkinTitle').textContent='每日签到';document.getElementById('checkinMsg').textContent=s>0?`连续${s}天，今天+${CHECKIN_REWARDS[Math.min(s,6)]}积分`:'签到领积分，连续7天额外奖3分';document.getElementById('checkinBtn').textContent=`📅 签到 +${CHECKIN_REWARDS[Math.min(s,6)]}积分`;document.getElementById('checkinBtn').disabled=false;document.getElementById('checkinBadge').textContent='签到';
-  }
+  const d=document.getElementById('checkinEmoji'),t=document.getElementById('checkinTitle'),
+    m=document.getElementById('checkinMsg'),b=document.getElementById('checkinBtn'),
+    bdg=document.getElementById('checkinBadge');
+  if(!d||!t)return;
+  if(!currentUser){d.textContent='🎁';t.textContent='请先登录';m.textContent='登录后签到领积分';if(b)b.disabled=true;return}
+  fetch(BASE_URL+'/api/user/checkin-status',{
+    headers:{'Authorization':'Bearer '+localStorage.getItem('nx_auth_token'),'Content-Type':'application/json'}
+  }).then(r=>r.json()).then(r=>{
+    if(r.ok&&r.checkedIn){
+      d.textContent='✅';t.textContent='今日已签到';m.textContent=`连续${r.streak||0}天，明天继续!`;if(b){b.textContent='已完成';b.disabled=true};if(bdg)bdg.textContent='✅'
+    }else{
+      d.textContent='🎁';t.textContent='每日签到';m.textContent=r.streak>0?`连续${r.streak}天，今天+5积分`:'签到领积分，连续7天额外奖5分';if(b){b.textContent=`📅 签到 +5积分`;b.disabled=false};if(bdg)bdg.textContent='签到'
+    }
+  }).catch(()=>{d.textContent='🎁';t.textContent='签到';m.textContent='网络错误';if(b)b.disabled=true})
 }
 function doCheckin(){
   const btn=document.getElementById('checkinBtn');
@@ -6214,7 +6225,7 @@ function NOVEL_SAVE_CHAPTER(){const c=document.getElementById('wizWriteOutput').
 function NOVEL_NEXT_CHAPTER(){NOVEL_STATE.currentChap++;document.getElementById('wizChapTitle').value=`第${NOVEL_STATE.currentChap}章`;document.getElementById('wizChapPoints').value='';document.getElementById('wizExtraRule').value='';document.getElementById('wizWriteOutput').innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">📝</div><p>填好章节信息，开始下一章</p></div>';updateWriteConstraints()}
 function NOVEL_REFINE(mode){const txt=document.getElementById('wizWriteOutput').textContent.trim();if(!txt||txt.includes('创作中')){showToast('请先完成写作');return}NOVEL_STATE.refineMode=mode;document.getElementById('novelWizardSteps').style.display='none';document.getElementById('novelRefinePanel').style.display='block';document.getElementById('refineInput').value=txt;document.getElementById('refineBefore').textContent=txt;document.getElementById('refineAfter').innerHTML='<span class="spinner"></span>';document.querySelectorAll('.refine-option').forEach(b=>{b.classList.remove('active');if(b.dataset.rmode===mode)b.classList.add('active')})}
 function NOVEL_REF_MODE(mode,el){NOVEL_STATE.refineMode=mode;document.querySelectorAll('.refine-option').forEach(b=>b.classList.remove('active'));el.classList.add('active')}
-async function NOVEL_REFINE_EXEC(){const input=document.getElementById('refineInput').value.trim();if(!input){showToast('请粘贴文本');return}if(!spendCredits(5))return;const modelId=document.getElementById('refineModel').value;const sysMap={polish:'你是顶级编辑。润色要求：保留核心情节，提升文笔，删除冗余。直接返回润色后文本。',deai:'去掉AI写作痕迹：删除"总的来说""值得注意的是"等AI高频词，打碎过于工整的句式，增加口语化表达和人类写作的不完美。直接返回处理后的文本。',expand:'扩写文本：在关键情节处增加细节，丰富人物心理，扩展环境渲染，字数扩充约50%。直接返回。',shorten:'精简文本：删除冗余但保留精华，保持核心情节，字数缩减约40%。直接返回。'};const out=document.getElementById('refineAfter');out.innerHTML='<span class="spinner"></span> 炼字中...';try{const r=await callModelAPI(modelId,input,sysMap[NOVEL_STATE.refineMode]||sysMap.polish);window._lr=r.content;out.innerHTML=`<div style="margin-bottom:8px;display:flex;gap:6px"><button class="btn-sm primary" onclick="NOVEL_REFINE_ACCEPT()">✅ 采用</button><button class="btn-sm" onclick="NOVEL_REFINE_EXEC()">🔄 重炼</button></div>`+escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
+async function NOVEL_REFINE_EXEC(){const input=document.getElementById('refineInput').value.trim();if(!input){showToast('请粘贴文本');return}const modelId=NOVEL_GET_MODEL();if(!spendCredits(getModelCost(modelId)))return;const sysMap={polish:'你是顶级编辑。润色要求：保留核心情节，提升文笔，删除冗余。直接返回润色后文本。',deai:'去掉AI写作痕迹：删除"总的来说""值得注意的是"等AI高频词，打碎过于工整的句式，增加口语化表达和人类写作的不完美。直接返回处理后的文本。',expand:'扩写文本：在关键情节处增加细节，丰富人物心理，扩展环境渲染，字数扩充约50%。直接返回。',shorten:'精简文本：删除冗余但保留精华，保持核心情节，字数缩减约40%。直接返回。'};const out=document.getElementById('refineAfter');out.innerHTML='<span class="spinner"></span> 炼字中...';try{const r=await callModelAPI(modelId,input,sysMap[NOVEL_STATE.refineMode]||sysMap.polish);window._lr=r.content;out.innerHTML=`<div style="margin-bottom:8px;display:flex;gap:6px"><button class="btn-sm primary" onclick="NOVEL_REFINE_ACCEPT()">✅ 采用</button><button class="btn-sm" onclick="NOVEL_REFINE_EXEC()">🔄 重炼</button></div>`+escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
 function NOVEL_REFINE_ACCEPT(){if(window._lr){document.getElementById('wizWriteOutput').innerHTML=escapeHtml(window._lr);document.getElementById('refineInput').value=window._lr;document.getElementById('refineBefore').textContent=window._lr;document.getElementById('refineAfter').innerHTML='<span style="color:var(--green)">✅ 已采用！</span>';document.getElementById('novelRefinePanel').style.display='none';document.getElementById('novelWizardSteps').style.display='block';NOVEL_GOTO_STEP(6);showToast('润色结果已应用')}}
 
 // ==== 创作工作台函数 ====
