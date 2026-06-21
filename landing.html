@@ -54,6 +54,8 @@ nav { display:flex; align-items:center; justify-content:space-between; height:64
 .hero-cta:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(108,140,255,0.35); }
 .hero-cta-secondary { display:inline-flex; align-items:center; gap:10px; background:var(--lp-card-bg); color:var(--lp-gray-300); padding:14px 32px; border-radius:12px; font-size:16px; font-weight:500; border:1px solid var(--lp-card-border); cursor:pointer; transition:background 0.2s; }
 .hero-cta-secondary:hover { background:var(--lp-card-hover); color:var(--lp-white); }
+.hero-download { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#10b981,#059669); color:#fff; padding:14px 28px; border-radius:12px; font-size:15px; font-weight:600; border:none; cursor:pointer; transition:transform 0.2s,box-shadow 0.2s; }
+.hero-download:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(16,185,129,0.35); }
 .hero-stats { display:flex; justify-content:center; gap:60px; margin-top:60px; flex-wrap:wrap; }
 .hero-stat { text-align:center; }
 .hero-stat-num { font-size:36px; font-weight:800; color:var(--lp-white); }
@@ -173,6 +175,9 @@ footer { border-top:1px solid var(--lp-card-border); padding:48px 0; }
       </a>
       <a href="#features" class="hero-cta-secondary">
         <span data-i18n="common.more">了解更多</span> <span>↓</span>
+      </a>
+      <a href="https://github.com/wj910621/ai-nexus-server/releases/latest/download/TriGenClaw-Portable.zip" class="hero-download">
+        <span>💻</span> 下载桌面端 (Windows)
       </a>
     </div>
     <div class="hero-stats">
