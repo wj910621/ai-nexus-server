@@ -64,6 +64,8 @@ jobs:
           if (Test-Path "release\win-unpacked") {
             Compress-Archive -Path "release\win-unpacked\*" -DestinationPath "release\$zipName" -Force
             echo "✅ Portable ZIP: $zipName"
+            # 复制一个固定版名方便 latest 链接
+            Copy-Item "release\$zipName" "release\TriGenClaw-Portable.zip" -Force
           }
           
           # 列出产物

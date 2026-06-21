@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+      regs.forEach(function(r) { r.unregister(); });
+    });
+  }
+  if ('caches' in window) {
+    caches.keys().then(function(names) {
+      names.forEach(function(n) { caches.delete(n); });
+    });
+  }
+</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="TriGenClaw - AI Desktop Workbench">
+  <meta name="theme-color" content="#0f0f23">
+  <link rel="manifest" href="manifest.json">
+  <title>TriGenClaw</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>  <!-- 启动加载画面 -->
+  <div id="splashScreen" class="splash-screen">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <svg width="56" height="56" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="#00d4ff" stroke-width="1.5"/>
+          <path d="M8 14 L12 10 L18 16 L22 12" stroke="#7b2ff7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="14" cy="14" r="3" fill="#00d4ff" opacity="0.6"/>
+        </svg>
+      </div>
+      <h1 class="splash-title">TriGenClaw</h1>
+      <p class="splash-subtitle">Loading...</p>
+      <div class="splash-loader">
+        <div class="splash-bar"></div>
+      </div>
+    </div>
+  </div>
+  <div id="installPrompt" class="install-prompt hidden">
+    <div class="install-prompt-content">
+      <span class="install-icon">&#x1F4E6;</span>
+      <span>Install TriGenClaw to Desktop</span>
+      <button id="installBtn" class="btn btn-sm btn-primary">Install</button>
+      <button id="installDismiss" class="btn btn-sm btn-ghost">Later</button>
+    </div>
+  </div>
+  <div id="app" class="app-container">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="#00d4ff" stroke-width="1.5"/><path d="M8 14 L12 10 L18 16 L22 12" stroke="#7b2ff7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="14" r="3" fill="#00d4ff" opacity="0.6"/></svg>
+          <span>TriGen AI</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-panel="chat" title="Chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="nav-label">Chat</span></button>
+        <button class="nav-item" data-panel="code" title="Code"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg><span class="nav-label">Code</span></button>
+        <button class="nav-item" data-panel="agent" title="Agent"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4v1H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/><circle cx="12" cy="14" r="3"/><path d="M12 17v2"/></svg><span class="nav-label">Agent</span></button>
+        <button class="nav-item" data-panel="skills" title="Skills"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span class="nav-label">Skills</span></button>
+        <button class="nav-item" data-panel="knowledge" title="Knowledge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="nav-label">Knowledge</span></button>
+        <button class="nav-item" data-panel="music" title="Music"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span class="nav-label">Music</span></button>
+        <button class="nav-item" data-panel="model3d" title="3D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span class="nav-label">3D</span></button>
+        <button class="nav-item" data-panel="settings" title="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span class="nav-label">Settings</span></button>
+      </nav>
+      <div class='sidebar-search'><input type='text' id='globalSearchInput' placeholder='Search...' autocomplete='off'></div>
+      <div class="sidebar-history" id="historyPanel">
+        <div class="history-search"><input type="text" id="historySearchInput" placeholder="Search..." autocomplete="off"></div>
+        <div class="history-header"><span>Chat History</span><button id="closeHistory" class="btn-icon" title="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </aside>
+    <main class="main-content">
+      <section id="chatPanel" class="panel active">
+        <div class="panel-header">
+          <div class="panel-title">
+            <button id="toggleHistory" class="btn-icon" title="History"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
+            <span>AI Chat</span>
+          </div>
+          <div class="model-selector" id="modelSelector">
+            <button id="modelSelectBtn" class="btn btn-sm btn-ghost"><span id="currentModelName">deepseek-chat</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div id="modelDropdown" class="dropdown-menu hidden">
+              <div class="dropdown-search"><input type="text" id="modelSearchInput" placeholder="Search models..." autocomplete="off"></div>
+              <div class="dropdown-groups" id="modelGroups"></div>
+            </div>
+          </div>
+          <button id="chatExportBtn" class="btn btn-sm btn-ghost" title="Export Chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button id="chatSearchBtn" class="btn btn-sm btn-ghost" title="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button><button id="ragToggle" class="btn btn-sm btn-ghost rag-active" title="RAG enabled �?search knowledge for context"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><circle cx="12" cy="10" r="2" fill="currentColor"/></svg></button><button id="newChatBtn" class="btn btn-sm btn-ghost" title="New Chat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="welcome-message">
+            <div class="welcome-icon"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="#00d4ff" stroke-width="1.5" opacity="0.3"/><path d="M14 24 L20 18 L28 26 L36 18" stroke="#7b2ff7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/></svg></div>
+            <h2>Welcome to TriGenClaw</h2>
+            <p>Choose a model and start chatting. 300+ models, Code Assistant, Agent orchestration.</p>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <div class="chat-input-wrapper">
+            <textarea id="chatInput" rows="3" placeholder="Type a message... (Enter to send, Shift+Enter for new line)"></textarea>
+            <button id="sendBtn" class="btn btn-primary btn-send" title="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+          </div>
+          <div class="chat-input-info"><span id="modelIndicator">Model: deepseek-chat</span><span id="tokenCounter"></span><span>Press Ctrl+K to focus input</span></div>
+        </div>
+      </section>
+      <section id="codePanel" class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>Code Assistant</span></div>
+          <div class="code-actions">
+            <button id="codeSaveBtn" class="btn btn-sm btn-ghost" title="Save (Ctrl+S)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+            <button id="codeReviewBtn" class="btn btn-sm btn-primary">Review</button>
+            <button id="codeExplainBtn" class="btn btn-sm btn-ghost">Explain</button>
+            <button id="codeOptimizeBtn" class="btn btn-sm btn-ghost">Optimize</button><button id="codeSnippetsBtn" class="btn btn-sm btn-ghost">Snippets</button><button id="codeEvolveBtn" class="btn btn-sm btn-ghost" title="Evolve">Evolve</button><button id="codeAutoBtn" class="btn btn-sm btn-ghost" title="AI Agent">Auto</button><button id="codeRunBtn" class="btn btn-sm btn-ghost" title="Run JavaScript">Run</button><button id="codeAutoBtn" class="btn btn-sm btn-ghost" title="AI Agent">Auto</button><button id="codeRunBtn" class="btn btn-sm btn-ghost" title="Run JavaScript">Run</button>
+          </div>
+        </div>
+        <div class="code-panel-body">
+          <div class="code-sidebar" id="fileTreePanel">
+            <div class="code-sidebar-header"><span>Files</span><button id="fileTreeRefresh" class="btn-icon" title="Refresh"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button></div>
+            <div class="file-tree-content" id="fileTreeContent"></div>
+          </div>
+          <div class="code-editor-area">
+            <div class="editor-tabs" id="editorTabs"><div class="tab active" data-file="welcome"><span>Welcome</span></div></div>
+            <div class="editor-container">
+              <div class="editor-line-numbers" id="lineNumbers"></div>
+              <div class="editor-wrapper">
+                <div class="editor-highlight-layer" id="highlightLayer"></div>
+                <textarea id="codeEditor" class="code-textarea" spellcheck="false" wrap="off" placeholder="Edit code here..."></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="code-right-panel">
+            <div class="code-right-tabs">
+              <button class="code-right-tab active" data-panel="aiPanel">AI Analysis</button>
+              <button class="code-right-tab" data-panel="terminalPanel">Terminal</button>
+            </div>
+            <div class="code-right-content">
+              <div id="aiPanel" class="ai-panel active">
+                <div class="ai-panel-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#555577" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><p>Select code and click Review, Explain, or Optimize</p></div>
+                <div class="ai-panel-content hidden" id="aiPanelContent"></div>
+              </div>
+              <div id="terminalPanel" class="terminal-panel">
+                <div class="terminal-toolbar"><span class="terminal-title">Terminal</span><div class="terminal-actions"><button id="terminalClearBtn" class="btn-icon" title="Clear"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+                <div class="terminal-content" id="terminalContent">
+                  <div class="terminal-line"><span class="terminal-prompt">TriGen@studio:~$</span><span class="terminal-output text-muted">Type help for available commands</span></div>
+                </div>
+                <div class="terminal-input-line"><span class="terminal-prompt">TriGen@studio:~$</span><input type="text" id="terminalInput" class="terminal-input" placeholder="Type a command..." autocomplete="off" spellcheck="false"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Agent Panel -->
+      <section id="agentPanel" class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4v1H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/><circle cx="12" cy="14" r="3"/><path d="M12 17v2"/></svg>
+            <span>Agent Workbench</span>
+          </div>
+          <div class="agent-tabs agent-tabs-header">
+            <button class="agent-tab active" data-tab="gallery">Gallery</button>
+            <button class="agent-tab" data-tab="workflow">Canvas</button>
+            <button class="agent-tab" data-tab="config">Config</button>
+            <button class="agent-tab" data-tab="results">Results</button>
+          </div>
+        </div>
+        <div class="agent-panel-body">
+          <div id="agentGallery" class="agent-gallery active">
+            <div class="gallery-search"><input type="text" id="agentSearchInput" placeholder="Search agents..."></div>
+            <div class="gallery-grid" id="agentCardGrid"></div>
+          </div>
+          <div id="agentWorkflow" class="agent-workflow">
+            <div class="canvas-toolbar">
+              <span class="canvas-info">Drag agents from Gallery to canvas. Connect outputs to inputs.</span>
+              <label class="canvas-toggle"><input type="checkbox" id="canvasSnapToggle" checked> Snap</label>
+            </div>
+            <div class="canvas-wrapper" id="canvasWrapper">
+              <svg class="canvas-svg" id="canvasSvg"></svg>
+              <div class="canvas-dropzone" id="canvasDropzone">
+                <div class="canvas-placeholder">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#555577" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  <p>Drag agents from Gallery, or click + on a card.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="agentConfig" class="agent-config">
+            <div class="config-placeholder" id="configPlaceholder"><p>Click an agent node on canvas to configure.</p></div>
+            <div class="config-form hidden" id="configForm">
+              <div class="config-header"><span class="config-name" id="configAgentName">Name</span><span class="config-role" id="configAgentRole">Role</span></div>
+              <div class="config-section"><h4>Model</h4>
+                <div class="config-row"><label>Model</label><select id="configModelSelect"></select></div>
+                <div class="config-row"><label>Temp</label><div class="config-range"><input type="range" id="configTemperature" min="0" max="2" step="0.1" value="0.7"><span id="configTempLabel">0.7</span></div></div>
+                <div class="config-row"><label>Max Tokens</label><input type="number" id="configMaxTokens" value="4096" class="config-number"></div>
+              </div>
+              <div class="config-section"><h4>Tools</h4>
+                <div class="config-row"><label><input type="checkbox" id="toolCode" checked> Code</label></div>
+                <div class="config-row"><label><input type="checkbox" id="toolTerminal" checked> Terminal</label></div>
+                <div class="config-row"><label><input type="checkbox" id="toolFile" checked> File</label></div>
+                <div class="config-row"><label><input type="checkbox" id="toolWeb"> Web</label></div>
+                <div class="config-row"><label><input type="checkbox" id="toolImage"> Image</label></div>
+              </div>
+              <div class="config-section"><h4>System Prompt</h4><textarea id="configSystemPrompt" class="config-textarea" rows="4"></textarea></div>
+              <button id="configSaveBtn" class="btn btn-sm btn-primary">Save</button>
+            </div>
+          </div>
+          <div id="agentResults" class="agent-results">
+            <div class="results-placeholder" id="resultsPlaceholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#555577" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <p>Configure workflow and click Run Workflow.</p>
+            </div>
+            <div class="results-content hidden" id="resultsContent">
+              <div class="results-toolbar"><span id="resultsStatus">Ready</span><button id="resultsClearBtn" class="btn btn-sm btn-ghost">Clear</button></div>
+              <div class="results-log" id="resultsLog"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="skillsPanel" class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>Skill Store</span>
+          </div>
+          <div class="skills-actions">
+            <button id="skillsCustomBtn" class="btn btn-sm btn-ghost">+ Create Skill</button>
+          </div>
+        </div>
+        <div class="skills-tabs">
+          <button class="skills-tab active" data-stab="browse">Browse</button>
+          <button class="skills-tab" data-stab="installed">Installed</button>
+          <button class="skills-tab" data-stab="custom">My Skills</button>
+        </div>
+        <div class="skills-panel-body">
+          <div id="skillsBrowse" class="skills-view active">
+            <div class="skills-search-bar">
+              <input type="text" id="skillsSearchInput" placeholder="Search skills...">
+              <div class="skills-categories" id="skillsCategories"></div>
+            </div>
+            <div class="skills-grid" id="skillsGrid"></div>
+          </div>
+          <div id="skillsInstalled" class="skills-view">
+            <div class="skills-view-placeholder" id="installedPlaceholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#555577" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p>No installed skills yet.</p>
+            </div>
+            <div class="skills-grid" id="installedGrid"></div>
+          </div>
+          <div id="skillsCustom" class="skills-view">
+            <div class="skills-view-placeholder" id="customPlaceholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#555577" stroke-width="1"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              <p>Create your own skills.</p>
+            </div>
+            <div class="skills-grid" id="customGrid"></div>
+          </div>
+        </div>
+      </section>
+      <section id="knowledgePanel" class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>Knowledge Base</span>
+          </div>
+          <div class="kb-actions">
+            <button id="kbAddBtn" class="btn btn-sm btn-primary">+ New Note</button><button id="kbUploadBtn" class="btn btn-sm btn-ghost" title="Upload file">馃搫 Upload</button><input type="file" id="kbFileInput" accept=".txt,.md,.py,.js,.ts,.html,.css,.json,.xml,.yaml,.yml,.java,.go,.rs,.cpp,.c,.h" hidden>
+          </div>
+        </div>
+        <div class="kb-body">
+          <div class="kb-sidebar">
+            <div class="kb-search">
+              <input type="text" id="kbSearchInput" placeholder="Search knowledge..." autocomplete="off">
+            </div>
+            <div class="kb-categories" id="kbCategories">
+              <button class="kb-cat active" data-cat="all">馃摎 All</button>
+              <button class="kb-cat" data-cat="code">馃捇 Code</button>
+              <button class="kb-cat" data-cat="api">馃敆 API</button>
+              <button class="kb-cat" data-cat="concept">馃 Concepts</button>
+              <button class="kb-cat" data-cat="guide">馃摉 Guides</button>
+              <button class="kb-cat" data-cat="reference">馃搶 Reference</button>
+              <button class="kb-cat" data-cat="other">馃摝 Other</button>
+            </div>
+            <div class="kb-doc-list" id="kbDocList"></div>
+          </div>
+          <div class="kb-main">
+            <div class="kb-welcome" id="kbWelcome">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#555577" stroke-width="1"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              <h3>Welcome to Knowledge Base</h3>
+              <p>Store code snippets, API references, guides, and notes.<br>Click + New Note to start building your knowledge.</p>
+            </div>
+            <div class="kb-editor hidden" id="kbEditor">
+              <div class="kb-editor-header">
+                <input type="text" id="kbDocTitle" class="kb-title-input" placeholder="Document title...">
+                <select id="kbDocCategory" class="kb-cat-select">
+                  <option value="code">馃捇 Code</option>
+                  <option value="api">馃敆 API</option>
+                  <option value="concept">馃 Concepts</option>
+                  <option value="guide">馃摉 Guides</option>
+                  <option value="reference">馃搶 Reference</option>
+                  <option value="other">馃摝 Other</option>
+                </select>
+                <div class="kb-editor-actions">
+                  <button id="kbSaveBtn" class="btn btn-sm btn-primary">Save</button>
+                  <button id="kbDeleteBtn" class="btn btn-sm btn-ghost">Delete</button>
+                  <button id="kbCopyBtn" class="btn btn-sm btn-ghost" title="Copy content">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  </button>
+                </div>
+              </div>
+              <textarea id="kbDocContent" class="kb-content-editor" placeholder="Write your knowledge content here... Supports Markdown."></textarea>
+              <div class="kb-preview hidden" id="kbPreview"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="musicPanel" class="panel">
+        <div class="panel-header"><div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>AI Music</span></div></div>
+        <div class="panel-body" style="padding:20px;overflow-y:auto">
+          <div class="settings-group"><h3>🎵 AI Music Generator</h3></div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div style="flex:1;min-width:300px">
+              <div class="settings-item"><label>🎵 Song Title</label><input type="text" id="musicTitle" class="settings-input" placeholder="Enter song title..."></div>
+              <div class="settings-item"><label>📝 Lyrics / Description</label><textarea id="musicLyric" class="settings-input" rows="4" placeholder="Enter lyrics, describe style, or creative idea..."></textarea></div>
+              <div class="settings-item"><label>🎸 Style (comma separated)</label><input type="text" id="musicStyle" class="settings-input" placeholder="e.g. pop, rock, classical, electronic, jazz"></div>
+              <div class="settings-item"><label><input type="checkbox" id="musicInstrumental"> 🎶 Instrumental (no lyrics)</label></div>
+              <div class="settings-actions" style="margin-top:12px">
+                <button class="btn btn-primary" onclick="MUSIC_GENERATE()">🎵 Generate</button>
+                <span style="font-size:0.78rem;color:var(--text-secondary);margin-left:12px">⚡ 10 credits</span>
+              </div>
+            </div>
+            <div style="flex:1;min-width:300px">
+              <div class="settings-item"><label>📀 Generation History</label></div>
+              <div id="musicHistoryList" style="max-height:400px;overflow-y:auto;background:var(--bg-surface);border-radius:8px;padding:12px">
+                <div style="text-align:center;color:var(--text-secondary);padding:40px"><div style="font-size:2rem">🎵</div><p>No music generated yet</p></div>
+              </div>
+              <div id="musicPlayer" style="display:none;margin-top:10px;padding:12px;background:rgba(0,212,255,0.1);border-radius:8px">
+                <audio id="musicAudio" controls style="width:100%;height:36px"></audio>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="model3dPanel" class="panel">
+        <div class="panel-header"><div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg><span>3D Model</span></div></div>
+        <div class="panel-body" style="padding:20px;overflow-y:auto">
+          <div class="settings-group"><h3>🎲 AI 3D Model Generator</h3></div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div style="flex:1;min-width:300px">
+              <div class="settings-item"><label>📝 Text Description</label><textarea id="d3TextPrompt" class="settings-input" rows="3" placeholder="Describe the 3D model you want... e.g. a cute cartoon cat, blue eyes, white fur"></textarea></div>
+              <div class="settings-item"><label>🎨 Style</label><select id="d3TextStyle" class="settings-input"><option value="realistic">Realistic</option><option value="sculpture">Sculpture</option><option value="low-poly">Low Poly</option><option value="cartoon">Cartoon</option><option value="pbr">PBR</option></select></div>
+              <div class="settings-actions" style="gap:8px">
+                <button class="btn btn-primary" onclick="D3_TEXT_TO_3D()">🎲 Text to 3D</button>
+                <span style="font-size:0.78rem;color:var(--text-secondary)">⚡ 12 credits</span>
+              </div>
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+                <div class="settings-item"><label>🖼️ Image to 3D</label><input type="file" id="d3ImageInput" accept="image/*" style="font-size:0.8rem"></div>
+                <button class="btn btn-primary" onclick="D3_IMAGE_TO_3D()" style="margin-top:8px">🖼️ Image to 3D</button>
+              </div>
+              <div id="d3TextResult" style="display:none;margin-top:12px"></div>
+              <div id="d3ImageResult" style="display:none;margin-top:12px"></div>
+            </div>
+            <div style="flex:1;min-width:300px">
+              <div id="d3ModelViewer" style="display:none;background:var(--bg-surface);border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+                <div style="height:360px;background:transparent">
+                  <model-viewer id="d3Viewer" src="" style="width:100%;height:100%" camera-controls auto-rotate auto-rotate-delay="3000" exposure="1.2" shadow-intensity="0.6" environment-image="neutral"></model-viewer>
+                </div>
+                <div style="padding:10px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--border)">
+                  <label style="font-size:0.7rem;display:flex;align-items:center;gap:4px">🔄 Auto rotate <input type="checkbox" checked onchange="var v=document.getElementById('d3Viewer');v.toggleAttribute('auto-rotate',this.checked)"></label>
+                  <label style="font-size:0.7rem;display:flex;align-items:center;gap:4px">☀️ Exposure <input type="range" min="0" max="3" step="0.1" value="1.2" oninput="document.getElementById('d3Viewer').exposure=this.value" style="width:60px"></label>
+                  <button class="btn btn-sm btn-ghost" onclick="var u=document.getElementById('d3Viewer').src;if(u)window.open(u,'_blank')">⬇️ Download</button>
+                </div>
+              </div>
+              <div class="settings-item" style="margin-top:12px"><label>ℹ️ Generated models appear here after creation (5-15 min)</label></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="settingsPanel" class="panel">
+        <div class="panel-header"><div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span>Settings</span></div></div>
+        <div class="settings-content">
+          <div class="settings-group"><h3>Appearance</h3>
+            <div class="settings-item"><label>Theme</label><select id="themeSelect"><option value="dark">Dark</option><option value="light">Light</option></select></div>
+            <div class="settings-item"><label>Language</label><select id="langSelect"><option value="en">English</option><option value="zh">中文</option></select></div>
+            <div class="settings-item"><label>Accent</label><select id="accentSelect"><option value="cyan">Cyan</option><option value="purple">Purple</option><option value="green">Green</option><option value="orange">Orange</option><option value="pink">Pink</option><option value="red">Red</option></select></div>
+            <div class="settings-item"><label>UI Font</label><div class="settings-range"><input type="range" id="fontSizeRange" min="12" max="20" step="1" value="14"><span id="fontSizeLabel">14px</span></div></div></div>
+          <div class="settings-group"><h3>Editor</h3>
+            <div class="settings-item"><label>Font</label><div class="settings-range"><input type="range" id="editorFontSizeRange" min="10" max="24" step="1" value="14"><span id="editorFontSizeLabel">14px</span></div></div>
+            <div class="settings-item"><label>Tab</label><select id="tabSizeSelect"><option value="2">2</option><option value="4" selected>4</option></select></div>
+            <div class="settings-item"><label>Wrap</label><label class="config-checkbox"><input type="checkbox" id="lineWrapToggle"> Word wrap</label></div></div>
+          <div class="settings-group"><h3>Data</h3>
+            <div class="settings-item"><label>History</label><span class="text-muted" id="historyCount">0 records</span></div>
+            <div class="settings-item"><label>Backup</label><div class="settings-actions"><button id="exportDataBtn" class="btn btn-sm btn-ghost">Export</button><button id="importDataBtn" class="btn btn-sm btn-ghost">Import</button></div></div>
+            <div class="settings-item"><button id="clearDataBtn" class="btn btn-sm btn-danger">Clear All</button></div></div>
+          <div class="settings-group"><h3>API</h3>
+            <div class="settings-item"><label>默认代理</label><input type="text" id="apiUrlInput" class="settings-input" value="https://j3trisheng.com"></div>
+            <div class="settings-item"><label>默认 Key</label><input type="password" id="apiKeyInput" class="settings-input" placeholder="API Key (留空则使�?Provider Key)"></div>
+            <div class="settings-divider"></div>
+            <div class="settings-subtitle">Provider API Key 配置（配置后自动路由到对应厂商）</div>
+            <div id="providerList"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="toastContainer" class="toast-container"></div>
+  <div id="welcomeOverlay" class="welcome-overlay hidden">
+    <div class="welcome-card">
+      <div class="welcome-logo">
+        <svg width="44" height="44" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="#00d4ff" stroke-width="1.5"/>
+          <path d="M8 14 L12 10 L18 16 L22 12" stroke="#7b2ff7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="14" cy="14" r="3" fill="#00d4ff" opacity="0.6"/>
+        </svg>
+      </div>
+      <h2>欢迎来到 TriGenClaw</h2>
+      <p class="welcome-subtitle">你的全能 AI 工作�?—�?Your All-in-One AI Workbench</p>
+      <div class="welcome-features">
+        <div class="welcome-feature"><div class="wf-icon">馃敟</div><div class="wf-title">300+ AI 模型</div><div class="wf-desc">GPT / Claude / DeepSeek / 千问 / GLM，随心切�?/div></div>
+        <div class="welcome-feature"><div class="wf-icon">馃捇</div><div class="wf-title">代码 + Agent 编排</div><div class="wf-desc">内置编辑器、终端�?0 �?Agent 可视化协�?/div></div>
+        <div class="welcome-feature"><div class="wf-icon">馃</div><div class="wf-title">知识�?+ RAG</div><div class="wf-desc">上传文档，AI 自动检索增强回�?/div></div>
+      </div>
+      <div class="welcome-footer">
+        <button id="welcomeStartBtn" class="btn btn-primary btn-lg">开始使�?/button>
+        <label class="welcome-skip"><input type="checkbox" id="welcomeDontShow"> 下次不再显示</label>
+      </div>
+    </div>
+  </div>
+  <!-- 错误边界 -->
+  <div id="errorBoundary" class="error-boundary hidden">
+    <div class="error-content">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <h2>Something went wrong</h2>
+      <p id="errorMessage">An unexpected error occurred.</p>
+      <button id="errorReloadBtn" class="btn btn-primary">Reload App</button>
+      <button id="errorDismissBtn" class="btn btn-ghost">Dismiss</button>
+    </div>
+  </div>
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/models.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/code.js"></script>
+  <script src="js/agent.js"></script>
+  <script src="js/skills.js"></script>
+  <script src="js/plugin.js"></script>
+  <script src='js/particles.js'></script>
+  <script src="js/autonomous.js"></script>
+  <script src="js/knowledge.js"></script>
+  <script src="js/music.js"></script>
+  <script src="js/model3d.js"></script>
+  <script src="js/mcp-client.js"></script>
+  
+  <!-- === 贾维斯语音模式 === -->
+  <script src="js/speech.js"></script>
+  <script src="js/device.js"></script>
+  <script src="js/jarvis.js"></script>
+  
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+
+<!-- 贾维斯模式 UI -->
+<div id="jarvisOverlay" class="jarvis-overlay" style="display:none">
+  <div class="jarvis-visualizer">
+    <div class="jarvis-ring jarvis-ring-1"></div>
+    <div class="jarvis-ring jarvis-ring-2"></div>
+    <div class="jarvis-ring jarvis-ring-3"></div>
+    <div class="jarvis-avatar">J</div>
+  </div>
+  <div class="jarvis-status" id="jarvisStatus">语音待命</div>
+  <div class="jarvis-transcript" id="jarvisTranscript"></div>
+  <div class="jarvis-response" id="jarvisResponse"></div>
+  <button id="jarvisToggleBtn" class="jarvis-toggle-btn" title="切换贾维斯模式">🎤</button>
+</div>
+<style>
+.jarvis-overlay {
+  position:fixed; bottom:20px; right:20px; z-index:9999;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  pointer-events:none;
+}
+.jarvis-toggle-btn {
+  pointer-events:auto;
+  width:56px; height:56px; border-radius:50%;
+  background:linear-gradient(135deg,#00d4ff,#7b2ff7);
+  border:none; color:#fff; font-size:24px; cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,212,255,0.4);
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.jarvis-toggle-btn:hover { transform:scale(1.1); box-shadow:0 6px 30px rgba(0,212,255,0.6); }
+.jarvis-toggle-btn.active { background:linear-gradient(135deg,#ff4444,#ff6b6b); animation:jarvisPulse 2s infinite; }
+@keyframes jarvisPulse { 0%,100%{box-shadow:0 4px 20px rgba(255,68,68,0.4)} 50%{box-shadow:0 4px 40px rgba(255,68,68,0.8)} }
+.jarvis-visualizer { position:relative; width:80px; height:80px; display:flex; align-items:center; justify-content:center; }
+.jarvis-ring { position:absolute; border-radius:50%; border:2px solid rgba(0,212,255,0.3); animation:jarvisRingAnim 3s infinite; }
+.jarvis-ring-1 { width:80px; height:80px; animation-delay:0s; }
+.jarvis-ring-2 { width:60px; height:60px; animation-delay:0.5s; border-color:rgba(123,47,247,0.3); }
+.jarvis-ring-3 { width:40px; height:40px; animation-delay:1s; border-color:rgba(0,212,255,0.5); }
+@keyframes jarvisRingAnim { 0%{transform:scale(0.8);opacity:0.5} 50%{transform:scale(1.1);opacity:1} 100%{transform:scale(0.8);opacity:0.5} }
+.jarvis-avatar { font-family:'Georgia',serif; font-size:24px; font-weight:bold; color:#00d4ff; text-shadow:0 0 10px rgba(0,212,255,0.5); z-index:1; }
+.jarvis-status { font-size:11px; color:rgba(255,255,255,0.6); text-align:center; }
+.jarvis-transcript { max-width:300px; font-size:12px; color:rgba(255,255,255,0.8); text-align:center; padding:4px 12px; background:rgba(0,0,0,0.5); border-radius:8px; display:none; }
+.jarvis-response { max-width:300px; font-size:12px; color:#00d4ff; text-align:center; padding:4px 12px; background:rgba(0,0,0,0.3); border-radius:8px; display:none; }
+</style>
+<script>
+// 贾维斯 UI 控制
+(function(){
+  var isJarvisActive = false;
+  var btn = document.getElementById('jarvisToggleBtn');
+  var overlay = document.getElementById('jarvisOverlay');
+  var statusEl = document.getElementById('jarvisStatus');
+  var transcriptEl = document.getElementById('jarvisTranscript');
+  var responseEl = document.getElementById('jarvisResponse');
+
+  if (!btn) return;
+
+  // 监听主进程的 toggle 事件
+  if (window.electronAPI) {
+    window.electronAPI.onMessage('action', function(data) {
+      if (data === 'toggle-jarvis') toggleJarvis();
+    });
+  }
+
+  // 快捷键覆盖
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'V') {
+      e.preventDefault();
+      toggleJarvis();
+    }
+  });
+
+  function toggleJarvis() {
+    isJarvisActive = !isJarvisActive;
+    if (isJarvisActive) {
+      startJarvis();
+    } else {
+      stopJarvis();
+    }
+  }
+
+  function startJarvis() {
+    btn.classList.add('active');
+    btn.textContent = '⏹';
+    if (overlay) overlay.style.display = 'flex';
+    
+    window.jarvis.setCallbacks({
+      onStatusChange: function(status) {
+        var labels = {
+          'off': '已关闭',
+          'listening': '🎤 聆听中...',
+          'awake': '✅ 贾维斯已唤醒',
+          'thinking': '🧠 思考中...',
+          'speaking': '🔊 说话中...'
+        };
+        if (statusEl) statusEl.textContent = labels[status] || status;
+      },
+      onTranscript: function(data) {
+        if (transcriptEl) {
+          if (data.role === 'interim') {
+            transcriptEl.textContent = data.text;
+            transcriptEl.style.display = data.text ? 'block' : 'none';
+          } else if (data.role === 'user') {
+            transcriptEl.textContent = '您: ' + data.text;
+            transcriptEl.style.display = 'block';
+          }
+        }
+      },
+      onResponse: function(text) {
+        if (responseEl) {
+          responseEl.textContent = text;
+          responseEl.style.display = 'block';
+        }
+      },
+      onWakeWord: function() {
+        if (transcriptEl) {
+          transcriptEl.textContent = '🔔 唤醒词已检测';
+          transcriptEl.style.display = 'block';
+        }
+      }
+    });
+
+    window.jarvis.start();
+    showToast('🎤 贾维斯模式已开启，说"贾维斯"唤醒我');
+  }
+
+  function stopJarvis() {
+    btn.classList.remove('active');
+    btn.textContent = '🎤';
+    window.jarvis.stop();
+    if (overlay) overlay.style.display = 'none';
+    if (statusEl) statusEl.textContent = '已关闭';
+    if (transcriptEl) { transcriptEl.style.display = 'none'; transcriptEl.textContent = ''; }
+    if (responseEl) { responseEl.style.display = 'none'; responseEl.textContent = ''; }
+  }
+
+  btn.addEventListener('click', toggleJarvis);
+
+  // 暴露给其他模块
+  window.toggleJarvisMode = toggleJarvis;
+})();
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;background:rgba(0,0,0,0.8);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;animation:fadeIn 0.3s;max-width:400px';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity 0.5s'; setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },500); }, 3000);
+}
+</script>
+<div class="system-indicator"><span class="dot"></span><span>SYSTEM ONLINE</span></div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

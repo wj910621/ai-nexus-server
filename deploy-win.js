@@ -93,7 +93,10 @@ function deployFrontend(cb) {
       uploadFile(BASE + '/dashboard.html', FRONTEND_DIR + '/dashboard.html', () => {
         uploadFile(BASE + '/manifest.json', FRONTEND_DIR + '/manifest.json', () => {
           console.log('📁 上传 js/ 目录...');
-          uploadDir(BASE + '/js', FRONTEND_DIR + '/js', cb);
+          uploadDir(BASE + '/js', FRONTEND_DIR + '/js', () => {
+            console.log('📁 上传 icons/ 目录...');
+            uploadDir(BASE + '/icons', FRONTEND_DIR + '/icons', cb);
+          });
         });
       });
     });

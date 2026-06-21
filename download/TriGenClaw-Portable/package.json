@@ -1,0 +1,67 @@
+﻿{
+  "name": "trigenclaw",
+  "version": "1.0.0",
+  "description": "TriGenClaw - AI Desktop Workbench. 300+ AI 妯″瀷 路 浠ｇ爜鍔╂墜 路 Agent 缂栨帓 路 鐭ヨ瘑搴?,
+  "homepage": "https://j3trisheng.com",
+  "repository": "github:wj910621/ai-nexus-server",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.trigen.claw",
+    "productName": "TriGenClaw",
+    "publish": null,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "css/",
+      "js/",
+      "icons/"
+    ],
+    "extraResources": [
+      { "from": "icons/", "to": "icons/" },
+      { "from": "build/", "to": "build/" }
+    ],
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "TriGenClaw-${version}-win-Setup.${ext}",
+      "icon": "build/icon.png"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "artifactName": "TriGenClaw-${version}-mac.${ext}",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "artifactName": "TriGenClaw-${version}-linux.${ext}",
+      "icon": "build/icon.png",
+      "maintainer": "TriGen <admin@j3trisheng.com>",
+      "category": "Utility"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TriGenClaw",
+      "uninstallDisplayName": "TriGenClaw"
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.3"
+  },
+  "keywords": ["ai", "desktop", "workbench", "llm", "chat"],
+  "author": "TriGen <admin@j3trisheng.com>",
+  "license": "MIT"
+}

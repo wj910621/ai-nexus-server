@@ -25,9 +25,7 @@ var NexusAPI = (function() {
     glm:       { name: '智谱 GLM',          baseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
     yi:        { name: '零一万物 Yi',        baseUrl: 'https://api.lingyiwanwu.com/v1' },
     baichuan:  { name: '百川',             baseUrl: 'https://api.baichuan-ai.com/v1' },
-    local:     { name: '本地后端',           baseUrl: 'http://localhost:8000', noKey: true },
-    suno:      { name: 'Suno AI 音乐',       baseUrl: 'https://open.suno.cn/api/v1' },
-    meshy:     { name: 'Meshy 3D',          baseUrl: 'https://api.meshy.ai/openapi/v2' }
+    local:     { name: '本地后端',           baseUrl: 'http://localhost:8000', noKey: true }
   };
 
   /* model ID 前缀 - provider key 映射 */
@@ -369,54 +367,6 @@ var NexusAPI = (function() {
   }
 
   /**
-   * Agent 流式执行：SSE 流式回调（参考 chatStream 模式）
-   * @param {string} task - 任务描述
-   * @param {function} onEvent - 事件回调({type,content,action,result,answer})
-   * @param {function} onDone - 完成回调
-   * @param {function} onError - 错误回调
-   * @param {object} opts - {model, maxIterations}
-   */
-  function agentExecuteStream(task, onEvent, onDone, onError, opts) {
-    opts = opts || {};
-    var model = opts.model || 'deepseekv3';
-    var maxIter = opts.maxIterations || 10;
-    var url = _defaultBaseUrl + '/api/agent/chat/stream';
-
-    fetch(url, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ task: task, model: model, maxIterations: maxIter })
-    }).then(function(response) {
-      if (!response.ok) { onError('HTTP ' + response.status); return; }
-      var reader = response.body.getReader();
-      var decoder = new TextDecoder();
-      var buffer = '';
-
-      function readChunk() {
-        reader.read().then(function(result) {
-          if (result.done) { onDone(); return; }
-          buffer += decoder.decode(result.value, { stream: true });
-          var lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (var i = 0; i < lines.length; i++) {
-            var line = lines[i];
-            if (line.indexOf('data: ') !== 0) continue;
-            var dataStr = line.substring(6).trim();
-            if (!dataStr) continue;
-            try {
-              var evt = JSON.parse(dataStr);
-              if (typeof onEvent === 'function') onEvent(evt);
-            } catch(e) { /* skip parse errors */ }
-          }
-          readChunk();
-        }).catch(function(err) { onError(err.message); });
-      }
-      readChunk();
-    }).catch(function(err) { onError(err.message); });
-  }
-
-  /**
    * Agent 计划：分解任务为子步骤
    */
   function agentPlan(task, model) {
@@ -471,7 +421,6 @@ var NexusAPI = (function() {
     getModelProviderMap: getModelProviderMap,
     resolveProvider: resolveProvider,
     agentExecute: agentExecute,
-    agentExecuteStream: agentExecuteStream,
     agentPlan: agentPlan,
     toolExecute: toolExecute,
     listTools: listTools
