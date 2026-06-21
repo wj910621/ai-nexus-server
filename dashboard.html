@@ -3066,14 +3066,14 @@ response = client.chat.completions.create(
 </footer>
 
 <!-- PWA 安装弹出提示 -->
-<div id="pwaToast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--bg-card);border:1px solid var(--accent-glow);border-radius:16px;padding:14px 20px;box-shadow:0 8px 40px rgba(0,0,0,0.4);display:flex;align-items:center;gap:12px;animation:fadeIn 0.3s ease">
+<div id="pwaToast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--bg-card);border:1px solid var(--accent-glow);border-radius:16px;padding:14px 20px;box-shadow:0 8px 40px rgba(0,0,0,0.4);align-items:center;gap:12px;animation:fadeIn 0.3s ease">
   <span style="font-size:1.4rem">📱</span>
   <div>
     <div style="font-size:0.85rem;font-weight:600;color:var(--text)">将 TriGen 添加到桌面</div>
     <div style="font-size:0.72rem;color:var(--text-secondary)">一键打开，无需输入网址</div>
   </div>
   <button id="pwaInstallBtn" style="padding:6px 16px;border-radius:20px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:0.78rem;font-weight:600;white-space:nowrap">立即添加</button>
-  <button onclick="document.getElementById('pwaToast').style.display='none'" style="padding:6px 8px;border-radius:50%;border:none;background:var(--accent-soft);color:var(--text-secondary);cursor:pointer;font-size:0.75rem">✕</button>
+  <button onclick="document.getElementById('pwaToast').style.display='none';localStorage.setItem('pwa_dismissed','1')" style="padding:6px 8px;border-radius:50%;border:none;background:var(--accent-soft);color:var(--text-secondary);cursor:pointer;font-size:0.75rem">✕</button>
 </div>
 
 <script>
@@ -3095,12 +3095,13 @@ function showToast(m){const t=document.getElementById('toast');t.textContent=m;t
 // === PWA 安装 ===
 let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',(e)=>{
+  if(localStorage.getItem('pwa_dismissed'))return; // 已关闭就不再弹
   e.preventDefault();
   deferredPrompt=e;
   document.getElementById('installBtn').style.display='inline-block';
   setTimeout(()=>{
     const toast=document.getElementById('pwaToast');
-    if(toast && deferredPrompt) toast.style.display='flex';
+    if(toast && deferredPrompt && !localStorage.getItem('pwa_dismissed')) toast.style.display='flex';
   },5000);
 });
 function installPWA(){
@@ -3260,6 +3261,7 @@ function checkPolicyUpdate(){
         setTimeout(()=>{
           const b=document.getElementById('policyBanner');
           if(b)b.style.animation='fadeOutDown 0.4s ease forwards';
+          markPolicyRead(); // 自动消失也算已读，下次不再弹
           setTimeout(()=>b?.remove(),500);
         },10000); // 10秒后自动消失
       }
