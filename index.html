@@ -7200,7 +7200,7 @@ function renderModelBar(pageId,containerId){
   var opts='';
   for(var i=0;i<allModels.length;i++){
     var m=allModels[i],c=getModelCost(m.id),sel=m.id===saved?' selected':'';
-    var label=c===0?' 🆓':' ⚡'+c;
+    var label=c===0?' [免费]':' ['+c+'积分]';
     opts+='<option value="'+m.id+'"'+sel+'>'+m.name+label+'</option>';
   }
   el.innerHTML=`
