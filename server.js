@@ -180,8 +180,8 @@ async function getQianfanToken() {
 // 模型到 API 配置的映射
 // ============================================================
 const MODEL_CONFIG = {
-  gpt4o:        { provider: 'openai',   model: 'gpt-4o',             baseUrl: process.env.OPENAI_BASE_URL },
-  gpt4omini:    { provider: 'openai',   model: 'gpt-4o-mini',        baseUrl: process.env.OPENAI_BASE_URL },
+  gpt4o:        { provider: 'nexus',   model: 'gpt-5-mini',             baseUrl: 'https://apinexus.net/v1' },
+  gpt4omini:    { provider: 'nexus',   model: 'gpt-5-nano',        baseUrl: 'https://apinexus.net/v1' },
   deepseekv3:   { provider: 'openai',   model: 'deepseek-chat',      baseUrl: 'https://api.deepseek.com/v1' },
   deepseekr1:   { provider: 'openai',   model: 'deepseek-reasoner',  baseUrl: 'https://api.deepseek.com/v1' },
   gemini25pro:  { provider: 'nexus',   model: 'gemini-2.5-pro',             baseUrl: 'https://apinexus.net/v1' },
@@ -189,7 +189,7 @@ const MODEL_CONFIG = {
   qwen3:        { provider: 'openai',   model: 'qwen3-235b-a22b',    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
   kimi2:        { provider: 'openai',   model: 'moonshot-v1-128k',   baseUrl: 'https://api.moonshot.cn/v1' },
   glm4plus:     { provider: 'openai',   model: 'glm-4-plus',         baseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
-  hunyuan:      { provider: 'openai',   model: 'hunyuan-lite',              baseUrl: 'https://www.dmxapi.cn/v1' },
+  hunyuan:      { provider: 'openai',   model: 'tencent/Hunyuan-A13B-Instruct',  baseUrl: 'https://api.siliconflow.cn/v1' },
 
   // === 硅基流动 SiliconFlow ===
   sf_qwen3_8b:       { provider: 'openai', model: 'Qwen/Qwen3-8B',                 baseUrl: 'https://api.siliconflow.cn/v1' },
@@ -199,7 +199,7 @@ const MODEL_CONFIG = {
   sf_glm47:         { provider: 'openai', model: 'Pro/zai-org/GLM-4.7',            baseUrl: 'https://api.siliconflow.cn/v1' },
   sf_qwen3_32b:     { provider: 'openai', model: 'Qwen/Qwen3-32B',                 baseUrl: 'https://api.siliconflow.cn/v1' },
   sf_qwen35_397b:   { provider: 'openai', model: 'Qwen/Qwen3.5-397B-A17B',         baseUrl: 'https://api.siliconflow.cn/v1' },
-  sf_qwq_32b:       { provider: 'openai', model: 'Qwen/QwQ-32B',                   baseUrl: 'https://api.siliconflow.cn/v1' },
+  sf_qwq_32b:       { provider: 'openai', model: 'deepseek-ai/DeepSeek-R1',                   baseUrl: 'https://api.siliconflow.cn/v1' },
   sf_hunyuan_a13b:  { provider: 'openai', model: 'tencent/Hunyuan-A13B-Instruct',  baseUrl: 'https://api.siliconflow.cn/v1' },
 
   // === 阿里云百炼 ===
@@ -213,7 +213,7 @@ const MODEL_CONFIG = {
 
   // === DMXAPI ===
   dmx_minimax_m27_free:  { provider: 'openai', model: 'MiniMax-M2.7-free',         baseUrl: 'https://www.dmxapi.cn/v1' },
-  dmx_minimax_m25_free:  { provider: 'openai', model: 'MiniMax-M2.5-free',         baseUrl: 'https://www.dmxapi.cn/v1' },
+  dmx_minimax_m25_free:  { provider: 'openai', model: 'doubao-seed-2-0-lite-260215', baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_glm_47_free:       { provider: 'openai', model: 'glm-4.7-free',              baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_glm_47_flash:      { provider: 'openai', model: 'glm-4.7-flash',             baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_glm_5_free:        { provider: 'openai', model: 'glm-5-free',                baseUrl: 'https://www.dmxapi.cn/v1' },
@@ -231,7 +231,7 @@ const MODEL_CONFIG = {
   dmx_qwen35_2b_free:    { provider: 'openai', model: 'Qwen3.5-2B-free',           baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_qwen35_35b_free:   { provider: 'openai', model: 'Qwen3.5-35B-A3B-free',      baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_qwen3_17b_free:    { provider: 'openai', model: 'Qwen3-1.7B-free',           baseUrl: 'https://www.dmxapi.cn/v1' },
-  dmx_qwen3_max_free:    { provider: 'openai', model: 'qwen3-max-2026-01-23-free', baseUrl: 'https://www.dmxapi.cn/v1' },
+  dmx_qwen3_max_free:    { provider: 'openai', model: 'qwen3.7-max',                baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
   dmx_qwen25_coder_7b:   { provider: 'openai', model: 'Qwen/Qwen2.5-Coder-7B-Instruct', baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_kimi_k25_free:     { provider: 'openai', model: 'kimi-k2.5-free',            baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_kimi_k26_free:     { provider: 'openai', model: 'kimi-k2.6-free',            baseUrl: 'https://www.dmxapi.cn/v1' },
@@ -244,7 +244,7 @@ const MODEL_CONFIG = {
   dmx_code_free:         { provider: 'openai', model: 'DMXAPI-Code-Free',          baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_codex_free:        { provider: 'openai', model: 'DMXAPI-CodeX-Free',         baseUrl: 'https://www.dmxapi.cn/v1' },
   dmx_kat_coder_free:    { provider: 'openai', model: 'KAT-Coder-ProV2-free',      baseUrl: 'https://www.dmxapi.cn/v1' },
-  dmx_qwen36_plus_free:  { provider: 'openai', model: 'qwen3.6-plus-free',         baseUrl: 'https://www.dmxapi.cn/v1' },
+  dmx_qwen36_plus_free:  { provider: 'openai', model: 'qwen3.6-plus',               baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
   dmx_code_free_x:       { provider: 'openai', model: 'DMXAPI-Code-Free-X',        baseUrl: 'https://www.dmxapi.cn/v1' },
 
   // == 百度千帆 (已下线，使用 DMXAPI/Ark 替代) ==
@@ -354,6 +354,8 @@ function getApiKey(provider, modelId) {
   if (modelId.startsWith('hunyuan'))  return process.env.DMXAPI_API_KEY;  // 改为走 DMXAPI 渠道
   if (modelId.startsWith('sf_'))     return process.env.SILICONFLOW_API_KEY;
   if (modelId.startsWith('ali_'))    return process.env.DASHSCOPE_API_KEY;  // 百炼共用阿里云Key
+  // DMXAPI 中已改为走百炼的模型
+  if (modelId === 'dmx_qwen3_max_free' || modelId === 'dmx_qwen36_plus_free') return process.env.DASHSCOPE_API_KEY;
   if (modelId.startsWith('dmx_'))    return process.env.DMXAPI_API_KEY;
   if (modelId.startsWith('or_'))     return process.env.OPENROUTER_API_KEY;
   if (modelId.startsWith('qiniu_'))  return process.env.QINIU_API_KEY;
@@ -518,8 +520,8 @@ const API_MODEL_COST = {
   dmx_minimax_m27_free:0, dmx_glm_5_turbo_free:0, dmx_qwen3_coder_plus_free:0,
   dmx_qwen3_coder_next_free:0, dmx_doubao_seed_code:0, dmx_mimo_v2_pro_free:0,
   dmx_code_free:0, dmx_codex_free:0, dmx_kat_coder_free:0,
-  dmx_qwen36_plus_free:0, dmx_code_free_x:0,
-  dmx_kimi_k25_free:0, dmx_kimi_k26_free:0, dmx_doubao_seed_pro:0, dmx_qwen3_max_free:0,
+  dmx_qwen36_plus_free:1, dmx_code_free_x:0, dmx_qwen3_max_free:1,
+  dmx_minimax_m25_free:0,
   ark_dbs2_mini:0, ark_dbp15l:0, ark_dbs2_lite:0,
   ark_dsv4f:0, ark_dbs1_6:0, ark_dbs1_8:0, ark_dbs_code:0,
   ark_dsv32:0, ark_dsv4p:0, ark_dbs2_pro:0, ark_glm47:0,
@@ -779,9 +781,25 @@ app.post('/api/chat', async (req, res) => {
     });
   } catch (error) {
     console.error(`[${modelId}] 调用失败:`, error.message);
+    const errMsg = error.message || '未知错误';
+    // 提取上游API返回的具体错误信息
+    let userMsg = errMsg;
+    if (errMsg.includes('503') || errMsg.includes('无可用渠道')) {
+      userMsg = '该模型当前服务不可用，上游渠道暂不可用。请尝试其他模型。';
+    } else if (errMsg.includes('524') || errMsg.includes('满载')) {
+      userMsg = '上游服务器繁忙，请稍后重试或更换模型。';
+    } else if (errMsg.includes('401') || errMsg.includes('User not found')) {
+      userMsg = 'API 密钥无效或已过期，请联系管理员更新。';
+    } else if (errMsg.includes('403') || errMsg.includes('disabled')) {
+      userMsg = '该模型已被上游禁用，请尝试其他模型。';
+    } else if (errMsg.includes('404') || errMsg.includes('NotFound')) {
+      userMsg = '模型端点不存在，可能已下线。请尝试其他模型。';
+    } else if (errMsg.includes('timeout') || errMsg.includes('ETIMEDOUT')) {
+      userMsg = '请求超时，上游服务响应过慢。请重试或更换模型。';
+    }
     res.status(502).json({
       model: modelId,
-      content: `❌ API 调用失败: ${error.message}\n\n请检查 API Key 是否正确、账户是否有余额。`,
+      content: `❌ ${userMsg}\n\n技术详情: ${errMsg}`,
       error: true,
     });
   }
