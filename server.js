@@ -647,11 +647,17 @@ app.post('/api/chat', async (req, res) => {
     }
   }
 
-  // IP 速率检查
+  // IP 速率检查（登录用户且积分足够时，跳过每日IP限制）
   const rateCheck = checkIpRate(ip, modelId);
   if (rateCheck.blocked) {
-    console.log(`[RATE_LIMIT] ${ip} → ${modelId}: ${rateCheck.reason}`);
-    return res.status(429).json({ error: { message: rateCheck.reason, type: 'rate_limit' } });
+    // 登录用户有积分 → 不限制IP调用次数（已经是付费用户）
+    const isPayingUser = username && userCredits >= (creditCost || 0);
+    if (!isPayingUser || rateCheck.reason.includes('过频')) {
+      console.log(`[RATE_LIMIT] ${ip} → ${modelId}: ${rateCheck.reason}`);
+      return res.status(429).json({ error: { message: rateCheck.reason, type: 'rate_limit' } });
+    }
+    // paying user with credits — skip daily limit, still enforce rate limit
+    console.log(`[RATE_LIMIT] ${ip} → ${modelId}: 跳过每日限制（付费用户有积分）`);
   }
 
   // 扣积分

@@ -59,6 +59,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return ipcRenderer.invoke('window:set-size', width, height);
   },
 
+  // ===== 贾维斯设备控制 =====
+  /** 搜索文件 */
+  searchFile: function(query) {
+    return ipcRenderer.invoke('device:search-file', query);
+  },
+  /** 打开文件/文件夹 */
+  openPath: function(filePath) {
+    return ipcRenderer.invoke('shell:open-path', filePath);
+  },
+
   // ===== 事件监听 =====
   /** 监听主进程消息 */
   onMessage: function(channel, callback) {

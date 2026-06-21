@@ -30,14 +30,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Sync source files
-        run: |
-          Copy-Item -Path ..\source\main.js -Destination .\ -Force
-          Copy-Item -Path ..\source\preload.js -Destination .\ -Force
-          Copy-Item -Path ..\source\index.html -Destination .\ -Force
-          Copy-Item -Path ..\source\css\ -Destination .\css\ -Recurse -Force
-          Copy-Item -Path ..\source\js\ -Destination .\js\ -Recurse -Force
-
       - name: Determine version
         id: version
         shell: pwsh

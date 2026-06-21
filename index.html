@@ -3456,12 +3456,11 @@ async function sendChatMessage(){
       const backup=m.backup;
       if((r.simulated||r.error)&&backup){
         const backupModel=models.find(x=>x.id===backup);
-        r=await callModelAPI(backup,msg,ragSysPrompt+'【系统提示：已自动切换到备用渠道】');
+        r=await callModelAPI(backup,msg,ragSysPrompt);
         if(r&&!r.simulated&&!r.error){
-          showToast(`🔄 ${m.name} → ${backupModel?.name||backup} 已自动切换`);
         }
       }
-      const el=document.getElementById(pid);if(el){el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if(r.simulated)el.querySelector('.chat-msg-content').style.opacity='0.6';if(backup&&!r.simulated&&!r.error)el.innerHTML+=`<div style="font-size:0.6rem;color:var(--orange);margin-top:4px">🔄 已自动切换到备用渠道（${backup}）</div>`}
+      const el=document.getElementById(pid);if(el){el.querySelector('.chat-msg-content').innerHTML=escapeHtml(r.content);if(r.simulated)el.querySelector('.chat-msg-content').style.opacity='0.6'}
     }catch(e){const el=document.getElementById(pid);if(el)el.querySelector('.chat-msg-content').innerHTML=`<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`}
     md.scrollTop=md.scrollHeight;
   });
@@ -5686,7 +5685,7 @@ function submitFeedback(){
 // 密码从服务器验证，本地仅缓存用户输入的密码
 const DEFAULT_PASSWORD='CHANGE_ME',ADMIN_STORAGE_KEY='apwd',MODELS_STORAGE_KEY='amod',API_KEYS_KEY='akeys',SETTINGS_KEY='aset';
 let adminModels=[],editingModelId=null;
-function initAdmin(){const s=localStorage.getItem(MODELS_STORAGE_KEY);adminModels=[];if(s){try{const p=JSON.parse(s);if(Array.isArray(p))adminModels=p}catch(e){}}if(!adminModels.length)adminModels=JSON.parse(JSON.stringify(models))}
+function initAdmin(){adminModels=JSON.parse(JSON.stringify(models));const s=localStorage.getItem(MODELS_STORAGE_KEY);if(s){try{const p=JSON.parse(s);if(Array.isArray(p)){const builtInIds=new Set(adminModels.map(m=>m.id));for(const saved of p){const idx=adminModels.findIndex(m=>m.id===saved.id);if(idx>=0){adminModels[idx]=saved}else if(!builtInIds.has(saved.id)){adminModels.push(saved)}}}}catch(e){}}}
 function toggleKeyDashboard(){
   const kd=document.getElementById('keyDashboard');
   kd.style.display=kd.style.display==='none'?'block':'none';
@@ -6671,6 +6670,18 @@ if(!currentUser){
 updateCreditDisplay();
 renderUserNav();
 initAdmin();
+// 安全校验：如果模型列表异常少（<10个），清除本地缓存重建
+if(models.length<10 && localStorage.getItem(MODELS_STORAGE_KEY)){
+  console.warn('[TriGen] 检测到模型列表异常（仅'+models.length+'个），清除缓存重建');
+  localStorage.removeItem(MODELS_STORAGE_KEY);
+  initAdmin(); // 重新初始化
+}
+// 支持 ?reset-models 参数强制重建模型列表
+if(location.search.includes('reset-models')){
+  localStorage.removeItem(MODELS_STORAGE_KEY);
+  console.log('[TriGen] 已强制重建模型列表');
+  setTimeout(()=>location.href=location.pathname,100);
+}
 updateStreakUI();
 setTimeout(renderContinue,500);
 // First visit welcome
@@ -7165,12 +7176,12 @@ setInterval(MUSIC_UPDATE_CREDITS,5000);
 // ==== 🤖 统一模型选择器 + 智能推荐模块 ====
 const PAGE_MODEL_RECOMMEND={
   novel:{id:'deepseekv3',name:'DeepSeek V3',reason:'长文本创作最佳，支持百万字上下文'},
-  media:{id:'qwen_max',name:'Qwen Max',reason:'中文理解力强，适合分镜脚本'},
+  media:{id:'dmx_qwen3_max_free',name:'Qwen3 Max',reason:'中文理解力强，适合分镜脚本'},
   brand:{id:'deepseekv3',name:'DeepSeek V3',reason:'创意文案生成最佳'},
-  market:{id:'kimi_k2',name:'Kimi K2',reason:'社交媒体文案擅长'},
+  market:{id:'ali_kimi_k26',name:'Kimi K2.6',reason:'社交媒体文案擅长'},
   office:{id:'deepseekv3',name:'DeepSeek V3',reason:'办公文件处理最优'},
   agents:{id:'deepseekr1',name:'DeepSeek R1',reason:'复杂推理任务首选'},
-  studio:{id:'qwen_max',name:'Qwen Max',reason:'生成任务最好配合'},
+  studio:{id:'dmx_qwen3_max_free',name:'Qwen3 Max',reason:'生成任务最好配合'},
   music:{id:'deepseekv3',name:'DeepSeek V3',reason:'歌词创作最擅长'},
   d3:{id:'meshy_text',name:'Meshy 3D',reason:'3D模型生成最优',filter:'3d'},
 };

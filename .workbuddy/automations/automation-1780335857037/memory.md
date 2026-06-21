@@ -1,5 +1,10 @@
 # 每日 Git 自动备份 执行记录
 
+## 2026-06-21 02:55
+- **状态**: 部分成功（commit 成功，push 失败）
+- **操作**: `git add .` + commit `auto backup 2026-06-21`，59 文件变更（+24872/-5 行），新增 `download/TriGenClaw-Portable/`（Electron 便携版构建产物：main.js、preload.js、app.asar、前端 JS/CSS 等 53 文件）及 `fix-nginx-manifest.sh`，修改 release.yml、deploy-win.js、api.js、index.html 等，提交 23d8871
+- **push 结果**: 失败 — `Recv failure: Connection was aborted`（GitHub 连接中断），与 06-19、06-15、06-14、06-09 同类故障，按策略不重试，下次再推
+
 ## 2026-06-20 02:55
 - **状态**: 成功
 - **操作**: `git add .` + commit `auto backup 2026-06-20`，5 文件变更（+76/-17 行），提交 46f7c6b
