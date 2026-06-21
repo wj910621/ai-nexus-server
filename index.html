@@ -4320,16 +4320,19 @@ function downloadMedia(){
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='漫剧_'+new Date().toISOString().slice(0,10)+'.txt';a.click()
 }
 
-// 桌面端直接下载 — 点击即下载，无中间页面
+// 桌面端直接下载 — 一键下载 ZIP 便携版（无安全警告，解压即用）
 function downloadDesktopApp(){
-  showToast('⏳ 正在准备下载 TriGenClaw 桌面客户端...');
-  const a=document.createElement('a');
-  a.href='/download/TriGenClaw-1.0.0-win-Setup.exe';
-  a.download='TriGenClaw-1.0.0-win-Setup.exe';
+  showToast('⏳ 正在开始下载 TriGenClaw 桌面端...');
+  const zipUrl = 'https://github.com/wj910621/ai-nexus-server/releases/latest/download/TriGenClaw-Portable.zip';
+  const a = document.createElement('a');
+  a.href = zipUrl;
+  a.download = 'TriGenClaw-Portable.zip';
+  a.target = '_blank';
+  a.rel = 'noopener';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  setTimeout(()=>showToast('✅ 下载已开始！安装包约 100MB，下载后双击安装即可'), 800);
+  setTimeout(() => showToast('✅ 下载已开始！ZIP约155MB，解压后双击 TriGenClaw.exe 即可使用'), 1000);
 }
 
 // === Credits ===
