@@ -1343,8 +1343,7 @@ a{color:var(--accent);text-decoration:none}
             <div class="feature-card"><label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">💎 金手指/核心设定</label>
               <textarea id="wizCheat" rows="2" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="主角的特殊能力/系统/传承（留空AI设计）"></textarea>
             </div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <div id="novelStep2Model" style="min-width:120px"></div>
+            <div style="margin-top:8px">
               <button class="btn-send" onclick="NOVEL_STEP_2()">🤖 AI 生成框架</button>
             </div>
           </div>
@@ -1381,8 +1380,7 @@ a{color:var(--accent);text-decoration:none}
                 <span class="filter-tag" onclick="NOVEL_SET('chapCount',this,'100')">100章</span>
               </div>
             </div>
-            <div style="display:flex;gap:8px">
-              <div id="novelStep4Model" style="min-width:120px"></div>
+            <div style="margin-top:8px">
               <button class="btn-send" onclick="NOVEL_STEP_4_GEN()">🤖 生成大纲</button>
             </div>
           </div>
@@ -1651,8 +1649,7 @@ a{color:var(--accent);text-decoration:none}
 </div>
 <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
 <div><textarea id="officeInput" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="例：为「AI绘画工具」写一篇1000字的公众号推广文章，目标读者是设计师和创作者，语气专业但不死板..."></textarea>
-<div style="display:flex;gap:8px;margin-top:8px"><select id="officeModel" class="col-select"><option value="deepseekv3">DeepSeek-V3 ⚡1</option><option value="ali_qwen36_plus">Qwen3.6 Plus ⚡2</option><option value="gpt4o">GPT-4o ⚡5</option><option value="qwen3">通义千问3 ⚡3</option></select>
-<button class="btn-send" onclick="runAiOffice()">生成</button></div></div>
+<button class="btn-send" onclick="runAiOffice()" style="margin-top:8px">生成</button></div></div>
 <div class="feature-card" style="min-height:180px;max-height:360px;overflow-y:auto;white-space:pre-wrap" id="officeOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择上方功能，输入需求开始</p></div></div>
 </section></div>
 
@@ -1668,8 +1665,7 @@ a{color:var(--accent);text-decoration:none}
 </div>
 <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
 <div><textarea id="brandInput" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="输入品牌信息..."></textarea>
-<div style="display:flex;gap:8px;margin-top:8px"><select id="brandModel" class="col-select"><option value="ali_qwen37_max">Qwen3.7 Max ⚡3</option><option value="gpt4o">GPT-4o ⚡5</option><option value="deepseekv3">DeepSeek-V3 ⚡1</option></select>
-<button class="btn-send" onclick="runAiBrand()">生成</button></div></div>
+<button class="btn-send" onclick="runAiBrand()" style="margin-top:8px">生成</button></div></div>
 <div class="feature-card" style="min-height:180px;max-height:360px;overflow-y:auto;white-space:pre-wrap" id="brandOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择功能开始</p></div>
   <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button class="btn-sm" onclick="brandToMarket()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none">📢 去营销推广</button></div>
 </div>
@@ -1687,8 +1683,7 @@ a{color:var(--accent);text-decoration:none}
 </div>
 <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
 <div><textarea id="marketInput" rows="4" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="输入产品信息..."></textarea>
-<div style="display:flex;gap:8px;margin-top:8px"><select id="marketModel" class="col-select"><option value="ali_kimi_k26">Kimi-K2.6 ⚡3</option><option value="ali_qwen37_max">Qwen3.7 Max ⚡3</option><option value="gpt4o">GPT-4o ⚡5</option><option value="deepseekv3">DeepSeek-V3 ⚡1</option></select>
-<button class="btn-send" onclick="runAiMarket()">生成</button></div></div>
+<button class="btn-send" onclick="runAiMarket()" style="margin-top:8px">生成</button></div></div>
 <div class="feature-card" style="min-height:180px;max-height:360px;overflow-y:auto;white-space:pre-wrap" id="marketOutput"><p style="color:var(--text-secondary);text-align:center;padding:40px">选择功能开始</p></div>
   <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button class="btn-sm" onclick="marketToBrand()" style="background:linear-gradient(135deg,#6c4ef5,#8b70ff);color:#fff;border:none">🎨 去设计品牌</button></div>
 </div>
@@ -5054,8 +5049,9 @@ const OFFICE_SYS='你是专业商务助理。要求：1. 输出直接可使用�
 function aiOffice(type,template){officePrompt=template;document.getElementById('officeInput').value=template;document.getElementById('officeInput').focus()}
 async function runAiOffice(){
   const i=document.getElementById('officeInput').value.trim();if(!i){showToast('输入需求');return}
-  if(!spendCredits(5))return;
-  const m=document.getElementById('officeModel').value,o=document.getElementById('officeOutput');
+  const m=getPageModel('office')||'deepseekv3';
+  if(!spendCredits(getModelCost(m)))return;
+  const o=document.getElementById('officeOutput');
   o.innerHTML='<span class="spinner"></span> 生成中...';
   try{const r=await callModelAPI(m,i,OFFICE_SYS);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
 }
@@ -5066,8 +5062,9 @@ const BRAND_SYS='你是顶级品牌策略师。要求：1. 每个方案给出3�
 function aiBrand(type,template){brandPrompt=template;document.getElementById('brandInput').value=template;document.getElementById('brandInput').focus()}
 async function runAiBrand(){
   const i=document.getElementById('brandInput').value.trim();if(!i){showToast('输入品牌信息');return}
-  if(!spendCredits(5))return;
-  const m=document.getElementById('brandModel').value,o=document.getElementById('brandOutput');
+  const m=getPageModel('brand')||'deepseekv3';
+  if(!spendCredits(getModelCost(m)))return;
+  const o=document.getElementById('brandOutput');
   o.innerHTML='<span class="spinner"></span> 生成中...';
   try{const r=await callModelAPI(m,i,BRAND_SYS);o.innerHTML=escapeHtml(r.content)}catch(e){o.innerHTML='❌ '+e.message}
 }
@@ -5078,7 +5075,7 @@ const MARKET_SYS='你是资深营销专家。要求：1. 文案直接可发布�
 function aiMarket(type,template){marketPrompt=template;document.getElementById('marketInput').value=template;document.getElementById('marketInput').focus()}
 async function runAiMarket(){
   const i=document.getElementById('marketInput').value.trim();if(!i){showToast('输入产品信息');return}
-  const m=document.getElementById('marketModel').value;
+  const m=getPageModel('market')||'ali_kimi_k26';
   const o=document.getElementById('marketOutput');
   if(!spendCredits(getModelCost(m)))return;
   o.innerHTML='<span class="spinner"></span> 生成中...';
@@ -6148,7 +6145,7 @@ function NOVEL_SET(tag,el,val){if(el.classList.contains('active')){el.classList.
 function NOVEL_SET_LENGTH(label,el,chaps,words,total){document.querySelectorAll('#novelLengthTags .filter-tag').forEach(x=>x.classList.remove('active'));el.classList.add('active');NOVEL_STATE.chapCount=chaps;NOVEL_STATE.perChapWords=words;document.getElementById('novelChapCount').value=chaps;document.getElementById('novelPerChapWords').value=words;if(total)document.getElementById('novelTotalWordsInput').value=total;NOVEL_UPDATE_LENGTH()}
 function NOVEL_UPDATE_LENGTH(){const chaps=parseInt(document.getElementById('novelChapCount').value)||0;const words=parseInt(document.getElementById('novelPerChapWords').value)||0;let vols=parseInt(document.getElementById('novelVolumeCount').value)||0;const total=parseInt(document.getElementById('novelTotalWordsInput').value)||0;NOVEL_STATE.chapCount=chaps;NOVEL_STATE.perChapWords=words;NOVEL_STATE.volumeCount=vols;let displayTotal=total,displayChaps=chaps,displayWords=words,displayVols=vols;if(total>0&&chaps>0&&words>0){displayTotal=chaps*words;document.getElementById('novelTotalWordsInput').value=displayTotal}if(total>0&&chaps<=0&&words<=0){displayChaps=Math.max(10,Math.round(total/2500));displayWords=Math.round(total/displayChaps);displayTotal=displayChaps*displayWords;document.getElementById('novelChapCount').value=displayChaps;document.getElementById('novelPerChapWords').value=displayWords;NOVEL_STATE.chapCount=displayChaps;NOVEL_STATE.perChapWords=displayWords}if(vols<=0){displayVols=Math.max(1,Math.ceil(displayChaps/10));document.getElementById('novelVolumeCount').value=displayVols;NOVEL_STATE.volumeCount=displayVols}if(displayTotal<=0)displayTotal=total||displayChaps*displayWords||50000;NOVEL_STATE.totalWords=displayTotal;const perVol=displayVols>0?Math.ceil(displayChaps/displayVols):0;document.getElementById('novelTotalWordsDisplay').textContent=`总目标: ${NOVEL_STATE.totalWords.toLocaleString()} 字 · ${displayVols}卷 · 每卷${perVol}章`}
 function NOVEL_UPDATE_LENGTH_TOTAL(){const total=parseInt(document.getElementById('novelTotalWordsInput').value)||0;if(total>0){document.getElementById('novelChapCount').value='';document.getElementById('novelPerChapWords').value=''}NOVEL_UPDATE_LENGTH()}
-function NOVEL_GOTO_STEP(s){NOVEL_STATE.step=parseInt(s);const stepNames={'1':'定方向','2':'搭框架','3':'锁框架','4':'写大纲','5':'确大纲','6':'写正文'};for(let i=1;i<=6;i++){const p=document.getElementById('wizPanel'+i);const sb=document.querySelector(`.wizard-step[data-step="${i}"]`);if(i===parseInt(s)){p.style.display='block';sb.classList.add('active');sb.classList.remove('done')}else if(i<parseInt(s)){p.style.display='none';sb.classList.add('done');sb.classList.remove('active')}else{p.style.display='none';sb.classList.remove('active','done')}}setTimeout(()=>{const c2=document.getElementById('novelStep2Model');if(c2&&!c2.children.length)createCustomModelSelect(c2,'novel_step',models.filter(m=>!m.hidden),getPageModel('novel')||'deepseekv3',(pageId,val)=>{localStorage.setItem('pageModel_novel',val)});const c4=document.getElementById('novelStep4Model');if(c4&&!c4.children.length)createCustomModelSelect(c4,'novel_step2',models.filter(m=>!m.hidden),getPageModel('novel')||'deepseekv3',(pageId,val)=>{localStorage.setItem('pageModel_novel',val)})},100)}
+function NOVEL_GOTO_STEP(s){NOVEL_STATE.step=parseInt(s);const stepNames={'1':'定方向','2':'搭框架','3':'锁框架','4':'写大纲','5':'确大纲','6':'写正文'};for(let i=1;i<=6;i++){const p=document.getElementById('wizPanel'+i);const sb=document.querySelector(`.wizard-step[data-step="${i}"]`);if(i===parseInt(s)){p.style.display='block';sb.classList.add('active');sb.classList.remove('done')}else if(i<parseInt(s)){p.style.display='none';sb.classList.add('done');sb.classList.remove('active')}else{p.style.display='none';sb.classList.remove('active','done')}}}
 async function NOVEL_STEP_1(){const core=document.getElementById('wizCore').value.trim();if(!core){showToast('请输入创意核心描述');return}NOVEL_STATE.core=core;NOVEL_GOTO_STEP(2)}
 async function NOVEL_STEP_2(){NOVEL_UPDATE_LENGTH();const core=NOVEL_STATE.core,type=NOVEL_STATE.type,style=NOVEL_STATE.style,pov=NOVEL_STATE.pov;const mc=document.getElementById('wizMainChar').value,world=document.getElementById('wizWorld').value,cheat=document.getElementById('wizCheat').value;let chaps=NOVEL_STATE.chapCount||0,words=NOVEL_STATE.perChapWords||0,vols=NOVEL_STATE.volumeCount||0,total=NOVEL_STATE.totalWords||0;const sizeDesc=chaps>0&&words>0?`总目标${chaps}章×${words}字=${(chaps*words).toLocaleString()}字`:(total>0?`总目标${total.toLocaleString()}字`:'字数由AI按最佳节奏自行决定');const volDesc=vols>0?`分${vols}卷`:'卷数由AI按情节节奏自行分配';const modelId=NOVEL_GET_MODEL();const cost=getModelCost(modelId);const out=document.getElementById('wizFrameOutput');out.innerHTML='<span class="spinner"></span> AI 正在搭建故事框架...';if(!spendCredits(cost))return;const sys=`你是顶级小说架构师。请为以下小说构建完整故事框架。${sizeDesc}，${volDesc}。注意：如果未指定具体章节数和字数，请根据故事的情节密度和类型特点，自行决定最佳的章节分配和每章字数。输出格式：\n\n【故事主线】200字核心主线\n【分卷规划】按需分卷，每卷标题+概要+关键事件+起止章节\n【人物关系网】主角+5个关键配角，含外貌/性格/关系/成长弧\n【世界观架构】时代背景/势力分布/规则体系\n【爽点设计】每卷2-3个核心爽点或高潮\n【读者期待管理】开篇钩子/每卷悬念/最终结局的情感基调\n【规模说明】如果框架中推荐的章数和字数与目标不同，请说明AI推荐的理由`;try{const r=await callModelAPI(modelId,`小说类型：${type} 写作风格：${style} 视角：${pov} 核心创意：${core} ${sizeDesc} ${volDesc} 主角设定：${mc||'由AI设计'} 世界观：${world||'由AI构建'} 金手指：${cheat||'由AI设计'}`,sys);NOVEL_STATE.frame=r.content;out.innerHTML=escapeHtml(r.content)}catch(e){out.innerHTML=`❌ ${e.message}`}}
 function NOVEL_STEP_3(){if(!NOVEL_STATE.frame){showToast('请先生成框架');return}document.getElementById('wizFrameLocked').value=NOVEL_STATE.frame;NOVEL_GOTO_STEP(3)}
