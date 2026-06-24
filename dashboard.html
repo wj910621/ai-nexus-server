@@ -2516,11 +2516,11 @@ response = client.chat.completions.create(
     <!-- 一次性充值 -->
     <h3 style="text-align:center;font-size:1.1rem;margin:36px 0 16px;color:var(--text-secondary)">🔋 一次性充值</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-      <div class="feature-card" style="text-align:center;padding:20px 16px;position:relative"><div id="firstPurchaseBadge" style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:2px 10px;border-radius:8px;font-size:0.65rem;font-weight:700;display:none">🔥 首购5折</div><div style="font-size:1.4rem;margin-bottom:4px">☕</div><h4>体验包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">100 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥6.9</div><p style="font-size:0.65rem;color:var(--green)">¥0.069/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(100,'¥6.9')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:20px 16px;border:2px solid var(--accent)"><div style="font-size:1.4rem;margin-bottom:4px">⭐</div><h4>标准包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">500 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥29</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.058/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(500,'¥29')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:20px 16px"><div style="font-size:1.4rem;margin-bottom:4px">💎</div><h4>进阶包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">1000 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥49</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.049/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(1000,'¥49')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:20px 16px"><div style="font-size:1.4rem;margin-bottom:4px">🚀</div><h4>专业包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">2500 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥99</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.040/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits(2500,'¥99')">购买</button></div>
-      <div class="feature-card" style="text-align:center;padding:20px 16px;background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(99,102,241,0.05))"><div style="font-size:1.4rem;margin-bottom:4px">👑</div><h4>旗舰包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">6000 积分</p><div style="font-size:1.2rem;font-weight:800;color:#7c3aed;margin:6px 0">¥199</div><p style="font-size:0.65rem;color:var(--green)">¥0.033/分 · 赠知识库</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem;background:linear-gradient(135deg,#7c3aed,#6366f1)" onclick="purchaseCredits(6000,'¥199')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px;position:relative"><div id="firstPurchaseBadge" style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:2px 10px;border-radius:8px;font-size:0.65rem;font-weight:700;display:none">🔥 首购5折</div><div style="font-size:1.4rem;margin-bottom:4px">☕</div><h4>体验包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">100 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥6.9</div><p style="font-size:0.65rem;color:var(--green)">¥0.069/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits('credits_starter')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px;border:2px solid var(--accent)"><div style="font-size:1.4rem;margin-bottom:4px">⭐</div><h4>标准包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">500 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥29</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.058/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits('credits_standard')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px"><div style="font-size:1.4rem;margin-bottom:4px">💎</div><h4>进阶包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">1000 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥49</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.049/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits('credits_premium')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px"><div style="font-size:1.4rem;margin-bottom:4px">🚀</div><h4>专业包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">2500 积分</p><div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin:6px 0">¥99</div><p style="font-size:0.65rem;color:var(--text-secondary)">¥0.040/分</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem" onclick="purchaseCredits('credits_pro')">购买</button></div>
+      <div class="feature-card" style="text-align:center;padding:20px 16px;background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(99,102,241,0.05))"><div style="font-size:1.4rem;margin-bottom:4px">👑</div><h4>旗舰包</h4><p style="font-size:0.78rem;color:var(--text-secondary)">6000 积分</p><div style="font-size:1.2rem;font-weight:800;color:#7c3aed;margin:6px 0">¥199</div><p style="font-size:0.65rem;color:var(--green)">¥0.033/分 · 赠知识库</p><button class="btn-send" style="padding:6px 16px;font-size:0.78rem;background:linear-gradient(135deg,#7c3aed,#6366f1)" onclick="purchaseCredits('credits_ultimate')">购买</button></div>
     </div>
 
     <!-- 功能消耗明细 -->
@@ -4728,18 +4728,62 @@ function checkAchievement(){
     setTimeout(()=>showToast('🏆 活跃用户成就达成！+50 积分 · 继续加油'),5000);
   }
 }
-function purchaseCredits(a,p){const isFirst=!localStorage.getItem('has_purchased');const disc=a>99&&isFirst?'\n\n🎉 首次充值特惠！':'';
-  if(confirm(`${disc?disc+'\n':''}购买 ${a} 积分 (¥${p})
-─────────────────
-💡 温馨提示：
-• 积分为虚拟商品，充值后立即到账
-• 已消耗积分无法退还
-• 积分永久有效，无过期时间
-─────────────────
-确认支付表示同意用户协议及免责声明`)){
-    localStorage.setItem('has_purchased','1');
-    window.open('https://mbd.pub','_blank');showToast('付款后积分自动到账');
-  }
+function purchaseCredits(productId){
+  const product = {
+    credits_starter:{name:'体验包',credits:150,price:9.9},
+    credits_standard:{name:'标准包',credits:700,price:39},
+    credits_premium:{name:'进阶包',credits:1500,price:69},
+    credits_pro:{name:'专业包',credits:2500,price:99},
+    credits_ultimate:{name:'旗舰包',credits:6000,price:199}
+  }[productId];
+  if(!product) return showToast('无效的商品');
+
+  // 显示支付弹窗
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s';
+  overlay.innerHTML=`
+    <div style="background:var(--bg-card);border-radius:20px;padding:30px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp 0.3s ease">
+      <div style="font-size:1.2rem;font-weight:700;margin-bottom:8px">${product.name}</div>
+      <div style="font-size:2rem;font-weight:800;color:var(--accent);margin-bottom:4px">¥${product.price}</div>
+      <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:20px">${product.credits} 积分</div>
+      <div id="qrContainer" style="background:#fff;border-radius:12px;padding:20px;margin:0 auto 16px;width:220px;height:220px;display:flex;align-items:center;justify-content:center">
+        <span class="spinner"></span>
+      </div>
+      <div id="payStatus" style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px">正在创建支付订单...</div>
+      <button onclick="this.closest('[style*=\\'fixed\\']').remove()" style="padding:8px 20px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);cursor:pointer;font-size:0.85rem">取消</button>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  // 创建支付订单
+  const token=localStorage.getItem('nx_auth_token');
+  fetch('/api/payments/wechat-create',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({productId})
+  }).then(r=>r.json()).then(d=>{
+    if(!d.ok){document.getElementById('payStatus').textContent='❌ 支付创建失败: '+d.error;return}
+    if(d.codeUrl){
+      const qrImg='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(d.codeUrl);
+      document.getElementById('qrContainer').innerHTML='<img src="'+qrImg+'" style="width:220px;height:220px;border-radius:8px" alt="支付二维码" onerror="this.outerHTML=\'<div style=color:#999>二维码加载失败</div>\'">';
+      document.getElementById('payStatus').textContent='📱 请使用微信扫码支付';
+      // 轮询支付状态
+      const poll=setInterval(()=>{
+        fetch('/api/payments/wechat-query/'+d.orderId,{
+          headers:{'Authorization':'Bearer '+token}
+        }).then(r=>r.json()).then(q=>{
+          if(q.paid){
+            clearInterval(poll);
+            document.getElementById('payStatus').textContent='✅ 支付成功！积分已到账';
+            setTimeout(()=>{overlay.remove();location.reload()},1500);
+          }
+        }).catch(()=>{})
+      },2000);
+      // 5 分钟后停止轮询
+      setTimeout(()=>clearInterval(poll),300000);
+    }
+  }).catch(e=>{
+    document.getElementById('payStatus').textContent='❌ 网络错误: '+e.message;
+  });
 }
 function subscribe(type){const plans={monthly:{n:'月度会员',p:39,c:800},quarterly:{n:'季度会员',p:99,c:2400},yearly:{n:'年度会员',p:299,c:9600}};const plan=plans[type];if(!plan)return;
   if(confirm(`订阅 ${plan.n}

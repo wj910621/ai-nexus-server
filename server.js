@@ -2664,6 +2664,131 @@ app.get('/api/payments/orders', authRequired, (req, res) => {
 });
 
 // ============================================================
+// 微信支付 — Native 扫码支付
+// ============================================================
+let wxpay = null;
+try { wxpay = require('./wechat-pay'); } catch (e) { console.log('[WX Pay] 模块加载失败:', e.message); }
+
+// 创建微信支付订单（返回 code_url）
+app.post('/api/payments/wechat-create', authRequired, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!wxpay) return res.json({ ok: false, error: '微信支付模块未加载' });
+    if (!productId || !PAYMENT_PRODUCTS[productId]) {
+      return res.json({ ok: false, error: '无效的商品ID' });
+    }
+    const product = PAYMENT_PRODUCTS[productId];
+    const orderId = 'ORD' + Date.now() + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const amount = Math.round(product.price * 100); // 单位：分
+
+    // 保存订单到数据库
+    const credits = product.credits || 0;
+    db.run(`CREATE TABLE IF NOT EXISTS orders (
+      order_id TEXT PRIMARY KEY, username TEXT, product_id TEXT, product_name TEXT,
+      amount REAL, credits INTEGER, status TEXT DEFAULT 'pending', created_at TEXT, paid_at TEXT
+    )`);
+    db.run("INSERT INTO orders (order_id, username, product_id, product_name, amount, credits, status, created_at) VALUES (?,?,?,?,?,?,'pending',?)",
+      [orderId, req.user.username, productId, product.name, product.price, credits, new Date().toISOString()]);
+    saveDB();
+
+    // 调用微信支付 API
+    const wxResult = await wxpay.createNativeOrder({
+      description: `TriGen - ${product.name}`,
+      outTradeNo: orderId,
+      amount,
+      attach: JSON.stringify({ username: req.user.username, productId }),
+    });
+
+    res.json({ ok: true, orderId, product, codeUrl: wxResult.code_url });
+  } catch (e) {
+    res.json({ ok: false, error: '创建支付失败: ' + e.message });
+  }
+});
+
+// 微信支付回调通知
+app.post('/api/payments/wechat-notify', (req, res) => {
+  try {
+    if (!wxpay) return res.status(500).json({ code: 'FAIL', message: '模块未加载' });
+    const headers = req.headers;
+    const body = JSON.stringify(req.body);
+
+    const ver = wxpay.verifyNotify(headers, body);
+    if (!ver.ok) {
+      console.error('[WX Pay] 回调签名验证失败:', ver.error);
+      return res.status(401).json({ code: 'FAIL', message: '签名验证失败' });
+    }
+
+    // 解密回调数据
+    const resource = req.body.resource;
+    if (!resource) return res.status(400).json({ code: 'FAIL', message: '缺少resource' });
+
+    const decrypted = wxpay.decryptResource(resource);
+    const { out_trade_no, trade_state, transaction_id, amount } = decrypted;
+
+    if (trade_state === 'SUCCESS') {
+      // 查询订单，给用户加积分
+      const order = db.exec("SELECT username, product_id, credits, status FROM orders WHERE order_id=?",
+        [out_trade_no]);
+      if (order.length && order[0].values.length) {
+        const row = order[0].values[0];
+        const cols = order[0].columns;
+        const m = {};
+        cols.forEach((c, i) => { m[c] = i; });
+
+        if (row[m['status']] === 'pending') {
+          const username = row[m['username']];
+          const creditsToAdd = row[m['credits']];
+
+          // 更新订单状态
+          db.run("UPDATE orders SET status='paid', paid_at=? WHERE order_id=?",
+            [new Date().toISOString(), out_trade_no]);
+          // 给用户加积分
+          db.run("UPDATE users SET credits=credits+? WHERE username=?", [creditsToAdd, username]);
+          saveDB();
+          console.log(`[WX Pay] 支付成功: ${out_trade_no}, 用户: ${username}, 积分: +${creditsToAdd}`);
+        }
+      }
+    }
+
+    res.json({ code: 'SUCCESS', message: '成功' });
+  } catch (e) {
+    console.error('[WX Pay] 回调处理异常:', e.message);
+    res.json({ code: 'FAIL', message: e.message });
+  }
+});
+
+// 查询支付状态
+app.get('/api/payments/wechat-query/:orderId', authRequired, async (req, res) => {
+  try {
+    if (!wxpay) return res.json({ ok: false, error: '微信支付模块未加载' });
+    const { orderId } = req.params;
+    const order = db.exec("SELECT status FROM orders WHERE order_id=? AND username=?",
+      [orderId, req.user.username]);
+    if (!order.length || !order[0].values.length) {
+      return res.json({ ok: false, error: '订单不存在' });
+    }
+    const status = order[0].values[0][0];
+    if (status === 'paid') {
+      return res.json({ ok: true, paid: true });
+    }
+    // 查询微信支付平台状态
+    const wxResult = await wxpay.queryOrder(orderId);
+    if (wxResult.trade_state === 'SUCCESS') {
+      // 已支付，更新
+      const creditsRow = db.exec("SELECT credits FROM orders WHERE order_id=?", [orderId]);
+      const credits = creditsRow[0].values[0][0];
+      db.run("UPDATE orders SET status='paid', paid_at=? WHERE order_id=?", [new Date().toISOString(), orderId]);
+      db.run("UPDATE users SET credits=credits+? WHERE username=?", [credits, req.user.username]);
+      saveDB();
+      return res.json({ ok: true, paid: true });
+    }
+    res.json({ ok: true, paid: false, tradeState: wxResult.trade_state });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// ============================================================
 // API Key 管理系统 — 用户生成自己的 Key 接入外部应用
 // ============================================================
 function generateApiKey(prefix) {
