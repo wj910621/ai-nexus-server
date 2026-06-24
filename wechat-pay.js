@@ -93,7 +93,7 @@ async function createNativeOrder({ description, outTradeNo, amount, attach = '' 
   const body = {
     mchid: CFG.mchid,
     out_trade_no: outTradeNo,
-    appid: 'wxf3f9e5b5c8e5d6f7', // 微信支付APPID — 需要你确认
+    appid: 'wxe5db01613c33e1b5',
     description,
     notify_url: CFG.notifyUrl,
     amount: { total: amount, currency: 'CNY' },
