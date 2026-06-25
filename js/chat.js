@@ -1,5 +1,10 @@
 'use strict';
 // === Chat ===
+
+// 当前聊天模式
+let CHAT_MODE = 'chat'; // chat | explore | plan | code
+
+// 初始化聊天模型列表
 function initChatModels(){
   const list=document.getElementById('chatModelList');
   if(list)list.innerHTML=models.filter(m=>!m.hidden).map(m=>`<label class="model-checkbox" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px;font-size:0.8rem;transition:all 0.2s"><input type="checkbox" value="${m.id}" ${m.featured?'checked':''}><span>${m.name}</span>${getModelCostLabel(m.id)}</label>`).join('');
@@ -12,6 +17,16 @@ async function sendChatMessage(){
     return await sendAgentMessage(msg);
   }
 
+  // 探索模式：使用只读探索 Agent
+  if (CHAT_MODE === 'explore') {
+    return await sendExploreMessage(msg);
+  }
+
+  // 规划模式：先制定计划再执行
+  if (CHAT_MODE === 'plan') {
+    return await sendPlanMessage(msg);
+  }
+
   const selList=document.getElementById('chatModelList');
   const sel=selList?[...selList.querySelectorAll('input:checked')].map(cb=>cb.value):['deepseekv3','qwen3'];
   if(!sel.length){showToast('请在右侧面板选择模型');return}
@@ -22,7 +37,7 @@ async function sendChatMessage(){
   md.innerHTML+=`<div class="chat-msg user"><div class="chat-msg-header"><span class="chat-msg-model">你</span></div><div class="chat-msg-content">${escapeHtml(msg)}</div></div>`;
   document.getElementById('chatInput').value='';const btn=document.getElementById('btnSend');btn.disabled=true;
 
-  // 构建 RAG 增强 system prompt
+  // 构建 RAG 增强 system prompt（使用新的提示词系统）
   const ragSysPrompt = await buildRAGSystemPrompt(msg);
 
   const ps=sel.map(async (id,i)=>{
@@ -216,12 +231,25 @@ const PLATFORM_SYSTEM_PROMPT = [
   '- RAG 知识增强：基于平台知识库的智能回答',
   '- 提示词库：50+ 专业写作工具',
   '',
-  '【回答风格】',
-  '- 直接回答问题，不回避，不绕弯子',
-  '- 需要推理的展示逻辑链，不确定的明确说"不确定"',
-  '- 尽量简洁但完整，避免废话和过度礼貌用语',
-  '- 中文回答时保持流畅自然',
-  '- 不要提及平台底层技术细节、API 来源、模型供应商',
+  '【回答规范】',
+  '- 直接回答，不回避',
+  '- 推理过程展示完整逻辑链',
+  '- 不确定的明确说"不确定"，不编造',
+  '- 简洁完整，避免废话',
+  '- 不提及底层技术、API、模型供应商',
+  '',
+  '【通信风格】(基于 Claude Code 设计)',
+  '- 首次行动：一句话说清要做什么',
+  '- 工作更新：关键节点简短说明（发现什么、转向、障碍）',
+  '- 结束汇报：一两句话总结（做了什么、下一步）',
+  '- 代码中默认不写注释，最多一行',
+  '- 不主动创建文档文件',
+  '',
+  '【安全规范】',
+  '- 不可逆操作先确认',
+  '- 删除/覆盖前检查内容',
+  '- 不引入安全漏洞（注入、XSS等）',
+  '- 不协助恶意活动'
 ].join('\n');
 
 // RAG 检索 + system prompt 构建
@@ -416,4 +444,198 @@ async function runCompare(){
   await Promise.all(ps);
 }
 function setComparePrompt(t){document.getElementById('comparePrompt').value=t;runCompare()}
+
+// ============================================================
+// 探索模式发送消息（只读代码搜索）
+// ============================================================
+async function sendExploreMessage(msg) {
+  const md = document.getElementById('chatMessages');
+  if (md.querySelector('[data-p]')) md.innerHTML = '';
+
+  md.innerHTML += `<div class="chat-msg user"><div class="chat-msg-header"><span class="chat-msg-model">你</span></div><div class="chat-msg-content">${escapeHtml(msg)}</div></div>`;
+
+  const pid = 'explore-' + Date.now();
+  const container = document.createElement('div');
+  container.className = 'chat-msg';
+  container.id = pid;
+  container.innerHTML = `<div class="chat-msg-header"><div class="chat-msg-avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)">🔍</div><span class="chat-msg-model">代码探索</span></div><div class="chat-msg-content" style="white-space:pre-wrap"><span class="spinner"></span>正在分析代码...</div>`;
+  md.appendChild(container);
+  md.scrollTop = md.scrollHeight;
+
+  document.getElementById('chatInput').value = '';
+  const btn = document.getElementById('btnSend');
+  if (btn) btn.disabled = true;
+
+  try {
+    const explorePrompt = `你是代码探索专家，只进行只读搜索。
+
+【工作模式】
+- 仅搜索和分析代码，不进行任何修改
+- 禁止创建、修改、删除文件
+- 允许的操作：grep、find、cat、ls、git status/diff
+
+【搜索策略】
+- 快速定位：glob 模式匹配文件
+- 深度搜索：正则搜索关键词
+- 多策略并行：同时尝试多种方式
+
+【输出规范】
+- 报告简洁，只说明关键发现
+- 指出文件路径和代码位置
+- 不创建任何文件
+
+用户问题：${msg}
+
+请直接回答代码位置和分析结果。`;
+
+    const r = await callModelAPI('deepseekv3', msg, explorePrompt);
+
+    const el = document.getElementById(pid);
+    if (el) {
+      el.querySelector('.chat-msg-content').innerHTML = escapeHtml(r.content);
+    }
+  } catch(e) {
+    const el = document.getElementById(pid);
+    if (el) {
+      el.querySelector('.chat-msg-content').innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`;
+    }
+  }
+
+  if (btn) btn.disabled = false;
+}
+
+// ============================================================
+// 规划模式发送消息（先计划再执行）
+// ============================================================
+async function sendPlanMessage(msg) {
+  const md = document.getElementById('chatMessages');
+  if (md.querySelector('[data-p]')) md.innerHTML = '';
+
+  md.innerHTML += `<div class="chat-msg user"><div class="chat-msg-header"><span class="chat-msg-model">你</span></div><div class="chat-msg-content">${escapeHtml(msg)}</div></div>`;
+
+  const pid = 'plan-' + Date.now();
+  const container = document.createElement('div');
+  container.className = 'chat-msg';
+  container.id = pid;
+  container.innerHTML = `<div class="chat-msg-header"><div class="chat-msg-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">📋</div><span class="chat-msg-model">任务规划</span></div><div class="chat-msg-content" style="white-space:pre-wrap"><span class="spinner"></span>正在分析并制定计划...</div>`;
+  md.appendChild(container);
+  md.scrollTop = md.scrollHeight;
+
+  document.getElementById('chatInput').value = '';
+  const btn = document.getElementById('btnSend');
+  if (btn) btn.disabled = true;
+
+  try {
+    const planPrompt = `你是任务规划专家，帮助分析需求并制定执行计划。
+
+【规划流程】
+1. 理解需求：明确目标、约束、优先级
+2. 分析可行性：评估技术难度、风险、资源
+3. 制定计划：分解为可执行步骤，标注依赖
+4. 预估成本：估算时间、复杂度、工具需求
+5. 获取确认：用户批准后再执行
+
+【输出格式】
+计划应包含：
+- 目标概述（1-2句话）
+- 步骤列表（每步简短描述 + 预估时间）
+- 所需工具/资源
+- 潜在风险和应对
+- 确认提示：「请确认计划，我将开始执行」
+
+用户需求：${msg}
+
+请先制定计划。`;
+
+    const r = await callModelAPI('deepseekr1', msg, planPrompt);
+
+    const el = document.getElementById(pid);
+    if (el) {
+      el.querySelector('.chat-msg-content').innerHTML = escapeHtml(r.content) + `\n\n<button class="btn-sm primary" onclick="executePlan('${pid}')">确认执行</button>`;
+    }
+
+    // 保存计划供后续执行
+    window._currentPlan = r.content;
+  } catch(e) {
+    const el = document.getElementById(pid);
+    if (el) {
+      el.querySelector('.chat-msg-content').innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`;
+    }
+  }
+
+  if (btn) btn.disabled = false;
+}
+
+// 执行已确认的计划
+async function executePlan(planId) {
+  const plan = window._currentPlan;
+  if (!plan) {
+    showToast('计划已过期，请重新发起');
+    return;
+  }
+
+  showToast('开始执行计划...');
+
+  const executePrompt = `你是任务执行专家。用户已确认以下计划，请开始执行。
+
+【已确认计划】
+${plan}
+
+【执行规范】
+- 按计划步骤顺序执行
+- 每步完成后简短报告结果
+- 遇到问题如实说明
+- 完成后总结实际完成情况
+
+请开始执行。`;
+
+  const md = document.getElementById('chatMessages');
+  const pid = 'execute-' + Date.now();
+  md.innerHTML += `<div class="chat-msg" id="${pid}"><div class="chat-msg-header"><div class="chat-msg-avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)">⚡</div><span class="chat-msg-model">执行中</span></div><div class="chat-msg-content"><span class="spinner"></span>正在执行...</div></div>`;
+  md.scrollTop = md.scrollHeight;
+
+  try {
+    const r = await callModelAPI('deepseekr1', '开始执行', executePrompt);
+    const el = document.getElementById(pid);
+    if (el) {
+      el.querySelector('.chat-msg-content').innerHTML = escapeHtml(r.content);
+    }
+  } catch(e) {
+    const el = document.getElementById(pid);
+    if (el) {
+      el.querySelector('.chat-msg-content').innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`;
+    }
+  }
+}
+
+// 切换聊天模式
+function switchChatMode(mode) {
+  CHAT_MODE = mode;
+  const btn = document.getElementById('modeToggle');
+  if (btn) {
+    const icons = { chat: '💬', explore: '🔍', plan: '📋', code: '💻' };
+    const labels = { chat: '对话', explore: '探索', plan: '规划', code: '编程' };
+    btn.innerHTML = `${icons[mode] || '💬'} ${labels[mode] || '对话'}`;
+  }
+  showToast(`已切换到${labels[mode] || '对话'}模式`);
+}
+
+// 初始化聊天模式切换
+document.addEventListener('DOMContentLoaded', () => {
+  const inputArea = document.querySelector('.chat-input-area') || document.getElementById('chatInput');
+  if (inputArea && !document.getElementById('modeToggle')) {
+    const modeToggle = document.createElement('button');
+    modeToggle.id = 'modeToggle';
+    modeToggle.className = 'btn-sm';
+    modeToggle.style.cssText = 'margin-left:8px;background:var(--accent-soft)';
+    modeToggle.innerHTML = '💬 对话';
+    modeToggle.onclick = () => {
+      const modes = ['chat', 'explore', 'plan', 'code'];
+      const current = modes.indexOf(CHAT_MODE);
+      const next = modes[(current + 1) % modes.length];
+      switchChatMode(next);
+    };
+    inputArea.parentNode.appendChild(modeToggle);
+  }
+});
 
