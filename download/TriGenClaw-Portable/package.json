@@ -1,7 +1,7 @@
-﻿{
+{
   "name": "trigenclaw",
   "version": "1.0.0",
-  "description": "TriGenClaw - AI Desktop Workbench. 300+ AI 妯″瀷 路 浠ｇ爜鍔╂墜 路 Agent 缂栨帓 路 鐭ヨ瘑搴?,
+  "description": "TriGenClaw - AI Desktop Workbench",
   "homepage": "https://j3trisheng.com",
   "repository": "github:wj910621/ai-nexus-server",
   "main": "main.js",

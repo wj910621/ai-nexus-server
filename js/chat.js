@@ -9,6 +9,25 @@ function initChatModels(){
   const list=document.getElementById('chatModelList');
   if(list)list.innerHTML=models.filter(m=>!m.hidden).map(m=>`<label class="model-checkbox" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px;font-size:0.8rem;transition:all 0.2s"><input type="checkbox" value="${m.id}" ${m.featured?'checked':''}><span>${m.name}</span>${getModelCostLabel(m.id)}</label>`).join('');
 }
+
+// 初始化会话系统
+async function initSession() {
+  if (window.SessionSystem) {
+    await SessionSystem.init();
+    // 尝试恢复上次会话
+    const threads = SessionSystem.list();
+    if (threads.length > 0) {
+      await SessionSystem.load(threads[0].id);
+    }
+  }
+}
+
+// 保存消息到会话
+function saveToSession(role, content, metadata = {}) {
+  if (window.SessionSystem && SessionSystem.getHistory) {
+    SessionSystem.addMessage(role, content, metadata);
+  }
+}
 async function sendChatMessage(){
   const msg=document.getElementById('chatInput').value.trim();if(!msg)return;
 
