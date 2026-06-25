@@ -1,0 +1,77 @@
+---
+# Ansible部署剧本 - TriGen Nexus Hub
+- name: Deploy TriGen to Server
+  hosts: servers
+  become: yes
+  vars:
+    deploy_path: /home/admin/he-wiki-rag
+    domain: j3trisheng.com
+    node_port: 3000
+    app_name: trigen
+
+  tasks:
+    - name: Install Node.js 18
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+        apt-get install -y nodejs
+      when: ansible_os_family == "Debian"
+
+    - name: Install PM2
+      npm:
+        name: pm2
+        global: yes
+
+    - name: Create deploy directory
+      file:
+        path: "{{ deploy_path }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Copy deployment files
+      copy:
+        src: ./
+        dest: "{{ deploy_path }}/"
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      notify: Restart PM2
+
+    - name: Install npm dependencies
+      npm:
+        path: "{{ deploy_path }}"
+        production: yes
+
+    - name: Setup PM2
+      shell: |
+        cd {{ deploy_path }}
+        pm2 delete {{ app_name }} || true
+        pm2 start ecosystem.config.js
+        pm2 save
+        pm2 startup
+      creates: /root/.pm2/dump.pm2
+
+    - name: Setup Nginx
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/{{ domain }}
+      notify: Reload Nginx
+
+    - name: Enable Nginx site
+      file:
+        src: /etc/nginx/sites-available/{{ domain }}
+        dest: /etc/nginx/sites-enabled/{{ domain }}
+        state: link
+      notify: Reload Nginx
+
+  handlers:
+    - name: Restart PM2
+      shell: |
+        cd {{ deploy_path }}
+        pm2 restart {{ app_name }}
+
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded

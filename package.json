@@ -1,34 +1,41 @@
 {
-  "name": "trigen-hub",
+  "name": "trigen-nexus-hub",
   "version": "2.0.0",
-  "description": "TriGen - AI大模型聚合平台后端",
+  "description": "TriGen Nexus Hub - AI智能助手平台",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "pm2:start": "pm2 start ecosystem.config.js",
-    "pm2:stop": "pm2 stop ecosystem.config.js",
-    "pm2:restart": "pm2 restart ecosystem.config.js",
-    "pm2:logs": "pm2 logs trigen-hub",
-    "db:migrate": "node scripts/migrate.js"
+    "pm2": "pm2 start ecosystem.config.js",
+    "deploy": "bash autodeploy.sh"
   },
+  "keywords": [
+    "ai",
+    "assistant",
+    "chatbot",
+    "nexus",
+    "trigen"
+  ],
+  "author": "TriGen Team",
+  "license": "MIT",
   "dependencies": {
-    "express": "^4.21.0",
-    "cors": "^2.8.5",
-    "morgan": "^1.10.0",
-    "dotenv": "^16.4.5",
-    "bcryptjs": "^2.4.3",
+    "express": "^4.18.2",
+    "better-sqlite3": "^9.4.3",
     "jsonwebtoken": "^9.0.2",
-    "better-sqlite3": "^11.3.0",
-    "ssh2": "^1.17.0"
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.1",
+    "morgan": "^1.10.0",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^7.1.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.0.3",
+    "pm2": "^5.3.0"
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "keywords": ["ai", "llm", "chat", "api-proxy", "nexus"],
-  "author": "TriGen Team",
-  "license": "MIT"
+  }
 }
