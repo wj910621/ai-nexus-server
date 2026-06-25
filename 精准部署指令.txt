@@ -1,0 +1,228 @@
+================================================================================
+          TriGen Nexus Hub 精准部署指令（微信支付版）
+================================================================================
+                    【禁止擅自修改任何配置】
+================================================================================
+
+一、部署目标
+--------------------------------------------------------------------------------
+将 TriGen Nexus Hub 新版本部署到服务器，包含：
+  - 微信支付功能（Native 扫码支付）
+  - RAG 知识检索引擎
+  - Agent Harness 执行框架
+  - Skills 评测系统
+  - 完整前端优化
+
+二、部署路径与配置
+--------------------------------------------------------------------------------
+  目标目录: /home/admin/he-wiki-rag/
+  域名:     j3trisheng.com
+  服务端口: 3000
+  PM2应用:  trigen
+  数据库:   /home/admin/he-wiki-rag/data/database.sqlite
+  私钥:    /home/admin/ai-nexus/wechat_key.pem
+
+三、【绝对禁止】操作清单
+--------------------------------------------------------------------------------
+以下操作严格禁止，违者后果自负：
+
+  禁止1: 删除服务器上的任何文件或目录
+  禁止2: 修改 data/ 目录下的任何文件（数据库）
+  禁止3: 修改 .env 配置文件
+  禁止4: 修改 uploads/ 目录（用户上传）
+  禁止5: 修改 logs/ 目录（日志）
+  禁止6: 修改 nginx 配置
+  禁止7: 清空 node_modules（只允许 npm install）
+  禁止8: 卸载已安装的 npm 包
+  禁止9: 修改他用户文件或配置
+  禁止10: 执行 rm -rf /* 等危险命令
+
+四、【白名单】允许部署的文件（共50个）
+--------------------------------------------------------------------------------
+只更新以下文件，其他文件一律不动：
+
+【根目录 - 9个文件】
+  index.html              主页面
+  package.json            依赖配置
+  server.js               Node服务主文件
+  ecosystem.config.js     PM2配置
+  sw.js                   Service Worker
+  wechat-pay.js           微信支付模块
+  .deploy.conf            部署配置（可选）
+  deploy-whitelist.txt    白名单清单
+  DEPLOY_INSTRUCTIONS.txt 本文件
+
+【js/ 目录 - 23个文件】
+  js/main.js             主程序
+  js/core.js             核心模块
+  js/chat.js             聊天模块
+  js/user.js             用户模块
+  js/tools.js            工具模块
+  js/models.js           模型配置
+  js/extra.js            扩展功能
+  js/3d.js               3D效果
+  js/i18n.js             国际化
+  js/novel.js            小说模块
+  js/media.js            媒体模块
+  js/music.js            音乐模块
+  js/prompts.js          提示词系统
+  js/safety.js           安全确认
+  js/memory.js           记忆系统
+  js/sandbox.js          沙箱执行
+  js/session.js          会话持久化
+  js/file-editor.js      文件编辑器
+  js/plan-system.js       规划系统
+  js/explore-agent.js    代码探索
+  js/agents-md.js        AGENTS.md
+  js/rag-engine.js       RAG检索引擎
+  js/wiki-knowledge.js   知识库管理
+  js/harness-core.js     Agent Harness
+  js/trace-replay.js     Trace追踪
+  js/skills-eval.js      Skills评测
+
+【css/ 目录 - 1个文件】
+  css/core.css           样式文件
+
+【icons/ 目录 - 2个文件】
+  icons/icon-192.png     图标192px
+  icons/icon-512.png     图标512px
+
+【routes/ 目录 - 13个文件】
+  routes/auth.js         认证路由
+  routes/chat.js         聊天路由
+  routes/guest.js        访客路由
+  routes/knowledge.js    知识库路由
+  routes/manga.js        漫画路由
+  routes/media.js        媒体路由
+  routes/models.js       模型路由
+  routes/novel.js        小说路由
+  routes/openai_compat.js OpenAI兼容
+  routes/payment.js      支付路由（已包含微信支付API）
+  routes/plugins.js      插件路由
+  routes/sync.js         同步路由
+
+五、【保护文件】（绝对不能修改或删除）
+--------------------------------------------------------------------------------
+  data/database.sqlite           数据库文件
+  data/database.sqlite-shm       数据库共享内存
+  data/database.sqlite-wal       数据库日志
+  .env                           环境配置
+  uploads/                       用户上传目录
+  logs/                          日志目录
+  node_modules/                  已安装依赖
+  /home/admin/ai-nexus/wechat_key.pem  微信支付私钥
+
+六、部署步骤
+--------------------------------------------------------------------------------
+步骤1: 上传部署包
+  - 将 trigen-deploy-safe.tar.gz 上传到 /tmp/ 目录
+  - 上传路径: /tmp/trigen-deploy-safe.tar.gz
+
+步骤2: 解压部署包
+  cd /tmp
+  tar -xzvf trigen-deploy-safe.tar.gz
+  mkdir -p /tmp/trigen-deploy
+
+步骤3: 备份将被覆盖的文件（建议执行）
+  mkdir -p /tmp/backup
+  for f in $(cat /tmp/trigen-deploy/deploy-whitelist.txt); do
+    if [ -f "/home/admin/he-wiki-rag/$f" ]; then
+      mkdir -p "/tmp/backup/$(dirname $f)"
+      cp "/home/admin/he-wiki-rag/$f" "/tmp/backup/$f"
+    fi
+  done
+  echo "备份完成"
+
+步骤4: 按白名单部署文件（只复制白名单中的文件）
+  cd /home/admin/he-wiki-rag/
+  
+  # 逐个复制文件（不是整个目录复制）
+  while IFS= read -r filepath; do
+    if [[ "$filepath" == \#* ]] || [[ -z "$filepath" ]]; then
+      continue  # 跳过注释和空行
+    fi
+    if [ -f "/tmp/trigen-deploy/$filepath" ]; then
+      mkdir -p "$(dirname $filepath)"
+      cp "/tmp/trigen-deploy/$filepath" "$filepath"
+      echo "已更新: $filepath"
+    fi
+  done < /tmp/trigen-deploy/deploy-whitelist.txt
+
+步骤5: 安装新依赖
+  cd /home/admin/he-wiki-rag/
+  npm install --legacy-peer-deps --no-audit --no-fund
+
+步骤6: 重启服务
+  pm2 restart trigen
+  sleep 2
+  pm2 status
+
+步骤7: 验证部署
+  # 检查服务状态
+  pm2 status
+  
+  # 检查日志
+  pm2 logs trigen --lines 20 --nostream
+  
+  # 访问测试
+  curl -s http://localhost:3000 | head -c 200
+
+步骤8: 清理临时文件
+  rm -rf /tmp/trigen-deploy*
+  rm -rf /tmp/backup
+
+七、验证清单
+--------------------------------------------------------------------------------
+部署完成后，请逐项确认：
+
+  [ ] 1. pm2 status 显示 trigen 状态为 online
+  [ ] 2. curl http://localhost:3000 返回 HTML 页面
+  [ ] 3. curl http://j3trisheng.com 返回正常
+  [ ] 4. 数据库文件未被修改 (ls -la data/)
+  [ ] 5. node_modules 已安装新依赖
+  [ ] 6. wechat-pay.js 存在且配置正确
+  [ ] 7. js/rag-engine.js 等新模块存在
+
+八、回滚方案
+--------------------------------------------------------------------------------
+如果部署后出现问题：
+
+步骤1: 停止服务
+  pm2 stop trigen
+
+步骤2: 恢复备份
+  cd /tmp/backup
+  for f in $(find . -type f); do
+    cp "$f" "/home/admin/he-wiki-rag/${f:2}"
+  done
+
+步骤3: 重启服务
+  pm2 restart trigen
+
+步骤4: 验证恢复
+  pm2 status
+  curl http://localhost:3000
+
+九、微信支付特别说明
+--------------------------------------------------------------------------------
+  商户号: 1747381807（已在代码中配置）
+  私钥: /home/admin/ai-nexus/wechat_key.pem
+  APIv3密钥: Wangjiezhanglitaowangjinrui91062（已在代码中配置）
+  
+  如微信支付无法使用，请检查：
+  1. 私钥文件是否存在且可读
+  2. 商户号是否正确
+  3. 证书序列号是否匹配
+
+十、联系与支持
+--------------------------------------------------------------------------------
+  部署包: trigen-deploy-safe.tar.gz
+  白名单: deploy-whitelist.txt
+  指令文件: DEPLOY_INSTRUCTIONS.txt
+  
+  如有问题，请先检查日志：
+  pm2 logs trigen --err --lines 50
+
+================================================================================
+              【精准部署指令结束 - 严格按白名单执行】
+================================================================================
