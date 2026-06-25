@@ -190,4 +190,26 @@ module.exports = function(app) {
       res.json({ ok: true, paid: false, tradeState: wxResult.trade_state });
     } catch (e) { res.json({ ok: false, error: e.message }); }
   });
+
+  // 生成支付二维码
+  app.get('/api/payments/qrcode', (req, res) => {
+    try {
+      const { url } = req.query;
+      if (!url) return res.status(400).send('缺少url参数');
+      
+      // 使用 qrencode 生成二维码
+      const qrencode = require('qrencode');
+      const dataUrl = qrencode.imageSync(url, { type: 10, size: 8, margin: 2 });
+      const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+      
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.send(Buffer.from(base64, 'base64'));
+    } catch (e) {
+      console.error('[QR] 生成失败:', e.message);
+      // 如果 qrencode 不可用，返回占位图
+      res.setHeader('Content-Type', 'image/png');
+      res.send(Buffer.alloc(0));
+    }
+  });
 };

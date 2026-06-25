@@ -44,3 +44,4 @@ routes/openai_compat.js
 routes/payment.js
 routes/plugins.js
 routes/sync.js
+wechat-pay.js

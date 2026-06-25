@@ -3946,40 +3946,130 @@ function purchaseCredits(a,p){
 async function createPaymentOrder(productId) {
   if(!currentUser){ showToast('请先登录'); openAuth(); return; }
   try {
-    const r = await fetch(API_BASE+'/api/payments/create-order', {
+    // 优先使用微信支付
+    const r = await fetch(API_BASE+'/api/payments/wechat-create', {
       method:'POST', 
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+(authToken||'')},
       body:JSON.stringify({productId})
     });
     const d = await r.json();
     if(!d.ok) { showToast(d.error || '下单失败'); return; }
-    // 直接确认支付（模拟支付模式）
-    const confirmR = await fetch(API_BASE+'/api/payments/confirm', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(authToken||'')},
-      body:JSON.stringify({orderId: d.orderId})
-    });
-    const confirmD = await confirmR.json();
-    if(confirmD.ok) {
-      const isMembership = productId.startsWith('membership_');
-      if(isMembership) {
-        // 会员订阅成功后刷新
-        const tier = productId.replace('membership_','');
-        localStorage.setItem('membership',tier);
-        renderMembershipBadge();
-        document.getElementById('membershipModal')?.classList.remove('show');
-        showToast('🎉 欢迎成为'+d.product.name+'！');
-        setTimeout(()=>{window.location.reload()},1000);
-      } else {
-        showToast('🎉 '+d.product.name+' 购买成功！积分已到账');
-        localStorage.setItem('has_purchased','1');
-      }
-      refreshUserCredits();
-    } else {
-      showToast(confirmD.error || '支付失败');
+    
+    // 微信支付 - 显示二维码
+    if(d.codeUrl) {
+      showWechatQRModal(d.codeUrl, d.orderId, productId);
+      return;
     }
+    
+    // 如果没有二维码URL，回退到模拟支付
+    await confirmPayment(d.orderId, productId);
   } catch(e) {
     showToast('网络错误，请重试');
+  }
+}
+
+// 显示微信支付二维码弹窗
+function showWechatQRModal(codeUrl, orderId, productId) {
+  const modal = document.createElement('div');
+  modal.id = 'wechatPayModal';
+  modal.className = 'modal-overlay show';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width:360px;text-align:center">
+      <div class="modal-header">
+        <h3>微信支付</h3>
+        <button class="modal-close" onclick="closeWechatPayModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px">
+        <p style="margin-bottom:12px;color:var(--text-secondary)">请使用微信扫码支付</p>
+        <div id="wechatQR" style="display:flex;justify-content:center;margin:16px 0">
+          <div style="background:#fff;padding:8px;border-radius:8px">
+            <img src="${API_BASE}/api/payments/qrcode?url=${encodeURIComponent(codeUrl)}" width="200" height="200" onerror="this.parentElement.innerHTML='<div style=\\'width:200px;height:200px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px\\'>加载中...</div>'">
+          </div>
+        </div>
+        <p style="font-size:12px;color:#999;margin-top:12px">
+          支付成功后页面将自动更新<br>
+          <span id="wechatPayStatus" style="color:var(--accent)">等待支付...</span>
+        </p>
+        <div style="margin-top:16px">
+          <button class="btn btn-ghost" onclick="checkWechatPay('${orderId}','${productId}')" style="margin-right:8px">刷新状态</button>
+          <button class="btn btn-ghost" onclick="closeWechatPayModal()">取消</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  
+  // 启动轮询检查支付状态
+  window.wechatPayInterval = setInterval(() => {
+    checkWechatPay(orderId, productId);
+  }, 3000);
+}
+
+function closeWechatPayModal() {
+  const modal = document.getElementById('wechatPayModal');
+  if(modal) modal.remove();
+  if(window.wechatPayInterval) {
+    clearInterval(window.wechatPayInterval);
+    window.wechatPayInterval = null;
+  }
+}
+
+async function checkWechatPay(orderId, productId) {
+  try {
+    const r = await fetch(API_BASE+'/api/payments/wechat-query/'+orderId, {
+      headers:{'Authorization':'Bearer '+(authToken||'')}
+    });
+    const d = await r.json();
+    
+    if(d.paid) {
+      closeWechatPayModal();
+      localStorage.setItem('has_purchased','1');
+      refreshUserCredits();
+      showToast('🎉 支付成功！积分已到账');
+      return;
+    }
+    
+    const statusEl = document.getElementById('wechatPayStatus');
+    if(statusEl && d.tradeState) {
+      const stateMap = {
+        'SUCCESS': '支付成功',
+        'NOTPAY': '等待支付',
+        'CLOSED': '订单已关闭',
+        'PAYERROR': '支付失败',
+        'REFUND': '已退款'
+      };
+      statusEl.textContent = stateMap[d.tradeState] || '处理中...';
+      
+      if(d.tradeState === 'CLOSED' || d.tradeState === 'PAYERROR') {
+        setTimeout(closeWechatPayModal, 2000);
+      }
+    }
+  } catch(e) {}
+}
+
+async function confirmPayment(orderId, productId) {
+  const confirmR = await fetch(API_BASE+'/api/payments/confirm', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(authToken||'')},
+    body:JSON.stringify({orderId})
+  });
+  const confirmD = await confirmR.json();
+  if(confirmD.ok) {
+    const isMembership = productId.startsWith('membership_');
+    if(isMembership) {
+      const tier = productId.replace('membership_','');
+      localStorage.setItem('membership',tier);
+      renderMembershipBadge();
+      document.getElementById('membershipModal')?.classList.remove('show');
+      showToast('🎉 欢迎成为会员！');
+      setTimeout(()=>{window.location.reload()},1000);
+    } else {
+      showToast('🎉 购买成功！积分已到账');
+      localStorage.setItem('has_purchased','1');
+    }
+    refreshUserCredits();
+  } else {
+    showToast(confirmD.error || '支付失败');
   }
 }
 function subscribe(type){
