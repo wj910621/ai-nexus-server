@@ -25,6 +25,11 @@ js/file-editor.js
 js/plan-system.js
 js/explore-agent.js
 js/agents-md.js
+js/rag-engine.js
+js/wiki-knowledge.js
+js/harness-core.js
+js/trace-replay.js
+js/skills-eval.js
 icons/icon-192.png
 icons/icon-512.png
 routes/auth.js
