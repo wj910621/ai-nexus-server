@@ -29,7 +29,7 @@
       'sidebar.code': 'AI 编程',
       'sidebar.studio': 'AI 创作工场',
       'sidebar.music': 'AI 音乐',
-      'sidebar['3d']': '3D 生成',
+      "sidebar['3d']": '3D 生成',
       'sidebar.office': '办公',
       'sidebar.brand': '品牌',
       'sidebar.market': '营销',

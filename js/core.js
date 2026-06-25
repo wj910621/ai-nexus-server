@@ -1,5 +1,4 @@
 'use strict';
-
 // === Theme (default: dark) ===
 const themeToggle=document.getElementById('themeToggle');
 const savedTheme=localStorage.getItem('theme')||'dark';
@@ -368,3 +367,4 @@ function getDeviceFingerprint(){
 }
 // 生成指纹
 getDeviceFingerprint();
+

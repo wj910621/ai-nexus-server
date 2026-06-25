@@ -61,6 +61,10 @@
     "electron": "^42.4.0",
     "electron-builder": "^26.15.3"
   },
+  "dependencies": {
+    "electron-store": "^10.0.0",
+    "electron-log": "^5.2.4"
+  },
   "keywords": ["ai", "desktop", "workbench", "llm", "chat"],
   "author": "TriGen <admin@j3trisheng.com>",
   "license": "MIT"

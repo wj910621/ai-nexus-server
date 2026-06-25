@@ -267,7 +267,12 @@ function verifyToken(token) {
   return jwt.verify(token, JWT_SECRET);
 }
 
+// 仅允许健康检查的路径（不验证API Key）
+const HEALTH_PATHS = ['/health', '/manifest.json', '/sw.js'];
+
 function authRequired(req, res, next) {
+  // 排除健康检查路径
+  if (HEALTH_PATHS.includes(req.path)) return next();
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) {
     return res.status(401).json({ ok: false, error: '请先登录' });
@@ -507,6 +512,20 @@ app.get('/', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
 app.get('/dashboard', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
 app.get('/app', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
 app.get('/app/*', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
+
+// 健康检查端点
+app.get('/health', (req, res) => {
+  const memUsage = process.memoryUsage();
+  res.json({
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    memory: {
+      rss: Math.round(memUsage.rss / 1024 / 1024) + 'MB',
+      heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024) + 'MB'
+    },
+    database: db ? 'connected' : 'disconnected'
+  });
+});
 
 // 404 / 500 处理
 app.use((req, res) => res.status(404).json({ error: 'Not Found' }));

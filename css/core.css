@@ -605,3 +605,5 @@ a{color:var(--accent);text-decoration:none}
   .chat-input{font-size:16px} /* 防止 iOS 缩放 */
   input,textarea,select{font-size:16px}
 }
+
+</style>
