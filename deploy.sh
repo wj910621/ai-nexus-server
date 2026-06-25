@@ -1,79 +1,112 @@
 #!/bin/bash
-# ==============================================================
-# TriGen 一键部署脚本 v3.0
-# 用法:
-#   1. 设置密码: export DEPLOY_PASS=你的密码
-#   2. 执行部署: bash deploy.sh [frontend|backend|env|all]
-# ==============================================================
+# TriGen 部署脚本
+# 服务器执行此脚本完成部署
 
-if [ -z "$DEPLOY_PASS" ]; then
-  echo "❌ 错误：未设置 DEPLOY_PASS 环境变量"
-  echo "   export DEPLOY_PASS=你的服务器密码"
-  echo ""
-  echo "💡 或者直接用 Node.js 脚本（Windows 兼容）："
-  echo "   $env:DEPLOY_PASS=\"你的密码\"   (PowerShell)"
-  echo "   node deploy-win.js all"
-  exit 1
-fi
+set -e
 
-# 检测可用工具
-if command -v sshpass &> /dev/null; then
-  SSH_CMD="sshpass -p \"$DEPLOY_PASS\" ssh -o StrictHostKeyChecking=no"
-  SCP_CMD="sshpass -p \"$DEPLOY_PASS\" scp -o StrictHostKeyChecking=no"
-  USE_SSHPASS=true
-else
-  echo "⚠️  未检测到 sshpass，将改用 Node.js 部署脚本..."
-  echo "   正在执行: node deploy-win.js $1"
-  node deploy-win.js "$1"
-  exit $?
-fi
+echo "=========================================="
+echo "  TriGen 部署脚本"
+echo "=========================================="
 
-SERVER="root@120.79.17.184"
-FRONTEND_DIR="/home/admin/nexus-studio"
-BACKEND_DIR="/home/admin/ai-nexus"
+# 配置
+PROJECT_DIR="/home/admin/he-wiki-rag"
+BACKUP_DIR="/home/admin/he-wiki-rag/backup"
+LOG_FILE="/home/admin/he-wiki-rag/deploy.log"
 
-echo "========================================"
-echo "  TriGen 一键部署 v3.0"
-echo "  $(date '+%Y-%m-%d %H:%M:%S')"
-echo "========================================"
-echo ""
+# 颜色
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
-deploy_frontend() {
-  echo "🌐 [前端] 部署前端文件..."
-  $SCP_CMD index.html $SERVER:$FRONTEND_DIR/index.html
-  $SCP_CMD dashboard.html $SERVER:$FRONTEND_DIR/dashboard.html
-  $SCP_CMD landing.html $SERVER:$FRONTEND_DIR/landing.html
-  $SCP_CMD manifest.json $SERVER:$FRONTEND_DIR/manifest.json
-  $SCP_CMD -r js $SERVER:$FRONTEND_DIR/js
-  echo "  ✅ 前端更新完成"
+log() {
+    echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')]${NC} $1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
 }
 
-deploy_backend() {
-  echo "⚙️  [后端] 部署 API Server..."
-  $SCP_CMD server.js $SERVER:$BACKEND_DIR/server.js
-  $SSH_CMD $SERVER "cd $BACKEND_DIR && pm2 restart server.js" 2>&1 | tail -2
-  echo "  ✅ 后端更新 + 重启完成"
-}
-
-deploy_env() {
-  echo "🔑 [环境] 部署 .env 配置..."
-  $SCP_CMD .env $SERVER:$BACKEND_DIR/.env
-  $SSH_CMD $SERVER "cd $BACKEND_DIR && pm2 restart server.js" 2>&1 | tail -2
-  echo "  ✅ .env 已更新，服务已重启"
-}
-
-case "${1:-all}" in
-  frontend) deploy_frontend ;;
-  backend)  deploy_backend ;;
-  env)      deploy_env ;;
-  all)
-    deploy_frontend
-    deploy_backend
-    echo "🎉 全量部署完成！"
-    echo "   🌐 https://j3trisheng.com"
-    ;;
-  *)
-    echo "用法: bash deploy.sh [frontend|backend|env|all]"
+error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+    echo "[ERROR] $1" >> "$LOG_FILE"
     exit 1
-    ;;
-esac
+}
+
+warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+# 检查 root 权限
+if [ "$EUID" -eq 0 ]; then
+    warn "建议不要使用 root 用户运行此脚本"
+fi
+
+# 1. 创建目录
+log "创建目录..."
+mkdir -p "$PROJECT_DIR"
+mkdir -p "$BACKUP_DIR/$(date +%Y%m%d_%H%M%S)"
+
+# 2. 备份当前版本
+if [ -f "$PROJECT_DIR/server.js" ]; then
+    log "备份当前版本..."
+    cp -r "$PROJECT_DIR"/* "$BACKUP_DIR/$(date +%Y%m%d_%H%M%S)/" 2>/dev/null || true
+fi
+
+# 3. 停止 PM2 进程
+log "停止当前服务..."
+pm2 stop trigen-hub 2>/dev/null || true
+pm2 delete trigen-hub 2>/dev/null || true
+
+# 4. 更新代码
+log "更新代码..."
+
+# 如果是 git 部署
+if [ -d ".git" ]; then
+    git pull origin main
+else
+    error "请先通过 SFTP 上传最新代码"
+fi
+
+# 5. 安装依赖
+log "安装依赖..."
+npm install
+
+# 6. 检查环境变量
+if [ ! -f "$PROJECT_DIR/.env" ]; then
+    if [ -f ".env.example" ]; then
+        log "创建 .env 文件..."
+        cp .env.example .env
+        warn "请编辑 $PROJECT_DIR/.env 配置文件"
+    fi
+fi
+
+# 7. 创建日志目录
+mkdir -p logs
+
+# 8. 启动服务
+log "启动服务..."
+pm2 start ecosystem.config.js
+pm2 save
+
+# 9. 设置开机自启
+pm2 startup 2>/dev/null || true
+
+# 10. 检查服务状态
+sleep 2
+STATUS=$(pm2 show trigen-hub | grep "status" | head -1)
+if [[ "$STATUS" == *"online"* ]]; then
+    log "✅ 服务启动成功！"
+else
+    error "服务启动失败，请检查日志: pm2 logs trigen-hub"
+fi
+
+# 11. 显示状态
+echo ""
+echo "=========================================="
+echo "  部署完成！"
+echo "=========================================="
+echo ""
+pm2 status
+echo ""
+log "日志查看: pm2 logs trigen-hub"
+log "监控面板: pm2 monit"
+log "重启服务: pm2 restart trigen-hub"
+echo ""
