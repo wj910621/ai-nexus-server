@@ -3,8 +3,19 @@
 <head>
 <script>// 强制清除旧 Service Worker 缓存（在页面加载前执行）
 (function(){try{caches.keys().then(n=>n.forEach(c=>caches.delete(c)));navigator.serviceWorker&&navigator.serviceWorker.getRegistrations().then(r=>r.forEach(s=>s.unregister()))}catch(e){}})();
-// 如果是从旧缓存加载，跳转到版本化 URL 绕过缓存
-if(!location.search.includes('_v=2')&&!location.pathname.includes('app')){location.replace('/app/?_v=2')}
+// 仅在 /app/ 路径存在且当前不在 /app/ 下时才跳转（避免 404 死循环）
+(function(){
+  if(location.pathname.includes('app')||location.search.includes('_v=2'))return;
+  // 静默探测 /app/index.html 是否存在
+  var xhr=new XMLHttpRequest();
+  xhr.open('HEAD','/app/index.html',true);
+  xhr.onreadystatechange=function(){
+    if(xhr.readyState===4&&xhr.status===200){
+      location.replace('/app/?_v=2');
+    }
+  };
+  xhr.send();
+})();
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
