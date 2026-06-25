@@ -1,0 +1,157 @@
+================================================================================
+                    TriGen Nexus Hub 精准部署指令
+================================================================================
+【重要】执行部署前请仔细阅读本文件，严格按照白名单执行，禁止修改任何未列出的文件！
+================================================================================
+
+一、部署目标
+-----------
+将新版本的前端页面和JS模块部署到服务器，只更新白名单内的文件，
+绝对不能修改、删除服务器上的其他任何文件（包括数据库、用户数据、配置文件等）。
+
+二、部署路径
+-----------
+目标服务器目录：/home/admin/he-wiki-rag/
+域名：j3trisheng.com
+服务端口：3000
+进程管理：PM2 (应用名: trigen)
+
+三、【绝对禁止】操作清单
+------------------------
+以下操作严格禁止执行，违者可能导致数据丢失或服务崩溃：
+
+  禁止1: 删除服务器上的任何目录或文件
+  禁止2: 修改 data/ 目录下的任何文件（数据库文件）
+  禁止3: 修改 .env 配置文件
+  禁止4: 修改 uploads/ 目录下的任何文件（用户上传内容）
+  禁止5: 修改 logs/ 目录下的任何文件（日志）
+  禁止6: 清空 node_modules 目录（只允许 npm install 新增/更新）
+  禁止7: 卸载任何已安装的npm包
+  禁止8: 修改 nginx 配置（除非明确告知）
+  禁止9: 修改 PM2 配置文件（除非部署包内包含新版本）
+  禁止10: 格式化、分区等系统级操作
+
+四、【白名单】允许更新的文件
+----------------------------
+只允许更新以下文件，未列出的文件一律不动：
+
+【根目录文件】
+  index.html                    - 主页面
+  package.json                  - 依赖配置（用于npm install）
+  server.js                     - Node.js服务主文件
+  ecosystem.config.js           - PM2配置文件
+  sw.js                         - Service Worker
+
+【js/ 目录 - 全部覆盖】
+  js/main.js
+  js/core.js
+  js/chat.js
+  js/user.js
+  js/tools.js
+  js/models.js
+  js/extra.js
+  js/3d.js
+  js/i18n.js
+  js/novel.js
+  js/media.js
+  js/music.js
+  js/prompts.js                 - 【新增】模块化提示词系统
+  js/safety.js                  - 【新增】安全确认系统
+  js/memory.js                  - 【新增】三层记忆系统
+  js/sandbox.js                 - 【新增】沙箱执行系统
+  js/session.js                 - 【新增】会话持久化系统
+  js/file-editor.js             - 【新增】文件编辑器
+  js/plan-system.js             - 【新增】规划系统
+  js/explore-agent.js           - 【新增】代码探索Agent
+  js/agents-md.js               - 【新增】AGENTS.md系统
+
+【css/ 目录 - 全部覆盖】
+  css/core.css
+
+【icons/ 目录】
+  icons/icon-192.png
+  icons/icon-512.png
+
+【routes/ 目录 - 后端路由】
+  routes/auth.js
+  routes/chat.js
+  routes/guest.js
+  routes/knowledge.js
+  routes/manga.js
+  routes/media.js
+  routes/models.js
+  routes/novel.js
+  routes/openai_compat.js
+  routes/payment.js
+  routes/plugins.js
+  routes/sync.js
+
+五、部署步骤（严格按顺序执行）
+------------------------------
+步骤1: 上传部署包到服务器临时目录
+  上传文件: trigen-deploy-safe.tar.gz
+  上传路径: /tmp/trigen-deploy-safe.tar.gz
+
+步骤2: 备份白名单内的旧文件（可选，建议执行）
+  只备份即将被覆盖的文件，备份到 /tmp/trigen_backup_日期/
+  备份内容仅限白名单内的文件
+
+步骤3: 解压部署包到临时目录
+  mkdir -p /tmp/trigen-deploy/
+  tar -xzvf /tmp/trigen-deploy-safe.tar.gz -C /tmp/trigen-deploy/
+
+步骤4: 按白名单逐个复制文件
+  【重要】只复制白名单中列出的文件，禁止 cp -r 整个目录！
+  
+  复制方式：
+  - 对于白名单中已存在的文件：覆盖更新
+  - 对于白名单中新文件：新增
+  - 对于白名单外的文件：一律不动
+
+步骤5: 安装npm依赖
+  cd /home/admin/he-wiki-rag/
+  npm install --legacy-peer-deps
+  【注意】只安装/更新依赖，不删除任何现有包
+
+步骤6: 重启PM2服务
+  pm2 restart trigen
+  【注意】使用 restart，不要使用 delete + start
+
+步骤7: 验证服务状态
+  pm2 status
+  检查应用是否为 online 状态
+
+步骤8: 清理临时文件
+  rm -rf /tmp/trigen-deploy/
+  rm -f /tmp/trigen-deploy-safe.tar.gz
+  【注意】只清理临时目录，不动部署目录
+
+六、验证清单
+-----------
+部署完成后，请确认以下事项：
+
+  [ ] 1. 网站可以正常访问 (http://j3trisheng.com)
+  [ ] 2. 页面加载无404错误
+  [ ] 3. 浏览器控制台无JS报错
+  [ ] 4. 可以正常发送消息
+  [ ] 5. 用户登录功能正常
+  [ ] 6. PM2状态为 online
+  [ ] 7. 数据库文件未被修改 (data/ 目录)
+  [ ] 8. 上传文件功能正常
+
+七、回滚方案
+-----------
+如果部署出现问题，按以下步骤回滚：
+
+1. 停止服务：pm2 stop trigen
+2. 从备份目录恢复白名单文件
+3. 重启服务：pm2 start trigen
+4. 验证服务恢复正常
+
+八、联系信息
+-----------
+如有疑问，请先停止操作，不要自行尝试修复。
+
+================================================================================
+                         【部署指令结束】
+================================================================================
