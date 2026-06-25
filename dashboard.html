@@ -17,7 +17,8 @@
 <meta name="pwa-install-prompt" content="true">
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <script>
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}
+// 强制注销所有旧 Service Worker，避免缓存干扰
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(s=>s.unregister()))}
 </script>
 <meta name="description" content="TriGen - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，30+顶尖模型免费体验。">
 <meta name="keywords" content="AI写作,AI写小说,AI漫画,大模型,AI聊天,DeepSeek,GPT-4,Claude,Midjourney,AI绘画">
@@ -3047,12 +3048,12 @@ response = client.chat.completions.create(
     <a href="#" onclick="switchPage('privacy');return false" style="color:var(--text-secondary);margin:0 10px;text-decoration:underline">隐私政策</a>
     <a href="#" onclick="switchPage('feedback');return false" style="color:var(--text-secondary);margin:0 10px;text-decoration:underline">意见反馈</a>
     <span style="margin:0 10px">|</span>
-    <span>运营主体：[公司全称，办理营业执照后填写]</span>
+    <span>运营主体：乐山市亿界网络科技工作室</span>
   </div>
   <div>
-    <span>ICP备案号：<a href="https://beian.miit.gov.cn" target="_blank" style="color:var(--text-secondary)">[办理后填写]</a></span>
+    <span>ICP备案号：<a href="https://beian.miit.gov.cn" target="_blank" style="color:var(--text-secondary)">蜀ICP备2026030046号</a></span>
     <span style="margin:0 12px">|</span>
-    <span>公安备案号：[办理后填写]</span>
+    <span>公安备案号：审核中</span>
   </div>
   <div style="margin-top:6px;font-size:0.68rem;opacity:0.6">
     ⚠️ 本平台仅提供AI模型聚合服务。禁止生成违法和不良信息。AI生成内容仅供参考，不构成专业建议。
@@ -5648,14 +5649,7 @@ function renderContinue(){const el=document.getElementById('continueContent');if
 const _origSendChat=sendChatMessage;
 sendChatMessage=async function(){const m=document.getElementById('chatInput').value.trim();if(m)saveChatToHistory(m,'');await _origSendChat();setTimeout(renderContinue,1000)};
 
-// === PWA ===
-(function(){
-  if('serviceWorker' in navigator){
-    const swCode='self.addEventListener("install",e=>{e.waitUntil(caches.open("trigen-v1").then(c=>c.addAll(["/","/index.html"])))});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})';
-    const blob=new Blob([swCode],{type:'application/javascript'});
-    navigator.serviceWorker.register(URL.createObjectURL(blob));
-  }
-})();
+// === PWA (已禁用Service Worker缓存) ===
 
 // === AI Agents ===
 const AGENTS=[
@@ -6018,7 +6012,7 @@ function createCustomModelSelect(containerEl,pageId,allModels,saved,onChange){
   panel.style.cssText='position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,0.15);max-height:280px;overflow-y:auto;display:none;margin-top:2px';
   var paid=[],free=[];
   for(var i=0;i<allModels.length;i++){var x=allModels[i];if(getModelCost(x.id)>0)paid.push(x);else free.push(x);}
-  function rOpts(list,label){if(!list.length)return'';var h='<div style="padding:5px10px;font-size:0.65rem;color:var(--text-secondary);font-weight:600;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0">'+label+'</div>';for(var j=0;j<list.length;j++){var m=list[j],c=getModelCost(m.id),sel=m.id===saved;h+='<div class="cmd-opt" data-id="'+m.id+'" style="padding:6px10px;cursor:pointer;font-size:0.72rem;display:flex;align-items:center;gap:4px;background:'+(sel?'var(--accent-light)':'transparent')+'">'+(c===0?'<span style="font-size:0.6rem;padding:1px5px;border-radius:3px;background:#10b981;color:#fff;font-weight:600">免费</span>':'<span style="font-size:0.6rem;color:var(--accent);font-weight:600">⚡'+c+'</span>')+'<span>'+m.name+'</span></div>';}return h;}
+  function rOpts(list,label){if(!list.length)return'';var h='<div style="padding:5px 10px;font-size:0.65rem;color:var(--text-secondary);font-weight:600;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0">'+label+'</div>';for(var j=0;j<list.length;j++){var m=list[j],c=getModelCost(m.id),sel=m.id===saved;h+='<div class="cmd-opt" data-id="'+m.id+'" style="padding:6px 10px;cursor:pointer;font-size:0.72rem;display:flex;align-items:center;gap:4px;background:'+(sel?'var(--accent-light)':'transparent')+'">'+(c===0?'<span style="font-size:0.6rem;padding:1px 5px;border-radius:3px;background:#10b981;color:#fff;font-weight:600">免费</span>':'<span style="font-size:0.6rem;color:var(--accent);font-weight:600">⚡'+c+'</span>')+'<span>'+m.name+'</span></div>';}return h;}
   panel.innerHTML=rOpts(paid,'💰 收费模型')+rOpts(free,'🆓 免费模型');
   trigger.onclick=function(e){e.stopPropagation();closeAllCustomDropdowns();panel.style.display='block';arrow.style.transform='rotate(180deg)';};
   panel.onclick=function(e){var el=e.target;while(el&&el!==panel){if(el.classList&&el.classList.contains('cmd-opt')){panel.style.display='none';arrow.style.transform='';var val=el.getAttribute('data-id'),mdl=null;for(var q=0;q<allModels.length;q++){if(allModels[q].id===val){mdl=allModels[q];break}}if(mdl){updateTriggerDisplay(trigger,mdl);trigger.appendChild(arrow);localStorage.setItem('pageModel_'+pageId,val);if(onChange)onChange(pageId,val);}break;}el=el.parentNode;}};
