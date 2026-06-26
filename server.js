@@ -48,7 +48,7 @@ app.use((req, res, next) => {
 // ============================================================
 // 静态文件
 // ============================================================
-const staticDir = path.join(__dirname, 'public');
+const staticDir = __dirname;
 app.use(express.static(staticDir));
 app.use('/uploads', express.static(path.join(staticDir, 'uploads')));
 
@@ -508,10 +508,10 @@ require('./routes/plugins')(app);
 require('./routes/manga')(app);
 
 // SPA 路由
-app.get('/', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
-app.get('/app', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
-app.get('/app/*', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
+app.get('/', (req, res) => res.sendFile(path.join(staticDir, 'dashboard.html')));
+app.get('/dashboard', (req, res) => res.sendFile(path.join(staticDir, 'dashboard.html')));
+app.get('/app', (req, res) => res.sendFile(path.join(staticDir, 'dashboard.html')));
+app.get('/app/*', (req, res) => res.sendFile(path.join(staticDir, 'dashboard.html')));
 
 // 健康检查端点
 app.get('/health', (req, res) => {
