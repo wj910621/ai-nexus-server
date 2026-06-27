@@ -117,6 +117,9 @@ a{color:var(--accent);text-decoration:none}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
+/* 确保每个页面内容从顶部开始 */
+.page.active .section:first-child{padding-top:24px}
+
 /* Right Panel */
 .right-panel{background:var(--bg-sidebar);border-left:1px solid var(--border);padding:20px 16px;overflow-y:auto;position:fixed;right:0;top:56px;width:300px;height:calc(100vh - 56px);z-index:5}
 .right-panel-title{font-size:0.85rem;font-weight:700;margin-bottom:14px;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px}
