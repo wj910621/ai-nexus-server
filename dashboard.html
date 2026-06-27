@@ -5632,6 +5632,7 @@ function doCheckin(){
       showToast(d.already?'今天已签到':d.error);if(btn)btn.disabled=false
     }
   }).catch(e=>{showToast('网络错误');if(btn)btn.disabled=false})
+}
 
 // === Chat History ===
 function saveChatToHistory(msg,replies){
@@ -7564,7 +7565,6 @@ const PAGE_MODEL_RECOMMEND_OPTIONS=[
   {id:'nx_gpt5mini',name:'GPT-5 Mini'},
   {id:'nx_gemini_pro',name:'Gemini 2.5 Pro（Nexus）'},
 ];
-}
 </script>
 </body>
 </html>
