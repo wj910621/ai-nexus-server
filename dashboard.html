@@ -3147,8 +3147,19 @@ function switchPage(name){
   if(name==='market')setTimeout(()=>{},100);
   if(name==='code'){updateRightPanel('code');setTimeout(()=>{initCodeChatModels();if(codeChatHistory.length===0)document.getElementById('codeChatQuickStart').style.display='flex'},200)}
   if(name==='apikeys')setTimeout(loadApiKeys,200);
-  // 重置所有滚动位置
-  setTimeout(()=>{window.scrollTo(0,0);const mc=document.querySelector('.main-content');if(mc)mc.scrollTop=0},50);
+  // 重置所有滚动位置 - 立即 + 延迟多重保险
+  const resetScroll = () => {
+    window.scrollTo(0,0);
+    const mc = document.querySelector('.main-content');
+    if(mc) {
+      mc.scrollTop = 0;
+      mc.scrollTo(0,0);
+    }
+  };
+  resetScroll();
+  setTimeout(resetScroll, 50);
+  setTimeout(resetScroll, 300);
+  setTimeout(resetScroll, 600);
   // Force CDN refresh v2
   // 隐私政策更新检测
   if(name==='privacy')markPolicyRead();
