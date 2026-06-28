@@ -1,5 +1,5 @@
 /**
- * TriGen Agent Engine v2.0 — Harness Engineering Alignment
+ * Y·NEX Agent Engine v2.0 — Harness Engineering Alignment
  * 
  * 基于 Claude Code 架构学习，重构 Agent 核心引擎：
  * - while(true) async generator 循环（替代 for 循环）
@@ -152,7 +152,7 @@ class AgentHarness {
       .map(t => `- ${t.name}: ${t.description}`)
       .join('\n');
 
-    return `你是 TriGen AI Agent，一个智能编程助手。
+    return `你是 Y·NEX AI Agent，一个智能编程助手。
 
 ## 可用工具
 ${toolDesc}

@@ -1,11 +1,11 @@
-name: TriGenClaw Release
+name: Y·NEX Desktop Release
 
 on:
   push:
     branches: [main]
     paths:
       - 'download/source/**'
-      - 'download/trigenclaw-build/**'
+      - 'download/ynex-desktop-build/**'
       - 'download/package.json'
   workflow_dispatch:
     inputs:
@@ -19,7 +19,7 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: download/trigenclaw-build
+        working-directory: download/ynex-desktop-build
     steps:
       - uses: actions/checkout@v4
 
@@ -52,12 +52,12 @@ jobs:
           npm run dist:win
           
           # 同时创建 ZIP 便携版
-          $zipName = "TriGenClaw-$ver-Portable.zip"
+          $zipName = "Y·NEX Desktop-$ver-Portable.zip"
           if (Test-Path "release\win-unpacked") {
             Compress-Archive -Path "release\win-unpacked\*" -DestinationPath "release\$zipName" -Force
             echo "✅ Portable ZIP: $zipName"
             # 复制一个固定版名方便 latest 链接
-            Copy-Item "release\$zipName" "release\TriGenClaw-Portable.zip" -Force
+            Copy-Item "release\$zipName" "release\Y·NEX Desktop-Portable.zip" -Force
           }
           
           # 列出产物
@@ -68,24 +68,24 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          name: TriGenClaw v${{ steps.version.outputs.version }}
+          name: Y·NEX Desktop v${{ steps.version.outputs.version }}
           body: |
-            ## TriGenClaw v${{ steps.version.outputs.version }}
+            ## Y·NEX Desktop v${{ steps.version.outputs.version }}
             
             ### 下载
-            - ⬇️ **安装包**: `TriGenClaw-*-win-Setup.exe`
-            - 📦 **便携版 (免安装)**: `TriGenClaw-*-Portable.zip`
+            - ⬇️ **安装包**: `Y·NEX Desktop-*-win-Setup.exe`
+            - 📦 **便携版 (免安装)**: `Y·NEX Desktop-*-Portable.zip`
             
             ### 更新内容
             - 安全加固: CSP + 文件系统沙箱 + URL校验
             - 修复: 桌面端启动崩溃问题
             - 同步: 最新模型列表与前端功能
             
-            > 便携版解压后直接运行 `TriGenClaw.exe` 即可，无需安装。
+            > 便携版解压后直接运行 `Y·NEX Desktop.exe` 即可，无需安装。
           draft: false
           prerelease: false
           files: |
-            download/trigenclaw-build/release/TriGenClaw-*.exe
-            download/trigenclaw-build/release/TriGenClaw-*.zip
+            download/ynex-desktop-build/release/Y·NEX Desktop-*.exe
+            download/ynex-desktop-build/release/Y·NEX Desktop-*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

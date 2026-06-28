@@ -1,5 +1,5 @@
 /**
- * TriGen Trace & Replay 系统
+ * Y·NEX Trace & Replay 系统
  * 基于 he-wiki-rag Tracer 模块设计
  * 支持执行记录、追踪、回放、审计
  */

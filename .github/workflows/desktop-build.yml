@@ -1,10 +1,10 @@
-name: TriGenClaw Desktop Build
+name: Y·NEX Desktop Desktop Build
 
 on:
   push:
     paths:
       - 'download/source/**'
-      - 'download/trigenclaw-build/**'
+      - 'download/ynex-desktop-build/**'
       - 'download/package.json'
   workflow_dispatch:
     inputs:
@@ -26,7 +26,7 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: download/trigenclaw-build
+        working-directory: download/ynex-desktop-build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -48,8 +48,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TriGenClaw-Windows
-          path: download/trigenclaw-build/release/TriGenClaw-*-win-Setup.exe
+          name: Y·NEX Desktop-Windows
+          path: download/ynex-desktop-build/release/Y·NEX Desktop-*-win-Setup.exe
 
   build-mac:
     name: Build macOS
@@ -57,7 +57,7 @@ jobs:
     runs-on: macos-latest
     defaults:
       run:
-        working-directory: download/trigenclaw-build
+        working-directory: download/ynex-desktop-build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -79,8 +79,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TriGenClaw-macOS
-          path: download/trigenclaw-build/release/TriGenClaw-*-mac.dmg
+          name: Y·NEX Desktop-macOS
+          path: download/ynex-desktop-build/release/Y·NEX Desktop-*-mac.dmg
 
   build-linux:
     name: Build Linux
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: download/trigenclaw-build
+        working-directory: download/ynex-desktop-build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -110,5 +110,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TriGenClaw-Linux
-          path: download/trigenclaw-build/release/TriGenClaw-*-linux.*
+          name: Y·NEX Desktop-Linux
+          path: download/ynex-desktop-build/release/Y·NEX Desktop-*-linux.*

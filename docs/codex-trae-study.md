@@ -217,14 +217,14 @@ TRAE_AGENT_SYSTEM_PROMPT = """You are an expert AI software engineering agent.
 
 ---
 
-## 四、对 TriGen 的启示
+## 四、对 Y·NEX 的启示
 
 ### 4.1 紧急需要实现的功能
 
 1. **沙箱隔离执行**
    - Codex 的 Bubblewrap 是 Linux 标准
    - Windows 需要类似隔离机制
-   - 当前 TriGen 缺乏命令执行安全
+   - 当前 Y·NEX 缺乏命令执行安全
 
 2. **会话持久化**
    - Codex Thread 模型值得借鉴
@@ -265,7 +265,7 @@ TRAE_AGENT_SYSTEM_PROMPT = """You are an expert AI software engineering agent.
 ### 4.3 架构建议
 
 ```
-TriGen 2.0 架构
+Y·NEX 2.0 架构
 ├── core/
 │   ├── agent/           # Agent 核心
 │   ├── tools/            # 工具系统

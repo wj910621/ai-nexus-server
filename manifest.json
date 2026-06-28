@@ -1,6 +1,6 @@
 {
-  "name": "TriGen — All from Three",
-  "short_name": "TriGen",
+  "name": "Y·NEX — All from Three",
+  "short_name": "Y·NEX",
   "description": "一站式AI大模型聚合平台，接入DeepSeek、GPT-5、Claude等300+模型，免费模型无限用，会员解锁全部旗舰",
   "start_url": "/dashboard",
   "display": "standalone",

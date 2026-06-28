@@ -60,11 +60,11 @@ function createTray() {
   }
 
   tray = new Tray(trayIcon);
-  tray.setToolTip('TriGen Desktop');
+  tray.setToolTip('Y·NEX Desktop');
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: '打开 TriGen Desktop',
+      label: '打开 Y·NEX Desktop',
       click: () => {
         if (mainWindow) {
           mainWindow.show();
@@ -125,7 +125,7 @@ function checkForUpdates(notifyUpToDate) {
         require('electron').dialog.showMessageBox(mainWindow, {
           type: 'info',
           title: '已是最新',
-          message: `TriGen Desktop ${APP_VERSION} 已是最新版本。`,
+          message: `Y·NEX Desktop ${APP_VERSION} 已是最新版本。`,
         });
       }
     });

@@ -461,7 +461,7 @@ function doRegisterNew(){
       localStorage.setItem('cuser',JSON.stringify(currentUser));
       if(d.user&&d.user.credits!==undefined){userCredits=d.user.credits;localStorage.setItem('cr',userCredits)}
       closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();
-      switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 TriGen')},500);
+      switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 Y·NEX')},500);
       syncUserData();
     }else{
       // 显示后端错误消息

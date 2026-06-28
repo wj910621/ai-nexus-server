@@ -1,5 +1,5 @@
 /**
- * TriGen Agent Engine v1.0
+ * Y·NEX Agent Engine v1.0
  * Built-in tools version
  */
 
@@ -113,7 +113,7 @@ class AgentEngine {
   async run(task, options) {
     options = options || {}; const model = options.model || this.model; const maxIter = options.maxIterations || this.maxIterations; const tools = options.tools || this.tools; const workspace = options.workspace || process.cwd(); const streamCb = options.streamCallback;
     const toolNames = tools.list().map(t => t.name).join(', ');
-    const msgs = [{ role: 'system', content: '你是TriGen AI Agent，可用工具: ' + toolNames + '。需要调用工具时输出JSON格式：\n操作：{"工具名":"值"}\n完成后输出"最终回答："+你的答案' }, { role: 'user', content: task }];
+    const msgs = [{ role: 'system', content: '你是Y·NEX AI Agent，可用工具: ' + toolNames + '。需要调用工具时输出JSON格式：\n操作：{"工具名":"值"}\n完成后输出"最终回答："+你的答案' }, { role: 'user', content: task }];
     const history = []; let answer = ''; let iter = 0;
     while (iter < maxIter) {
       iter++; const resp = await this._callLLM(msgs, model); const content = resp.content;

@@ -141,16 +141,16 @@ function downloadMedia(){
 
 // 桌面端直接下载 — 一键下载 ZIP 便携版（无安全警告，解压即用）
 function downloadDesktopApp(){
-  showToast('⏳ 正在开始下载 TriGenClaw 桌面端...');
-  const zipUrl = 'https://github.com/wj910621/ai-nexus-server/releases/latest/download/TriGenClaw-Portable.zip';
+  showToast('⏳ 正在开始下载 Y·NEX Desktop 桌面端...');
+  const zipUrl = 'https://github.com/wj910621/ai-nexus-server/releases/latest/download/Y·NEX Desktop-Portable.zip';
   const a = document.createElement('a');
   a.href = zipUrl;
-  a.download = 'TriGenClaw-Portable.zip';
+  a.download = 'Y·NEX Desktop-Portable.zip';
   a.target = '_blank';
   a.rel = 'noopener';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  setTimeout(() => showToast('✅ 下载已开始！ZIP约155MB，解压后双击 TriGenClaw.exe 即可使用'), 1000);
+  setTimeout(() => showToast('✅ 下载已开始！ZIP约155MB，解压后双击 Y·NEX Desktop.exe 即可使用'), 1000);
 }
 

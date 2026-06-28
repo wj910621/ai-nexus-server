@@ -1,5 +1,5 @@
 /**
- * TriGen Agent Harness - Agent 执行回路核心
+ * Y·NEX Agent Harness - Agent 执行回路核心
  * 基于 he-wiki-rag Harness 模块设计
  * 完整的 Agent + Tool 工程化样板
  */

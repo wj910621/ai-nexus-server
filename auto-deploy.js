@@ -1,5 +1,5 @@
 /**
- * TriGen 一键自动部署脚本
+ * Y·NEX 一键自动部署脚本
  * 上传文件到服务器并重启服务
  */
 const { Client } = require('ssh2');
@@ -91,7 +91,7 @@ function uploadDir(localDir, remoteDir, cb) {
   });
 }
 
-console.log('🚀 开始部署 TriGen...\n');
+console.log('🚀 开始部署 Y·NEX...\n');
 console.log(`  服务器: ${USER}@${HOST}`);
 console.log(`  前端目录: ${FRONTEND_DIR}`);
 console.log(`  后端目录: ${BACKEND_DIR}\n`);

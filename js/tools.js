@@ -486,14 +486,14 @@ renderUserNav();
 initAdmin();
 // 安全校验：如果模型列表异常少（<10个），清除本地缓存重建
 if(models.length<10 && localStorage.getItem(MODELS_STORAGE_KEY)){
-  console.warn('[TriGen] 检测到模型列表异常（仅'+models.length+'个），清除缓存重建');
+  console.warn('[Y·NEX] 检测到模型列表异常（仅'+models.length+'个），清除缓存重建');
   localStorage.removeItem(MODELS_STORAGE_KEY);
   initAdmin(); // 重新初始化
 }
 // 支持 ?reset-models 参数强制重建模型列表
 if(location.search.includes('reset-models')){
   localStorage.removeItem(MODELS_STORAGE_KEY);
-  console.log('[TriGen] 已强制重建模型列表');
+  console.log('[Y·NEX] 已强制重建模型列表');
   setTimeout(()=>location.href=location.pathname,100);
 }
 updateStreakUI();

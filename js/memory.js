@@ -1,5 +1,5 @@
 /**
- * TriGen 记忆系统 v2.0
+ * Y·NEX 记忆系统 v2.0
  * 基于 Claude Code CLAUDE.md 设计理念
  * 三层记忆架构：用户级、项目级、会话级
  */

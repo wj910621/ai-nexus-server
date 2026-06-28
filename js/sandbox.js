@@ -1,5 +1,5 @@
 /**
- * TriGen 沙箱执行系统 v2.0
+ * Y·NEX 沙箱执行系统 v2.0
  * 基于 Codex Bubblewrap 设计理念
  * 提供安全的命令执行环境
  */

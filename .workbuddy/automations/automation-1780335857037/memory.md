@@ -2,7 +2,7 @@
 
 ## 2026-06-21 02:55
 - **状态**: 部分成功（commit 成功，push 失败）
-- **操作**: `git add .` + commit `auto backup 2026-06-21`，59 文件变更（+24872/-5 行），新增 `download/TriGenClaw-Portable/`（Electron 便携版构建产物：main.js、preload.js、app.asar、前端 JS/CSS 等 53 文件）及 `fix-nginx-manifest.sh`，修改 release.yml、deploy-win.js、api.js、index.html 等，提交 23d8871
+- **操作**: `git add .` + commit `auto backup 2026-06-21`，59 文件变更（+24872/-5 行），新增 `download/Y·NEX Desktop-Portable/`（Electron 便携版构建产物：main.js、preload.js、app.asar、前端 JS/CSS 等 53 文件）及 `fix-nginx-manifest.sh`，修改 release.yml、deploy-win.js、api.js、index.html 等，提交 23d8871
 - **push 结果**: 失败 — `Recv failure: Connection was aborted`（GitHub 连接中断），与 06-19、06-15、06-14、06-09 同类故障，按策略不重试，下次再推
 
 ## 2026-06-20 02:55
@@ -22,17 +22,17 @@
 
 ## 2026-06-17 02:55
 - **状态**: 部分成功（commit 成功，push 失败）
-- **操作**: `git add .` + commit `auto backup 2026-06-17`，53 文件变更（+15329/-123 行），新增 agent-engine.js/agent-engine-clean.js/agent-engine-fixed.js/mcp-server.js/package.json/rag-vector.js、.github/workflows/desktop-build.yml、.workbuddy/memory/2026-06-16.md、download/icons/*、download/source/js/*（mcp-client/model3d/music）、download/trigenclaw-build/**/*（JS/CSS 前端资源），删除 final-verify.js，提交 77c3364
-- **push 结果**: 失败 — GitHub pre-receive hook 拒绝，5 个大文件超限：TriGenClaw.exe 221.71 MB、ai-nexus.exe 221.51 MB、TriGen Desktop.exe 221.51 MB、TriGenClaw-1.0.0-win-Setup.exe 100.01 MB（>100 MB 硬限制）、TriGen-Desktop-1.0.0-win-Setup.exe 96.97 MB（>50 MB 建议限制）。与 06-14、06-16 同类故障，需使用 Git LFS 或将构建产物加入 .gitignore。按策略不重试
+- **操作**: `git add .` + commit `auto backup 2026-06-17`，53 文件变更（+15329/-123 行），新增 agent-engine.js/agent-engine-clean.js/agent-engine-fixed.js/mcp-server.js/package.json/rag-vector.js、.github/workflows/desktop-build.yml、.workbuddy/memory/2026-06-16.md、download/icons/*、download/source/js/*（mcp-client/model3d/music）、download/ynex-desktop-build/**/*（JS/CSS 前端资源），删除 final-verify.js，提交 77c3364
+- **push 结果**: 失败 — GitHub pre-receive hook 拒绝，5 个大文件超限：Y·NEX Desktop.exe 221.71 MB、ai-nexus.exe 221.51 MB、Y·NEX Desktop.exe 221.51 MB、Y·NEX Desktop-1.0.0-win-Setup.exe 100.01 MB（>100 MB 硬限制）、Y·NEX-Desktop-1.0.0-win-Setup.exe 96.97 MB（>50 MB 建议限制）。与 06-14、06-16 同类故障，需使用 Git LFS 或将构建产物加入 .gitignore。按策略不重试
 
 ## 2026-06-16 02:55
 - **状态**: 部分成功（commit 成功，push 失败）
-- **操作**: `git add .` + commit `auto backup 2026-06-16`，125 文件变更（+367933/-6552 行），新增 download/ 下大量 TriGenClaw Electron 桌面应用构建产物（release 安装包 + win-unpacked + JS 源码 + icons），新增 3 个 Python/JS 部署上传脚本，提交 6c3ddc9
-- **push 结果**: 失败 — GitHub pre-receive hook 拒绝：4 个文件超过 100 MB 硬限制（`ai-nexus.exe` 221.51 MB、`TriGenClaw.exe` 221.71 MB、`TriGen Desktop.exe` 221.51 MB、`TriGenClaw-1.0.0-win-Setup.exe` 100.01 MB），另有 1 个文件超过 50 MB 建议限制（`TriGen-Desktop-1.0.0-win-Setup.exe` 96.97 MB）。需使用 Git LFS 管理大文件或将构建产物加入 `.gitignore`。按策略不重试，下次再推
+- **操作**: `git add .` + commit `auto backup 2026-06-16`，125 文件变更（+367933/-6552 行），新增 download/ 下大量 Y·NEX Desktop Electron 桌面应用构建产物（release 安装包 + win-unpacked + JS 源码 + icons），新增 3 个 Python/JS 部署上传脚本，提交 6c3ddc9
+- **push 结果**: 失败 — GitHub pre-receive hook 拒绝：4 个文件超过 100 MB 硬限制（`ai-nexus.exe` 221.51 MB、`Y·NEX Desktop.exe` 221.71 MB、`Y·NEX Desktop.exe` 221.51 MB、`Y·NEX Desktop-1.0.0-win-Setup.exe` 100.01 MB），另有 1 个文件超过 50 MB 建议限制（`Y·NEX-Desktop-1.0.0-win-Setup.exe` 96.97 MB）。需使用 Git LFS 管理大文件或将构建产物加入 `.gitignore`。按策略不重试，下次再推
 
 ## 2026-06-15 02:55
 - **状态**: 部分成功（commit 成功，push 失败）
-- **操作**: `git add .` + commit `auto backup 2026-06-15`，322 文件变更（+759777/-3309 行），新增大量 download/ 目录下 TriGen Desktop 构建产物（dist + release）、source 源码（Electron 桌面应用 + FastAPI 后端）、Python 部署/修复脚本，新增 ssl/ 证书文件，删除 34 个旧的 JS 部署/检查脚本、package.json、package-lock.json 等，提交 27a5559
+- **操作**: `git add .` + commit `auto backup 2026-06-15`，322 文件变更（+759777/-3309 行），新增大量 download/ 目录下 Y·NEX Desktop 构建产物（dist + release）、source 源码（Electron 桌面应用 + FastAPI 后端）、Python 部署/修复脚本，新增 ssl/ 证书文件，删除 34 个旧的 JS 部署/检查脚本、package.json、package-lock.json 等，提交 27a5559
 - **push 结果**: 失败 — `Recv failure: Connection was aborted`（GitHub 连接中断），与 06-09、06-14 同类故障，按策略不重试，下次再推
 
 ## 2026-06-14 02:55

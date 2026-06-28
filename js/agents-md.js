@@ -1,5 +1,5 @@
 /**
- * TriGen AGENTS.md 项目级指令系统 v2.0
+ * Y·NEX AGENTS.md 项目级指令系统 v2.0
  * 基于 Codex AGENTS.md 设计
  * 支持项目级编码规范和指令
  */

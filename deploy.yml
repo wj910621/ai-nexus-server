@@ -1,6 +1,6 @@
 ---
-# Ansible部署剧本 - TriGen Nexus Hub
-- name: Deploy TriGen to Server
+# Ansible部署剧本 - Y·NEX Nexus Hub
+- name: Deploy Y·NEX to Server
   hosts: servers
   become: yes
   vars:

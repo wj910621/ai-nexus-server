@@ -62,7 +62,7 @@ function requestWxPay(method, url, body) {
         'Authorization': auth,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'User-Agent': 'TriGen/1.0',
+        'User-Agent': 'Y·NEX/1.0',
       },
     };
 

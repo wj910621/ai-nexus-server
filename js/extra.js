@@ -37,7 +37,7 @@ async function runAiMarket(){
 }
 
 // === AI 编程助手（对话式） ===
-const CODE_SYS_PROMPT = `你是 TriGen 平台的 AI 编程助手。你是一个专业、耐心、善于引导的全栈开发专家。
+const CODE_SYS_PROMPT = `你是 Y·NEX 平台的 AI 编程助手。你是一个专业、耐心、善于引导的全栈开发专家。
 
 【核心原则】
 1. 先理解，再动手：首先要充分理解用户想做什么，目标用户是谁，有什么具体需求

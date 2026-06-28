@@ -1,5 +1,5 @@
 /**
- * TriGen 会话持久化系统 v2.0
+ * Y·NEX 会话持久化系统 v2.0
  * 基于 Codex Thread 模型设计
  * SQLite 持久化，支持会话恢复和分叉
  */

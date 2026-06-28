@@ -1,5 +1,5 @@
 /**
- * TriGen 代码探索 Agent
+ * Y·NEX 代码探索 Agent
  * 基于 Claude Code Explore Agent 设计
  * 只读模式，快速定位代码
  */

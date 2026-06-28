@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TriGen Desktop</title>
+<title>Y·NEX Desktop</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='2' width='28' height='28' rx='6' fill='%23f5f5f7' stroke='%231a1a2e' stroke-width='1.5'/><path d='M8 16L12 11L20 19L24 14' stroke='%231a1a2e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
 <meta name="theme-color" content="#f5f5f7">
 <link rel="manifest" href="/studio/manifest.json">
@@ -128,13 +128,13 @@ body.dark .sidebar{background:#1c1c1e}body.dark .sidebar-foot{background:#1c1c1e
 </style>
 </head>
 <body>
-<div id="sp" class="sp"><div class="sp-i"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="6" stroke="#1a1a2e" stroke-width="1.5"/><path d="M8 16L12 11L20 19L24 14" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div><div class="sp-t">TriGen</div><div class="sp-s">DESKTOP</div><div class="sp-l"></div></div>
+<div id="sp" class="sp"><div class="sp-i"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="6" stroke="#1a1a2e" stroke-width="1.5"/><path d="M8 16L12 11L20 19L24 14" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div><div class="sp-t">Y·NEX</div><div class="sp-s">DESKTOP</div><div class="sp-l"></div></div>
 <div class="tt" id="tt"></div>
 
 <!-- Auth Modal -->
 <div id="authM" class="modal-overlay">
   <div class="modal">
-    <div class="mh"><div class="mt">TriGen</div><button class="mc" onclick="A.closeAuth()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mh"><div class="mt">Y·NEX</div><button class="mc" onclick="A.closeAuth()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="mtabs"><button class="mtab active" onclick="A.swTab('login')">登录</button><button class="mtab" onclick="A.swTab('register')">注册</button><button class="mtab" onclick="A.swTab('apikey')">API Key</button></div>
     <div id="loginF"><label class="ml">用户名/邮箱</label><input id="loginU" class="mi" placeholder="输入用户名或邮箱"><label class="ml" style="margin-top:10px">密码</label><input id="loginP" class="mi" type="password" placeholder="输入密码"><div class="merr" id="loginErr"></div></div>
     <div id="regF" style="display:none"><label class="ml">用户名</label><input id="regU" class="mi" placeholder="2-20位字母数字"><label class="ml" style="margin-top:10px">邮箱</label><input id="regE" class="mi" placeholder="选填"><label class="ml" style="margin-top:10px">密码</label><input id="regP" class="mi" type="password" placeholder="至少6位"><div class="merr" id="regErr"></div><div class="md">注册即送 30 积分！与主站账号通用</div></div>
@@ -154,7 +154,7 @@ body.dark .sidebar{background:#1c1c1e}body.dark .sidebar-foot{background:#1c1c1e
 
 <div class="app">
   <div class="titlebar">
-    <div class="titlebar-drag"><div class="titlebar-logo"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="6" stroke="#1a1a2e" stroke-width="1.5"/><path d="M8 16L12 11L20 19L24 14" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><span class="titlebar-name">TriGen</span><span class="titlebar-tag">DESKTOP</span></div></div>
+    <div class="titlebar-drag"><div class="titlebar-logo"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="6" stroke="#1a1a2e" stroke-width="1.5"/><path d="M8 16L12 11L20 19L24 14" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><span class="titlebar-name">Y·NEX</span><span class="titlebar-tag">DESKTOP</span></div></div>
     <div class="titlebar-user" id="tbUser" onclick="A.toggleMenu()"><span class="cred" id="tbCred" style="display:none"></span><div class="av" id="tbAv">N</div></div>
     <div class="titlebar-actions"><button class="tb-btn tb-c"></button><button class="tb-btn tb-m"></button><button class="tb-btn tb-x"></button></div>
   </div>
@@ -296,7 +296,7 @@ A.showSet=function(){
     '<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:600;margin-bottom:6px">📦 桌面版</div>'+
     '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--text2)">版本</span><span class="settings-version" style="font-size:10px;color:var(--text3)">v1.0.0</span></div>'+
     '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0"><span style="font-size:11px;color:var(--text2)">下载安装包</span><span style="font-size:10px;color:var(--accent2);cursor:pointer" onclick="window.open(\'/studio/download/Trigen-Desktop-Source.zip\')">下载 ZIP</span></div></div>'+
-    '<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px 0;border-top:1px solid var(--border)">TriGen · All from Three · 三生万物</div>';
+    '<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px 0;border-top:1px solid var(--border)">Y·NEX · All from Three · 三生万物</div>';
   id('setM').classList.add('open');
 };
 A.closeSet=function(){id('setM').classList.remove('open')};
@@ -415,7 +415,7 @@ function highlightCode(code,lang){lang=(lang||'').toLowerCase();var h=esc(code);
   return h}
 function copyCode(btn){var pre=btn.parentElement;var code=pre.querySelector('code');if(!code)return;var text=code.textContent||code.innerText||'';navigator.clipboard.writeText(text).then(function(){btn.textContent='✅';setTimeout(function(){btn.textContent='📋'},1500)}).catch(function(){})}
 function renderMsgs(){var el=id('rsScroll');if(!el)return;var msgs=S.msgs[S.curConv]||[];if(!msgs.length){id('welcomeArea').style.display='flex';id('resultsArea').style.display='none';return}var start=Math.max(0,msgs.length-50);var rmsgs=msgs.slice(start);
-  el.innerHTML=rmsgs.map(function(m){if(m.role==='thinking'||(m.role==='assistant'&&!m.content&&S.stream))return'<div class="msg msg-a" id="'+m.id+'"><div class="msg-av">AI</div><div class="msg-bd"><div class="msg-lb">TriGen · 全能引擎</div><div class="think"><span></span><span></span><span></span></div></div></div>';var av=m.role==='user'?'U':'AI',lb=m.role==='user'?'你':'TriGen';return'<div class="msg msg-'+m.role.substr(0,1)+'" id="'+m.id+'"><div class="msg-av">'+av+'</div><div class="msg-bd"><div class="msg-lb">'+lb+'</div><div class="msg-txt">'+rendC(m.content||'')+'</div></div></div>'}).join('');
+  el.innerHTML=rmsgs.map(function(m){if(m.role==='thinking'||(m.role==='assistant'&&!m.content&&S.stream))return'<div class="msg msg-a" id="'+m.id+'"><div class="msg-av">AI</div><div class="msg-bd"><div class="msg-lb">Y·NEX · 全能引擎</div><div class="think"><span></span><span></span><span></span></div></div></div>';var av=m.role==='user'?'U':'AI',lb=m.role==='user'?'你':'Y·NEX';return'<div class="msg msg-'+m.role.substr(0,1)+'" id="'+m.id+'"><div class="msg-av">'+av+'</div><div class="msg-bd"><div class="msg-lb">'+lb+'</div><div class="msg-txt">'+rendC(m.content||'')+'</div></div></div>'}).join('');
   if(el.parentElement)el.parentElement.scrollTop=el.parentElement.scrollHeight}
 function getC(id){for(var i=0;i<S.convs.length;i++){if(S.convs[i].id===id)return S.convs[i]}return null}
 A.clearAll=function(){id('rsScroll').innerHTML='';id('resultsArea').style.display='none';id('welcomeArea').style.display='flex'};
@@ -430,7 +430,7 @@ function processMediaRequest(userText,aiResponse){var c=(userText+' '+aiResponse
 function isMediaReq(t,k){for(var i=0;i<k.length;i++){if(t.indexOf(k[i])!==-1)return true}return false}
 function genMedia(type,text){
   var labels={video:'🎥 视频',music:'🎵 音乐',image:'🎨 图像','3d':'🧊 3D'};var sc=id('rsScroll');if(!sc)return;
-  var mid='media-'+gen();sc.insertAdjacentHTML('beforeend','<div class="msg msg-a" id="'+mid+'"><div class="msg-av">🎬</div><div class="msg-bd"><div class="msg-lb">TriGen · '+(labels[type]||'AI')+'</div><div class="think"><span></span><span></span><span></span></div><div class="msg-txt" style="font-size:11px;color:var(--text3)">⏳ 正在生成'+(type==='video'?'视频...':type==='music'?'音乐...':type==='image'?'图像创意...':'3D模型...')+'</div></div></div>');
+  var mid='media-'+gen();sc.insertAdjacentHTML('beforeend','<div class="msg msg-a" id="'+mid+'"><div class="msg-av">🎬</div><div class="msg-bd"><div class="msg-lb">Y·NEX · '+(labels[type]||'AI')+'</div><div class="think"><span></span><span></span><span></span></div><div class="msg-txt" style="font-size:11px;color:var(--text3)">⏳ 正在生成'+(type==='video'?'视频...':type==='music'?'音乐...':type==='image'?'图像创意...':'3D模型...')+'</div></div></div>');
   if(sc.parentElement)sc.parentElement.scrollTop=sc.scrollHeight;
   var prompt=text.replace(/^(请|帮我|给我|生成|创建|制作|做|画|写|创作|设计)/,'').trim()||text;
   if(type==='video'){var x=new XMLHttpRequest();x.open('POST','/api/kling/text2video');x.setRequestHeader('Content-Type','application/json');if(S.key)x.setRequestHeader('Authorization','Bearer '+S.key);else if(S.token)x.setRequestHeader('Authorization','Bearer '+S.token);x.onload=function(){try{var r=JSON.parse(x.responseText);if(r.data?.task_id)pollMedia('kling',r.data.task_id,mid,text);else showMediaDone(mid,'✅ 视频任务已提交！请到主站查看。')}catch(e){showMediaDone(mid,'✅ 视频生成已启动！')}};x.onerror=function(){showMediaDone(mid,'视频生成服务暂时不可用，请稍后重试。')};x.send(JSON.stringify({prompt:prompt,model:'kling-v1.6',duration:5}))}
@@ -441,10 +441,10 @@ function genMedia(type,text){
 function pollMedia(api,taskId,mid,text){var url={kling:'/api/kling/task?id=','music':'/api/music/task?id=','meshy':'/api/meshy/result/'}[api]+taskId;setTimeout(function(){var x=new XMLHttpRequest();x.open('GET',url);
   x.onload=function(){try{var r=JSON.parse(x.responseText);var s=r.data?.status||r.status||'';if(s==='succeed'||s==='completed'||s==='success'){var u=r.data?.videos?.[0]?.url||r.data?.url||r.data?.output?.video_url||'';if(u&&api==='kling')showMediaDone(mid,'🎥 视频生成完成！\n\n<video controls style="max-width:100%;border-radius:8px;margin:8px 0"><source src="'+u+'" type="video/mp4"></video>');else showMediaDone(mid,'✅ 生成完成！描述：'+esc(text))}else if(s==='failed')showMediaDone(mid,'❌ 生成失败，请重试');else pollMedia(api,taskId,mid,text)}catch(e){showMediaDone(mid,'✅ 任务已提交！请到主站查看结果。')}};
   x.onerror=function(){showMediaDone(mid,'✅ 任务已提交，请稍后到主站查看。')};x.send()},3000)}
-function showMediaDone(mid,html){var el=id(mid);if(!el)return;el.innerHTML='<div class="msg msg-a"><div class="msg-av">🎬</div><div class="msg-bd"><div class="msg-lb">TriGen · 生成结果</div><div class="msg-txt">'+rendC(html)+'</div></div></div>';var sc=id('rsScroll');if(sc)sc.parentElement.scrollTop=sc.scrollHeight}
+function showMediaDone(mid,html){var el=id(mid);if(!el)return;el.innerHTML='<div class="msg msg-a"><div class="msg-av">🎬</div><div class="msg-bd"><div class="msg-lb">Y·NEX · 生成结果</div><div class="msg-txt">'+rendC(html)+'</div></div></div>';var sc=id('rsScroll');if(sc)sc.parentElement.scrollTop=sc.scrollHeight}
 
 // === Modules ===
-var KB=[{title:'TriGen 平台架构',cat:'平台介绍',preview:'TriGen 聚合 135+ AI 模型，全模态覆盖。核心理念：一生二、二生三、三生万物。',tags:['平台']},{title:'RAG 知识增强',cat:'AI模型',preview:'RAG 通过检索知识库注入 AI，让回答更准确。',tags:['RAG']},{title:'Prompt Engineering',cat:'AI模型',preview:'高质量提示词：角色+目标+格式+示例+约束+分步。',tags:['Prompt']},{title:'Python 最佳实践',cat:'编程开发',preview:'PEP 8规范：4空格、类型提示、docstring、列表推导式。',tags:['Python']},{title:'React 18',cat:'编程开发',preview:'并发渲染、Suspense 流式 SSR、自动批处理。',tags:['React']},{title:'AI 小说创作',cat:'写作创作',preview:'六步法：世界观→人物→情节→逐章生成→精修→检查。',tags:['小说']},{title:'小红书文案',cat:'营销推广',preview:'爆款结构：吸睛标题+开篇钩子+正文干货+互动引导。',tags:['小红书']},{title:'数据库设计',cat:'编程开发',preview:'三大范式+索引原则。',tags:['数据库']},{title:'AI 绘画提示词',cat:'设计创意',preview:'公式：主体+环境+风格+光照+色彩+构图+质量。',tags:['AI绘画']},{title:'数据分析流程',cat:'数据分析',preview:'业务理解→数据获取→清洗→EDA→建模→评估→部署。',tags:['分析']},{title:'深度学习',cat:'AI模型',preview:'文本→Transformer；图像→CNN/ViT；多模态→CLIP。',tags:['深度学习']},{title:'品牌定位',cat:'营销推广',preview:'品牌=定位+故事+差异。',tags:['品牌']}];
+var KB=[{title:'Y·NEX 平台架构',cat:'平台介绍',preview:'Y·NEX 聚合 135+ AI 模型，全模态覆盖。核心理念：一生二、二生三、三生万物。',tags:['平台']},{title:'RAG 知识增强',cat:'AI模型',preview:'RAG 通过检索知识库注入 AI，让回答更准确。',tags:['RAG']},{title:'Prompt Engineering',cat:'AI模型',preview:'高质量提示词：角色+目标+格式+示例+约束+分步。',tags:['Prompt']},{title:'Python 最佳实践',cat:'编程开发',preview:'PEP 8规范：4空格、类型提示、docstring、列表推导式。',tags:['Python']},{title:'React 18',cat:'编程开发',preview:'并发渲染、Suspense 流式 SSR、自动批处理。',tags:['React']},{title:'AI 小说创作',cat:'写作创作',preview:'六步法：世界观→人物→情节→逐章生成→精修→检查。',tags:['小说']},{title:'小红书文案',cat:'营销推广',preview:'爆款结构：吸睛标题+开篇钩子+正文干货+互动引导。',tags:['小红书']},{title:'数据库设计',cat:'编程开发',preview:'三大范式+索引原则。',tags:['数据库']},{title:'AI 绘画提示词',cat:'设计创意',preview:'公式：主体+环境+风格+光照+色彩+构图+质量。',tags:['AI绘画']},{title:'数据分析流程',cat:'数据分析',preview:'业务理解→数据获取→清洗→EDA→建模→评估→部署。',tags:['分析']},{title:'深度学习',cat:'AI模型',preview:'文本→Transformer；图像→CNN/ViT；多模态→CLIP。',tags:['深度学习']},{title:'品牌定位',cat:'营销推广',preview:'品牌=定位+故事+差异。',tags:['品牌']}];
 var KBCATS=['平台介绍','AI模型','编程开发','写作创作','营销推广','数据分析','设计创意'];
 var AGENTS=[{name:'代码专家',icon:'💻',color:'#4f7cff',desc:'精通 Python/JS/Go/Rust，代码编写+重构+优化'},{name:'写作大师',icon:'✍️',color:'#7c5cfc',desc:'小说/散文/文案/技术文档，灵活调整风格'},{name:'翻译官',icon:'🌐',color:'#14b8a6',desc:'20+语言互译，准确传达语义语境'},{name:'数据分析师',icon:'📊',color:'#30b94e',desc:'数据分析/可视化/A/B测试，可执行洞察'},{name:'营销策划',icon:'📈',color:'#f59e0b',desc:'品牌定位/社媒运营/广告文案'},{name:'AI 导师',icon:'🎓',color:'#ec4899',desc:'苏格拉底式提问，由浅入深解释'},{name:'UI/UX设计师',icon:'🎨',color:'#4f7cff',desc:'界面/交互/设计系统'},{name:'产品经理',icon:'📋',color:'#7c5cfc',desc:'PRD/需求/竞品分析/全周期管理'},{name:'法律顾问',icon:'⚖️',color:'#f59e0b',desc:'法律咨询/合同审核/知识产权'},{name:'心灵导师',icon:'🧘',color:'#ec4899',desc:'倾听困惑，温和引导'},{name:'投资分析',icon:'💼',color:'#30b94e',desc:'行业研究/公司分析/估值建模'},{name:'学术助手',icon:'🔬',color:'#14b8a6',desc:'文献综述/论文润色/研究设计'}];
 var SKILLS=[{name:'公众号爆文',icon:'📝',cat:'写作',desc:'10w+文章模板：热点+深度+共鸣+互动',tags:['公众号']},{name:'小红书种草',icon:'📱',cat:'写作',desc:'痛点共鸣+测评+体验+购买引导',tags:['小红书']},{name:'英文邮件',icon:'📧',cat:'写作',desc:'正式/半正式/非正式三种语气',tags:['邮件']},{name:'故事创作',icon:'📖',cat:'写作',desc:'世界观+人物+情节+冲突+高潮',tags:['故事']},{name:'短视频脚本',icon:'🎬',cat:'写作',desc:'黄金3秒+信息增量+互动',tags:['短视频']},{name:'代码Review',icon:'🔍',cat:'编程',desc:'功能+性能+安全+可维护+测试',tags:['审查']},{name:'API设计',icon:'🔌',cat:'编程',desc:'RESTful最佳实践',tags:['API']},{name:'Docker配置',icon:'🐳',cat:'编程',desc:'多阶段构建+体积优化',tags:['Docker']},{name:'性能优化',icon:'⚡',cat:'编程',desc:'全链路：前端→网络→后端→数据库',tags:['性能']},{name:'SWOT分析',icon:'📊',cat:'营销',desc:'优劣势+机会+威胁',tags:['战略']},{name:'品牌定位',icon:'🎯',cat:'营销',desc:'画像+竞争+差异化+传播',tags:['品牌']},{name:'配色方案',icon:'🎨',cat:'设计',desc:'主色+辅色+中性色+语义色',tags:['配色']},{name:'设计系统',icon:'🏛️',cat:'设计',desc:'原则+色彩+字体+间距+组件',tags:['设计系统']},{name:'数据分析报告',icon:'📈',cat:'数据分析',desc:'摘要→方法论→发现→分析→建议',tags:['分析']},{name:'A/B测试',icon:'🔬',cat:'数据分析',desc:'假设→变量→样本→分析→决策',tags:['实验']},{name:'OKR设定',icon:'🎯',cat:'效率',desc:'目标+关键结果+周会追踪',tags:['OKR']},{name:'时间管理',icon:'⏰',cat:'效率',desc:'艾森豪威尔矩阵',tags:['效率']},{name:'用户访谈',icon:'🗣️',cat:'效率',desc:'开场→深挖→概念测试→收尾',tags:['研究']}];
@@ -494,7 +494,7 @@ function init(){
     if(window.electronAPI){window.electronAPI.getVersion().then(function(v){var ve=document.querySelector('.settings-version');if(ve)ve.textContent='v'+v})}
     if(S.token)fetchC();
     if(!S.user&&!S.key)setTimeout(function(){toast('💡 登录或设置 API Key','i')},1000);
-    else toast('TriGen Desktop 已就绪','s');
+    else toast('Y·NEX Desktop 已就绪','s');
     var sp=id('sp');if(sp){sp.classList.add('fade');setTimeout(function(){sp.style.display='none'},500)}
   }catch(e){console.error(e);toast('初始化完成','i')}
 }

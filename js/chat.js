@@ -236,9 +236,9 @@ let RAG_ENABLED = localStorage.getItem('ragEnabled')!=='false'; // 默认开启
 
 // 平台级 system prompt — 每次对话自动注入
 const PLATFORM_SYSTEM_PROMPT = [
-  '你是 TriGen 平台的 AI 助手。TriGen 是一个智能创作平台，聚合全球顶尖大语言模型，提供聊天、写作、绘图、视频、3D、音乐等全方位 AI 创作服务。',
+  '你是 Y·NEX 平台的 AI 助手。Y·NEX 是一个智能创作平台，聚合全球顶尖大语言模型，提供聊天、写作、绘图、视频、3D、音乐等全方位 AI 创作服务。',
   '',
-  '【TriGen 核心能力】',
+  '【Y·NEX 核心能力】',
   '- 多模型聊天：同时对话多个模型，直观对比回答',
   '- AI 小说：六步创作流程，支持百万字长篇不崩人设',
   '- AI 漫剧：小说转漫画分镜脚本',
@@ -290,7 +290,7 @@ async function buildRAGSystemPrompt(userQuery){
         '【知识片段'+(i+1)+'】'+item.title+'\n'+item.content
       ).join('\n\n');
 
-      sysPrompt += '\n\n【TriGen 知识库】（优先参考以下信息回答）\n' + ragContext;
+      sysPrompt += '\n\n【Y·NEX 知识库】（优先参考以下信息回答）\n' + ragContext;
 
       const st = document.getElementById('ragStatus');
       if(st){ st.style.display='inline'; st.textContent = '已匹配 '+data.matched+' 条知识'; }

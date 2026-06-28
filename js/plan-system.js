@@ -1,5 +1,5 @@
 /**
- * TriGen 增强规划系统 v2.0
+ * Y·NEX 增强规划系统 v2.0
  * 融合 Codex update_plan + TRAE sequential_thinking
  * 结构化问题解决和任务规划
  */

@@ -348,7 +348,7 @@ function getDeviceFingerprint(){
     const canvas=document.createElement('canvas');canvas.width=256;canvas.height=128;
     const ctx=canvas.getContext('2d');
     ctx.textBaseline='top';ctx.font='14px Arial';ctx.fillStyle='#f60';ctx.fillRect(100,10,50,30);
-    ctx.fillStyle='#069';ctx.font='16px monospace';ctx.fillText('TriGen FP',2,15);
+    ctx.fillStyle='#069';ctx.font='16px monospace';ctx.fillText('Y·NEX FP',2,15);
     ctx.fillStyle='rgba(102,204,0,0.7)';ctx.font='18px serif';ctx.fillText('device',30,60);
     const b64=canvas.toDataURL().replace(/^data:image\/png;base64,/,'');
     // 用简单哈希代替SHA-256（保持同步）

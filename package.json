@@ -1,7 +1,7 @@
 {
-  "name": "trigen-nexus-hub",
+  "name": "ynex-hub",
   "version": "2.0.0",
-  "description": "TriGen Nexus Hub - AI智能助手平台",
+  "description": "Y·NEX Nexus Hub - AI智能助手平台",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -16,7 +16,7 @@
     "nexus",
     "trigen"
   ],
-  "author": "TriGen Team",
+  "author": "Y·NEX Team",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",

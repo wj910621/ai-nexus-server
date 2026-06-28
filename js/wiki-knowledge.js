@@ -1,5 +1,5 @@
 /**
- * TriGen Wiki 知识库管理
+ * Y·NEX Wiki 知识库管理
  * 基于 he-wiki-rag Wiki 模块设计
  * 支持 Markdown 文档、Frontmatter、章节树
  */

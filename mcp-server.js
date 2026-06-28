@@ -1,5 +1,5 @@
 /**
- * TriGen MCP Server v1.0
+ * Y·NEX MCP Server v1.0
  * Model Context Protocol 标准服务器
  * 将 Agent 引擎的 6 个工具通过 MCP 协议暴露
  * 
@@ -226,7 +226,7 @@ function startHTTPServer(port = 3100) {
     // GET / (info)
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
-      name: 'TriGen MCP Server',
+      name: 'Y·NEX MCP Server',
       version: '1.0.0',
       tools: server.tools.list().length,
       endpoints: {
@@ -238,7 +238,7 @@ function startHTTPServer(port = 3100) {
   });
 
   app.listen(port, () => {
-    console.log(`\n🔌 TriGen MCP Server 已启动`);
+    console.log(`\n🔌 Y·NEX MCP Server 已启动`);
     console.log(`   HTTP 模式: http://localhost:${port}`);
     console.log(`   MCP 端点: POST http://localhost:${port}/mcp`);
     console.log(`   工具列表: GET  http://localhost:${port}/tools`);
@@ -263,7 +263,7 @@ function startStdioServer() {
     terminal: false
   });
 
-  console.error('[MCP] TriGen MCP Server (stdio mode)');
+  console.error('[MCP] Y·NEX MCP Server (stdio mode)');
   console.error('[MCP] Tools:', server.tools.list().map(t => t.name).join(', '));
 
   rl.on('line', async (line) => {

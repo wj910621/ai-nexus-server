@@ -1,7 +1,7 @@
 {
   "name": "trigen-desktop",
   "version": "1.0.0",
-  "description": "TriGen Desktop — One Input. Anything. 135+ AI 模型 · 全能 AI 桌面端",
+  "description": "Y·NEX Desktop — One Input. Anything. 135+ AI 模型 · 全能 AI 桌面端",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -12,7 +12,7 @@
   },
   "build": {
     "appId": "com.trigen.desktop",
-    "productName": "TriGen Desktop",
+    "productName": "Y·NEX Desktop",
     "directories": {
       "output": "release"
     },
@@ -33,14 +33,14 @@
         "nsis"
       ],
       "icon": "icons/icon.png",
-      "artifactName": "TriGen-Desktop-${version}-win-Setup.${ext}"
+      "artifactName": "Y·NEX-Desktop-${version}-win-Setup.${ext}"
     },
     "mac": {
       "target": [
         "dmg"
       ],
       "icon": "icons/icon.png",
-      "artifactName": "TriGen-Desktop-${version}-mac.${ext}"
+      "artifactName": "Y·NEX-Desktop-${version}-mac.${ext}"
     },
     "linux": {
       "target": [
@@ -48,16 +48,16 @@
         "deb"
       ],
       "icon": "icons/",
-      "artifactName": "TriGen-Desktop-${version}-linux.${ext}"
+      "artifactName": "Y·NEX-Desktop-${version}-linux.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "TriGen Desktop",
+      "shortcutName": "Y·NEX Desktop",
       "installerIcon": "icons/icon.png",
-      "uninstallDisplayName": "TriGen Desktop"
+      "uninstallDisplayName": "Y·NEX Desktop"
     }
   },
   "devDependencies": {

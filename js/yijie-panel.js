@@ -51,7 +51,7 @@
     } catch (e) {
       yijieOnline = false;
       if (dot) dot.className = 'conn-dot offline';
-      if (text) text.textContent = '本机亿界未启动，请打开 TriGenClaw 桌面端';
+      if (text) text.textContent = '本机亿界未启动，请打开 Y·NEX Desktop 桌面端';
       if (panel) panel.style.display = 'none';
     }
   }

@@ -1,4 +1,4 @@
-name: TriGen Deploy
+name: Y·NEX Deploy
 
 on:
   push:

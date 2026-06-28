@@ -135,7 +135,7 @@ module.exports = function(app) {
       db.prepare("INSERT INTO orders (order_id, username, product_id, product_name, amount, credits, status, created_at) VALUES (?,?,?,?,?,?,'pending',?)").run(
         orderId, req.user.username, productId, product.name, product.price, credits, new Date().toISOString());
       const wxResult = await wxpay.createNativeOrder({
-        description: `TriGen - ${product.name}`,
+        description: `Y·NEX - ${product.name}`,
         outTradeNo: orderId, amount,
         attach: JSON.stringify({ username: req.user.username, productId }),
       });

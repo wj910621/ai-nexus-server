@@ -1,4 +1,4 @@
-// TriGen Desktop — Service Worker
+// Y·NEX Desktop — Service Worker
 // Cache name includes version for easy updates
 var CACHE = 'trigen-v1';
 

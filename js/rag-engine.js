@@ -1,5 +1,5 @@
 /**
- * TriGen RAG Engine - 检索增强生成引擎
+ * Y·NEX RAG Engine - 检索增强生成引擎
  * 基于 he-wiki-rag 设计理念
  * 支持混合检索 + Reranker 精排
  */

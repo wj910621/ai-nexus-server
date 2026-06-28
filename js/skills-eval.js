@@ -1,5 +1,5 @@
 /**
- * TriGen Skills 评测与进化系统
+ * Y·NEX Skills 评测与进化系统
  * 基于 he-wiki-rag Skills 模块设计
  * 支持 6 大指标评测 + 4 层优化策略 + Accept/Rollback
  */

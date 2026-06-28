@@ -1,5 +1,5 @@
 /**
- * TriGen 一键部署脚本 (Windows 版)
+ * Y·NEX 一键部署脚本 (Windows 版)
  * 
  * 使用方法（在 Git Bash 或 PowerShell 中执行）：
  *   export DEPLOY_PASS=你的服务器密码
@@ -128,7 +128,7 @@ function deployEnv(cb) {
 }
 
 console.log('========================================');
-console.log('  TriGen 一键部署 (Windows 版)');
+console.log('  Y·NEX 一键部署 (Windows 版)');
 console.log('  ' + new Date().toLocaleString());
 console.log('========================================\n');
 

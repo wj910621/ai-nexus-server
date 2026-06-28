@@ -1,4 +1,4 @@
-# TriGen (Nexus Hub) 部署说明
+# Y·NEX (Nexus Hub) 部署说明
 # ==============================
 
 ## 快速部署（SSH方式）
@@ -41,7 +41,7 @@ docker build -t trigen .
 docker run -d \
   --name trigen \
   -p 3000:3000 \
-  -v /data/trigen:/app/data \
+  -v /data/ynex:/app/data \
   trigen
 ```
 

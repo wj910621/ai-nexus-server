@@ -1,5 +1,5 @@
 /**
- * TriGen AI - Internationalization Engine (i18n)
+ * Y·NEX AI - Internationalization Engine (i18n)
  * 支持中英文切换，可扩展更多语言
  * v1.0 - Phase 5
  */
@@ -44,8 +44,8 @@
       'lang.switch': '语言切换',
 
       /* ---- 首页 Hero ---- */
-      'hero.title': 'TriGen 智能创作平台',
-      'hero.subtitle': '聚合全球 300+ AI 模型，一个 TriGen 全搞定。对话顶级模型、写小说做漫剧、AI 编程创作、16 个预制智能体一键使用。',
+      'hero.title': 'Y·NEX 智能创作平台',
+      'hero.subtitle': '聚合全球 300+ AI 模型，一个 Y·NEX 全搞定。对话顶级模型、写小说做漫剧、AI 编程创作、16 个预制智能体一键使用。',
       'hero.free_trial': '🚀 免费体验',
       'hero.view_pricing': '💎 查看套餐',
       'hero.new_user_bonus': '✨ 新用户注册即送 <span style="font-size:1rem">30积分</span> 免费体验',
@@ -58,7 +58,7 @@
       'hero.no_save': '📡 不保存聊天内容',
 
       /* ---- 模型星球 ---- */
-      'planet.tag': 'TriGen · 模型星云',
+      'planet.tag': 'Y·NEX · 模型星云',
 
       /* ---- 定价页面 ---- */
       'pricing.title': '💎 选择你的套餐',
@@ -86,7 +86,7 @@
       'pricing.price_table': '积分消耗明细',
       'pricing.model': '模型类型',
       'pricing.cost': '消耗积分',
-      'pricing.compare_title': '为什么选择 TriGen？',
+      'pricing.compare_title': '为什么选择 Y·NEX？',
       'pricing.compare_subtitle': '对比主流 AI 平台',
 
       /* ---- 聊天页面 ---- */
@@ -137,7 +137,7 @@
       'common.fail': '操作失败',
 
       /* ---- 会员弹窗 ---- */
-      'member.title': '🔥 TriGen 会员',
+      'member.title': '🔥 Y·NEX 会员',
       'member.upgrade': '开通会员',
       'member.benefits': '会员权益',
       'member.daily_calls': '每日免费调用',
@@ -153,8 +153,8 @@
       'user.history': '使用历史',
       'user.api_keys': 'API 密钥',
 
-      /* ---- 桌面端 TriGenClaw ---- */
-      'desktop.title': 'TriGenClaw 桌面端',
+      /* ---- 桌面端 Y·NEX Desktop ---- */
+      'desktop.title': 'Y·NEX Desktop 桌面端',
       'desktop.download': '下载桌面端',
       'desktop.desc': 'Windows / macOS / Linux 全平台支持，更流畅的 AI 体验',
       'desktop.win': 'Windows 版',
@@ -216,7 +216,7 @@
       'landing.faq2_a': '注册即送30积分，每日签到也可获得积分。高级功能需要消耗积分，您也可以直接购买积分包。',
       'landing.faq3_q': '桌面端和网页端有什么区别？',
       'landing.faq3_a': '桌面端提供离线缓存、系统托盘、全局快捷键等增强体验。功能与网页端完全同步。',
-      'landing.footer': '© 2026 TriGen. All rights reserved.',
+      'landing.footer': '© 2026 Y·NEX · 亿界网络科技工作室 · 亿界互联·无界未来',
     },
 
     en: {
@@ -248,8 +248,8 @@
       'lang.switch': 'Language',
 
       /* ---- Hero ---- */
-      'hero.title': 'TriGen AI Platform',
-      'hero.subtitle': 'Aggregate 300+ AI models worldwide. Chat with top models, write novels, create manga, AI coding, 16 preset agents - all in one TriGen.',
+      'hero.title': 'Y·NEX AI Platform',
+      'hero.subtitle': 'Aggregate 300+ AI models worldwide. Chat with top models, write novels, create manga, AI coding, 16 preset agents - all in one Y·NEX.',
       'hero.free_trial': '🚀 Free Trial',
       'hero.view_pricing': '💎 View Plans',
       'hero.new_user_bonus': '✨ New users get <span style="font-size:1rem">30 credits</span> free trial',
@@ -262,7 +262,7 @@
       'hero.no_save': '📡 No Storage',
 
       /* ---- Planet ---- */
-      'planet.tag': 'TriGen · Model Nebula',
+      'planet.tag': 'Y·NEX · Model Nebula',
 
       /* ---- Pricing ---- */
       'pricing.title': '💎 Choose Your Plan',
@@ -290,7 +290,7 @@
       'pricing.price_table': 'Credit Usage',
       'pricing.model': 'Model Type',
       'pricing.cost': 'Cost',
-      'pricing.compare_title': 'Why TriGen?',
+      'pricing.compare_title': 'Why Y·NEX?',
       'pricing.compare_subtitle': 'Compare with other AI platforms',
 
       /* ---- Chat ---- */
@@ -341,7 +341,7 @@
       'common.fail': 'Failed',
 
       /* ---- Member Modal ---- */
-      'member.title': '🔥 TriGen Membership',
+      'member.title': '🔥 Y·NEX Membership',
       'member.upgrade': 'Upgrade',
       'member.benefits': 'Benefits',
       'member.daily_calls': 'Daily calls',
@@ -358,7 +358,7 @@
       'user.api_keys': 'API Keys',
 
       /* ---- Desktop ---- */
-      'desktop.title': 'TriGenClaw Desktop',
+      'desktop.title': 'Y·NEX Desktop Desktop',
       'desktop.download': 'Download Desktop',
       'desktop.desc': 'Windows / macOS / Linux. Smoother AI experience.',
       'desktop.win': 'Windows',
@@ -420,14 +420,14 @@
       'landing.faq2_a': '30 free credits on signup. Daily check-in also rewards credits. Premium features consume credits, or buy credit packs.',
       'landing.faq3_q': 'Desktop vs Web?',
       'landing.faq3_a': 'Desktop offers offline cache, system tray, global hotkeys. Fully synced with web version.',
-      'landing.footer': '© 2026 TriGen. All rights reserved.',
+      'landing.footer': '© 2026 Y·NEX · 亿界网络科技工作室 · 亿界互联·无界未来',
     }
   };
 
   // ============================================================
   // 核心引擎
   // ============================================================
-  let currentLang = localStorage.getItem('trigen_lang') || 'zh';
+  let currentLang = localStorage.getItem('ynex_lang') || 'zh';
 
   function t(key, fallback) {
     const dict = TRANSLATIONS[currentLang];
@@ -462,7 +462,7 @@
   function setLanguage(lang) {
     if (!TRANSLATIONS[lang]) return;
     currentLang = lang;
-    localStorage.setItem('trigen_lang', lang);
+    localStorage.setItem('ynex_lang', lang);
     translatePage();
   }
 
@@ -546,8 +546,8 @@
   // ============================================================
   function init() {
     // 如果已经初始化过，跳过
-    if (window.__trigenI18nInited) return;
-    window.__trigenI18nInited = true;
+    if (window.__ynexI18nInited) return;
+    window.__ynexI18nInited = true;
 
     // 延迟到 DOM 加载完成
     if (document.readyState === 'loading') {
@@ -580,7 +580,7 @@
   // ============================================================
   window.__ = t;
   window.t = t;
-  window.trigenI18n = {
+  window.ynexI18n = {
     t: t,
     setLanguage: setLanguage,
     getLanguage: getLanguage,
