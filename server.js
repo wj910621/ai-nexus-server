@@ -10,7 +10,15 @@ const Database = require('better-sqlite3');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+// 生产环境强制检查 JWT_SECRET
+if (IS_PROD && (!JWT_SECRET || JWT_SECRET.length < 32 || JWT_SECRET.includes('your-secret-key'))) {
+  console.error('错误：生产环境必须设置强度足够的 JWT_SECRET（至少 32 位随机字符串）');
+  process.exit(1);
+}
+const _JWT_SECRET = JWT_SECRET || 'dev-only-secret-key-not-for-production';
 const DB_FILE = path.join(__dirname, 'data', 'database.sqlite');
 
 // 占位导出对象，供路由模块同步 require；真实函数/值在 initDB() 后覆盖
@@ -34,7 +42,20 @@ module.exports = _exports;
 // ============================================================
 // 安全中间件
 // ============================================================
-app.use(cors({ origin: true, credentials: true }));
+// CORS 配置：生产环境只允许配置的域名
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+const corsOptions = {
+  origin: (origin, callback) => {
+    // 同域请求或 ALLOWED_ORIGINS 为空时允许（开发环境）
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('不允许的跨域来源: ' + origin));
+  },
+  credentials: true,
+};
+app.use(cors(corsOptions));
+app.set('trust proxy', 1);  // 信任反向代理，正确获取客户端 IP
 app.use(express.json({ limit: '50mb' }));
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -59,7 +80,10 @@ const requestCounts = new Map();
 const RATE_LIMIT_WINDOW = 60000;
 const RATE_LIMIT_MAX = 60;
 
+const RATE_LIMIT_WHITELIST = ['/health', '/manifest.json', '/sw.js', '/'];
+
 function rateLimit(req, res, next) {
+  if (RATE_LIMIT_WHITELIST.includes(req.path)) return next();
   const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
   const record = requestCounts.get(ip) || { count: 0, resetTime: now + RATE_LIMIT_WINDOW };
@@ -250,9 +274,14 @@ function initDB() {
   `);
   const adminExists = db.prepare("SELECT id FROM users WHERE username='admin'").get();
   if (!adminExists) {
-    const adminPwd = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminPwd = process.env.ADMIN_PASSWORD;
+    if (IS_PROD && (!adminPwd || adminPwd === 'admin123' || adminPwd.length < 8)) {
+      console.error('错误：生产环境必须设置 ADMIN_PASSWORD 且长度不少于 8 位');
+      process.exit(1);
+    }
+    const finalAdminPwd = adminPwd || 'admin123';
     db.prepare("INSERT INTO users (username, email, password, credits, role) VALUES (?,?,?,?,?)").run(
-      'admin', 'admin@nexus-hub.local', bcrypt.hashSync(adminPwd, 10), 99999, 'admin');
+      'admin', 'admin@nexus-hub.local', bcrypt.hashSync(finalAdminPwd, 10), 99999, 'admin');
   }
 }
 
@@ -260,11 +289,11 @@ function initDB() {
 // JWT 辅助函数
 // ============================================================
 function signToken(payload) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign(payload, _JWT_SECRET, { expiresIn: '7d' });
 }
 
 function verifyToken(token) {
-  return jwt.verify(token, JWT_SECRET);
+  return jwt.verify(token, _JWT_SECRET);
 }
 
 // 仅允许健康检查的路径（不验证API Key）
@@ -506,6 +535,7 @@ require('./routes/guest')(app);
 require('./routes/sync')(app);
 require('./routes/plugins')(app);
 require('./routes/manga')(app);
+require('./routes/yijie')(app);
 
 // SPA 路由
 app.get('/', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));

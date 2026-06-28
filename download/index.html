@@ -29,58 +29,68 @@ hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:24px 0}
 <div class="card">
   <div style="font-size:48px;margin-bottom:12px">🦀</div>
   <h1>下载 TriGenClaw</h1>
-  <p>AI 桌面工作台 · 独立客户端<br>300+ AI 模型 · 代码编辑器 · Agent 工坊 · 知识库</p>
+  <p>AI 桌面工作台 · 亿界本地 AI 核心 · 3D 粒子交互界面</p>
 
-  <!-- 方案一：install.bat（推荐） -->
+  <!-- 方案一：一键安装包（推荐） -->
   <div style="margin-bottom:16px">
-    <a class="dl-btn green" href="/download/install.bat" download>
-      📥 下载一键安装脚本
-      <span style="font-size:12px;font-weight:400;opacity:.8">(install.bat · 2KB)</span>
+    <a class="dl-btn green" href="/download/TriGenClaw-Setup-2.0.0.exe" download>
+      📥 下载 Windows 安装包
+      <span style="font-size:12px;font-weight:400;opacity:.8">(EXE · 66.8MB)</span>
     </a>
-    <p style="font-size:12px;color:#10b981;margin-top:6px">⬆ 推荐！双击自动安装到桌面，无需手动操作</p>
+    <p style="font-size:12px;color:#10b981;margin-top:6px">⬆ 推荐！双击运行，自动启动亿界本地 AI + 3D 粒子桌面</p>
   </div>
 
-  <!-- 方案二：直接下载 -->
+  <!-- 方案二：一键脚本（自动下载 exe 并安装） -->
+  <div style="margin-bottom:16px">
+    <a class="dl-btn" href="/download/install-yijie.bat" download>
+      📥 下载一键安装脚本
+      <span style="font-size:12px;font-weight:400;opacity:.8">(install-yijie.bat · 3.9KB)</span>
+    </a>
+    <p style="font-size:12px;color:#a090c0;margin-top:6px">双击脚本：自动下载 exe、解压、创建桌面快捷方式</p>
+  </div>
+
+  <!-- 方案三：GitHub 备用 -->
   <div>
     <a class="dl-btn ghost" href="https://github.com/wj910621/ai-nexus-server/releases/latest/download/TriGenClaw-Portable.zip" target="_blank">
-      📦 直接下载便携版
+      📦 GitHub 备用下载
       <span style="font-size:12px;font-weight:400;opacity:.8">(ZIP · ~155MB)</span>
     </a>
-    <p style="font-size:12px;color:#7b6b95;margin-top:6px">从 GitHub 下载，解压即用</p>
+    <p style="font-size:12px;color:#7b6b95;margin-top:6px">旧版便携包，网络不佳时备用</p>
   </div>
 
   <!-- 安装步骤 -->
   <div class="step-box">
-    <h3>📖 使用 install.bat 安装（推荐）</h3>
+    <h3>📖 使用安装包（推荐）</h3>
     <p style="font-size:13px;color:#a090c0;margin:4px 0 12px">只需三步，全程自动</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <div style="flex:1;min-width:120px;background:rgba(255,255,255,.02);border-radius:10px;padding:12px">
         <div style="font-size:20px;font-weight:700;color:#6c4ef5">1</div>
-        <div style="font-size:12px;color:#a090c0;margin-top:4px">点击上方绿色按钮<br>下载 install.bat</div>
+        <div style="font-size:12px;color:#a090c0;margin-top:4px">点击上方绿色按钮<br>下载安装包</div>
       </div>
       <div style="flex:1;min-width:120px;background:rgba(16,185,129,.06);border:1px solid #10b981;border-radius:10px;padding:12px">
         <div style="font-size:20px;font-weight:700;color:#10b981">2</div>
-        <div style="font-size:12px;color:#a090c0;margin-top:4px">双击 install.bat<br>自动下载并安装</div>
+        <div style="font-size:12px;color:#a090c0;margin-top:4px">双击运行 .exe<br>自动解压并启动</div>
       </div>
       <div style="flex:1;min-width:120px;background:rgba(255,255,255,.02);border-radius:10px;padding:12px">
         <div style="font-size:20px;font-weight:700;color:#6c4ef5">3</div>
-        <div style="font-size:12px;color:#a090c0;margin-top:4px">桌面出现快捷方式<br>双击运行 ✅</div>
+        <div style="font-size:12px;color:#a090c0;margin-top:4px">桌面出现 TriGenClaw<br>双击运行 ✅</div>
       </div>
     </div>
   </div>
 
   <ul class="features">
-    <li>300+ AI 大模型聚合，一次安装全部可用</li>
-    <li>内置代码编辑器，支持语法高亮和项目管理</li>
-    <li>Agent 可视化编排工作流</li>
-    <li>知识库管理 + 技能商店生态</li>
-    <li>Alt+Space 全局唤起，系统托盘驻留</li>
+    <li>本地 Ollama 大模型（qwen2.5:7b）隐私运行，无需联网费用</li>
+    <li>在线 DeepSeek API 自动回退，功能最强</li>
+    <li>3D 粒子人脸 / 球体 / 星云等 7 种形态交互界面</li>
+    <li>PC 自动化：全局热键、剪贴板、窗口控制、浏览器操作</li>
+    <li>语音唤醒 + 连续对话，Alt+Space 全局唤起</li>
+    <li>Agent 工坊、知识库、移动端 PWA 远程控制</li>
   </ul>
 
   <div class="info">
     <span class="badge">Windows 10/11 64位</span>
-    <span class="badge">解压即用</span>
-    <span class="badge">无安全警告</span>
+    <span class="badge">便携版</span>
+    <span class="badge">本地 AI</span>
     <span class="badge">自动更新</span>
   </div>
 
