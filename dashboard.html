@@ -320,6 +320,20 @@ a{color:var(--accent);text-decoration:none}
 .sb-desc{font-size:0.82rem;line-height:1.6;color:var(--text)}
 .sb-dialog{font-size:0.8rem;line-height:1.5;margin-top:8px;padding:8px 12px;background:var(--bg-sidebar);border-radius:8px;border-left:3px solid var(--cyan)}
 .sb-dialog .speaker{font-weight:700;color:var(--cyan);font-size:0.75rem}
+.wiz-step{display:flex;align-items:center;gap:8px;font-size:0.78rem;font-weight:600;color:var(--text-secondary);padding:6px 10px;border-radius:20px;background:transparent;transition:all var(--transition);flex:1;justify-content:center}
+.wiz-step.active{background:rgba(139,92,246,0.15);color:#c4b5fd}
+.wiz-step.done{color:#10b981}
+.wiz-num{width:24px;height:24px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.72rem}
+.wiz-step.active .wiz-num{background:linear-gradient(135deg,#8b5cf6,#d946ef);color:#fff}
+.wiz-step.done .wiz-num{background:#10b981;color:#fff}
+.mw-img-card img{width:100%;height:220px;object-fit:cover;border-radius:10px;background:var(--bg-input)}
+.mw-final-frame{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:16px}
+.mw-final-frame img{width:100%;border-radius:12px;background:var(--bg-input)}
+@media(max-width:768px){
+  .wiz-step span:last-child{display:none}
+  .wiz-step{justify-content:center;gap:0;padding:6px}
+  .mw-final-frame{grid-template-columns:1fr}
+}
 .comic-frame{border:3px solid #1a1a2e;border-radius:4px;background:#fff;color:#222;padding:20px;font-size:0.8rem;line-height:1.5;position:relative;box-shadow:4px 4px 0 rgba(0,0,0,0.3)}
 .comic-frame::before{content:attr(data-num);position:absolute;top:-12px;left:-12px;width:28px;height:28px;border-radius:50%;background:#e63946;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.75rem}
 /* Consistency Manager */
@@ -1583,65 +1597,126 @@ a{color:var(--accent);text-decoration:none}
 
 <div class="page" id="page-media">
   <section class="section">
-    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M10 9l5 3-5 3V9z"/></svg> AI 漫剧</h2>
-    <p class="section-desc">从故事到分镜、从角色到对白——专业漫画/动画制作流水线。支持多风格、保持角色一致性</p>
-    <div class="workshop-tabs" id="mediaTabs">
-      <button class="workshop-tab active" onclick="switchMediaTab('create')"><span class="tab-icon">🎨</span>创作</button>
-      <button class="workshop-tab" onclick="switchMediaTab('storyboard')"><span class="tab-icon">🎞</span>分镜板</button>
-      <button class="workshop-tab" onclick="switchMediaTab('chars')"><span class="tab-icon">👥</span>角色库</button>
+    <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M10 9l5 3-5 3V9z"/></svg> AI 漫剧工厂</h2>
+    <p class="section-desc">从零开始，一步一步生成完整漫剧：创意 → 大纲 → 角色 → 分镜 → 画面 → 成品</p>
+
+    <!-- 步骤指示器 -->
+    <div class="feature-card" style="padding:14px 18px;margin-bottom:16px;background:var(--accent-soft)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap" id="mediaWizardSteps">
+        <div class="wiz-step active" data-step="0"><span class="wiz-num">1</span><span>输入创意</span></div>
+        <div class="wiz-step" data-step="1"><span class="wiz-num">2</span><span>故事大纲</span></div>
+        <div class="wiz-step" data-step="2"><span class="wiz-num">3</span><span>角色设计</span></div>
+        <div class="wiz-step" data-step="3"><span class="wiz-num">4</span><span>分镜脚本</span></div>
+        <div class="wiz-step" data-step="4"><span class="wiz-num">5</span><span>生成画面</span></div>
+        <div class="wiz-step" data-step="5"><span class="wiz-num">6</span><span>成品导出</span></div>
+      </div>
     </div>
-    <!-- Tab: Create -->
-    <div id="mediaTabCreate">
+
+    <!-- 步骤 1：输入创意 -->
+    <div id="mediaStep0" class="media-wizard-step">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div>
-        <div class="feature-card" style="margin-bottom:10px">
-          <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:8px">创作模式</label>
-          <div style="display:flex;gap:6px;flex-wrap:wrap" id="mediaModes">
-            <button class="filter-tag active" data-mode="storyboard" onclick="mediaMode(this)">🎞 分镜脚本</button>
-            <button class="filter-tag" data-mode="chars" onclick="mediaMode(this)">👥 角色设计</button>
-            <button class="filter-tag" data-mode="scene" onclick="mediaMode(this)">🏞 场景构建</button>
-            <button class="filter-tag" data-mode="dialog" onclick="mediaMode(this)">💬 对白生成</button>
-            <button class="filter-tag" data-mode="batch" onclick="mediaMode(this)">⚡ 批量生成</button>
+        <div class="feature-card">
+          <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:10px">💡 输入你的漫剧创意</label>
+          <textarea id="mwIdea" rows="8" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical;margin-bottom:12px" placeholder="例：一个普通上班族意外获得穿越能力，在古代成为侠客，与现代生活形成反差。想要热血+轻松搞笑风格..."></textarea>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div>
+              <label style="font-size:0.78rem;color:var(--text-secondary);display:block;margin-bottom:4px">视觉风格</label>
+              <select id="mwStyle" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem">
+                <option>日系动漫</option><option>国风水墨</option><option>写实电影</option><option>Q版可爱</option><option>暗黑哥特</option><option>美式漫画</option><option>韩系条漫</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:0.78rem;color:var(--text-secondary);display:block;margin-bottom:4px">集数长度</label>
+              <select id="mwLength" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem">
+                <option value="short">短剧（6 格）</option><option value="medium" selected>中剧（10 格）</option><option value="long">长剧（16 格）</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-send" onclick="mwGenerateOutline()" style="width:100%">🚀 开始创作（消耗 12 积分）</button>
+        </div>
+        <div class="feature-card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:var(--text-secondary);min-height:320px">
+          <div style="font-size:4rem;margin-bottom:16px">🎬</div>
+          <p style="font-size:0.9rem;margin-bottom:8px">漫剧工厂会带你完成 6 个步骤</p>
+          <div style="font-size:0.78rem;line-height:1.8;text-align:left;display:inline-block">
+            1. 输入一句话创意<br>
+            2. AI 生成故事大纲<br>
+            3. AI 设计主要角色<br>
+            4. AI 编写分镜脚本<br>
+            5. AI 生成每格画面<br>
+            6. 导出完整漫剧
           </div>
         </div>
-        <textarea id="mediaInput" rows="5" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem;font-family:inherit;resize:vertical;margin-bottom:10px" placeholder="描述你的故事场景、世界观或已有小说内容..."></textarea>
-        <div style="display:flex;gap:8px;align-items:center">
-          <select id="mediaStyle" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.85rem"><option>日系动漫</option><option>国风水墨</option><option>写实电影</option><option>Q版可爱</option><option>暗黑哥特</option><option>美式漫画</option><option>韩系条漫</option></select>
-          <button class="btn-send" onclick="aiCreateMedia()" style="flex-shrink:0">🎬 生成</button>
-        </div>
-      </div>
-      <div>
-        <div class="feature-card" style="min-height:400px;max-height:580px;overflow-y:auto;white-space:pre-wrap;font-size:0.85rem;line-height:1.8" id="mediaOutput">
-          <div style="text-align:center;color:var(--text-secondary);padding:60px 20px"><div style="font-size:3rem">🎬</div><p>输入故事后点"生成"</p></div>
-        </div>
-        <div class="quick-actions">
-          <button class="quick-action" onclick="renderStoryboardCards()">🎞 分镜卡片</button>
-          <button class="quick-action" onclick="generateComicImage()">🖼 出图提示词</button>
-          <button class="quick-action" onclick="mediaToNovel()">📖 扩展小说</button>
-          <button class="quick-action" onclick="saveToCharLib()">👥 存角色库</button>
-          <button class="quick-action" onclick="copyMediaOutput()">📋 复制</button>
-          <button class="quick-action" onclick="downloadMedia()">⬇ 下载</button>
-        </div>
-      </div>
       </div>
     </div>
-    <!-- Tab: Storyboard Board -->
-    <div id="mediaTabStoryboard" style="display:none">
-      <div class="storyboard-grid" id="storyboardGrid">
-        <div style="text-align:center;color:var(--text-secondary);padding:60px 20px;grid-column:1/-1">
-          <div style="font-size:3rem">🎞</div><p>在"创作"页生成分镜脚本后，这里会显示可视化分镜卡片</p>
+
+    <!-- 步骤 2：故事大纲 -->
+    <div id="mediaStep1" class="media-wizard-step" style="display:none">
+      <div class="feature-card" style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <label style="font-weight:600;font-size:0.9rem">📖 故事大纲（可编辑）</label>
+          <div style="display:flex;gap:6px">
+            <button class="btn-sm" onclick="mwGenerateOutline()">🔄 重新生成</button>
+            <button class="btn-send" onclick="mwStep(2)">下一步：设计角色 →</button>
+          </div>
         </div>
+        <textarea id="mwOutline" rows="12" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.88rem;font-family:inherit;resize:vertical;line-height:1.8"></textarea>
       </div>
     </div>
-    <!-- Tab: Character Library -->
-    <div id="mediaTabChars" style="display:none">
-      <div class="storyboard-grid" id="charLibGrid">
-        <div style="text-align:center;color:var(--text-secondary);padding:60px 20px;grid-column:1/-1">
-          <div style="font-size:3rem">👥</div><p>生成角色设计后点击"存角色库"，角色会在这里统一管理</p>
-          <p style="font-size:0.78rem;margin-top:8px">保持多集漫剧角色一致性</p>
+
+    <!-- 步骤 3：角色设计 -->
+    <div id="mediaStep2" class="media-wizard-step" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <label style="font-weight:600;font-size:0.9rem">👥 角色设计</label>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm" onclick="mwGenerateChars()">🔄 重新生成</button>
+          <button class="btn-sm" onclick="mwStep(1)">← 上一步</button>
+          <button class="btn-send" onclick="mwStep(3)">下一步：生成分镜 →</button>
         </div>
       </div>
+      <div id="mwCharList" class="storyboard-grid"></div>
     </div>
+
+    <!-- 步骤 4：分镜脚本 -->
+    <div id="mediaStep3" class="media-wizard-step" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <label style="font-weight:600;font-size:0.9rem">🎞 分镜脚本</label>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm" onclick="mwGenerateStoryboard()">🔄 重新生成</button>
+          <button class="btn-sm" onclick="mwStep(2)">← 上一步</button>
+          <button class="btn-send" onclick="mwStep(4)">下一步：生成画面 →</button>
+        </div>
+      </div>
+      <div id="mwStoryboardList" class="storyboard-grid"></div>
+    </div>
+
+    <!-- 步骤 5：生成画面 -->
+    <div id="mediaStep4" class="media-wizard-step" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <label style="font-weight:600;font-size:0.9rem">🖼 画面生成</label>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm" onclick="mwGenerateImages()">🔄 重新生成画面</button>
+          <button class="btn-sm" onclick="mwStep(3)">← 上一步</button>
+          <button class="btn-send" onclick="mwStep(5)">下一步：查看成品 →</button>
+        </div>
+      </div>
+      <div id="mwImageProgress" style="margin-bottom:14px"></div>
+      <div id="mwImageList" class="storyboard-grid"></div>
+    </div>
+
+    <!-- 步骤 6：成品导出 -->
+    <div id="mediaStep5" class="media-wizard-step" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <label style="font-weight:600;font-size:0.9rem">🎉 漫剧成品</label>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm" onclick="mwStep(4)">← 返回修改</button>
+          <button class="btn-sm" onclick="mwExportScript()">📋 复制脚本</button>
+          <button class="btn-sm primary" onclick="mwDownloadAll()">⬇ 下载全部图片</button>
+          <button class="btn-send" onclick="mwRestart()">🆕 创作新漫剧</button>
+        </div>
+      </div>
+      <div id="mwFinalResult"></div>
+    </div>
+
   </section>
 </div>
 
@@ -3443,17 +3518,17 @@ function updateRightPanel(page){
     'media':{title:'AI 漫剧',html:`
       <div class="right-panel-card"><div style="font-weight:600;font-size:0.82rem;margin-bottom:6px">🎬 风格参考</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px">
-          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mediaStyle').value='日系动漫'">日系</div>
-          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mediaStyle').value='美式漫画'">美式</div>
-          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mediaStyle').value='国风水墨'">国风</div>
-          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mediaStyle').value='韩系条漫'">韩系</div>
+          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mwStyle').value='日系动漫'">日系</div>
+          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mwStyle').value='美式漫画'">美式</div>
+          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mwStyle').value='国风水墨'">国风</div>
+          <div class="filter-tag" style="font-size:0.68rem;cursor:pointer" onclick="document.getElementById('mwStyle').value='韩系条漫'">韩系</div>
         </div>
       </div>
-      <div class="right-panel-card" style="cursor:pointer" onclick="renderStoryboardCards();switchMediaTab('storyboard')">
-        <div style="font-size:1.2rem;margin-bottom:2px">🎞</div><div style="font-weight:600;font-size:0.82rem">分镜板</div><div style="font-size:0.72rem;color:var(--text-secondary)">可视化卡片</div>
+      <div class="right-panel-card" style="cursor:pointer" onclick="switchPage('media');setTimeout(()=>mwStep(3),100)">
+        <div style="font-size:1.2rem;margin-bottom:2px">🎞</div><div style="font-weight:600;font-size:0.82rem">分镜板</div><div style="font-size:0.72rem;color:var(--text-secondary)">查看当前分镜</div>
       </div>
-      <div class="right-panel-card" style="cursor:pointer" onclick="renderCharLibrary();switchMediaTab('chars')">
-        <div style="font-size:1.2rem;margin-bottom:2px">👥</div><div style="font-weight:600;font-size:0.82rem">角色库</div><div style="font-size:0.72rem;color:var(--text-secondary)">保持角色一致性</div>
+      <div class="right-panel-card" style="cursor:pointer" onclick="switchPage('media');setTimeout(()=>mwStep(5),100)">
+        <div style="font-size:1.2rem;margin-bottom:2px">🎉</div><div style="font-weight:600;font-size:0.82rem">成品</div><div style="font-size:0.72rem;color:var(--text-secondary)">导出漫剧</div>
       </div>
     `},
     'studio':{title:'AI 绘画/视频',html:`
@@ -4428,24 +4503,6 @@ function updateNovelProgress2(){
 }
 
 // Cross-module pipelines
-function novelToMedia(){
-  const txt=document.getElementById('novelOutput').textContent.trim();
-  if(!txt||txt.includes('创作中')){showToast('请先完成小说创作');return}
-  switchPage('media');setTimeout(()=>{
-    document.getElementById('mediaInput').value=`将以下小说内容改编为${novelType}风格漫剧：\n\n${txt.substring(0,800)}`;
-    showToast('小说内容已填充到漫剧输入框，选风格后点生成')
-  },300);
-}
-
-function mediaToNovel(){
-  const txt=document.getElementById('mediaOutput').textContent.trim();
-  if(!txt||txt.includes('输入故事')){showToast('请先生成漫剧内容');return}
-  switchPage('novel');switchNovelTab('write');setTimeout(()=>{
-    const ta=document.getElementById('wizWrite');if(ta)ta.value=`基于漫剧脚本扩展：\n\n${txt.substring(0,500)}`;
-    showToast('漫剧脚本已填充，设置后点创作')
-  },300);
-}
-
 function novelToBrand(){
   const txt=document.getElementById('novelOutput')?.textContent?.trim()||'';
   if(!txt||txt.includes('创作中')){showToast('请先完成小说创作');return}
@@ -4467,159 +4524,239 @@ function marketToBrand(){
   if(txt&&txt!=='选择功能开始'){switchPage('brand');setTimeout(()=>{document.getElementById('brandInput').value=txt.substring(0,600);showToast('营销内容已填充到品牌页')},300)}
   else{switchPage('brand')}}
 
-// === 漫剧工厂 (Media Workshop) ===
-let mediaModeType='storyboard',mediaTab='create';
-let charLibrary=JSON.parse(localStorage.getItem('charLib')||'[]');
+// === 漫剧工厂向导 (Media Wizard) ===
+let mwState={step:0,idea:'',style:'',length:'medium',outline:'',characters:[],storyboard:[],images:[],title:''};
 
-function switchMediaTab(tab){
-  mediaTab=tab;
-  document.querySelectorAll('#mediaTabs .workshop-tab').forEach(b=>b.classList.remove('active'));
-  document.querySelector(`#mediaTabs .workshop-tab[onclick*="${tab}"]`)?.classList.add('active');
-  ['create','storyboard','chars'].forEach(t=>{const el=document.getElementById('mediaTab'+t.charAt(0).toUpperCase()+t.slice(1));if(el)el.style.display=t===tab?'block':'none'});
-  if(tab==='storyboard')renderStoryboardCards();
-  if(tab==='chars')renderCharLibrary();
+function mwStep(n){
+  mwState.step=n;
+  document.querySelectorAll('.media-wizard-step').forEach((el,i)=>el.style.display=i===n?'block':'none');
+  document.querySelectorAll('#mediaWizardSteps .wiz-step').forEach(el=>{
+    const s=parseInt(el.dataset.step);
+    el.classList.remove('active','done');
+    if(s===n)el.classList.add('active');
+    else if(s<n)el.classList.add('done');
+  });
+  if(n===2)mwRenderChars();
+  if(n===3)mwRenderStoryboard();
+  if(n===4)mwRenderImages();
+  if(n===5)mwRenderFinal();
 }
 
-function mediaMode(b){document.querySelectorAll('#mediaModes .filter-tag').forEach(x=>x.classList.remove('active'));b.classList.add('active');mediaModeType=b.dataset.mode}
+function mwGetFrameCount(){return {short:6,medium:10,long:16}[mwState.length]||10}
 
-async function aiCreateMedia(){
-  const i=document.getElementById('mediaInput').value.trim();if(!i){showToast('输入故事');return}
-  const cost=mediaModeType==='batch'?20:12;
-  if(!spendCredits(cost))return;const s=document.getElementById('mediaStyle').value;
-  const o=document.getElementById('mediaOutput');o.innerHTML='<span class="spinner"></span> 生成中...';
-  if(mediaModeType==='batch'){
-    // Batch mode: generate all 4 modes at once
-    const modes=[
-      {t:`${s}漫画。8格分镜脚本（编号/景别/画面/动作/对白）：\n${i}`,s:`你是专业${s}漫画家和编剧。每个分镜必须包含：编号、景别(特写/中景/全景)、画面描述、角色动作、对白。画面描述要具象化。对白标注语气【】`},
-      {t:`${s}风格角色设计。3个核心角色（外貌/服装/性格/能力/口头禅）：\n${i}`,s:'你是角色设计专家。每个角色描述要包含：外貌特征、标志性服装、性格标签、特殊能力、经典台词。'},
-      {t:`${s}风格场景设计。4个场景（环境/色彩/光影/氛围）：\n${i}`,s:'你是场景设计师。每个场景包含：环境描述、主色调、光影效果、氛围关键词。'},
-      {t:`${s}风格角色对白（角色名：对白内容【语气】）：\n${i}`,s:'你是专业编剧。对白要：符合角色性格、推动剧情、有潜台词、口语化自然。'}
-    ];
-    let result='';
-    for(let m=0;m<modes.length;m++){
-      const labels=['🎞 分镜脚本','👥 角色设计','🏞 场景构建','💬 对白生成'];
-      o.innerHTML=`<span class="spinner"></span> 批量生成中 (${m+1}/4) ${labels[m]}...`;
-      try{
-        const r=await callModelAPI('deepseekv3',modes[m].t,modes[m].s);
-        result+=`\n\n${'='.repeat(30)}\n${labels[m]}\n${'='.repeat(30)}\n\n${r.content}`;
-        usedTokensCount+=r.content.length;
-      }catch(e){result+=`\n\n${labels[m]}\n❌ ${e.message}`}
+async function mwGenerateOutline(){
+  const idea=document.getElementById('mwIdea').value.trim();
+  if(!idea){showToast('请输入漫剧创意');return}
+  if(!spendCredits(12))return;
+  mwState.idea=idea;mwState.style=document.getElementById('mwStyle').value;mwState.length=document.getElementById('mwLength').value;
+  const btn=document.querySelector('#mediaStep0 .btn-send');if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 生成中...'}
+  const sys=`你是专业漫剧编剧。根据用户的创意，写一个完整的故事大纲。大纲需包含：标题、故事背景、主要角色（名字+一句话特征）、起承转合、结尾。用中文输出，结构清晰。`;
+  try{
+    const r=await callModelAPI('deepseekv3',`创意：${idea}\n风格：${mwState.style}\n请生成故事大纲`,sys);
+    mwState.outline=r.content;usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
+    document.getElementById('mwOutline').value=mwState.outline;
+    mwStep(1);
+  }catch(e){showToast('生成失败：'+e.message)}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='🚀 开始创作（消耗 12 积分）'}}
+}
+
+async function mwGenerateChars(){
+  if(!mwState.outline){showToast('请先生成故事大纲');return}
+  if(!spendCredits(12))return;
+  const grid=document.getElementById('mwCharList');grid.innerHTML='<div style="text-align:center;padding:40px;grid-column:1/-1"><span class="spinner"></span> 设计角色中...</div>';
+  const sys=`你是角色设计专家。根据故事大纲，设计3-5个核心角色。每个角色必须包含：名字、外貌特征、标志性服装、性格标签、经典台词。用中文输出，格式如下：\n角色1：名字\n外貌：...\n服装：...\n性格：...\n台词：...\n---\n角色2：...`;
+  try{
+    const r=await callModelAPI('deepseekv3',`故事大纲：\n${mwState.outline.substring(0,1200)}\n\n风格：${mwState.style}\n请设计主要角色`,sys);
+    mwState.characters=mwParseChars(r.content);usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
+    if(!mwState.characters.length)mwState.characters=[{name:'主角',desc:r.content}];
+    mwRenderChars();
+  }catch(e){grid.innerHTML=`<div style="text-align:center;color:#ef4444;grid-column:1/-1">生成失败：${e.message}</div>`}
+}
+
+function mwParseChars(txt){
+  const chars=[];const blocks=txt.split(/\n---+\s*\n|\n(?=角色\d*[：:])/g).filter(b=>b.trim());
+  blocks.forEach(b=>{
+    const lines=b.trim().split('\n').filter(l=>l.trim());
+    if(!lines.length)return;
+    let name=lines[0].replace(/^角色\d*[：:]\s*/,'').trim()||'角色';
+    chars.push({name:name,desc:lines.join('\n')});
+  });
+  return chars;
+}
+
+function mwRenderChars(){
+  const grid=document.getElementById('mwCharList');
+  if(!mwState.characters.length){grid.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">👥</div><p>点击上方「重新生成」设计角色</p></div>';return}
+  grid.innerHTML=mwState.characters.map((c,i)=>`<div class="storyboard-card">
+    <div class="sb-header"><div class="sb-num">${i+1}</div><div class="sb-desc" style="font-weight:700">${escapeHtml(c.name)}</div></div>
+    <div class="sb-desc" style="white-space:pre-wrap">${escapeHtml(c.desc)}</div>
+  </div>`).join('');
+}
+
+async function mwGenerateStoryboard(){
+  if(!mwState.outline){showToast('请先生成故事大纲');return}
+  if(!spendCredits(15))return;
+  const grid=document.getElementById('mwStoryboardList');grid.innerHTML='<div style="text-align:center;padding:40px;grid-column:1/-1"><span class="spinner"></span> 编写分镜中...</div>';
+  const frameCount=mwGetFrameCount();
+  const chars=mwState.characters.map(c=>c.name+':'+c.desc.substring(0,80)).join('; ');
+  const sys=`你是专业漫剧分镜师。根据故事大纲和角色，编写${frameCount}格分镜脚本。每格必须包含：\n编号. 景别（特写/中景/全景/远景）\n画面：具体的画面描述，要有视觉冲击力\n动作：角色动作\n对白：角色名：对白内容（如无对白写「无」）\n\n用中文输出，确保每格格式一致。`;
+  try{
+    const r=await callModelAPI('deepseekv3',`故事大纲：\n${mwState.outline.substring(0,1200)}\n\n角色：${chars}\n\n风格：${mwState.style}\n请编写${frameCount}格分镜脚本`,sys);
+    mwState.storyboard=mwParseStoryboard(r.content,frameCount);usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
+    mwRenderStoryboard();
+  }catch(e){grid.innerHTML=`<div style="text-align:center;color:#ef4444;grid-column:1/-1">生成失败：${e.message}</div>`}
+}
+
+function mwParseStoryboard(txt,expectedCount){
+  const frames=[];
+  // Try split by numbered lines like "1." or "第1格"
+  const blocks=txt.split(/\n(?=(?:第\s*\d+\s*[格帧]|\d+[\.\)、]\s*))/g).filter(b=>b.trim());
+  blocks.forEach(b=>{
+    const content=b.trim();
+    const numMatch=content.match(/(?:第\s*(\d+)\s*[格帧]|^(\d+)[\.\)、]\s*)/);
+    if(!numMatch)return;
+    const lines=content.split('\n').map(l=>l.trim()).filter(l=>l);
+    let shot='中景',desc='',action='',dialog='';
+    lines.forEach(l=>{
+      if(/景别[:：]/.test(l))shot=l.replace(/.*景别[:：]\s*/,'');
+      else if(/画面[:：]/.test(l))desc=l.replace(/.*画面[:：]\s*/,'');
+      else if(/动作[:：]/.test(l))action=l.replace(/.*动作[:：]\s*/,'');
+      else if(/对白[:：]/.test(l))dialog=l.replace(/.*对白[:：]\s*/,'');
+      else if(!desc&&l.length>4)desc=l;
+      else if(desc&&!action&&l.length>2)action=l;
+    });
+    if(/特写/.test(shot))shot='特写';else if(/全景/.test(shot))shot='全景';else if(/远景/.test(shot))shot='远景';else shot='中景';
+    if(desc||action||dialog)frames.push({num:frames.length+1,shot,desc,action,dialog});
+  });
+  // Fallback: if parse failed, create frames from raw text
+  if(frames.length<3){
+    const lines=txt.split('\n').filter(l=>l.trim());
+    const chunk=Math.ceil(lines.length/expectedCount)||1;
+    for(let i=0;i<expectedCount;i++){
+      const seg=lines.slice(i*chunk,(i+1)*chunk).join('\n');
+      if(seg.trim())frames.push({num:i+1,shot:'中景',desc:seg,action:'',dialog:''});
     }
-    o.innerHTML=escapeHtml(result.trim())+renderMediaNextSteps('batch');
-    localStorage.setItem('utk',usedTokensCount);updateCreditDisplay();
-    return;
   }
-  const sys=`你是专业${s}漫画家和编剧。要求：\n1. 每个分镜必须包含：编号、景别(特写/中景/全景/远景)、画面描述、角色动作、对白\n2. 画面描述要具象化——读者能根据描述画出分镜图\n3. 对白要自然、有性格区分、推进剧情\n4. 每帧之间有节奏变化，不要全是同一景别\n5. 重要对白用【】标注语气（如【怒吼】【低声】）`;
-  const pm={
-    storyboard:{t:`${s}漫画。8格分镜脚本（编号/景别/画面/动作/对白）：\n${i}`,s:sys},
-    chars:{t:`${s}风格角色设计。3个核心角色（外貌/服装/性格/能力/口头禅）：\n${i}`,s:'你是角色设计专家。每个角色描述要包含：外貌特征、标志性服装、性格标签、特殊能力、经典台词。描述要能让读者在脑中形成清晰形象。格式：角色名 | 外貌 | 服装 | 性格 | 能力 | 口头禅'},
-    scene:{t:`${s}风格场景设计。4个场景（环境/色彩/光影/氛围/时代感）：\n${i}`,s:'你是场景设计师。每个场景要包含：环境描述、主色调、光影效果、氛围关键词、时代特征。描述要具有视觉冲击力。'},
-    dialog:{t:`${s}风格角色对白（角色名：对白内容【语气】）：\n${i}`,s:'你是专业编剧。对白要：符合角色性格、推动剧情、有潜台词、口语化自然。避免说教和直白的情感表达。'}
-  };
-  const m=pm[mediaModeType]||pm.storyboard;
-  try{const r=await callModelAPI('deepseekv3',m.t,m.s);o.innerHTML=escapeHtml(r.content)+renderMediaNextSteps(mediaModeType);usedTokensCount+=r.content.length;localStorage.setItem('utk',usedTokensCount);updateCreditDisplay()}catch(e){o.innerHTML=`❌ ${e.message}`}
+  return frames;
 }
 
-function renderMediaNextSteps(mode){
-  const boxStyle='margin-top:18px;padding:16px;border-radius:12px;background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(217,70,239,0.08));border:1px solid rgba(139,92,246,0.35)';
-  const titleStyle='font-weight:700;font-size:0.9rem;margin-bottom:10px;color:#c4b5fd';
-  const btnStyle='display:inline-flex;align-items:center;gap:4px;padding:8px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#8b5cf6,#d946ef);color:#fff;font-size:0.78rem;cursor:pointer;margin:0 6px 6px 0;box-shadow:0 2px 8px rgba(139,92,246,0.25)';
-  const secStyle='padding:7px 11px;border-radius:8px;border:1px solid rgba(139,92,246,0.4);background:rgba(139,92,246,0.1);color:#e9d5ff;font-size:0.75rem;cursor:pointer;margin:0 6px 6px 0';
-  const actions={
-    storyboard:`<button style="${btnStyle}" onclick="switchMediaTab('storyboard');renderStoryboardCards();">🎞 查看分镜卡片</button><button style="${btnStyle}" onclick="generateComicImage()">🖼 生成画面提示词</button><button style="${secStyle}" onclick="saveToCharLib()">👥 存角色库</button><button style="${secStyle}" onclick="mediaToNovel()">📖 扩展为小说</button>`,
-    chars:`<button style="${btnStyle}" onclick="saveToCharLib();switchMediaTab('chars');">👥 保存到角色库</button><button style="${btnStyle}" onclick="switchMediaTab('create');mediaMode(document.querySelector('[data-mode=storyboard]'));document.getElementById('mediaInput').value='基于以下角色设计生成分镜脚本：\n\n'+document.getElementById('mediaOutput').textContent.trim().substring(0,800);showToast('已切换到分镜模式，点生成继续');">🎞 基于角色生成分镜</button><button style="${secStyle}" onclick="mediaToNovel()">📖 扩展为小说</button>`,
-    scene:`<button style="${btnStyle}" onclick="generateComicImage()">🖼 生成画面提示词</button><button style="${btnStyle}" onclick="switchMediaTab('create');mediaMode(document.querySelector('[data-mode=storyboard]'));document.getElementById('mediaInput').value='在以下场景中生成分镜脚本：\n\n'+document.getElementById('mediaOutput').textContent.trim().substring(0,800);showToast('已切换到分镜模式，点生成继续');">🎞 场景转分镜</button><button style="${secStyle}" onclick="mediaToNovel()">📖 扩展为小说</button>`,
-    dialog:`<button style="${btnStyle}" onclick="switchMediaTab('create');mediaMode(document.querySelector('[data-mode=storyboard]'));document.getElementById('mediaInput').value='将以下对白扩展为完整漫剧分镜脚本：\n\n'+document.getElementById('mediaOutput').textContent.trim().substring(0,800);showToast('已切换到分镜模式，点生成继续');">🎞 对白转分镜</button><button style="${btnStyle}" onclick="generateComicImage()">🖼 生成画面提示词</button><button style="${secStyle}" onclick="mediaToNovel()">📖 扩展为小说</button>`,
-    batch:`<button style="${btnStyle}" onclick="switchMediaTab('storyboard');renderStoryboardCards();">🎞 查看分镜卡片</button><button style="${btnStyle}" onclick="generateComicImage()">🖼 生成画面提示词</button><button style="${secStyle}" onclick="saveToCharLib()">👥 存角色库</button><button style="${secStyle}" onclick="mediaToNovel()">📖 扩展为小说</button>`
-  };
-  return `<div style="${boxStyle}"><div style="${titleStyle}">🚀 创作完成，继续下一步</div><div>${actions[mode]||actions.storyboard}</div></div>`;
+function mwRenderStoryboard(){
+  const grid=document.getElementById('mwStoryboardList');
+  if(!mwState.storyboard.length){grid.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎞</div><p>点击上方「重新生成」编写分镜</p></div>';return}
+  grid.innerHTML=mwState.storyboard.map(f=>`<div class="storyboard-card">
+    <div class="sb-header"><div class="sb-num">${f.num}</div><div class="sb-camera">${escapeHtml(f.shot)}</div></div>
+    <div class="sb-desc"><b>画面：</b>${escapeHtml(f.desc)}</div>
+    ${f.action?`<div class="sb-desc" style="margin-top:6px"><b>动作：</b>${escapeHtml(f.action)}</div>`:''}
+    ${f.dialog&&f.dialog!=='无'?`<div class="sb-dialog"><span class="speaker">对白</span>${escapeHtml(f.dialog)}</div>`:''}
+  </div>`).join('');
 }
 
-function renderStoryboardCards(){
-  const txt=document.getElementById('mediaOutput').textContent.trim();
-  const grid=document.getElementById('storyboardGrid');
-  if(!txt||txt.includes('输入故事')){grid.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🎞</div><p>先在"创作"页生成分镜脚本</p></div>';return}
-  // Parse storyboard content into cards
-  const scenes=txt.split(/\n(?=\d+[\.\)、]\s*)/g).filter(s=>s.trim());
-  if(scenes.length<2){grid.innerHTML=`<div style="text-align:center;color:var(--text-secondary);padding:40px;grid-column:1/-1"><p>无法解析分镜格式，请先在创作页生成分镜脚本</p></div>`;return}
-  let html='';
-  scenes.forEach((s,i)=>{
-    const lines=s.trim().split('\n');
-    const title=lines[0]||'';
-    const rest=lines.slice(1).join('\n');
-    // Extract camera info
-    let camera='中景';
-    if(title.includes('特写'))camera='特写';
-    else if(title.includes('全景'))camera='全景';
-    else if(title.includes('远景'))camera='远景';
-    else if(title.includes('中景'))camera='中景';
-    html+=`<div class="storyboard-card">
-      <div class="sb-header">
-        <div class="sb-num">${i+1}</div>
-        <div class="sb-camera">${camera}</div>
-      </div>
-      <div class="sb-desc">${escapeHtml(title)}</div>
-      <div class="sb-desc" style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px">${escapeHtml(rest.substring(0,150))}${rest.length>150?'...':''}</div>
-      <div class="sb-image">🎬 画面生成区域</div>
-    </div>`;
-  });
-  grid.innerHTML=html;
+async function mwGenerateImages(){
+  if(!mwState.storyboard.length){showToast('请先生成分镜脚本');return}
+  if(!spendCredits(mwState.storyboard.length*2)){return}
+  mwState.images=[];mwRenderImages();
+  const progress=document.getElementById('mwImageProgress');
+  for(let i=0;i<mwState.storyboard.length;i++){
+    progress.innerHTML=`<div class="feature-card" style="text-align:center;padding:16px"><span class="spinner"></span> 正在生成第 ${i+1}/${mwState.storyboard.length} 格画面...</div>`;
+    const frame=mwState.storyboard[i];
+    const prompt=await mwBuildImagePrompt(frame);
+    const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=432&nologo=true&seed=${1000+i}`;
+    mwState.images.push({frame:frame.num,prompt,url,status:'done'});
+    usedImagesCount++;localStorage.setItem('uim',usedImagesCount);updateCreditDisplay();
+    mwRenderImages();
+    // small delay to avoid rate limiting
+    await new Promise(r=>setTimeout(r,300));
+  }
+  progress.innerHTML=`<div class="feature-card" style="text-align:center;padding:14px;background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3)">✅ 全部 ${mwState.storyboard.length} 格画面生成完成</div>`;
 }
 
-function saveToCharLib(){
-  const txt=document.getElementById('mediaOutput').textContent.trim();
-  if(!txt||!txt.includes('角色')){showToast('请先生成角色设计');return}
-  const entry={content:txt,style:document.getElementById('mediaStyle').value,time:new Date().toISOString()};
-  charLibrary.push(entry);localStorage.setItem('charLib',JSON.stringify(charLibrary));
-  showToast('已保存到角色库');
-}
-
-function renderCharLibrary(){
-  const grid=document.getElementById('charLibGrid');
-  if(!charLibrary.length){grid.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">👥</div><p>还没有角色，去创作页生成后保存吧~</p></div>';return}
-  let html='';
-  charLibrary.forEach((c,i)=>{
-    html+=`<div class="storyboard-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span class="sb-camera">${escapeHtml(c.style)}</span>
-        <span style="font-size:0.7rem;color:var(--text-secondary)">${new Date(c.time).toLocaleDateString()}</span>
-      </div>
-      <div class="sb-desc" style="max-height:200px;overflow-y:auto">${escapeHtml(c.content.substring(0,300))}</div>
-      <div style="display:flex;gap:6px;margin-top:8px">
-        <button class="btn-sm" onclick="loadFromCharLib(${i})">📋 加载</button>
-        <button class="btn-sm danger" onclick="deleteFromCharLib(${i})">🗑</button>
-      </div>
-    </div>`;
-  });
-  grid.innerHTML=html;
-}
-
-function loadFromCharLib(idx){
-  if(charLibrary[idx]){
-    document.getElementById('mediaInput').value=charLibrary[idx].content.substring(0,500);
-    document.getElementById('mediaStyle').value=charLibrary[idx].style;
-    switchMediaTab('create');showToast('已加载到创作区');
+async function mwBuildImagePrompt(frame){
+  const styleMap={'日系动漫':'anime style, manga','国风水墨':'chinese ink wash painting','写实电影':'cinematic realistic','Q版可爱':'chibi cute','暗黑哥特':'dark gothic','美式漫画':'american comic book style','韩系条漫':'korean webtoon style'};
+  const style=styleMap[mwState.style]||mwState.style;
+  const charDesc=mwState.characters.map(c=>c.desc.substring(0,120)).join('. ');
+  const sys=`你是专业 AI 绘画提示词工程师。根据分镜信息，生成一段高质量的英文文生图提示词。要求：\n1. 主体明确、画面具体\n2. 包含风格、光影、构图、画质关键词\n3. 保持与角色设计一致\n4. 只输出提示词，不要解释`;
+  try{
+    const r=await callModelAPI('deepseekv3',`分镜画面：${frame.desc}\n动作：${frame.action}\n风格：${style}\n角色参考：${charDesc}\n请生成英文图片提示词`,sys);
+    let p=r.content.replace(/["“”]/g,'').replace(/\n/g,' ').trim();
+    if(p.length<20)p=`${style}, ${frame.desc}, ${frame.action}, professional comic art, detailed, cinematic lighting`;
+    return p;
+  }catch(e){
+    return `${style}, ${frame.desc}, ${frame.action}, professional comic art, detailed, cinematic lighting`;
   }
 }
 
-function deleteFromCharLib(idx){
-  if(!confirm('删除该角色？'))return;
-  charLibrary.splice(idx,1);localStorage.setItem('charLib',JSON.stringify(charLibrary));
-  renderCharLibrary();showToast('已删除');
+function mwRenderImages(){
+  const grid=document.getElementById('mwImageList');
+  if(!mwState.images.length){grid.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px;grid-column:1/-1"><div style="font-size:3rem">🖼</div><p>点击「重新生成画面」开始为每格分镜出图</p></div>';return}
+  grid.innerHTML=mwState.images.map((img,i)=>`<div class="storyboard-card mw-img-card">
+    <div class="sb-header"><div class="sb-num">${img.frame}</div><div class="sb-camera">第 ${i+1} 格</div></div>
+    <img src="${img.url}" alt="画面${img.frame}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 225%22><rect fill=%22%230d0721%22 width=%22400%22 height=%22225%22/><text x=%22200%22 y=%22120%22 font-size=%2220%22 text-anchor=%22middle%22 fill=%22%23ffffff33%22>🖼 生成失败</text></svg>'">
+    <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:8px;word-break:break-all">${escapeHtml(img.prompt.substring(0,120))}...</div>
+  </div>`).join('');
 }
 
-function generateComicImage(){
-  const s=document.getElementById('mediaOutput').textContent.trim();
-  if(!s||s.includes('输入故事')){showToast('先生成内容');return}
-  if(!spendCredits(12))return;const st=document.getElementById('mediaStyle').value;
-  usedImagesCount++;localStorage.setItem('uim',usedImagesCount);updateCreditDisplay();
-  document.getElementById('mediaOutput').innerHTML+=`\n\n--- 🖼️ 画面提示词 (${st}) ---\n${st}, ${s.substring(0,300)}, professional comic art, detailed linework, --ar 16:9`;
+function mwRenderFinal(){
+  const container=document.getElementById('mwFinalResult');
+  if(!mwState.storyboard.length){container.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:60px"><div style="font-size:3rem">🎉</div><p>还没有成品，先完成前面的步骤</p></div>';return}
+  const titleMatch=mwState.outline.match(/标题[:：]\s*(.+)/);mwState.title=titleMatch?titleMatch[1].trim():'AI 漫剧';
+  let html=`<div style="text-align:center;margin-bottom:20px"><h3 style="font-size:1.3rem;margin-bottom:6px">${escapeHtml(mwState.title)}</h3><p style="font-size:0.8rem;color:var(--text-secondary)">风格：${escapeHtml(mwState.style)} · 共 ${mwState.storyboard.length} 格</p></div>`;
+  mwState.storyboard.forEach((f,i)=>{
+    const img=mwState.images.find(im=>im.frame===f.num);
+    html+=`<div class="mw-final-frame">
+      <div>${img?`<img src="${img.url}" alt="画面${f.num}" onerror="this.style.display='none'">`:`<div style="height:220px;background:var(--bg-input);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">未生成画面</div>`}</div>
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="sb-num">${f.num}</div><div class="sb-camera">${escapeHtml(f.shot)}</div></div>
+        <div class="sb-desc" style="margin-bottom:10px"><b>画面：</b>${escapeHtml(f.desc)}</div>
+        ${f.action?`<div class="sb-desc" style="margin-bottom:10px"><b>动作：</b>${escapeHtml(f.action)}</div>`:''}
+        ${f.dialog&&f.dialog!=='无'?`<div class="sb-dialog"><span class="speaker">对白</span>${escapeHtml(f.dialog)}</div>`:''}
+      </div>
+    </div>`;
+  });
+  container.innerHTML=html;
 }
 
-function copyMediaOutput(){navigator.clipboard.writeText(document.getElementById('mediaOutput').textContent).then(()=>showToast('已复制'))}
-function downloadMedia(){
-  const t=document.getElementById('mediaOutput').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='漫剧_'+new Date().toISOString().slice(0,10)+'.txt';a.click()
+function mwExportScript(){
+  if(!mwState.storyboard.length){showToast('没有可导出的脚本');return}
+  let txt=`# ${mwState.title}\n\n风格：${mwState.style}\n总格数：${mwState.storyboard.length}\n\n## 故事大纲\n${mwState.outline}\n\n## 角色设计\n`;
+  mwState.characters.forEach(c=>{txt+=`\n### ${c.name}\n${c.desc}\n`});
+  txt+='\n## 分镜脚本\n';
+  mwState.storyboard.forEach(f=>{txt+=`\n### 第 ${f.num} 格 (${f.shot})\n画面：${f.desc}\n动作：${f.action}\n对白：${f.dialog}\n`});
+  txt+='\n## 画面提示词\n';
+  mwState.images.forEach(img=>{txt+=`\n第 ${img.frame} 格：${img.prompt}\n`});
+  navigator.clipboard.writeText(txt).then(()=>showToast('漫剧脚本已复制到剪贴板'));
+}
+
+function mwDownloadAll(){
+  if(!mwState.images.length){showToast('请先生成画面');return}
+  mwState.images.forEach((img,i)=>{
+    setTimeout(()=>{
+      const a=document.createElement('a');a.href=img.url;a.download=`漫剧_${mwState.title||'frame'}_${String(i+1).padStart(2,'0')}.png`;a.click();
+    },i*400);
+  });
+  showToast('开始批量下载图片');
+}
+
+function mwRestart(){mwState={step:0,idea:'',style:'',length:'medium',outline:'',characters:[],storyboard:[],images:[],title:''};document.getElementById('mwIdea').value='';document.getElementById('mwStyle').selectedIndex=0;document.getElementById('mwLength').value='medium';mwStep(0);}
+
+// 保持旧版跳转兼容：小说 → 漫剧向导
+function novelToMedia(){
+  const txt=document.getElementById('novelOutput')?.textContent?.trim()||'';
+  if(!txt||txt.includes('选择功能开始')){showToast('请先完成小说创作');return}
+  switchPage('media');
+  setTimeout(()=>{
+    document.getElementById('mwIdea').value=`将以下小说内容改编为${mwState.style||'日系动漫'}风格漫剧：\n\n${txt.substring(0,800)}`;
+    document.getElementById('mwStyle').value=mwState.style||'日系动漫';
+    showToast('小说内容已填充到漫剧向导，点击开始创作');
+  },300);
+}
+
+// 漫剧 → 小说扩展
+function mediaToNovel(){
+  if(!mwState.outline){showToast('请先在漫剧工厂完成创作');return}
+  switchPage('novel');switchNovelTab('write');setTimeout(()=>{
+    const ta=document.getElementById('wizWrite');if(ta)ta.value=`基于以下漫剧大纲扩展为小说：\n\n标题：${mwState.title}\n风格：${mwState.style}\n\n大纲：\n${mwState.outline.substring(0,500)}`;
+    showToast('漫剧大纲已填充，设置后点创作');
+  },300);
 }
 
 // === Credits ===
@@ -7086,7 +7223,7 @@ function PROMPT_USE(name){
     else if(page==='brand'){document.getElementById('brandInput').value=promptText;document.getElementById('brandInput').focus()}
     else if(page==='market'){document.getElementById('marketInput').value=promptText;document.getElementById('marketInput').focus()}
     else if(page==='studio'){document.getElementById('stuPrompt').value=promptText;STUDIO_BUILD_PROMPT()}
-    else if(page==='media'){document.getElementById('mediaInput').value=promptText;document.getElementById('mediaInput').focus()}
+    else if(page==='media'){document.getElementById('mwIdea').value=promptText;document.getElementById('mwIdea').focus()}
     else{document.getElementById('chatInput').value=promptText;document.getElementById('chatInput').focus()}
     showToast(`已加载「${name}」工具`)
   },300)
