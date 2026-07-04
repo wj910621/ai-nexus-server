@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0c29"/>
+      <stop offset="40%" stop-color="#302b63"/>
+      <stop offset="100%" stop-color="#24243e"/>
+    </linearGradient>
+    <linearGradient id="ring1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="ring2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#c4b5fd"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+    <radialGradient id="innerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 圆角方形背景 -->
+  <rect x="0" y="0" width="1024" height="1024" rx="230" ry="230" fill="url(#bg)" filter="url(#softShadow)"/>
+
+  <!-- 内部光晕 -->
+  <circle cx="512" cy="512" r="380" fill="url(#innerGlow)" opacity="0.4"/>
+
+  <!-- 星点装饰 -->
+  <g fill="#ffffff" opacity="0.5">
+    <circle cx="200" cy="200" r="6"/>
+    <circle cx="820" cy="180" r="4"/>
+    <circle cx="860" cy="500" r="8"/>
+    <circle cx="160" cy="580" r="5"/>
+    <circle cx="760" cy="780" r="7"/>
+    <circle cx="280" cy="820" r="5"/>
+    <circle cx="512" cy="140" r="4"/>
+    <circle cx="512" cy="880" r="5"/>
+  </g>
+
+  <!-- 外层轨道环 -->
+  <g filter="url(#glow)">
+    <ellipse cx="512" cy="512" rx="340" ry="130" fill="none" stroke="url(#ring1)" stroke-width="4" opacity="0.5" transform="rotate(-20 512 512)"/>
+    <ellipse cx="512" cy="512" rx="300" ry="110" fill="none" stroke="url(#ring2)" stroke-width="3" opacity="0.4" transform="rotate(25 512 512)"/>
+  </g>
+
+  <!-- 中心 Y 形核心 - 抽象科技感 -->
+  <g filter="url(#glow)">
+    <!-- 主竖线 -->
+    <line x1="512" y1="280" x2="512" y2="740" stroke="url(#core)" stroke-width="52" stroke-linecap="round"/>
+    
+    <!-- 左上分支 -->
+    <path d="M512 420 L340 260" fill="none" stroke="url(#core)" stroke-width="48" stroke-linecap="round"/>
+    
+    <!-- 右上分支 -->
+    <path d="M512 420 L684 260" fill="none" stroke="url(#core)" stroke-width="48" stroke-linecap="round"/>
+
+    <!-- 中心能量核心圆点 -->
+    <circle cx="512" cy="420" r="38" fill="#ffffff"/>
+    <circle cx="512" cy="420" r="22" fill="#c4b5fd" opacity="0.8"/>
+  </g>
+
+  <!-- 底部 NEX 弧线装饰 -->
+  <path d="M380 680 Q512 760 644 680" fill="none" stroke="url(#ring2)" stroke-width="24" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- 底部横杠 -->
+  <line x1="380" y1="740" x2="644" y2="740" stroke="url(#core)" stroke-width="28" stroke-linecap="round" opacity="0.9"/>
+
+</svg>

@@ -1,0 +1,10 @@
+{
+    "id": "example",
+    "name": "货币转换",
+    "version": "1.0.0",
+    "author": "Y·NEX官方",
+    "description": "提供货币转换功能，支持主要国际货币。",
+    "tags": ["工具", "金融"],
+    "dependencies": [],
+    "enabled": true
+}

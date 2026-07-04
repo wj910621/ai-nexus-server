@@ -1,0 +1,84 @@
+# Y·NEX 本地AI核心依赖
+# 版本锁定：使用 ~= 兼容版本（允许 patch/minor 更新，拒绝 major 变更）
+# 安装：pip install -r requirements.txt
+
+# ===== 语音处理 =====
+SpeechRecognition~=3.10.0
+edge-tts~=6.1.0
+pygame~=2.5.0
+noisereduce~=3.0.0
+webrtcvad~=2.0.10
+openwakeword~=0.6.0
+sounddevice~=0.4.6
+
+# ===== LLM / AI =====
+openai~=1.30.0
+ollama~=0.3.0
+faster-whisper~=1.0.0
+pvporcupine~=3.0.0
+pvrecorder~=2.0.0
+
+# ===== Web 框架 =====
+flask~=3.0.0
+flask-cors~=4.0.0
+waitress~=3.0.0
+werkzeug~=3.0.0
+
+# ===== HTTP / 网络 =====
+requests~=2.32.0
+paho-mqtt~=2.0.0
+
+# ===== 配置 / 日志 =====
+python-dotenv~=1.0.0
+pydantic-settings~=2.2.0
+loguru~=0.7.0
+
+# ===== 系统监控 =====
+psutil~=5.9.0
+APScheduler~=3.10.0
+
+# ===== 知识库 / RAG =====
+chromadb~=0.5.0
+sentence-transformers~=3.0.0
+beautifulsoup4~=4.12.0
+markdown~=3.6
+
+# ===== GUI / 桌面 =====
+PyQt6~=6.7.0
+pystray~=0.19.0
+pillow~=10.3.0
+win10toast~=0.9
+
+# ===== 浏览器自动化 =====
+playwright~=1.40.0
+
+# ===== 桌面控制 =====
+pyautogui~=0.9.54
+pyperclip~=1.8.0
+pygetwindow~=0.0.9
+pycaw~=20230407
+winshell~=0.6
+pynput~=1.7.0
+
+# ===== 多模态 / OCR / 截图 =====
+opencv-python~=4.9.0
+mediapipe~=0.10.0
+mss~=9.0.0
+pytesseract~=0.3.10
+
+# ===== 数值计算 =====
+numpy~=1.26.0
+
+# ===== 通知 =====
+python-telegram-bot~=21.0
+
+# ===== 可选增强依赖（按需安装）=====
+# paddleocr          # 中文OCR效果更好，但体积大
+# paddlepaddle       # PaddleOCR依赖
+# PyPDF2             # PDF解析（knowledge_enhancer.py 使用）
+# python-docx        # Word解析
+# python-pptx        # PPT解析
+# ebooklib           # EPUB解析
+# newspaper3k        # 网页文章解析
+# pyaudio            # 录音（需要 PortAudio）
+# redis              # Redis缓存后端（cache.py 使用）

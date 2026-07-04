@@ -1,39 +1,190 @@
-node_modules/
-package-lock.json
+# ===== 环境与密钥 =====
 .env
-data.db
-*.log
-logs/
-.DS_Store
-Thumbs.db
-server/.git/
-.history/
-*.backup
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+wechat_key.pem
+askpass.bat
 
-# Build artifacts - 超过 GitHub 100MB 限制
-download/release/
-download/dist/
-download/trigenclaw-build/release/
-download/trigenclaw-build/dist/
+# ===== 数据库与运行时数据 =====
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+data/api_keys.json
+data/mobile_devices.json
+data/plugin_configs.json
+data/automation_rules.json
+data/logs/
+data/vectors/
+data/file_transfer/
+data/knowledge/
+python-backend/nexus.db
+python-backend/.env
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# ===== Python 缓存 =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+develop-eggs/
+
+# ===== Node.js =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# ===== 虚拟环境 =====
+venv/
+.venv/
+env/
+ENV/
+python-backend/venv/
+
+# ===== 构建产物 =====
+dist/
+dist-new/
+dist-v*/
+ynex-desktop-dist-*/
+ynex-desktop-portable-*/
+ynex-build-output/
+trigenclaw-dist/
+desktop/dist/
+desktop/dist-*/
+desktop/dist-v*/
+desktop/.electron-cache/
+desktop/node_modules/
+local-core/ynex-build-output/
+local-core/trigenclaw-dist/
+*.exe
+*.dll
+*.nsis.7z
+*.app
+*.dmg
+*.AppImage
+*.snap
+
+# ===== 下载页安装包（超过GitHub 100MB限制）=====
 download/*.exe
 download/*.dmg
 download/*.AppImage
-*.exe
-*.dmg
-*.AppImage
-release/
-dist/
+download/release/
+download/dist/
+download/trigenclaw-build/
 
-# Python backend artifacts
-download/source/server/venv/
-download/source/server/*.db
-download/source/server/alembic/versions/
-__pycache__/
-*.pyc
-*.egg-info/
+# ===== 备份与临时文件 =====
+backups/
+*.bak
+*.tmp
+*.swp
+*~
+_security_test2_tmp/
+_temp_*/
 
-# Security - 敏感文件不应进 Git
-ssl/
-products/openclaw-enhanced-config.json
-auto-deploy.js
+# ===== 日志 =====
+*.log
+logs/
+ollama_*.log
+rebuild_*.log
+
+# ===== 一次性/部署脚本（历史遗留，不应入库）=====
+ssh-*.js
+ssh-*.sh
+upload-*.js
+upload-*.sh
+upload-*.bat
+server-diagnose.js
+server-finalize.js
+server-setup.js
+restart-*.js
+reset_*.py
+reset_*.sh
+safe-deploy.sh
+ssh-deploy.sh
+ssh-pass.sh
+ssh-test.js
+version-stamp.js
+update-cache-buster.js
+write-nginx-config.js
+nginx-systemctl.js
+nginx.conf.j2
+pm2-reset.js
+restart-pm2.js
+setup-pm2.js
+railway.json
+render.yaml
+nginx-systemctl.js
+精准部署指令.txt
+README_DEPLOY.md
+check_*.js
+check_*.py
+fix_*.js
+fix_*.py
+patch_*.js
+cat_*.js
+debug_*.js
+find_*.js
+inspect_*.js
+diff_*.js
+verify_*.js
+list_*.js
+clean_*.js
+reload_*.js
+rename_*.js
+kill_*.js
+renew_*.js
+remove_*.js
+sync_*.js
+_*.js
+_*.txt
+_*.conf
+_*.ps1
+_*.tar
+_gitignore_new
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.pydevproject
+.settings/
+TRAE-Work-Copy/
 .workbuddy/
+
+# ===== 操作系统 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ===== 测试覆盖率 =====
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# ===== TypeScript =====
+*.tsbuildinfo
+
+# ===== 其他 =====
+handle.exe
+handle64a.exe
+handle64.exe
+handle64.zip
+handle.zip
+.history/
+*.backup
+server/.git/

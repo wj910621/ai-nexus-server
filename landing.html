@@ -3,485 +3,310 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TriGen — All from Three · 三生万物 · 万物互联</title>
-<meta name="description" content="TriGen 聚合 135+ AI 模型，一个输入无限可能。三生万物，万物互联。">
-<meta property="og:title" content="TriGen — All from Three">
-<meta property="og:description" content="三生万物，万物互联。135+ AI 模型，一个输入无限可能。">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://j3trisheng.com">
-<meta property="og:site_name" content="TriGen">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="TriGen - 一站式AI大模型聚合平台">
-<meta name="twitter:description" content="聚合全球 300+ AI 模型，一个控制台掌控所有。">
+<title>Y·NEX — 亿界互联·无界未来</title>
+<meta name="description" content="Y·NEX 智能创作平台，聚合全球 300+ AI 模型，提供 AI 聊天、绘画、小说、编程、办公、音乐、3D 生成等一站式创作服务。">
+<meta name="theme-color" content="#0d0721">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <style>
-:root{
-  --lp-bg:#f8f7ff;--lp-text:#1a1035;--lp-text-secondary:#6b5b95;--lp-card-bg:rgba(255,255,255,0.92);--lp-card-border:rgba(200,180,240,0.4);
-  --lp-accent:#6c4ef5;--lp-accent2:#a855f7;--lp-header-bg:rgba(248,247,255,0.92);--lp-header-border:rgba(200,180,240,0.3);
-  --lp-white:#1a1035;--lp-gray-200:#6b5b95;--lp-gray-300:#8b7aaa;--lp-gray-400:#9d92b5;--lp-gray-500:#6b5b95;--lp-gray-600:#b0a5c8;--lp-gray-700:#c4b5fd;
-  --lp-card-overlay:rgba(108,78,245,0.04);--lp-card-hover:rgba(108,78,245,0.08);
+:root {
+  --bg: #f5f3ff;
+  --bg-card: #ffffff;
+  --text: #1f1b2e;
+  --text-secondary: #6b6680;
+  --accent: #6c4ef5;
+  --accent-light: #a78bfa;
+  --accent-soft: rgba(108,78,245,0.08);
+  --border: rgba(0,0,0,0.06);
+  --shadow: 0 4px 24px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 48px rgba(108,78,245,0.18);
+  --radius: 16px;
 }
-[data-theme="dark"]{
-  --lp-bg:#0a0a0f;--lp-text:#e0e0e0;--lp-text-secondary:#888;--lp-card-bg:rgba(255,255,255,0.03);--lp-card-border:rgba(255,255,255,0.06);
-  --lp-accent:#6c8cff;--lp-accent2:#a855f7;--lp-header-bg:rgba(10,10,15,0.85);--lp-header-border:rgba(255,255,255,0.06);
-  --lp-white:#fff;--lp-gray-200:#ddd;--lp-gray-300:#bbb;--lp-gray-400:#999;--lp-gray-500:#888;--lp-gray-600:#666;--lp-gray-700:#555;
-  --lp-card-overlay:rgba(255,255,255,0.02);--lp-card-hover:rgba(108,140,255,0.08);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0721;
+    --bg-card: rgba(255,255,255,0.04);
+    --text: #f3f0ff;
+    --text-secondary: #a39cb8;
+    --accent-soft: rgba(108,78,245,0.15);
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 4px 24px rgba(0,0,0,0.25);
+  }
 }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--lp-bg); color:var(--lp-text); line-height:1.6; transition:background 0.25s,color 0.25s; }
-a { color:var(--lp-accent); text-decoration:none; }
-a:hover { color:var(--lp-accent2); }
-.container { max-width:1200px; margin:0 auto; padding:0 24px; }
-
-/* Header/Nav */
-header { position:fixed; top:0; left:0; right:0; z-index:100; background:var(--lp-header-bg); backdrop-filter:blur(20px); border-bottom:1px solid var(--lp-header-border); }
-nav { display:flex; align-items:center; justify-content:space-between; height:64px; }
-.logo { display:flex; align-items:center; gap:10px; font-size:22px; font-weight:700; color:var(--lp-white); letter-spacing:-0.5px; }
-.logo-icon { width:32px; height:32px; background:linear-gradient(135deg,#6c8cff,#a855f7); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; color:#fff; }
-.nav-links { display:flex; gap:32px; align-items:center; }
-.nav-links a { color:var(--lp-gray-400); font-size:14px; transition:color 0.2s; }
-.nav-links a:hover { color:var(--lp-white); }
-.cta-btn { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#6c8cff,#a855f7); color:#fff !important; padding:10px 24px; border-radius:10px; font-weight:600; font-size:14px; transition:transform 0.2s,box-shadow 0.2s; border:none; cursor:pointer; }
-.cta-btn:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(108,140,255,0.3); }
+/* Header */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(245,243,255,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+@media (prefers-color-scheme: dark) {
+  .header { background: rgba(13,7,33,0.85); }
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 1.35rem; color: var(--text);
+}
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #6c4ef5, #a855f7);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.1rem;
+}
+.logo-slogan {
+  font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-left: 8px;
+}
+.header-actions { display: flex; gap: 12px; align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 10px 20px; border-radius: 24px;
+  font-weight: 600; font-size: 0.9rem; cursor: pointer;
+  transition: all 0.2s; border: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #6c4ef5, #a855f7);
+  color: #fff; box-shadow: 0 4px 16px rgba(108,78,245,0.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(108,78,245,0.45); }
+.btn-outline {
+  background: var(--bg-card); color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { background: var(--accent-soft); }
 
 /* Hero */
-.hero { padding:140px 0 80px; text-align:center; position:relative; overflow:hidden; }
-.hero-bg { position:absolute; top:0; left:50%; transform:translateX(-50%); width:800px; height:800px; background:radial-gradient(circle,color-mix(in srgb,var(--lp-accent) 10%,transparent) 0%,transparent 70%); pointer-events:none; }
-.hero h1 { font-size:48px; font-weight:800; line-height:1.15; margin-bottom:20px; background:linear-gradient(135deg,#1a1035 0%,#6c4ef5 50%,#a855f7 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; max-width:800px; margin:0 auto 20px; }
-.hero p { font-size:18px; color:var(--lp-text-secondary); max-width:600px; margin:0 auto 36px; }
-.hero-buttons { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
-.hero-cta { display:inline-flex; align-items:center; gap:10px; background:linear-gradient(135deg,#6c8cff,#a855f7); color:#fff; padding:14px 32px; border-radius:12px; font-size:16px; font-weight:600; border:none; cursor:pointer; transition:transform 0.2s; }
-.hero-cta:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(108,140,255,0.35); }
-.hero-cta-secondary { display:inline-flex; align-items:center; gap:10px; background:var(--lp-card-bg); color:var(--lp-gray-300); padding:14px 32px; border-radius:12px; font-size:16px; font-weight:500; border:1px solid var(--lp-card-border); cursor:pointer; transition:background 0.2s; }
-.hero-cta-secondary:hover { background:var(--lp-card-hover); color:var(--lp-white); }
-.hero-download { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#10b981,#059669); color:#fff; padding:14px 28px; border-radius:12px; font-size:15px; font-weight:600; border:none; cursor:pointer; transition:transform 0.2s,box-shadow 0.2s; }
-.hero-download:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(16,185,129,0.35); }
-.hero-stats { display:flex; justify-content:center; gap:60px; margin-top:60px; flex-wrap:wrap; }
-.hero-stat { text-align:center; }
-.hero-stat-num { font-size:36px; font-weight:800; color:var(--lp-white); }
-.hero-stat-label { font-size:14px; color:var(--lp-gray-500); margin-top:4px; }
+.hero {
+  padding: 140px 0 100px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(circle at 30% 20%, rgba(108,78,245,0.12) 0%, transparent 40%),
+              radial-gradient(circle at 70% 80%, rgba(168,85,247,0.1) 0%, transparent 40%);
+}
+.hero-inner { position: relative; z-index: 1; text-align: center; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--accent-soft); color: var(--accent);
+  font-size: 0.8rem; font-weight: 600; margin-bottom: 24px;
+}
+.hero-title {
+  font-size: clamp(2.2rem, 6vw, 4rem); font-weight: 900; line-height: 1.15;
+  margin-bottom: 16px; letter-spacing: -1px;
+}
+.hero-title span {
+  background: linear-gradient(135deg, #6c4ef5, #a855f7, #ec4899);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-slogan {
+  font-size: clamp(1.1rem, 3vw, 1.6rem); color: var(--text-secondary);
+  margin-bottom: 12px; font-weight: 500;
+}
+.hero-sub {
+  font-size: 1rem; color: var(--text-secondary); max-width: 640px; margin: 0 auto 36px;
+}
+.hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
+.hero-stats {
+  display: flex; gap: 40px; justify-content: center; flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+.stat-label { font-size: 0.85rem; color: var(--text-secondary); }
 
-/* Features Section */
-.section { padding:80px 0; }
-.section-title { text-align:center; font-size:32px; font-weight:700; color:var(--lp-white); margin-bottom:16px; }
-.section-subtitle { text-align:center; font-size:16px; color:var(--lp-text-secondary); max-width:600px; margin:0 auto 48px; }
-.features-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:24px; }
-.feature-card { background:var(--lp-card-bg); border:1px solid var(--lp-card-border); border-radius:16px; padding:28px; transition:border-color 0.2s,background 0.2s; }
-.feature-card:hover { border-color:var(--lp-accent); background:var(--lp-card-overlay); }
-.feature-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px; }
-.feature-card h3 { font-size:18px; font-weight:600; color:var(--lp-white); margin-bottom:8px; }
-.feature-card p { font-size:14px; color:var(--lp-gray-500); line-height:1.7; }
+/* Features */
+.features { padding: 80px 0; }
+.section-title {
+  text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 12px;
+}
+.section-sub { text-align: center; color: var(--text-secondary); margin-bottom: 48px; }
+.feature-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;
+}
+.feature-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 24px; box-shadow: var(--shadow); transition: all 0.2s;
+}
+.feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgba(108,78,245,0.2); }
+.feature-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; margin-bottom: 16px;
+  background: var(--accent-soft);
+}
+.feature-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.feature-card p { font-size: 0.85rem; color: var(--text-secondary); }
 
-/* Model Showcase */
-.model-showcase { background:var(--lp-card-bg); border-radius:20px; border:1px solid var(--lp-card-border); padding:40px; margin-top:40px; }
-.model-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; margin-top:24px; }
-.model-brand { background:var(--lp-card-bg); border-radius:12px; padding:20px 16px; text-align:center; transition:background 0.2s; }
-.model-brand:hover { background:var(--lp-card-hover); }
-.model-brand-logo { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:16px; font-weight:700; color:#fff; }
-.model-brand-name { font-size:14px; font-weight:600; color:var(--lp-gray-200); margin-bottom:4px; }
-.model-brand-count { font-size:12px; color:var(--lp-gray-600); }
+/* Local AI */
+.local-ai {
+  padding: 80px 0; background: var(--accent-soft);
+}
+.local-ai-inner {
+  display: flex; align-items: center; gap: 60px; flex-wrap: wrap;
+}
+.local-ai-content { flex: 1; min-width: 300px; }
+.local-ai-content h2 { font-size: 2rem; margin-bottom: 16px; }
+.local-ai-content p { color: var(--text-secondary); margin-bottom: 24px; }
+.local-ai-list { list-style: none; }
+.local-ai-list li { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; color: var(--text-secondary); }
+.local-ai-visual {
+  flex: 1; min-width: 300px; height: 320px; border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(108,78,245,0.2), rgba(168,85,247,0.15));
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+}
+.particle-face {
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(108,78,245,0.4));
+  box-shadow: 0 0 60px rgba(108,78,245,0.5), inset 0 0 40px rgba(255,255,255,0.2);
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
 
-/* Platform Integration */
-.platform-row { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin:32px 0; }
-.platform-tag { background:var(--lp-card-bg); border:1px solid var(--lp-card-border); border-radius:10px; padding:10px 20px; font-size:13px; color:var(--lp-gray-400); display:flex; align-items:center; gap:8px; }
-.platform-tag .dot { width:6px; height:6px; border-radius:50%; }
-
-/* Pricing */
-.pricing-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:24px; }
-.pricing-card { background:var(--lp-card-bg); border:1px solid var(--lp-card-border); border-radius:20px; padding:32px; text-align:center; transition:border-color 0.2s; position:relative; }
-.pricing-card.featured { border-color:var(--lp-accent); background:var(--lp-card-overlay); }
-.pricing-card.featured::before { content:'推荐'; position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#6c8cff,#a855f7); color:#fff; font-size:12px; font-weight:600; padding:4px 16px; border-radius:20px; }
-.pricing-name { font-size:20px; font-weight:700; color:var(--lp-white); margin-bottom:8px; }
-.pricing-desc { font-size:14px; color:var(--lp-gray-500); margin-bottom:24px; }
-.pricing-price { font-size:36px; font-weight:800; color:var(--lp-white); margin-bottom:4px; }
-.pricing-sub { font-size:14px; color:var(--lp-gray-600); margin-bottom:24px; }
-.pricing-features { list-style:none; text-align:left; margin-bottom:28px; }
-.pricing-features li { padding:8px 0; font-size:14px; color:var(--lp-gray-300); display:flex; align-items:center; gap:8px; }
-.pricing-features li::before { content:'✓'; color:var(--lp-accent); font-weight:700; }
-
-/* FAQ */
-.faq-list { max-width:800px; margin:0 auto; }
-.faq-item { background:var(--lp-card-bg); border:1px solid var(--lp-card-border); border-radius:12px; margin-bottom:12px; overflow:hidden; }
-.faq-q { padding:18px 24px; font-size:15px; font-weight:600; color:var(--lp-gray-200); cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none; }
-.faq-q:hover { color:var(--lp-white); }
-.faq-arrow { transition:transform 0.3s; font-size:12px; color:var(--lp-gray-600); }
-.faq-item.open .faq-arrow { transform:rotate(180deg); }
-.faq-a { padding:0 24px 18px; font-size:14px; color:var(--lp-gray-500); line-height:1.8; display:none; }
-.faq-item.open .faq-a { display:block; }
+/* CTA */
+.cta {
+  padding: 100px 0; text-align: center;
+  background: radial-gradient(circle at 50% 50%, rgba(108,78,245,0.1) 0%, transparent 60%);
+}
+.cta h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 16px; }
+.cta p { color: var(--text-secondary); margin-bottom: 32px; font-size: 1.05rem; }
 
 /* Footer */
-footer { border-top:1px solid var(--lp-card-border); padding:48px 0; }
-.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; }
-@media(max-width:768px) { .footer-grid { grid-template-columns:1fr; } }
-.footer-brand .logo { margin-bottom:16px; }
-.footer-brand p { font-size:13px; color:var(--lp-gray-600); }
-.footer-col h4 { font-size:14px; font-weight:600; color:var(--lp-white); margin-bottom:16px; }
-.footer-col a { display:block; font-size:13px; color:var(--lp-gray-600); margin-bottom:10px; }
-.footer-col a:hover { color:var(--lp-gray-400); }
-.footer-bottom { text-align:center; padding-top:32px; margin-top:32px; border-top:1px solid var(--lp-card-border); font-size:13px; color:var(--lp-gray-700); }
+.footer {
+  padding: 40px 0; border-top: 1px solid var(--border); text-align: center;
+  color: var(--text-secondary); font-size: 0.85rem;
+}
+.footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+.footer-links a:hover { color: var(--accent); }
 
-/* Animations */
-.fade-in { opacity:0; transform:translateY(20px); transition:opacity 0.6s ease,transform 0.6s ease; }
-.fade-in.visible { opacity:1; transform:translateY(0); }
-
-/* Responsive */
-@media(max-width:768px) {
-  .hero h1 { font-size:32px; }
-  .hero p { font-size:16px; }
-  .nav-links { display:none; }
-  .hero-stats { gap:30px; }
-  .features-grid { grid-template-columns:1fr; }
-  .pricing-grid { grid-template-columns:1fr; }
-  .model-grid { grid-template-columns:repeat(2,1fr); }
+@media (max-width: 768px) {
+  .header-actions .btn-outline { display: none; }
+  .hero { padding: 120px 0 60px; }
+  .local-ai-inner { flex-direction: column; }
 }
 </style>
-<script src="/js/i18n.js"></script>
 </head>
 <body>
 
-<!-- Navigation -->
-<header>
-  <nav class="container">
+<header class="header">
+  <div class="container header-inner">
     <a href="/" class="logo">
-      <div class="logo-icon">T</div>
-      TriGen
+      <div class="logo-icon" style="width:36px;height:36px;border-radius:9px;overflow:hidden;box-shadow:0 2px 8px rgba(99,102,241,0.35)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="100%" height="100%"><defs><linearGradient id="lbg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7c3aed"/><stop offset="50%" stop-color="#6366f1"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient><linearGradient id="lglow" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a78bfa" stop-opacity="0.9"/><stop offset="100%" stop-color="#60a5fa" stop-opacity="0.6"/></linearGradient><filter id="lsoftGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="url(#lbg)"/><circle cx="512" cy="512" r="360" fill="none" stroke="url(#lglow)" stroke-width="6" opacity="0.35"/><circle cx="512" cy="512" r="300" fill="none" stroke="url(#lglow)" stroke-width="3" opacity="0.25"/><g fill="#ffffff" opacity="0.6"><circle cx="320" cy="280" r="8"/><circle cx="720" cy="240" r="6"/><circle cx="780" cy="520" r="10"/><circle cx="260" cy="600" r="7"/><circle cx="700" cy="760" r="9"/><circle cx="340" cy="780" r="5"/></g><g filter="url(#lsoftGlow)"><path d="M380 320 L512 520 L644 320" fill="none" stroke="#ffffff" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/><line x1="512" y1="520" x2="512" y2="740" stroke="#ffffff" stroke-width="56" stroke-linecap="round"/><circle cx="512" cy="512" r="42" fill="#ffffff"/><path d="M620 420 Q760 512 620 640" fill="none" stroke="#a78bfa" stroke-width="28" stroke-linecap="round" opacity="0.95"/><path d="M404 420 Q264 512 404 640" fill="none" stroke="#60a5fa" stroke-width="28" stroke-linecap="round" opacity="0.85"/></g></svg></div>
+      <span>Y·NEX</span>
+      <span class="logo-slogan">亿界互联·无界未来</span>
     </a>
-    <div class="nav-links">
-      <a href="#features" data-i18n="landing.nav_features">功能</a>
-      <a href="#models">模型</a>
-      <a href="#pricing" data-i18n="landing.nav_pricing">定价</a>
-      <a href="#faq" data-i18n="landing.nav_faq">常见问题</a>
-      <button id="landingThemeToggle" style="width:34px;height:34px;border-radius:10px;border:1px solid var(--lp-card-border);background:var(--lp-card-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95rem;transition:all 0.2s;color:var(--lp-text);padding:0" title="切换主题">🌙</button>
-      <select id="landingLangToggle" style="background:var(--lp-card-bg);border:1px solid var(--lp-card-border);border-radius:10px;color:var(--lp-gray-400);font-size:13px;padding:6px 10px;cursor:pointer;outline:none;">
-        <option value="zh">中文</option>
-        <option value="en">EN</option>
-      </select>
-      <a href="/app/" class="cta-btn">
-        <span>→</span> <span data-i18n="landing.nav_start">进入控制台</span>
-      </a>
+    <div class="header-actions">
+      <a href="/app/" class="btn btn-outline">进入应用</a>
     </div>
-  </nav>
+  </div>
 </header>
 
-<!-- Hero -->
 <section class="hero">
   <div class="hero-bg"></div>
-  <div class="container">
-    <h1><span data-i18n="landing.hero_title">全球 AI 大模型<br>一站式聚合平台</span></h1>
-    <p data-i18n="landing.hero_desc">无需切换平台即可调用 300+ 最新 AI 模型。从 GPT-5 到 DeepSeek，从 Claude 4 到 Gemini 3，一个控制台掌控所有。</p>
-    <div class="hero-buttons">
-      <a href="/app/" class="hero-cta" data-i18n="landing.hero_cta">
-        <span>🚀</span> 免费开始使用
-      </a>
-      <a href="#features" class="hero-cta-secondary">
-        <span data-i18n="common.more">了解更多</span> <span>↓</span>
-      </a>
-      <a href="https://github.com/wj910621/ai-nexus-server/releases/latest/download/TriGenClaw-Portable.zip" class="hero-download">
-        <span>💻</span> 下载桌面端 (Windows)
-      </a>
+  <div class="container hero-inner">
+    <div class="hero-badge">🚀 未来已来，智能无界</div>
+    <h1 class="hero-title"><span>Y·NEX</span> 智能创作平台</h1>
+    <p class="hero-slogan">亿界互联 · 无界未来</p>
+    <p class="hero-sub">聚合全球 300+ AI 模型，一个平台搞定对话、绘画、小说、编程、办公、音乐、3D 生成。让每一次创作，都超越想象。</p>
+    <div class="hero-cta">
+      <a href="/app/" class="btn btn-primary" style="font-size:1rem;padding:14px 32px">进入应用</a>
     </div>
     <div class="hero-stats">
-      <div class="hero-stat">
-        <div class="hero-stat-num">300+</div>
-        <div class="hero-stat-label" data-i18n="hero.models_count">接入模型</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-num">9</div>
-        <div class="hero-stat-label" data-i18n="hero.providers_count">AI 平台</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-num">15+</div>
-        <div class="hero-stat-label" data-i18n="landing.hero_stats_section">功能模块</div>
-      </div>
+      <div class="stat-item"><div class="stat-num">300+</div><div class="stat-label">AI 模型</div></div>
+      <div class="stat-item"><div class="stat-num">16+</div><div class="stat-label">预制智能体</div></div>
+      <div class="stat-item"><div class="stat-num">10+</div><div class="stat-label">创作场景</div></div>
+      <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">站式平台</div></div>
     </div>
   </div>
 </section>
 
-<!-- Platform Integration -->
-<section class="section" style="padding-top:0">
+<section class="features">
   <div class="container">
-    <div class="platform-row">
-      <span class="platform-tag"><span class="dot" style="background:#6c8cff"></span> DeepSeek</span>
-      <span class="platform-tag"><span class="dot" style="background:#a855f7"></span> 阿里百炼</span>
-      <span class="platform-tag"><span class="dot" style="background:#f59e0b"></span> Kimi</span>
-      <span class="platform-tag"><span class="dot" style="background:#10b981"></span> 智谱 GLM</span>
-      <span class="platform-tag"><span class="dot" style="background:#ef4444"></span> 硅基流动</span>
-      <span class="platform-tag"><span class="dot" style="background:#3b82f6"></span> OpenRouter</span>
-      <span class="platform-tag"><span class="dot" style="background:#8b5cf6"></span> 腾讯混元</span>
-      <span class="platform-tag"><span class="dot" style="background:#ec4899"></span> 火山引擎</span>
-      <span class="platform-tag"><span class="dot" style="background:#6366f1"></span> 百度千帆</span>
+    <h2 class="section-title">一站式 AI 创作能力</h2>
+    <p class="section-sub">覆盖文本、图像、音频、代码、办公等全场景需求</p>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-icon">💬</div><h3>AI 聊天</h3><p>多模型同时对话，一次提问获取多个顶尖 AI 的回答。</p></div>
+      <div class="feature-card"><div class="feature-icon">🖼</div><h3>AI 绘画</h3><p>Midjourney 提示词生成与图像创作，让灵感快速可视化。</p></div>
+      <div class="feature-card"><div class="feature-icon">📖</div><h3>AI 小说</h3><p>从世界观到章节正文，AI 辅助完成长篇创作与润色。</p></div>
+      <div class="feature-card"><div class="feature-icon">💻</div><h3>AI 编程</h3><p>代码生成、Bug 修复、网页构建，开发效率倍增。</p></div>
+      <div class="feature-card"><div class="feature-icon">💼</div><h3>AI 办公</h3><p>文档写作、邮件起草、PPT 大纲、智能翻译、文档摘要。</p></div>
+      <div class="feature-card"><div class="feature-icon">🎵</div><h3>AI 音乐</h3><p>文本生成音乐与歌曲，为内容创作配乐。</p></div>
+      <div class="feature-card"><div class="feature-icon">🧊</div><h3>3D 生成</h3><p>文本描述转 3D 模型，高质量 PBR 材质输出。</p></div>
+      <div class="feature-card"><div class="feature-icon">🎬</div><h3>AI 创作工场</h3><p>图片、视频、漫剧一体化创作工作流。</p></div>
     </div>
   </div>
 </section>
 
-<!-- Features -->
-<section class="section" id="features">
-  <div class="container">
-    <h2 class="section-title" data-i18n="landing.section_features">一个控制台，解锁所有</h2>
-    <p class="section-subtitle">抛弃碎片化的 AI 使用体验，TriGen 集成所有主流模型到统一界面</p>
-    <div class="features-grid">
-      <div class="feature-card fade-in">
-        <div class="feature-icon" style="background:rgba(108,78,245,0.12);color:var(--lp-accent)">🤖</div>
-        <h3>多模型聊天</h3>
-        <p>同时与多个模型对话，对比回复质量。支持 GPT-5、Claude 4、Gemini 3、DeepSeek R1 等最新模型。</p>
+<section class="local-ai">
+  <div class="container local-ai-inner">
+    <div class="local-ai-content">
+      <h2>Y·NEX 本地AI</h2>
+      <p>不止于云端。下载 Y·NEX Desktop，在你的电脑上运行本地 AI 核心，拥有 3D 粒子人脸、语音唤醒、本地大模型和设备控制能力。</p>
+      <ul class="local-ai-list">
+        <li>✅ 3D 粒子人脸可视化交互</li>
+        <li>✅ 语音唤醒，自然语言控制</li>
+        <li>✅ 本地大模型推理，隐私数据不出本机</li>
+        <li>✅ 智能家居与设备联动</li>
+      </ul>
+      <div style="margin-top:24px">
+        <a href="/download/" class="btn btn-primary">⬇ 下载 Y·NEX Desktop</a>
       </div>
-      <div class="feature-card fade-in">
-        <div class="feature-icon" style="background:rgba(168,85,247,0.15);color:#a855f7">📝</div>
-        <h3>AI 小说创作</h3>
-        <p>6 步创作向导，从设定到完稿。支持长篇管理、分章写作、角色一致性和 AI 润色。</p>
-      </div>
-      <div class="feature-card fade-in">
-        <div class="feature-icon" style="background:rgba(16,185,129,0.15);color:#10b981">🎨</div>
-        <h3>智能体工坊</h3>
-        <p>16 个预制专业智能体，覆盖创作、营销、编程、研究等场景。自定义智能体玩法。</p>
-      </div>
-      <div class="feature-card fade-in">
-        <div class="feature-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b">🎬</div>
-        <h3>AI 视频 & 3D 生成</h3>
-        <p>文生视频、图生视频、3D 模型生成。支持可灵、Meshy 等多平台，一个界面操控。</p>
-      </div>
-      <div class="feature-card fade-in">
-        <div class="feature-icon" style="background:rgba(239,68,68,0.15);color:#ef4444">🎵</div>
-        <h3>AI 音乐生成</h3>
-        <p>使用 Suno API 生成完整歌曲，支持歌词编写、风格选择和音频播放下载。</p>
-      </div>
-      <div class="feature-card fade-in">
-        <div class="feature-icon" style="background:rgba(99,102,241,0.15);color:#6366f1">📊</div>
-        <h3>模型对比 & 知识库</h3>
-        <p>并排对比多模型输出，RAG 知识库系统管理企业数据，精准检索注入对话。</p>
-      </div>
-      <div class="feature-card fade-in">
-        <div class="feature-icon" style="background:rgba(236,72,153,0.15);color:#ec4899">💼</div>
-        <h3>AI 办公 & 营销</h3>
-        <p>智能文档、邮件、PPT 生成。小红书爆款、公众号文章、广告投放策略一键生成。</p>
-      </div>
-      <div class="feature-card fade-in">
-        <div class="feature-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6">🔧</div>
-        <h3>联想搜索 & 工具</h3>
-        <p>AI 辅助编程、品牌设计、API Key 管理、第三方工具集成，一站式搞定。</p>
-      </div>
+    </div>
+    <div class="local-ai-visual">
+      <div class="particle-face"></div>
     </div>
   </div>
 </section>
 
-<!-- Model Showcase -->
-<section class="section" id="models">
+<section class="cta">
   <div class="container">
-    <h2 class="section-title">全球顶级模型齐聚</h2>
-    <p class="section-subtitle">从旗舰模型到性价比之选，300+ 模型满足各种场景</p>
-    <div class="model-showcase fade-in">
-      <div class="model-grid">
-        <div class="model-brand">
-          <div class="model-brand-logo" style="background:linear-gradient(135deg,#19c37d,#00a66c)">G</div>
-          <div class="model-brand-name">GPT-5 Pro</div>
-          <div class="model-brand-count">旗舰模型</div>
-        </div>
-        <div class="model-brand">
-          <div class="model-brand-logo" style="background:linear-gradient(135deg,#5436da,#3415b0)">C</div>
-          <div class="model-brand-name">Claude 4 Opus</div>
-          <div class="model-brand-count">深度思考</div>
-        </div>
-        <div class="model-brand">
-          <div class="model-brand-logo" style="background:linear-gradient(135deg,#4285f4,#1a73e8)">G</div>
-          <div class="model-brand-name">Gemini 3 Pro</div>
-          <div class="model-brand-count">多模态</div>
-        </div>
-        <div class="model-brand">
-          <div class="model-brand-logo" style="background:linear-gradient(135deg,#4f46e5,#3730a3)">D</div>
-          <div class="model-brand-name">DeepSeek V4</div>
-          <div class="model-brand-count">开源先锋</div>
-        </div>
-        <div class="model-brand">
-          <div class="model-brand-logo" style="background:linear-gradient(135deg,#f97316,#ea580c)">K</div>
-          <div class="model-brand-name">Kimi K2.6</div>
-          <div class="model-brand-count">超长上下文</div>
-        </div>
-        <div class="model-brand">
-          <div class="model-brand-logo" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">G</div>
-          <div class="model-brand-name">GLM-5.1</div>
-          <div class="model-brand-count">中文优化</div>
-        </div>
-        <div class="model-brand">
-          <div class="model-brand-logo" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">G</div>
-          <div class="model-brand-name">Grok 4</div>
-          <div class="model-brand-count">实时数据</div>
-        </div>
-        <div class="model-brand">
-          <div class="model-brand-logo" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">Q</div>
-          <div class="model-brand-name">Qwen3-Max</div>
-          <div class="model-brand-count">阿里旗舰</div>
-        </div>
-      </div>
-    </div>
+    <h2>未来已来，立即开启</h2>
+    <p>加入 Y·NEX，体验无界 AI 创作。注册即送 30 积分免费体验。</p>
+    <a href="/app/" class="btn btn-primary" style="font-size:1.05rem;padding:14px 36px">🚀 免费体验 Y·NEX</a>
   </div>
 </section>
 
-<!-- Pricing -->
-<section class="section" id="pricing">
+<footer class="footer">
   <div class="container">
-    <h2 class="section-title" data-i18n="landing.section_pricing">灵活的积分定价</h2>
-    <p class="section-subtitle">按模型消耗积分，50+ 免费模型不限量试玩，会员解锁 GPT-5.5 Pro</p>
-    <div class="pricing-grid">
-      <div class="pricing-card fade-in">
-        <div class="pricing-name" data-i18n="pricing.starter">体验包</div>
-        <div class="pricing-desc">尝鲜首选</div>
-        <div class="pricing-price">¥6.9</div>
-        <div class="pricing-sub">100 积分</div>
-        <ul class="pricing-features">
-          <li>全部 300+ 模型可用</li>
-          <li>基础聊天功能</li>
-          <li>模型对比</li>
-          <li>AI 小说创作</li>
-        </ul>
-        <a href="/app/" class="hero-cta-secondary" style="display:block;text-align:center;border-color:rgba(255,255,255,0.1);">开始使用</a>
-      </div>
-      <div class="pricing-card featured fade-in">
-        <div class="pricing-name">月卡会员</div>
-        <div class="pricing-desc">最受欢迎</div>
-        <div class="pricing-price">¥39</div>
-        <div class="pricing-sub">800 积分 / 月</div>
-        <ul class="pricing-features">
-          <li>全部 300+ 模型可用</li>
-          <li>多模型聊天 & 对比</li>
-          <li>AI 小说创作 & 漫剧</li>
-          <li>智能助手 & 提示词库</li>
-          <li>AI 办公 & 营销工具</li>
-          <li>视频 & 音乐生成</li>
-        </ul>
-        <a href="/app/" class="hero-cta" style="display:block;text-align:center;">立即购买</a>
-      </div>
-      <div class="pricing-card fade-in">
-        <div class="pricing-name">年卡会员</div>
-        <div class="pricing-desc">重度用户专属</div>
-        <div class="pricing-price">¥299</div>
-        <div class="pricing-sub">9600 积分 / 年</div>
-        <ul class="pricing-features">
-          <li>全部 300+ 模型无限量</li>
-          <li>3D 模型生成</li>
-          <li>知识库管理</li>
-          <li>API Key 独立接入</li>
-          <li>优先技术支持</li>
-          <li>所有高级功能</li>
-        </ul>
-        <a href="/app/" class="hero-cta-secondary" style="display:block;text-align:center;">购买专业版</a>
-      </div>
+    <div class="footer-links">
+      <a href="/app/">进入应用</a>
+      <a href="/app/#pricing">订阅套餐</a>
+      <a href="/app/#privacy">隐私政策</a>
+      <a href="mailto:contact@ynexai.cn">联系我们</a>
     </div>
-  </div>
-</section>
-
-<!-- FAQ -->
-<section class="section" id="faq">
-  <div class="container">
-    <h2 class="section-title" data-i18n="landing.section_faq">常见问题</h2>
-    <p class="section-subtitle">快速了解 TriGen</p>
-    <div class="faq-list">
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          TriGen 和其他平台有什么区别？
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a">TriGen 聚合了 9 个主流 AI 平台、300+ 模型，你无需注册多个平台、管理多个 API Key。一个控制台即可调用所有的最新模型。</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          模型是实时可用的吗？
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a">是的，所有模型都通过我们后端的实时 API 代理调用。我们支持自动切换备用渠道，即使某个平台故障，也能保证服务可用性。</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          积分如何计算和使用？
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a">每个模型消耗不同数量的积分（0-25 分/次对话）。免费模型不消耗积分，高级模型（如 GPT-5、Claude 4 Opus）消耗更多。注册即送体验积分。</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          是否支持 API Key 接入？
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a">支持！你可以在控制台的 API Key 管理中创建自己的 Key，然后通过 OpenAI 兼容接口调用 TriGen 的所有模型。</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          如何保障数据安全？
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a">所有对话数据经过加密传输，我们不存储你的聊天记录。API Key 由你自行管理，也可选择使用平台提供的公共额度。</div>
-      </div>
+    <div>© 2026 Y·NEX · 亿界网络科技工作室 · 亿界互联·无界未来</div>
+    <div style="margin-top:8px;font-size:0.78rem;opacity:0.85">
+      <a href="https://beian.miit.gov.cn" target="_blank" rel="noreferrer" style="color:var(--text-secondary);text-decoration:none">蜀ICP备2026030046号</a>
+      <span style="margin:0 10px">|</span>
+      <a href="https://beian.mps.gov.cn/#/query/webSearch?code=51110202002408" rel="noreferrer" target="_blank" style="color:var(--text-secondary);text-decoration:none">川公网安备51110202002408号</a>
     </div>
-  </div>
-</section>
-
-<!-- Footer -->
-<footer>
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a href="/" class="logo" style="margin-bottom:16px">
-          <div class="logo-icon">T</div>
-          TriGen
-        </a>
-        <p>一站式 AI 大模型聚合平台。打破模型壁垒，释放 AI 潜能。</p>
-      </div>
-      <div class="footer-col">
-        <h4>产品</h4>
-        <a href="#models">模型目录</a>
-        <a href="#features">功能特性</a>
-        <a href="#pricing">定价方案</a>
-        <a href="/app/">控制台</a>
-      </div>
-      <div class="footer-col">
-        <h4>支持</h4>
-        <a href="#faq">常见问题</a>
-        <a href="/app/">反馈建议</a>
-        <a href="/app/">使用帮助</a>
-      </div>
-      <div class="footer-col">
-        <h4>法律</h4>
-        <a href="/app/">服务条款</a>
-        <a href="/app/">隐私政策</a>
-      </div>
-    </div>
-    <div class="footer-bottom">© 2026 TriGen. All rights reserved.</div>
   </div>
 </footer>
 
 <script>
-// Fade-in animation on scroll
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-// Confirm the user is going to the studio
-document.querySelectorAll('a[href^="/studio/"]').forEach(a => {
-  a.addEventListener('click', (e) => {
-    // Allow normal navigation
-  });
-});
-// === Theme (default: light, shared with dashboard) ===
-const themeToggleL=document.getElementById('landingThemeToggle');
-const savedThemeL=localStorage.getItem('theme')||'light';
-document.documentElement.setAttribute('data-theme',savedThemeL);
-themeToggleL.textContent=savedThemeL==='light'?'🌙':'☀️';
-themeToggleL.addEventListener('click',()=>{
-  const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',n);
-  themeToggleL.textContent=n==='light'?'🌙':'☀️';
-  localStorage.setItem('theme',n);
-});
-// === Language Switcher ===
-const langToggleL=document.getElementById('landingLangToggle');
-if(langToggleL && window.trigenI18n) {
-  langToggleL.value=trigenI18n.getLanguage();
-  langToggleL.addEventListener('change',function(){ trigenI18n.setLanguage(this.value); });
-} else if(langToggleL) {
-  langToggleL.addEventListener('change',function(){
-    if(window.trigenI18n) trigenI18n.setLanguage(this.value);
-  });
+function downloadDesktopApp(){
+  location.href = '/download/';
 }
 </script>
+
 </body>
 </html>

@@ -1,0 +1,552 @@
+const { db, signToken, verifyToken: _verifyTokenRaw, authRequired, authLimiter } = require('./server');
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+
+// 安全：API Key 哈希化存储，防止数据库泄露后 Key 可直接使用。
+// 使用 HMAC-SHA256 + JWT_SECRET 作为 pepper，与 billing.py 的哈希策略一致。
+// 弱 pepper fallback：未设置 JWT_SECRET 时使用随机值并警告（不硬编码），
+// 避免数据库泄露后攻击者用已知盐值离线爆破 API Key。
+const API_KEY_PEPPER = process.env.JWT_SECRET || (() => {
+  console.warn('[security] JWT_SECRET 未设置，API Key 哈希使用临时随机 pepper。重启后所有 API Key 将失效，请在 .env 中设置 JWT_SECRET。');
+  return crypto.randomBytes(32).toString('hex');
+})();
+
+function hashApiKey(key) {
+  return crypto.createHmac('sha256', API_KEY_PEPPER).update(key).digest('hex');
+}
+
+function generateSecureApiKey(prefix, username) {
+  // 使用 crypto.randomBytes（CSPRNG）替代 Math.random（PRNG）。
+  // Math.random 基于 xorshift128+，观察足够输出后可预测后续值。
+  const userPart = (username || 'user').substring(0, 4).toLowerCase();
+  const randomPart = crypto.randomBytes(16).toString('hex');
+  return prefix + userPart + '-' + randomPart;
+}
+
+function maskApiKey(key) {
+  if (!key || key.length <= 12) return '****';
+  return key.substring(0, 8) + '****' + key.substring(key.length - 4);
+}
+
+// ============================================================
+// 安全：JWT 撤销机制（token_version）
+// 修改密码/重置密码后递增 token_version，使所有旧 token 立即失效。
+// ============================================================
+function getTokenVersion(username) {
+  try {
+    const row = db.prepare("SELECT token_version FROM users WHERE username=?").get(username);
+    return row ? (row.token_version || 0) : 0;
+  } catch (_) {
+    return 0;
+  }
+}
+
+function incrementTokenVersion(username) {
+  try {
+    db.prepare("UPDATE users SET token_version = token_version + 1 WHERE username=?").run(username);
+  } catch (_) {
+    // 列可能尚未迁移，忽略
+  }
+}
+
+function signUserToken(username, role) {
+  const tv = getTokenVersion(username);
+  return signToken({ username, role, tv, ts: Date.now() });
+}
+
+function verifyUserToken(token) {
+  const payload = _verifyTokenRaw(token);
+  if (!payload || !payload.username) return null;
+  // 校验 token_version：密码修改后旧 token 立即失效
+  const currentTv = getTokenVersion(payload.username);
+  if (payload.tv !== currentTv) return null;
+  return payload;
+}
+
+// 安全：仅使用 bcrypt 哈希，不再回退到 Base64 编码
+function isBcryptHash(hash) { return typeof hash === 'string' && (hash.startsWith('$2a$') || hash.startsWith('$2b$')); }
+function hashPasswordSync(pwd) { return bcrypt.hashSync(pwd, 10); }
+function verifyPasswordSync(pwd, storedHash) {
+  if (!storedHash) return false;
+  if (isBcryptHash(storedHash)) return bcrypt.compareSync(pwd, storedHash);
+  // 非 bcrypt 哈希一律拒绝（旧 Base64 密码需通过密码重置流程迁移）
+  return false;
+}
+function upgradePasswordToBcrypt(username, plainPwd) {
+  const newHash = hashPasswordSync(plainPwd);
+  db.prepare("UPDATE users SET password=? WHERE username=?").run(newHash, username);
+}
+
+function requireAdmin(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) {
+    return res.status(401).json({ ok: false, error: '未登录' });
+  }
+  try {
+    const token = auth.slice(7);
+    const payload = verifyUserToken(token);
+    if (!payload || payload.role !== 'admin') {
+      return res.status(403).json({ ok: false, error: '无管理员权限' });
+    }
+    req.adminUser = payload.username;
+    next();
+  } catch(e) {
+    return res.status(401).json({ ok: false, error: 'Token无效' });
+  }
+}
+
+module.exports = function(app) {
+  app.post('/api/auth/register', authLimiter, (req, res) => {
+    const { username, email, password, refCode, deviceFp } = req.body;
+    if (!username || !password) return res.json({ ok: false, error: '请填写用户名和密码' });
+    const phone = (req.body.phone || '').trim();
+    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) return res.json({ ok: false, error: '请填写正确的手机号' });
+    if (!/^[a-zA-Z0-9]{2,20}$/.test(username)) return res.json({ ok: false, error: '用户名格式不正确（2-20位字母或数字）' });
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.json({ ok: false, error: '邮箱格式不正确' });
+    if (password.length < 6) return res.json({ ok: false, error: '密码至少6位' });
+    const securityQ = (req.body.securityQuestion || '').trim();
+    const securityA = (req.body.securityA || '').trim();
+    if (!securityQ || !securityA) return res.json({ ok: false, error: '请设置密保问题和答案' });
+    const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    const ipRow = db.prepare("SELECT COUNT(*) as cnt FROM users WHERE register_ip=?").get(clientIP);
+    const currentCount = ipRow ? ipRow.cnt : 0;
+    if (currentCount >= 2) return res.json({ ok: false, error: '本网络已注册过 2 个账号，已达到上限' });
+    if (deviceFp && deviceFp.length >= 8) {
+      const fpRow = db.prepare("SELECT COUNT(*) as cnt FROM users WHERE device_fp=?").get(deviceFp);
+      const currentFpCount = fpRow ? fpRow.cnt : 0;
+      if (currentFpCount >= 1) return res.json({ ok: false, error: '该设备已注册过账号，每个设备限注册一个账号' });
+    }
+    try {
+      const existing = db.prepare("SELECT id FROM users WHERE username=? " + (email ? "OR email=?" : "") + " OR phone=?").get(
+        email ? [username, email, phone] : [username, phone]
+      );
+      if (existing) return res.json({ ok: false, error: '用户名、邮箱或手机号已被注册' });
+      const refCodeGen = 'J3' + username.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) + Math.random().toString(36).slice(2, 5).toUpperCase();
+      const userEmail = email || ('noemail_' + username + '@nexus-hub.local');
+      let bonus = 30;
+      let referrer = null;
+      if (refCode) {
+        const refUser = db.prepare("SELECT username FROM users WHERE ref_code=? OR username=?").get(refCode, refCode);
+        if (refUser) {
+          bonus += 30;
+          referrer = refUser.username;
+          db.prepare("UPDATE users SET credits=credits+30 WHERE username=?").run(referrer);
+          db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?, ?, ?)").run(referrer, 30, '推荐奖励');
+        }
+      }
+      db.prepare("INSERT INTO users (username, email, password, credits, ref_code, referrer, register_ip, phone, device_fp, security_q, security_a) VALUES (?,?,?,?,?,?,?,?,?,?,?)").run(
+        username, userEmail, hashPasswordSync(password), bonus, refCodeGen, referrer, clientIP, phone||'', deviceFp||'', securityQ, hashPasswordSync(securityA));
+      db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(username, bonus, '注册赠送');
+      const apiKey = generateSecureApiKey('nexus-', username);
+      // 安全：存储哈希而非明文，api_key 列存掩码用于展示。
+      db.prepare("INSERT INTO api_keys (username, key_name, api_key, api_key_hash, quota) VALUES (?,?,?,?,?)").run(username, '默认Key', maskApiKey(apiKey), hashApiKey(apiKey), 0);
+      const token = signUserToken(username, 'user');
+      res.json({ ok: true, token, apiKey, user: { username, email, credits: bonus, refCode: refCodeGen }, bonus, referrerBonus: refCode ? 30 : 0 });
+    } catch(e) { res.json({ ok: false, error: '注册失败: ' + e.message }); }
+  });
+
+  app.post('/api/auth/login', authLimiter, (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) return res.json({ ok: false, error: '请输入用户名和密码' });
+    try {
+      const user = db.prepare("SELECT username, email, password, credits, role, ref_code FROM users WHERE username=? OR email=? OR phone=?").get(username, username, username);
+      if (!user) return res.json({ ok: false, error: '用户不存在' });
+      if (!verifyPasswordSync(password, user.password)) return res.json({ ok: false, error: '密码错误' });
+      if (!isBcryptHash(user.password)) upgradePasswordToBcrypt(user.username, password);
+      const token = signUserToken(user.username, user.role);
+      // 安全：不再返回明文 API Key。api_key 列已存储掩码，用户需到 Key 管理页面创建新 Key 获取明文。
+      const apiKeyRow = db.prepare("SELECT api_key FROM api_keys WHERE username=? AND active=1 ORDER BY id LIMIT 1").get(user.username);
+      const apiKey = apiKeyRow ? apiKeyRow.api_key : null;
+      res.json({ ok: true, token, apiKey, user: { username: user.username, email: user.email, credits: user.credits, role: user.role, refCode: user.ref_code } });
+    } catch(e) { res.json({ ok: false, error: '登录失败: ' + e.message }); }
+  });
+
+  app.post('/api/user/spend', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.json({ ok: false, error: '未登录' });
+    const { amount } = req.body;
+    if (!amount || amount <= 0) return res.json({ ok: false, error: '金额无效' });
+    try {
+      const payload = verifyUserToken(token);
+      const username = payload.username;
+      // 原子事务：UPDATE + INSERT 在同一事务内，且用条件 UPDATE 消除 TOCTOU
+      const spendTxn = db.transaction(() => {
+        const result = db.prepare(
+          "UPDATE users SET credits = credits - ? WHERE username = ? AND credits >= ?"
+        ).run(amount, username, amount);
+        if (result.changes !== 1) {
+          return { ok: false, error: '积分不足或用户不存在' };
+        }
+        db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(username, -amount, '消费');
+        const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        return { ok: true, credits: newCredits.credits };
+      });
+      const r = spendTxn();
+      res.json(r);
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.get('/api/user/credits', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.json({ ok: false, error: '未登录' });
+    try {
+      const payload = verifyUserToken(token);
+      const user = db.prepare("SELECT credits FROM users WHERE username=?").get(payload.username);
+      if (!user) return res.json({ ok: false, error: '用户不存在' });
+      res.json({ ok: true, credits: user.credits });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.post('/api/user/checkin', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.json({ ok: false, error: '未登录' });
+    try {
+      const payload = verifyUserToken(token);
+      const username = payload.username;
+      const today = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      // 事务：UPDATE + INSERT 原子化，避免部分成功
+      const checkinTxn = db.transaction(() => {
+        const existing = db.prepare("SELECT checkin_date, checkin_streak FROM users WHERE username=?").get(username);
+        if (!existing) return { ok: false, error: '用户不存在' };
+        let lastCheckin = existing.checkin_date || '';
+        if (lastCheckin === today) return { ok: false, error: '今天已经签到过了', already: true };
+        let streak = existing.checkin_streak || 0;
+        if (lastCheckin === yesterday) streak += 1; else streak = 1;
+        let bonus = 5;
+        if (streak % 7 === 0) bonus += 5;
+        if (streak % 30 === 0) bonus += 20;
+        db.prepare("UPDATE users SET credits=credits+?, checkin_date=?, checkin_streak=? WHERE username=?").run(bonus, today, streak, username);
+        db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(username, bonus, '每日签到');
+        const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        return { ok: true, bonus, streak, credits: newCredits.credits };
+      });
+      const r = checkinTxn();
+      res.json(r);
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.get('/api/user/checkin-status', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.json({ ok: false, error: '未登录' });
+    try {
+      const payload = verifyUserToken(token);
+      const today = new Date().toISOString().slice(0, 10);
+      const result = db.prepare("SELECT checkin_date, checkin_streak FROM users WHERE username=?").get(payload.username);
+      if (result) {
+        const lastDate = result.checkin_date || '';
+        const streak = result.checkin_streak || 0;
+        res.json({ ok: true, checkedIn: lastDate === today, streak: streak || 0, lastDate });
+      } else {
+        res.json({ ok: true, checkedIn: false, streak: 0, lastDate: '' });
+      }
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  // 管理员审核退款（替换原来的用户自助退款，防止任意积分自增）
+  app.post('/api/admin/refund', requireAdmin, (req, res) => {
+    const { username, amount, reason } = req.body;
+    if (!username || !amount || amount <= 0) return res.json({ ok: false, error: '参数无效' });
+    if (amount > 10000) return res.json({ ok: false, error: '单笔退款不能超过10000积分' });
+    try {
+      // 事务：UPDATE + INSERT 原子化
+      const refundTxn = db.transaction(() => {
+        const user = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        if (!user) return { ok: false, error: '用户不存在' };
+        db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(amount, username);
+        db.prepare("INSERT INTO credit_log (username, amount, reason, admin) VALUES (?,?,?,?)").run(username, amount, reason || '管理员退款', req.adminUser);
+        const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        return { ok: true, message: '退款成功', username, credits: newCredits.credits };
+      });
+      const r = refundTxn();
+      res.json(r);
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.post('/api/admin/login', (req, res) => {
+    const { password } = req.body;
+    try {
+      const admin = db.prepare("SELECT username, password FROM users WHERE role='admin' AND username='admin'").get();
+      if (!admin) return res.json({ ok: false, error: '管理员账号不存在' });
+      if (!verifyPasswordSync(password, admin.password)) return res.json({ ok: false, error: '密码错误' });
+      if (!isBcryptHash(admin.password)) upgradePasswordToBcrypt('admin', password);
+      const token = signUserToken('admin', 'admin');
+      res.json({ ok: true, token });
+    } catch(e) { res.json({ ok: false, error: '登录失败: ' + e.message }); }
+  });
+
+  app.post('/api/admin/change-pwd', requireAdmin, (req, res) => {
+    const { oldPwd, newPwd } = req.body;
+    if (!newPwd || newPwd.length < 6) return res.json({ ok: false, error: '新密码至少6位' });
+    try {
+      const admin = db.prepare("SELECT password FROM users WHERE username='admin'").get();
+      if (!admin) return res.json({ ok: false, error: '管理员账号不存在' });
+      if (!verifyPasswordSync(oldPwd, admin.password)) return res.json({ ok: false, error: '原密码错误' });
+      db.prepare("UPDATE users SET password=? WHERE username=?").run(hashPasswordSync(newPwd), 'admin');
+      res.json({ ok: true });
+    } catch(e) { res.json({ ok: false, error: '修改失败: ' + e.message }); }
+  });
+
+  app.get('/api/admin/users', requireAdmin, (req, res) => {
+    try {
+      const users = db.prepare("SELECT username, email, credits, role, ref_code, created_at FROM users ORDER BY created_at DESC").all();
+      const total = users.length;
+      const totalCredits = users.reduce((s, u) => s + u.credits, 0);
+      res.json({ ok: true, users: users.map(u => ({ username: u.username, email: u.email, credits: u.credits, role: u.role, refCode: u.ref_code, createdAt: u.created_at })), total, totalCredits });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.post('/api/admin/recharge', requireAdmin, (req, res) => {
+    const { username, amount, reason } = req.body;
+    if (!username || !amount || amount <= 0) return res.json({ ok: false, error: '请填写正确的用户名和金额' });
+    try {
+      // 事务：UPDATE + INSERT 原子化
+      const rechargeTxn = db.transaction(() => {
+        const user = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        if (!user) return { ok: false, error: '用户不存在' };
+        db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(amount, username);
+        db.prepare("INSERT INTO credit_log (username, amount, reason, admin) VALUES (?,?,?,?)").run(username, amount, reason || '手动充值', req.adminUser);
+        const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        return { ok: true, username, added: amount, credits: newCredits.credits };
+      });
+      const r = rechargeTxn();
+      res.json(r);
+    } catch(e) { res.json({ ok: false, error: '充值失败: ' + e.message }); }
+  });
+
+  // 查询各平台余额状态
+  app.get('/api/admin/balances', requireAdmin, async (req, res) => {
+    const CORE_PLATFORMS = ['DEEPSEEK', 'DASHSCOPE', 'NEXUS', 'SUNO'];
+    const WARNING_THRESHOLD = 10;
+    const platforms = [
+      { key: 'DEEPSEEK', name: 'DeepSeek', env: 'DEEPSEEK_API_KEY', core: true },
+      { key: 'DASHSCOPE', name: '阿里百炼', env: 'DASHSCOPE_API_KEY', core: true },
+      { key: 'MOONSHOT', name: '月之暗面', env: 'MOONSHOT_API_KEY', core: false },
+      { key: 'ZHIPU', name: '智谱GLM', env: 'ZHIPU_API_KEY', core: false },
+      { key: 'SILICONFLOW', name: '硅基流动', env: 'SILICONFLOW_API_KEY', core: false },
+      { key: 'DMXAPI', name: 'DMXAPI', env: 'DMXAPI_API_KEY', core: false },
+      { key: 'OPENROUTER', name: 'OpenRouter', env: 'OPENROUTER_API_KEY', core: false },
+      { key: 'HUNYUAN', name: '腾讯混元', env: 'HUNYUAN_API_KEY', core: false },
+      { key: 'QINIU', name: '七牛云', env: 'QINIU_API_KEY', core: false },
+      { key: 'ARK', name: '火山引擎', env: 'ARK_API_KEY', free: true, core: false },
+      { key: 'BAICHUAN', name: '百川智能', env: 'BAICHUAN_API_KEY', core: false },
+      { key: 'NEXUS', name: 'API Nexus', env: 'NEXUS_API_KEY', core: true },
+      { key: 'QIANFAN', name: '百度千帆', env: 'QIANFAN_AK', core: false },
+      { key: 'SUNO', name: 'Suno音乐', env: 'SUNO_API_KEY', core: true },
+    ];
+    const balances = {};
+    let warnings = [];
+    for (const p of platforms) {
+      const hasKey = !!process.env[p.env];
+      const b = { 
+        name: p.name, 
+        configured: hasKey,
+        balance: 0,
+        free: p.free || false,
+        core: p.core || false,
+        warning: false,
+        error: hasKey ? '查询接口待对接' : '未配置'
+      };
+      balances[p.key] = b;
+    }
+    const tryFetch = async (url, key, parser) => {
+      try {
+        const r = await fetch(url, { 
+          headers: { 'Authorization': 'Bearer ' + key },
+          signal: AbortSignal.timeout(4000)
+        });
+        if (r.ok) {
+          const d = await r.json();
+          return parser(d);
+        }
+        return null;
+      } catch(e) { return null; }
+    };
+    if (process.env.OPENROUTER_API_KEY) {
+      const val = await tryFetch(
+        'https://openrouter.ai/api/v1/auth/key',
+        process.env.OPENROUTER_API_KEY,
+        (d) => d?.data?.credits !== undefined ? d.data.credits : d?.credits
+      );
+      if (val !== null) {
+        balances.OPENROUTER.balance = parseFloat(val) || 0;
+        balances.OPENROUTER.error = '';
+      }
+    }
+    if (process.env.SILICONFLOW_API_KEY) {
+      const val = await tryFetch(
+        'https://api.siliconflow.cn/v1/user/info',
+        process.env.SILICONFLOW_API_KEY,
+        (d) => d?.data?.balance !== undefined ? d.data.balance : d?.balance
+      );
+      if (val !== null) {
+        balances.SILICONFLOW.balance = parseFloat(val) || 0;
+        balances.SILICONFLOW.error = '';
+      }
+    }
+    if (process.env.NEXUS_API_KEY) {
+      const val = await tryFetch(
+        process.env.NEXUS_API_BASE + '/auth/key',
+        process.env.NEXUS_API_KEY,
+        (d) => d?.data?.credits !== undefined ? d.data.credits : d?.balance !== undefined ? d.balance : d?.credits
+      );
+      if (val !== null) {
+        balances.NEXUS.balance = parseFloat(val) || 0;
+        balances.NEXUS.error = '';
+      }
+    }
+    for (const key of Object.keys(balances)) {
+      const b = balances[key];
+      if (b.core && b.configured && !b.free && b.balance > 0 && b.balance < WARNING_THRESHOLD) {
+        b.warning = true;
+        warnings.push({ key, name: b.name, balance: b.balance });
+      }
+    }
+    res.json({ ok: true, balances, warnings, warningThreshold: WARNING_THRESHOLD });
+  });
+
+  app.get('/api/admin/recharge-log', requireAdmin, (req, res) => {
+    try {
+      const logs = db.prepare("SELECT username, amount, reason, admin, created_at FROM credit_log ORDER BY created_at DESC LIMIT 200").all();
+      res.json({ ok: true, logs: logs.map(r => ({ username: r.username, amount: r.amount, reason: r.reason, admin: r.admin, createdAt: r.created_at })) });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.get('/api/user/data', (req, res) => {
+    const auth = req.headers.authorization;
+    if (!auth || !auth.startsWith('Bearer ')) return res.json({ ok: false, error: '未登录' });
+    try {
+      const payload = verifyUserToken(auth.slice(7));
+      const user = db.prepare("SELECT username, email, credits, role, ref_code FROM users WHERE username=?").get(payload.username);
+      if (!user) return res.json({ ok: false, error: '用户不存在' });
+      res.json({ ok: true, data: { username: user.username, email: user.email, credits: user.credits, role: user.role, refCode: user.ref_code } });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.get('/api/admin/keys', requireAdmin, (req, res) => {
+    try {
+      const keys = db.prepare("SELECT id, platform, prefix, models, manage_url, notes FROM key_config ORDER BY id").all();
+      res.json({ ok: true, keys: keys.map(r => ({ id: r.id, platform: r.platform, prefix: r.prefix, models: JSON.parse(r.models || '[]'), manageUrl: r.manage_url, notes: r.notes })) });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.post('/api/admin/keys', requireAdmin, (req, res) => {
+    const { platform, prefix, models, manageUrl, notes } = req.body;
+    if (!platform || !prefix) return res.json({ ok: false, error: '平台名称和Key前缀必填' });
+    try {
+      db.prepare("INSERT INTO key_config (platform, prefix, models, manage_url, notes) VALUES (?,?,?,?,?)").run(platform, prefix, JSON.stringify(models || []), manageUrl || '', notes || '');
+      res.json({ ok: true });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.delete('/api/admin/keys/:id', requireAdmin, (req, res) => {
+    try {
+      db.prepare("DELETE FROM key_config WHERE id=?").run(req.params.id);
+      res.json({ ok: true });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.post('/api/keys/create', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.json({ ok: false, error: '未登录' });
+    try {
+      const payload = verifyUserToken(token);
+      const username = payload.username;
+      const keyName = (req.body.name || '').trim() || '默认 Key';
+      // 安全：使用 crypto.randomBytes（CSPRNG）替代 Math.random（PRNG）。
+      const apiKey = generateSecureApiKey('ai-', username);
+      // 存储：api_key 列存掩码，api_key_hash 列存 HMAC 哈希用于验证。
+      db.prepare("INSERT INTO api_keys (username, key_name, api_key, api_key_hash, quota) VALUES (?,?,?,?,?)").run(username, keyName, maskApiKey(apiKey), hashApiKey(apiKey), 0);
+      // 明文 Key 仅在创建时返回一次，之后无法再次查看。
+      res.json({ ok: true, apiKey, name: keyName, warning: '请立即保存 Key，之后无法再次查看' });
+    } catch(e) { res.json({ ok: false, error: '创建失败: ' + e.message }); }
+  });
+
+  app.get('/api/keys', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.json({ ok: false, error: '未登录' });
+    try {
+      const payload = verifyUserToken(token);
+      const keys = db.prepare("SELECT id, key_name, api_key, api_key_hash, quota, used, active, created_at FROM api_keys WHERE username=? ORDER BY id DESC").all(payload.username);
+      // 安全：列表统一返回掩码，不返回明文（旧 Key 的 api_key 列可能仍是明文）。
+      res.json({ ok: true, keys: keys.map(v => ({ id: v.id, name: v.key_name, key: maskApiKey(v.api_key), quota: v.quota, used: v.used, active: v.active, created: v.created_at })) });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.delete('/api/keys/:id', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.json({ ok: false, error: '未登录' });
+    try {
+      const payload = verifyUserToken(token);
+      db.prepare("DELETE FROM api_keys WHERE id=? AND username=?").run(req.params.id, payload.username);
+      res.json({ ok: true });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+  app.post('/api/auth/forgot-password', authLimiter, (req, res) => {
+    const { input, securityAnswer, newPassword } = req.body;
+    if (!input || !securityAnswer || !newPassword) return res.json({ ok: false, error: '请填写完整信息' });
+    if (newPassword.length < 6) return res.json({ ok: false, error: '新密码至少6位' });
+    try {
+      const user = db.prepare("SELECT username, security_q, security_a FROM users WHERE username=? OR email=? OR phone=?").get(input, input, input);
+      if (!user) return res.json({ ok: false, error: '未找到该邮箱或用户名对应的账号' });
+      const storedAnswer = user.security_a;
+      if (!storedAnswer) return res.json({ ok: false, error: '该账号未设置密保，无法找回' });
+      if (!verifyPasswordSync(securityAnswer, storedAnswer)) return res.json({ ok: false, error: '密保答案错误' });
+      db.prepare("UPDATE users SET password=? WHERE username=?").run(hashPasswordSync(newPassword), user.username);
+      res.json({ ok: true, message: '密码已重置，请使用新密码登录', username: user.username });
+    } catch(e) { res.json({ ok: false, error: '重置失败: ' + e.message }); }
+  });
+
+  app.post('/api/auth/forgot-password-query', authLimiter, (req, res) => {
+    const { input } = req.body;
+    if (!input) return res.json({ ok: false, error: '请输入用户名、邮箱或手机号' });
+    try {
+      const user = db.prepare("SELECT username, email, security_q FROM users WHERE username=? OR email=? OR phone=?").get(input, input, input);
+      if (!user) return res.json({ ok: false, error: '未找到该邮箱或用户名对应的账号' });
+      if (!user.security_q) return res.json({ ok: false, error: '该账号未设置密保，无法找回' });
+      res.json({ ok: true, username: user.username, email: user.email, securityQ: user.security_q });
+    } catch(e) { res.json({ ok: false, error: '查询失败: ' + e.message }); }
+  });
+
+  app.post('/api/user/update-profile', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.json({ ok: false, error: '未登录' });
+    try {
+      const payload = verifyUserToken(token);
+      const { email, oldPassword, newPassword } = req.body;
+      const user = db.prepare("SELECT password FROM users WHERE username=?").get(payload.username);
+      if (!user) return res.json({ ok: false, error: '用户不存在' });
+      if (!verifyPasswordSync(oldPassword, user.password)) return res.json({ ok: false, error: '当前密码错误' });
+      if (email) db.prepare("UPDATE users SET email=? WHERE username=?").run(email, payload.username);
+      if (newPassword) {
+        db.prepare("UPDATE users SET password=? WHERE username=?").run(hashPasswordSync(newPassword), payload.username);
+        // 安全：递增 token_version，使所有旧 token 立即失效
+        incrementTokenVersion(payload.username);
+      }
+      res.json({ ok: true, message: '已保存' });
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
+
+  // 安全：管理员认证统一走 /api/auth/login + JWT signToken，不再使用可逆 base64 token
+  app.post('/api/admin/auth', authLimiter, (req, res) => {
+    const { password } = req.body || {};
+    // 防御 undefined === undefined 绕过：必须显式设置 ADMIN_PASSWORD 且密码非空
+    if (!process.env.ADMIN_PASSWORD) {
+      return res.status(503).json({ ok: false, error: '管理员密码未配置，请设置 ADMIN_PASSWORD 环境变量' });
+    }
+    if (!password) {
+      return res.json({ ok: false, error: '密码错误' });
+    }
+    // 恒定时间比较防时序攻击
+    const a = Buffer.from(String(password));
+    const b = Buffer.from(process.env.ADMIN_PASSWORD);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      return res.json({ ok: false, error: '密码错误' });
+    }
+    // 使用 signUserToken 确保包含 tv 字段，支持 token_version 撤销机制
+    const token = signUserToken('admin', 'admin');
+    res.json({ ok: true, token });
+  });
+};

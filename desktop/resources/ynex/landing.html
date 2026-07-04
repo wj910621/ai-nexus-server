@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Y·NEX — 亿界互联·无界未来</title>
+<meta name="description" content="Y·NEX 智能创作平台，聚合全球 300+ AI 模型，提供 AI 聊天、绘画、小说、编程、办公、音乐、3D 生成等一站式创作服务。">
+<meta name="theme-color" content="#0d0721">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<style>
+:root {
+  --bg: #f5f3ff;
+  --bg-card: #ffffff;
+  --text: #1f1b2e;
+  --text-secondary: #6b6680;
+  --accent: #6c4ef5;
+  --accent-light: #a78bfa;
+  --accent-soft: rgba(108,78,245,0.08);
+  --border: rgba(0,0,0,0.06);
+  --shadow: 0 4px 24px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 48px rgba(108,78,245,0.18);
+  --radius: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0721;
+    --bg-card: rgba(255,255,255,0.04);
+    --text: #f3f0ff;
+    --text-secondary: #a39cb8;
+    --accent-soft: rgba(108,78,245,0.15);
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 4px 24px rgba(0,0,0,0.25);
+  }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* Header */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(245,243,255,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+@media (prefers-color-scheme: dark) {
+  .header { background: rgba(13,7,33,0.85); }
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 1.35rem; color: var(--text);
+}
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #6c4ef5, #a855f7);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.1rem;
+}
+.logo-slogan {
+  font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-left: 8px;
+}
+.header-actions { display: flex; gap: 12px; align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 10px 20px; border-radius: 24px;
+  font-weight: 600; font-size: 0.9rem; cursor: pointer;
+  transition: all 0.2s; border: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #6c4ef5, #a855f7);
+  color: #fff; box-shadow: 0 4px 16px rgba(108,78,245,0.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(108,78,245,0.45); }
+.btn-outline {
+  background: var(--bg-card); color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { background: var(--accent-soft); }
+
+/* Hero */
+.hero {
+  padding: 140px 0 100px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(circle at 30% 20%, rgba(108,78,245,0.12) 0%, transparent 40%),
+              radial-gradient(circle at 70% 80%, rgba(168,85,247,0.1) 0%, transparent 40%);
+}
+.hero-inner { position: relative; z-index: 1; text-align: center; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--accent-soft); color: var(--accent);
+  font-size: 0.8rem; font-weight: 600; margin-bottom: 24px;
+}
+.hero-title {
+  font-size: clamp(2.2rem, 6vw, 4rem); font-weight: 900; line-height: 1.15;
+  margin-bottom: 16px; letter-spacing: -1px;
+}
+.hero-title span {
+  background: linear-gradient(135deg, #6c4ef5, #a855f7, #ec4899);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-slogan {
+  font-size: clamp(1.1rem, 3vw, 1.6rem); color: var(--text-secondary);
+  margin-bottom: 12px; font-weight: 500;
+}
+.hero-sub {
+  font-size: 1rem; color: var(--text-secondary); max-width: 640px; margin: 0 auto 36px;
+}
+.hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
+.hero-stats {
+  display: flex; gap: 40px; justify-content: center; flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+.stat-label { font-size: 0.85rem; color: var(--text-secondary); }
+
+/* Features */
+.features { padding: 80px 0; }
+.section-title {
+  text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 12px;
+}
+.section-sub { text-align: center; color: var(--text-secondary); margin-bottom: 48px; }
+.feature-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;
+}
+.feature-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 24px; box-shadow: var(--shadow); transition: all 0.2s;
+}
+.feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgba(108,78,245,0.2); }
+.feature-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; margin-bottom: 16px;
+  background: var(--accent-soft);
+}
+.feature-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.feature-card p { font-size: 0.85rem; color: var(--text-secondary); }
+
+/* Local AI */
+.local-ai {
+  padding: 80px 0; background: var(--accent-soft);
+}
+.local-ai-inner {
+  display: flex; align-items: center; gap: 60px; flex-wrap: wrap;
+}
+.local-ai-content { flex: 1; min-width: 300px; }
+.local-ai-content h2 { font-size: 2rem; margin-bottom: 16px; }
+.local-ai-content p { color: var(--text-secondary); margin-bottom: 24px; }
+.local-ai-list { list-style: none; }
+.local-ai-list li { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; color: var(--text-secondary); }
+.local-ai-visual {
+  flex: 1; min-width: 300px; height: 320px; border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(108,78,245,0.2), rgba(168,85,247,0.15));
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+}
+.particle-face {
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(108,78,245,0.4));
+  box-shadow: 0 0 60px rgba(108,78,245,0.5), inset 0 0 40px rgba(255,255,255,0.2);
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* CTA */
+.cta {
+  padding: 100px 0; text-align: center;
+  background: radial-gradient(circle at 50% 50%, rgba(108,78,245,0.1) 0%, transparent 60%);
+}
+.cta h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 16px; }
+.cta p { color: var(--text-secondary); margin-bottom: 32px; font-size: 1.05rem; }
+
+/* Footer */
+.footer {
+  padding: 40px 0; border-top: 1px solid var(--border); text-align: center;
+  color: var(--text-secondary); font-size: 0.85rem;
+}
+.footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+.footer-links a:hover { color: var(--accent); }
+
+@media (max-width: 768px) {
+  .header-actions .btn-outline { display: none; }
+  .hero { padding: 120px 0 60px; }
+  .local-ai-inner { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon" style="width:36px;height:36px;border-radius:9px;overflow:hidden;box-shadow:0 2px 8px rgba(99,102,241,0.35)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="100%" height="100%"><defs><linearGradient id="lbg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7c3aed"/><stop offset="50%" stop-color="#6366f1"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient><linearGradient id="lglow" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a78bfa" stop-opacity="0.9"/><stop offset="100%" stop-color="#60a5fa" stop-opacity="0.6"/></linearGradient><filter id="lsoftGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="url(#lbg)"/><circle cx="512" cy="512" r="360" fill="none" stroke="url(#lglow)" stroke-width="6" opacity="0.35"/><circle cx="512" cy="512" r="300" fill="none" stroke="url(#lglow)" stroke-width="3" opacity="0.25"/><g fill="#ffffff" opacity="0.6"><circle cx="320" cy="280" r="8"/><circle cx="720" cy="240" r="6"/><circle cx="780" cy="520" r="10"/><circle cx="260" cy="600" r="7"/><circle cx="700" cy="760" r="9"/><circle cx="340" cy="780" r="5"/></g><g filter="url(#lsoftGlow)"><path d="M380 320 L512 520 L644 320" fill="none" stroke="#ffffff" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/><line x1="512" y1="520" x2="512" y2="740" stroke="#ffffff" stroke-width="56" stroke-linecap="round"/><circle cx="512" cy="512" r="42" fill="#ffffff"/><path d="M620 420 Q760 512 620 640" fill="none" stroke="#a78bfa" stroke-width="28" stroke-linecap="round" opacity="0.95"/><path d="M404 420 Q264 512 404 640" fill="none" stroke="#60a5fa" stroke-width="28" stroke-linecap="round" opacity="0.85"/></g></svg></div>
+      <span>Y·NEX</span>
+      <span class="logo-slogan">亿界互联·无界未来</span>
+    </a>
+    <div class="header-actions">
+      <a href="/app/" class="btn btn-outline">进入应用</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container hero-inner">
+    <div class="hero-badge">🚀 未来已来，智能无界</div>
+    <h1 class="hero-title"><span>Y·NEX</span> 智能创作平台</h1>
+    <p class="hero-slogan">亿界互联 · 无界未来</p>
+    <p class="hero-sub">聚合全球 300+ AI 模型，一个平台搞定对话、绘画、小说、编程、办公、音乐、3D 生成。让每一次创作，都超越想象。</p>
+    <div class="hero-cta">
+      <a href="/app/" class="btn btn-primary" style="font-size:1rem;padding:14px 32px">进入应用</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num">300+</div><div class="stat-label">AI 模型</div></div>
+      <div class="stat-item"><div class="stat-num">16+</div><div class="stat-label">预制智能体</div></div>
+      <div class="stat-item"><div class="stat-num">10+</div><div class="stat-label">创作场景</div></div>
+      <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">站式平台</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="container">
+    <h2 class="section-title">一站式 AI 创作能力</h2>
+    <p class="section-sub">覆盖文本、图像、音频、代码、办公等全场景需求</p>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-icon">💬</div><h3>AI 聊天</h3><p>多模型同时对话，一次提问获取多个顶尖 AI 的回答。</p></div>
+      <div class="feature-card"><div class="feature-icon">🖼</div><h3>AI 绘画</h3><p>Midjourney 提示词生成与图像创作，让灵感快速可视化。</p></div>
+      <div class="feature-card"><div class="feature-icon">📖</div><h3>AI 小说</h3><p>从世界观到章节正文，AI 辅助完成长篇创作与润色。</p></div>
+      <div class="feature-card"><div class="feature-icon">💻</div><h3>AI 编程</h3><p>代码生成、Bug 修复、网页构建，开发效率倍增。</p></div>
+      <div class="feature-card"><div class="feature-icon">💼</div><h3>AI 办公</h3><p>文档写作、邮件起草、PPT 大纲、智能翻译、文档摘要。</p></div>
+      <div class="feature-card"><div class="feature-icon">🎵</div><h3>AI 音乐</h3><p>文本生成音乐与歌曲，为内容创作配乐。</p></div>
+      <div class="feature-card"><div class="feature-icon">🧊</div><h3>3D 生成</h3><p>文本描述转 3D 模型，高质量 PBR 材质输出。</p></div>
+      <div class="feature-card"><div class="feature-icon">🎬</div><h3>AI 创作工场</h3><p>图片、视频、漫剧一体化创作工作流。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="local-ai">
+  <div class="container local-ai-inner">
+    <div class="local-ai-content">
+      <h2>Y·NEX 本地AI</h2>
+      <p>不止于云端。下载 Y·NEX Desktop，在你的电脑上运行本地 AI 核心，拥有 3D 粒子人脸、语音唤醒、本地大模型和设备控制能力。</p>
+      <ul class="local-ai-list">
+        <li>✅ 3D 粒子人脸可视化交互</li>
+        <li>✅ 语音唤醒，自然语言控制</li>
+        <li>✅ 本地大模型推理，隐私数据不出本机</li>
+        <li>✅ 智能家居与设备联动</li>
+      </ul>
+      <div style="margin-top:24px">
+        <a href="/download/" class="btn btn-primary">⬇ 下载 Y·NEX Desktop</a>
+      </div>
+    </div>
+    <div class="local-ai-visual">
+      <div class="particle-face"></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>未来已来，立即开启</h2>
+    <p>加入 Y·NEX，体验无界 AI 创作。注册即送 30 积分免费体验。</p>
+    <a href="/app/" class="btn btn-primary" style="font-size:1.05rem;padding:14px 36px">🚀 免费体验 Y·NEX</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-links">
+      <a href="/app/">进入应用</a>
+      <a href="/app/#pricing">订阅套餐</a>
+      <a href="/app/#privacy">隐私政策</a>
+      <a href="mailto:contact@ynexai.cn">联系我们</a>
+    </div>
+    <div>© 2026 Y·NEX · 亿界网络科技工作室 · 亿界互联·无界未来</div>
+    <div style="margin-top:8px;font-size:0.78rem;opacity:0.85">
+      <a href="https://beian.miit.gov.cn" target="_blank" rel="noreferrer" style="color:var(--text-secondary);text-decoration:none">蜀ICP备2026030046号</a>
+      <span style="margin:0 10px">|</span>
+      <a href="https://beian.mps.gov.cn/#/query/webSearch?code=51110202002408" rel="noreferrer" target="_blank" style="color:var(--text-secondary);text-decoration:none">川公网安备51110202002408号</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function downloadDesktopApp(){
+  location.href = '/download/';
+}
+</script>
+
+</body>
+</html>

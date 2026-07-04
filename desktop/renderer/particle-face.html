@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Y·NEX 粒子界面</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    --theme-color: #00ffff;
+    background: #000000;
+    color: #00ffff;
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  #canvas-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+  }
+  #overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .title {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 12px;
+    color: #00ffff;
+    text-shadow: 0 0 20px #00ffff, 0 0 40px #0088ff;
+    opacity: 0.8;
+  }
+  .subtitle {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: #00aaff;
+    opacity: 0.6;
+  }
+  .status-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 30px;
+    font-size: 11px;
+    color: #00aaff;
+    opacity: 0.7;
+    letter-spacing: 2px;
+  }
+  .status-bar .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 8px #00ff88;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .control-panel {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: auto;
+  }
+  .ctrl-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    background: rgba(0, 30, 50, 0.4);
+    color: #00ffff;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+  }
+  .ctrl-btn:hover {
+    background: rgba(0, 255, 255, 0.15);
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    transform: scale(1.1);
+  }
+  .ctrl-btn .icon { font-size: 20px; margin-bottom: 2px; }
+  .ctrl-btn .label { font-size: 9px; letter-spacing: 1px; }
+  .shape-panel {
+    position: fixed;
+    left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+  }
+  .shape-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    background: rgba(0, 30, 50, 0.4);
+    color: #00aacc;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 4px;
+    letter-spacing: 2px;
+    backdrop-filter: blur(10px);
+    text-align: center;
+    min-width: 100px;
+  }
+  .shape-btn:hover, .shape-btn.active {
+    color: #00ffff;
+    border-color: #00ffff;
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  }
+  .chat-bubble {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 60%;
+    padding: 15px 25px;
+    background: rgba(0, 30, 50, 0.6);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+    color: #aaffff;
+    font-size: 14px;
+    line-height: 1.6;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.5s;
+    text-align: center;
+    pointer-events: none;
+  }
+  .chat-bubble.show { opacity: 1; }
+  .input-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 560px;
+    max-width: 85%;
+    pointer-events: auto;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .input-bar input {
+    flex: 1;
+    padding: 12px 20px;
+    background: rgba(0, 30, 50, 0.6);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 30px;
+    color: #00ffff;
+    font-size: 14px;
+    outline: none;
+    backdrop-filter: blur(10px);
+  }
+  .input-bar input:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  }
+  .input-bar input::placeholder { color: rgba(0, 170, 200, 0.5); }
+  .voice-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    background: rgba(0, 30, 50, 0.6);
+    color: #00ffff;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+  }
+  .voice-btn:hover {
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+  }
+  .voice-btn.listening {
+    background: rgba(255, 68, 102, 0.3);
+    border-color: #ff4466;
+    color: #ff4466;
+    box-shadow: 0 0 20px rgba(255, 68, 102, 0.6);
+    animation: micPulse 1s infinite;
+  }
+  .voice-btn.muted { opacity: 0.4; }
+  @keyframes micPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  .color-picker {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    display: flex;
+    gap: 8px;
+    pointer-events: auto;
+  }
+  .color-dot {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.1);
+    transition: transform 0.2s;
+  }
+  .color-dot:hover { transform: scale(1.2); }
+  .color-dot.active { border-color: white; transform: scale(1.2); }
+  .hud-circle {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 400px; height: 400px;
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hud-circle::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px;
+    width: 100%; height: 100%;
+    border: 2px solid transparent;
+    border-top-color: rgba(0, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: rotate 10s linear infinite;
+  }
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="overlay">
+  <div class="title">Y·NEX</div>
+  <div class="subtitle">Y I J I E &nbsp; AI &nbsp; A S S I S T A N T</div>
+
+  <div class="hud-circle"></div>
+
+  <!-- 左侧：形态切换 -->
+  <div class="shape-panel">
+    <div class="shape-btn active" onclick="changeShape('face', event)">人脸 FACE</div>
+    <div class="shape-btn" onclick="changeShape('sphere', event)">球体 SPHERE</div>
+    <div class="shape-btn" onclick="changeShape('torus', event)">圆环 TORUS</div>
+    <div class="shape-btn" onclick="changeShape('nebula', event)">星云 NEBULA</div>
+    <div class="shape-btn" onclick="changeShape('heart', event)">心形 HEART</div>
+    <div class="shape-btn" onclick="changeShape('wave', event)">波形 WAVE</div>
+    <div class="shape-btn" onclick="changeShape('dna', event)">DNA DNA</div>
+  </div>
+
+  <!-- 右侧：功能按钮 -->
+  <div class="control-panel">
+    <div class="ctrl-btn" onclick="toggleTalk()">
+      <div class="icon">🎤</div>
+      <div class="label">对话</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('weather', event)">
+      <div class="icon">🌤️</div>
+      <div class="label">天气</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('light', event)">
+      <div class="icon">💡</div>
+      <div class="label">灯光</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('music', event)">
+      <div class="icon">🎵</div>
+      <div class="label">音乐</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('system', event)">
+      <div class="icon">⚙️</div>
+      <div class="label">系统</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('camera', event)">
+      <div class="icon">📷</div>
+      <div class="label">视觉</div>
+    </div>
+    <div class="ctrl-btn" onclick="toggleMorph()">
+      <div class="icon">✨</div>
+      <div class="label">变换</div>
+    </div>
+  </div>
+
+  <!-- 底部状态 -->
+  <div class="status-bar">
+    <span><span class="dot"></span>在线</span>
+    <span id="stat-cpu">CPU 12%</span>
+    <span id="stat-mem">内存 4.2G</span>
+    <span id="clock">--:--</span>
+  </div>
+
+  <!-- 对话气泡 -->
+  <div class="chat-bubble" id="chatBubble">Y·NEX 已就绪，随时待命，先生。</div>
+
+  <!-- 输入框 -->
+  <div class="input-bar" id="inputBar">
+    <div class="voice-btn" id="micBtn" onclick="toggleVoice()" title="语音输入">🎤</div>
+    <input type="text" id="chatInput" placeholder="有什么吩咐，先生？" onkeydown="handleInput(event)">
+    <div class="voice-btn" id="speakBtn" onclick="toggleAutoSpeak()" title="语音输出开关">🔊</div>
+  </div>
+
+  <!-- 颜色切换 -->
+  <div class="color-picker">
+    <div class="color-dot active" style="background:#00ffff;box-shadow:0 0 10px #00ffff" onclick="setColor('#00ffff', this)"></div>
+    <div class="color-dot" style="background:#ff00ff;box-shadow:0 0 10px #ff00ff" onclick="setColor('#ff00ff', this)"></div>
+    <div class="color-dot" style="background:#00ff88;box-shadow:0 0 10px #00ff88" onclick="setColor('#00ff88', this)"></div>
+    <div class="color-dot" style="background:#ffaa00;box-shadow:0 0 10px #ffaa00" onclick="setColor('#ffaa00', this)"></div>
+    <div class="color-dot" style="background:#ff4466;box-shadow:0 0 10px #ff4466" onclick="setColor('#ff4466', this)"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+// ============================================================
+// Three.js 3D 粒子系统
+// ============================================================
+let scene, camera, renderer, particles, particleSystem;
+let targetPositions = [];
+let currentPositions = [];
+let morphProgress = 1;
+let morphing = false;
+let autoMorph = false;
+let currentShape = 'face';
+let particleColor = new THREE.Color(0x00ffff);
+let currentColor = '#00ffff';
+let clock = new THREE.Clock();
+let mouseX = 0, mouseY = 0;
+
+const PARTICLE_COUNT = 8000;
+
+function init() {
+  const container = document.getElementById('canvas-container');
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(
+    60, window.innerWidth / window.innerHeight, 0.1, 1000
+  );
+  camera.position.z = 5;
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  // 粒子几何
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(PARTICLE_COUNT * 3);
+  const colors = new Float32Array(PARTICLE_COUNT * 3);
+  const sizes = new Float32Array(PARTICLE_COUNT);
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 4;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 4;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+
+    colors[i * 3] = 0;
+    colors[i * 3 + 1] = 1;
+    colors[i * 3 + 2] = 1;
+
+    sizes[i] = Math.random() * 2 + 1;
+  }
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  // 粒子材质（发光点）
+  const material = new THREE.PointsMaterial({
+    size: 0.03,
+    vertexColors: true,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    opacity: 0.8,
+    sizeAttenuation: true,
+  });
+
+  particleSystem = new THREE.Points(geometry, material);
+  scene.add(particleSystem);
+
+  // 初始形态
+  targetPositions = generateFaceShape();
+  currentPositions = Array.from(positions);
+
+  // 鼠标移动
+  document.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('resize', onResize);
+
+  animate();
+}
+
+function onMouseMove(e) {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ============================================================
+// 形态生成器
+// ============================================================
+
+function generateFaceShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    // 球形基底（人脸近似）
+    let phi = Math.acos(2 * Math.random() - 1);
+    let theta = 2 * Math.PI * Math.random();
+    let r = 1.4 + Math.random() * 0.1;
+
+    // 纵向压缩成人脸比例
+    let x = r * Math.sin(phi) * Math.cos(theta) * 1.0;
+    let y = r * Math.cos(phi) * 1.2;
+    let z = r * Math.sin(phi) * Math.sin(theta) * 0.8;
+
+    // 眼睛凹陷
+    const eyeLeftDist = Math.sqrt((x + 0.45) ** 2 + (y - 0.3) ** 2 + z ** 2);
+    const eyeRightDist = Math.sqrt((x - 0.45) ** 2 + (y - 0.3) ** 2 + z ** 2);
+    if (eyeLeftDist < 0.25) { z -= 0.3; }
+    if (eyeRightDist < 0.25) { z -= 0.3; }
+
+    // 鼻子凸起
+    const noseDist = Math.sqrt(x ** 2 + (y + 0.1) ** 2);
+    if (noseDist < 0.15 && y < 0.2 && y > -0.3) { z += 0.2; }
+
+    // 嘴巴凹陷
+    const mouthDist = Math.sqrt((x * 2) ** 2 + (y + 0.55) ** 2);
+    if (mouthDist < 0.3 && y < -0.3) { z -= 0.15; }
+
+    // 下巴尖一点
+    if (y < -0.8) {
+      x *= 1 - (y + 0.8) * 0.5;
+      z *= 1 - (y + 0.8) * 0.3;
+    }
+
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = y;
+    pos[i * 3 + 2] = z;
+  }
+  return pos;
+}
+
+function generateSphereShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const phi = Math.acos(2 * Math.random() - 1);
+    const theta = 2 * Math.PI * Math.random();
+    const r = 1.5 + Math.random() * 0.1;
+    pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    pos[i * 3 + 2] = r * Math.cos(phi);
+  }
+  return pos;
+}
+
+function generateTorusShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  const R = 1.2;
+  const r = 0.4;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const u = Math.random() * Math.PI * 2;
+    const v = Math.random() * Math.PI * 2;
+    const rr = r + (Math.random() - 0.5) * 0.1;
+    pos[i * 3] = (R + rr * Math.cos(v)) * Math.cos(u);
+    pos[i * 3 + 1] = rr * Math.sin(v);
+    pos[i * 3 + 2] = (R + rr * Math.cos(v)) * Math.sin(u);
+  }
+  return pos;
+}
+
+function generateNebulaShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    // 螺旋星云
+    const arm = Math.floor(Math.random() * 3);
+    const angle = arm * (Math.PI * 2 / 3) + Math.random() * 0.8;
+    const dist = Math.random() * 2;
+    const spread = dist * 0.3;
+    pos[i * 3] = Math.cos(angle) * dist + (Math.random() - 0.5) * spread;
+    pos[i * 3 + 1] = (Math.random() - 0.5) * 0.5;
+    pos[i * 3 + 2] = Math.sin(angle) * dist + (Math.random() - 0.5) * spread;
+  }
+  return pos;
+}
+
+function generateHeartShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const t = Math.random() * Math.PI * 2;
+    const r = Math.random() * 0.8 + 0.2;
+    const x = 16 * Math.pow(Math.sin(t), 3) * r / 16 * 1.2;
+    const y = (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * r / 16 * 1.2;
+    const z = (Math.random() - 0.5) * 0.4;
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = y;
+    pos[i * 3 + 2] = z;
+  }
+  return pos;
+}
+
+function generateWaveShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const x = (Math.random() - 0.5) * 4;
+    const z = (Math.random() - 0.5) * 3;
+    const y = Math.sin(x * 2) * Math.cos(z * 2) * 0.5 + (Math.random() - 0.5) * 0.1;
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = y;
+    pos[i * 3 + 2] = z;
+  }
+  return pos;
+}
+
+function generateDnaShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const t = (Math.random() - 0.5) * 3;
+    const strand = Math.random() < 0.5 ? 0 : Math.PI;
+    const r = 0.8;
+    const x = Math.cos(t * 3 + strand) * r + (Math.random() - 0.5) * 0.1;
+    const y = t;
+    const z = Math.sin(t * 3 + strand) * r + (Math.random() - 0.5) * 0.1;
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = y;
+    pos[i * 3 + 2] = z;
+  }
+  return pos;
+}
+
+// ============================================================
+// 形态切换
+// ============================================================
+
+const shapeGenerators = {
+  face: generateFaceShape,
+  sphere: generateSphereShape,
+  torus: generateTorusShape,
+  nebula: generateNebulaShape,
+  heart: generateHeartShape,
+  wave: generateWaveShape,
+  dna: generateDnaShape,
+};
+
+function changeShape(shapeName, evt) {
+  if (shapeName === currentShape && morphProgress >= 1) return;
+
+  currentShape = shapeName;
+  targetPositions = shapeGenerators[shapeName]();
+  morphProgress = 0;
+  morphing = true;
+
+  // 更新按钮状态
+  document.querySelectorAll('.shape-btn').forEach(btn => btn.classList.remove('active'));
+  const e = evt || window.event;
+  if (e && e.target) e.target.classList.add('active');
+}
+
+function toggleMorph() {
+  autoMorph = !autoMorph;
+  showMessage(autoMorph ? '自动变换已开启' : '自动变换已关闭');
+}
+
+const shapeOrder = ['face', 'sphere', 'torus', 'nebula', 'heart', 'wave', 'dna'];
+let autoMorphIndex = 0;
+let autoMorphTimer = 0;
+
+// ============================================================
+// 动画循环
+// ============================================================
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  const elapsed = clock.getElapsedTime();
+
+  const positions = particleSystem.geometry.attributes.position.array;
+  const colors = particleSystem.geometry.attributes.color.array;
+
+  // 形态插值
+  if (morphing && morphProgress < 1) {
+    morphProgress += delta * 1.5;
+    if (morphProgress >= 1) {
+      morphProgress = 1;
+      morphing = false;
+    }
+    const t = easeOutCubic(morphProgress);
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const idx = i * 3;
+      positions[idx] = currentPositions[idx] + (targetPositions[idx] - currentPositions[idx]) * t;
+      positions[idx + 1] = currentPositions[idx + 1] + (targetPositions[idx + 1] - currentPositions[idx + 1]) * t;
+      positions[idx + 2] = currentPositions[idx + 2] + (targetPositions[idx + 2] - currentPositions[idx + 2]) * t;
+    }
+  }
+
+  if (morphProgress >= 1 && !morphing) {
+    // 保存当前位置作为下次变换起点
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      currentPositions[i * 3] = positions[i * 3];
+      currentPositions[i * 3 + 1] = positions[i * 3 + 1];
+      currentPositions[i * 3 + 2] = positions[i * 3 + 2];
+    }
+  }
+
+  // 呼吸动画 + 微扰动
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const idx = i * 3;
+    const breath = 1 + Math.sin(elapsed * 1.5 + i * 0.01) * 0.02;
+    positions[idx] *= breath;
+    positions[idx + 1] *= breath;
+    positions[idx + 2] *= breath;
+
+    // 微抖动
+    positions[idx] += Math.sin(elapsed * 2 + i * 0.05) * 0.005;
+    positions[idx + 1] += Math.cos(elapsed * 1.8 + i * 0.03) * 0.005;
+  }
+
+  // 自动变换
+  if (autoMorph) {
+    autoMorphTimer += delta;
+    if (autoMorphTimer > 5 && !morphing) {
+      autoMorphTimer = 0;
+      autoMorphIndex = (autoMorphIndex + 1) % shapeOrder.length;
+      const nextShape = shapeOrder[autoMorphIndex];
+      targetPositions = shapeGenerators[nextShape]();
+      morphProgress = 0;
+      morphing = true;
+      currentShape = nextShape;
+      document.querySelectorAll('.shape-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', shapeOrder[i] === nextShape);
+      });
+    }
+  }
+
+  // 鼠标跟随旋转
+  particleSystem.rotation.y = mouseX * 0.3;
+  particleSystem.rotation.x = mouseY * 0.2;
+
+  // 整体缓慢自转
+  if (!morphing) {
+    particleSystem.rotation.y += delta * 0.1;
+  }
+
+  particleSystem.geometry.attributes.position.needsUpdate = true;
+  particleSystem.geometry.attributes.color.needsUpdate = true;
+
+  // 时钟更新
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${hh}:${mm}:${ss}`;
+
+  renderer.render(scene, camera);
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+// ============================================================
+// 颜色切换（完整同步所有UI元素）
+// ============================================================
+
+function setColor(color, el) {
+  currentColor = color;
+  particleColor = new THREE.Color(color);
+  const colors = particleSystem.geometry.attributes.color.array;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const idx = i * 3;
+    colors[idx] = particleColor.r;
+    colors[idx + 1] = particleColor.g;
+    colors[idx + 2] = particleColor.b;
+  }
+  particleSystem.geometry.attributes.color.needsUpdate = true;
+
+  // 更新UI颜色
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+
+  document.querySelector('.title').style.color = color;
+  document.querySelector('.title').style.textShadow = `0 0 20px ${color}, 0 0 40px ${color}88`;
+
+  // 更新CSS变量 --theme-color
+  document.body.style.setProperty('--theme-color', color);
+
+  // 更新副标题颜色
+  const subtitle = document.querySelector('.subtitle');
+  if (subtitle) subtitle.style.color = color;
+
+  // 更新状态栏文字颜色
+  const statusBar = document.querySelector('.status-bar');
+  if (statusBar) statusBar.style.color = color;
+
+  // 更新HUD圆环边框
+  const hudCircle = document.querySelector('.hud-circle');
+  if (hudCircle) hudCircle.style.borderColor = color + '1a';
+
+  // 更新对话气泡边框
+  const chatBubble = document.getElementById('chatBubble');
+  if (chatBubble) {
+    chatBubble.style.borderColor = color + '4d';
+    chatBubble.style.color = color;
+  }
+
+  // 更新输入框边框
+  const chatInput = document.getElementById('chatInput');
+  if (chatInput) chatInput.style.borderColor = color + '4d';
+}
+
+// ============================================================
+// 通信桥：Electron IPC（window.ynex.chat.send）
+// ============================================================
+
+// 从 IPC 返回值中提取回复文本
+function extractReply(res) {
+  if (res == null) return '已收到您的指令';
+  if (typeof res === 'string') return res;
+  if (res.answer) return res.answer;
+  if (res.reply) return res.reply;
+  if (res.content) return res.content;
+  if (res.data) {
+    if (res.data.answer) return res.data.answer;
+    if (res.data.reply) return res.data.reply;
+    if (res.data.content) return res.data.content;
+    if (res.data.choices && res.data.choices[0] && res.data.choices[0].message) {
+      return res.data.choices[0].message.content || '已收到您的指令';
+    }
+  }
+  if (res.ok === false && res.error) return res.error;
+  return '已收到您的指令';
+}
+
+async function sendMessage(text) {
+  showMessage('正在思考...');
+  // 1) 优先使用 Electron IPC 桥（preload 暴露 / 父窗口注入）
+  if (window.ynex && window.ynex.chat && window.ynex.chat.send) {
+    try {
+      const res = await window.ynex.chat.send(text);
+      const reply = extractReply(res);
+      showMessage(reply);
+      speakOut(reply);
+    } catch (e) {
+      const msg = (e && e.message) ? e.message : String(e);
+      showMessage('通信异常：' + msg);
+    }
+    return;
+  }
+  // 2) iframe 场景：通过父窗口中转到 AI 后端
+  if (window.parent && window.parent !== window) {
+    const targetOrigin = document.referrer || window.location.origin || '*';
+    window.parent.postMessage({ source: 'particle-face', type: 'particle-chat', text: text }, targetOrigin);
+    return;
+  }
+  // 3) 演示模式
+  setTimeout(() => {
+    const reply = '收到：' + text + '（演示模式）';
+    showMessage(reply);
+    speakOut(reply);
+  }, 800);
+}
+
+// 允许的来源白名单（用于校验 message 事件）
+const ALLOWED_ORIGINS = (function () {
+  const list = [];
+  try {
+    if (window.location.ancestorOrigins && window.location.ancestorOrigins.length) {
+      for (let i = 0; i < window.location.ancestorOrigins.length; i++) {
+        list.push(window.location.ancestorOrigins[i]);
+      }
+    }
+  } catch (_) {}
+  if (document.referrer) {
+    try { list.push(new URL(document.referrer).origin); } catch (_) {}
+  }
+  if (window.location.origin && window.location.origin !== 'null') {
+    list.push(window.location.origin);
+  }
+  return list;
+})();
+
+// 监听父窗口返回的 AI 回复（iframe 中转场景），校验来源 origin
+window.addEventListener('message', function (e) {
+  if (ALLOWED_ORIGINS.length && ALLOWED_ORIGINS.indexOf(e.origin) === -1) return;
+  const d = e.data;
+  if (d && d.source === 'particle-face-reply' && d.type === 'particle-chat-reply') {
+    const reply = extractReply(d.res);
+    showMessage(reply);
+    speakOut(reply);
+  }
+});
+
+// ============================================================
+// 消息队列：避免多条消息互相覆盖
+// ============================================================
+
+const messageQueue = [];
+let isShowingMessage = false;
+
+function showMessage(text, isUser) {
+  messageQueue.push({ text: text, isUser: isUser || false });
+  if (!isShowingMessage) processMessageQueue();
+}
+
+function processMessageQueue() {
+  if (messageQueue.length === 0) {
+    isShowingMessage = false;
+    return;
+  }
+  isShowingMessage = true;
+  const item = messageQueue.shift();
+  const text = item.text;
+  const isUser = item.isUser;
+  const bubble = document.getElementById('chatBubble');
+  if (bubble) {
+    bubble.textContent = (isUser ? '你: ' : 'AI: ') + text;
+    bubble.classList.add('show');
+    var duration = Math.max(3000, Math.min(8000, text.length * 50));
+    clearTimeout(processMessageQueue._timer);
+    processMessageQueue._timer = setTimeout(function () {
+      bubble.classList.remove('show');
+      setTimeout(processMessageQueue, 300);
+    }, duration);
+  } else {
+    isShowingMessage = false;
+  }
+}
+
+// 暴露给外部调用
+window.pyShowMessage = showMessage;
+window.pyChangeShape = changeShape;
+window.pySetColor = (color) => {
+  const dots = document.querySelectorAll('.color-dot');
+  for (let dot of dots) {
+    if (dot.style.background.includes(color.replace('#',''))) {
+      setColor(color, dot);
+      return;
+    }
+  }
+  setColor(color, document.querySelector('.color-dot'));
+};
+
+function quickAction(type, evt) {
+  // 按钮高亮反馈
+  const ev = evt || window.event;
+  if (ev && ev.target) {
+    ev.target.style.background = currentColor + '22';
+    setTimeout(function () { ev.target.style.background = ''; }, 300);
+  }
+  const actions = {
+    weather: '查询天气',
+    light: '控制灯光',
+    music: '播放音乐',
+    system: '系统状态',
+    camera: '视觉检测',
+  };
+  sendMessage(actions[type] || type);
+}
+
+// ============================================================
+// 对话与交互
+// ============================================================
+
+function toggleTalk() {
+  const inputBar = document.getElementById('inputBar');
+  if (inputBar.style.display === 'flex') {
+    inputBar.style.display = 'none';
+  } else {
+    inputBar.style.display = 'flex';
+    document.getElementById('chatInput').focus();
+  }
+}
+
+function handleInput(e) {
+  if (e.key === 'Enter') {
+    const text = e.target.value.trim();
+    if (text) {
+      sendMessage(text);
+      e.target.value = '';
+    }
+  }
+}
+
+// ============================================================
+// 语音输入：Web Speech API - SpeechRecognition
+// ============================================================
+
+let recognition = null;
+let recognizing = false;
+
+function toggleVoice() {
+  // 优先使用 preload 暴露的 voice API
+  if (window.ynex && window.ynex.voice && typeof window.ynex.voice.recognize === 'function') {
+    const micBtn = document.getElementById('micBtn');
+    if (recognizing) {
+      try { window.ynex.voice.stopSpeak && window.ynex.voice.stopSpeak(); } catch (_) {}
+      recognizing = false;
+      micBtn.classList.remove('listening');
+      return;
+    }
+    recognizing = true;
+    micBtn.classList.add('listening');
+    showMessage('正在聆听...');
+    window.ynex.voice.recognize(function (res) {
+      if (res && res.text) {
+        document.getElementById('chatInput').value = res.text;
+        sendMessage(res.text);
+        document.getElementById('chatInput').value = '';
+      }
+      if (res && (res.done || res.error)) {
+        recognizing = false;
+        micBtn.classList.remove('listening');
+        if (res.error) showMessage('语音识别异常：' + res.error);
+      }
+    });
+    return;
+  }
+
+  // 回退：直接使用 Web Speech API
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    showMessage('当前环境不支持语音识别');
+    return;
+  }
+  const micBtn = document.getElementById('micBtn');
+  if (recognizing) {
+    try { recognition && recognition.stop(); } catch (_) {}
+    return;
+  }
+  recognition = new SR();
+  recognition.lang = 'zh-CN';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onstart = function () {
+    recognizing = true;
+    micBtn.classList.add('listening');
+    showMessage('正在聆听...');
+  };
+  recognition.onresult = function (ev) {
+    const text = ev.results[0][0].transcript;
+    document.getElementById('chatInput').value = text;
+    sendMessage(text);
+    document.getElementById('chatInput').value = '';
+  };
+  recognition.onerror = function (ev) {
+    showMessage('语音识别错误：' + (ev.error || '未知错误'));
+  };
+  recognition.onend = function () {
+    recognizing = false;
+    micBtn.classList.remove('listening');
+  };
+  try { recognition.start(); } catch (e) { showMessage('启动语音识别失败：' + e.message); }
+}
+
+// ============================================================
+// 语音输出：speechSynthesis API
+// ============================================================
+
+let autoSpeak = true;
+
+function toggleAutoSpeak() {
+  autoSpeak = !autoSpeak;
+  const btn = document.getElementById('speakBtn');
+  btn.textContent = autoSpeak ? '🔊' : '🔇';
+  btn.classList.toggle('muted', !autoSpeak);
+  if (!autoSpeak) stopSpeak();
+  showMessage(autoSpeak ? '语音输出已开启' : '语音输出已关闭');
+}
+
+function speakOut(text) {
+  if (!autoSpeak) return;
+  // 优先使用 preload 暴露的 voice API
+  if (window.ynex && window.ynex.voice && typeof window.ynex.voice.speak === 'function') {
+    try { window.ynex.voice.speak(text, { lang: 'zh-CN' }); } catch (_) {}
+    return;
+  }
+  // 回退：直接使用 Web Speech API
+  if (!('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN';
+    u.rate = 1; u.pitch = 1; u.volume = 1;
+    window.speechSynthesis.speak(u);
+  } catch (e) { /* 忽略 */ }
+}
+
+function stopSpeak() {
+  if (window.ynex && window.ynex.voice && typeof window.ynex.voice.stopSpeak === 'function') {
+    try { window.ynex.voice.stopSpeak(); } catch (_) {}
+  }
+  if ('speechSynthesis' in window) {
+    try { window.speechSynthesis.cancel(); } catch (_) {}
+  }
+}
+
+// ============================================================
+// 系统状态：真实 CPU/内存数据
+// ============================================================
+
+async function fetchSystemStats() {
+  try {
+    if (window.ynex && window.ynex.system && window.ynex.system.getStats) {
+      const stats = await window.ynex.system.getStats();
+      updateStatusDisplay(stats);
+      return;
+    }
+  } catch (e) {}
+  if (performance.memory) {
+    const memUsed = (performance.memory.usedJSHeapSize / 1048576).toFixed(1);
+    updateStatusDisplay({ cpu: null, memUsed: memUsed });
+  } else {
+    updateStatusDisplay({ cpu: null, memUsed: null });
+  }
+}
+
+function updateStatusDisplay(stats) {
+  const cpuEl = document.getElementById('stat-cpu');
+  const memEl = document.getElementById('stat-mem');
+  if (cpuEl) cpuEl.textContent = stats.cpu != null ? 'CPU ' + stats.cpu + '%' : 'CPU —';
+  if (memEl) memEl.textContent = stats.memUsed != null ? '内存 ' + stats.memUsed + 'M' : '内存 —';
+}
+
+// 启动
+init();
+fetchSystemStats();
+setInterval(fetchSystemStats, 3000);
+showMessage('Y·NEX系统已启动，随时待命，先生。');
+speakOut('Y·NEX系统已启动，随时待命，先生。');
+</script>
+</body>
+</html>

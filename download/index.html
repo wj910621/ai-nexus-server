@@ -1,94 +1,335 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>下载 TriGenClaw — AI 桌面工作台</title>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>下载 Y·NEX Desktop — 亿界互联·无界未来</title>
+<meta name="description" content="下载 Y·NEX Desktop 桌面客户端，体验本地 AI 核心、3D 粒子人脸、语音唤醒和智能设备控制。">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-body{background:#0f0a1a;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-.card{background:linear-gradient(135deg,#1a1040,#2a1a50);border:1px solid rgba(108,78,245,.3);border-radius:16px;padding:40px;max-width:640px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-h1{font-size:28px;margin-bottom:6px;background:linear-gradient(135deg,#6c4ef5,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-p{color:#a090c0;margin:8px 0 20px;font-size:14px;line-height:1.6}
-.dl-btn{display:inline-flex;align-items:center;gap:10px;padding:18px 44px;background:linear-gradient(135deg,#6c4ef5,#a855f7);color:#fff;border-radius:14px;text-decoration:none;font-size:17px;font-weight:600;transition:all .2s;margin:8px 4px;border:none;cursor:pointer}
-.dl-btn:hover{transform:translateY(-2px);box-shadow:0 10px 35px rgba(108,78,245,.5)}
-.dl-btn.ghost{background:rgba(108,78,245,.12);border:1px solid rgba(108,78,245,.3);color:#b87fff}
-.dl-btn.ghost:hover{background:rgba(108,78,245,.22)}
-.dl-btn.green{background:linear-gradient(135deg,#10b981,#059669)}
-.dl-btn.green:hover{box-shadow:0 10px 35px rgba(16,185,129,.4)}
-.features{text-align:left;margin:20px 0;padding:16px 20px;background:rgba(255,255,255,.03);border-radius:12px}
-.features li{list-style:none;padding:6px 0;font-size:13px;color:#b8a8d8}
-.features li::before{content:"✓ ";color:#10b981;font-weight:bold}
-.info{font-size:12px;color:#6b5b95;margin-top:12px;line-height:1.8}
-.badge{display:inline-block;padding:3px 10px;background:rgba(16,185,129,.15);color:#10b981;border-radius:6px;font-size:11px;margin:4px}
-.step-box{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:20px;margin:16px 0;text-align:left}
-.step-box h3{font-size:15px;color:#e0d8f0;margin-bottom:12px}
-.step-box code{background:#1a1a2e;padding:4px 8px;border-radius:4px;font-size:12px;color:#10b981;display:block;margin:6px 0;word-break:break-all;line-height:1.6}
-.step-box .note{font-size:11px;color:#7b6b95;margin-top:8px}
-hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:24px 0}
-</style></head>
+:root {
+  --bg: #f5f3ff;
+  --bg-card: #ffffff;
+  --text: #1f1b2e;
+  --text-secondary: #6b6680;
+  --accent: #6c4ef5;
+  --accent-soft: rgba(108,78,245,0.08);
+  --border: rgba(0,0,0,0.06);
+  --shadow: 0 4px 24px rgba(0,0,0,0.06);
+  --radius: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0721;
+    --bg-card: rgba(255,255,255,0.04);
+    --text: #f3f0ff;
+    --text-secondary: #a39cb8;
+    --accent-soft: rgba(108,78,245,0.15);
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 4px 24px rgba(0,0,0,0.25);
+  }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.7;
+}
+.container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+/* Header */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(245,243,255,0.9); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+@media (prefers-color-scheme: dark) { .header { background: rgba(13,7,33,0.9); } }
+.header-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.3rem; }
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #6c4ef5, #a855f7);
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  overflow: hidden;
+}
+.back-link { color: var(--text-secondary); font-size: 0.9rem; }
+.back-link:hover { color: var(--accent); }
+
+/* Hero */
+.hero { padding: 120px 0 60px; text-align: center; }
+.hero h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800; margin-bottom: 12px; }
+.hero .slogan { font-size: 1.1rem; color: var(--accent); font-weight: 600; margin-bottom: 12px; }
+.hero p { color: var(--text-secondary); max-width: 560px; margin: 0 auto 32px; }
+
+/* Download card */
+.download-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow);
+  text-align: center; margin-bottom: 40px;
+}
+.file-info { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.file-icon { font-size: 2.5rem; }
+.file-meta { text-align: left; }
+.file-name { font-weight: 700; font-size: 1.1rem; }
+.file-size { color: var(--text-secondary); font-size: 0.85rem; }
+.btn-download {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #6c4ef5, #a855f7);
+  color: #fff; padding: 14px 36px; border-radius: 28px;
+  font-weight: 700; font-size: 1.05rem; border: none; cursor: pointer;
+  box-shadow: 0 6px 24px rgba(108,78,245,0.35);
+  transition: all 0.2s;
+}
+.btn-download:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108,78,245,0.45); }
+
+/* Warning card */
+.warning-card {
+  background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 12px; padding: 20px; margin-bottom: 32px; text-align: left;
+}
+.warning-card h3 { color: #d97706; margin-bottom: 10px; font-size: 1rem; }
+.warning-card p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px; }
+.warning-card ol { margin-left: 18px; color: var(--text-secondary); font-size: 0.9rem; }
+.warning-card li { margin-bottom: 6px; }
+
+/* Steps */
+.steps { margin-bottom: 40px; }
+.section-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; text-align: center; }
+.step-list { display: grid; gap: 16px; }
+.step-item {
+  display: flex; gap: 16px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+}
+.step-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #6c4ef5, #a855f7);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; flex-shrink: 0;
+}
+.step-content h3 { font-size: 1.05rem; margin-bottom: 6px; }
+.step-content p { color: var(--text-secondary); font-size: 0.9rem; }
+
+/* Changelog */
+.changelog { margin-bottom: 40px; }
+.changelog-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 12px; }
+.changelog-version { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.changelog-version .version-badge {
+  background: linear-gradient(135deg, #6c4ef5, #a855f7);
+  color: #fff; padding: 4px 12px; border-radius: 20px;
+  font-size: 0.85rem; font-weight: 700;
+}
+.changelog-version .version-date { color: var(--text-secondary); font-size: 0.85rem; }
+.changelog-list { list-style: none; padding: 0; }
+.changelog-list li {
+  padding: 6px 0; padding-left: 24px; position: relative;
+  color: var(--text-secondary); font-size: 0.9rem;
+}
+.changelog-list li::before {
+  content: "✓"; position: absolute; left: 0; top: 6px;
+  color: #10b981; font-weight: 700;
+}
+.changelog-list li.new::before { content: "✨"; }
+.changelog-list li.improve::before { content: "⚡"; }
+
+/* FAQ */
+.faq { margin-bottom: 40px; }
+.faq-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 12px; }
+.faq-item h3 { font-size: 1rem; margin-bottom: 8px; }
+.faq-item p { color: var(--text-secondary); font-size: 0.9rem; }
+
+/* Footer */
+.footer { padding: 30px 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-secondary); font-size: 0.85rem; }
+
+@media (max-width: 600px) {
+  .hero { padding: 100px 0 40px; }
+  .download-card { padding: 24px; }
+  .file-meta { text-align: center; }
+}
+</style>
+</head>
 <body>
-<div class="card">
-  <div style="font-size:48px;margin-bottom:12px">🦀</div>
-  <h1>下载 TriGenClaw</h1>
-  <p>AI 桌面工作台 · 独立客户端<br>300+ AI 模型 · 代码编辑器 · Agent 工坊 · 知识库</p>
 
-  <!-- 方案一：install.bat（推荐） -->
-  <div style="margin-bottom:16px">
-    <a class="dl-btn green" href="/download/install.bat" download>
-      📥 下载一键安装脚本
-      <span style="font-size:12px;font-weight:400;opacity:.8">(install.bat · 2KB)</span>
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 1024 1024" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="dl-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="50%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#4f46e5"/>
+            </linearGradient>
+            <linearGradient id="dl-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.6"/>
+            </linearGradient>
+            <filter id="dl-softGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="14" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="url(#dl-bg)"/>
+          <circle cx="512" cy="512" r="360" fill="none" stroke="url(#dl-glow)" stroke-width="6" opacity="0.35"/>
+          <circle cx="512" cy="512" r="300" fill="none" stroke="url(#dl-glow)" stroke-width="3" opacity="0.25"/>
+          <g fill="#ffffff" opacity="0.6">
+            <circle cx="320" cy="280" r="8"/><circle cx="720" cy="240" r="6"/>
+            <circle cx="780" cy="520" r="10"/><circle cx="260" cy="600" r="7"/>
+            <circle cx="700" cy="760" r="9"/><circle cx="340" cy="780" r="5"/>
+          </g>
+          <g filter="url(#dl-softGlow)">
+            <path d="M380 320 L512 520 L644 320" fill="none" stroke="#ffffff" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="512" y1="520" x2="512" y2="740" stroke="#ffffff" stroke-width="56" stroke-linecap="round"/>
+            <circle cx="512" cy="512" r="42" fill="#ffffff"/>
+            <path d="M620 420 Q760 512 620 640" fill="none" stroke="#a78bfa" stroke-width="28" stroke-linecap="round" opacity="0.95"/>
+            <path d="M404 420 Q264 512 404 640" fill="none" stroke="#60a5fa" stroke-width="28" stroke-linecap="round" opacity="0.85"/>
+          </g>
+        </svg>
+      </div>
+      <span>Y·NEX</span>
     </a>
-    <p style="font-size:12px;color:#10b981;margin-top:6px">⬆ 推荐！双击自动安装到桌面，无需手动操作</p>
+    <a href="/" class="back-link">← 返回首页</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="slogan">亿界互联 · 无界未来</div>
+    <h1>下载 Y·NEX Desktop</h1>
+    <p>桌面端即本地 AI 核心。安装后可体验 3D 粒子人脸、语音唤醒、本地大模型和智能设备控制。</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="download-card">
+    <div class="file-info">
+      <div class="file-icon">💻</div>
+      <div class="file-meta">
+        <div class="file-name">YNEX-Desktop-Setup-2.0.0.exe</div>
+        <div class="file-size">Windows 安装包 · 约 992MB（推荐，含快捷方式）</div>
+      </div>
+    </div>
+    <button class="btn-download" onclick="downloadApp('setup')">⬇ 立即下载</button>
+    <p style="margin-top:14px;color:var(--text-secondary);font-size:0.85rem">提示：若浏览器直接打开文件，可在按钮上右键选择「另存为」保存到指定位置后再运行。安装时支持选择安装目录。</p>
   </div>
 
-  <!-- 方案二：直接下载 -->
-  <div>
-    <a class="dl-btn ghost" href="https://github.com/wj910621/ai-nexus-server/releases/latest/download/TriGenClaw-Portable.zip" target="_blank">
-      📦 直接下载便携版
-      <span style="font-size:12px;font-weight:400;opacity:.8">(ZIP · ~155MB)</span>
-    </a>
-    <p style="font-size:12px;color:#7b6b95;margin-top:6px">从 GitHub 下载，解压即用</p>
+  <div class="warning-card">
+    <h3>⚠️ 浏览器提示"通常不会下载此文件"怎么办？</h3>
+    <p>这是 Windows 系统的正常安全提醒，因为下载的是 .exe 安装程序。请按以下步骤操作：</p>
+    <ol>
+      <li>点击下载后，如果浏览器提示安全警告，请选择<strong>"保留"</strong>或<strong>"仍要下载"</strong></li>
+      <li>如果 Windows 安全中心弹出提示，点击<strong>"更多信息"</strong> → <strong>"仍要运行"</strong></li>
+      <li>如果系统询问是否允许此应用更改设备，点击<strong>"是"</strong></li>
+    </ol>
   </div>
 
-  <!-- 安装步骤 -->
-  <div class="step-box">
-    <h3>📖 使用 install.bat 安装（推荐）</h3>
-    <p style="font-size:13px;color:#a090c0;margin:4px 0 12px">只需三步，全程自动</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <div style="flex:1;min-width:120px;background:rgba(255,255,255,.02);border-radius:10px;padding:12px">
-        <div style="font-size:20px;font-weight:700;color:#6c4ef5">1</div>
-        <div style="font-size:12px;color:#a090c0;margin-top:4px">点击上方绿色按钮<br>下载 install.bat</div>
+  <div class="steps">
+    <h2 class="section-title">安装与使用步骤</h2>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>下载安装包</h3>
+          <p>点击上方"立即下载"按钮，将 YNEX-Desktop-Setup-2.0.0.exe 保存到电脑。</p>
+        </div>
       </div>
-      <div style="flex:1;min-width:120px;background:rgba(16,185,129,.06);border:1px solid #10b981;border-radius:10px;padding:12px">
-        <div style="font-size:20px;font-weight:700;color:#10b981">2</div>
-        <div style="font-size:12px;color:#a090c0;margin-top:4px">双击 install.bat<br>自动下载并安装</div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>双击安装</h3>
+          <p>找到下载的安装包，双击运行。按安装向导提示完成安装，建议选择默认安装路径，并勾选"创建桌面快捷方式"。</p>
+        </div>
       </div>
-      <div style="flex:1;min-width:120px;background:rgba(255,255,255,.02);border-radius:10px;padding:12px">
-        <div style="font-size:20px;font-weight:700;color:#6c4ef5">3</div>
-        <div style="font-size:12px;color:#a090c0;margin-top:4px">桌面出现快捷方式<br>双击运行 ✅</div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>运行 Y·NEX Desktop</h3>
+          <p>安装完成后，在开始菜单或桌面找到「YNEX」图标并打开。程序会自动启动本地 AI 核心服务。</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>开始使用</h3>
+          <p>桌面端启动后，即可使用语音唤醒、3D 粒子人脸交互和本地 AI 对话。也可通过浏览器访问 http://localhost:7777 使用本地核心。</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <ul class="features">
-    <li>300+ AI 大模型聚合，一次安装全部可用</li>
-    <li>内置代码编辑器，支持语法高亮和项目管理</li>
-    <li>Agent 可视化编排工作流</li>
-    <li>知识库管理 + 技能商店生态</li>
-    <li>Alt+Space 全局唤起，系统托盘驻留</li>
-  </ul>
-
-  <div class="info">
-    <span class="badge">Windows 10/11 64位</span>
-    <span class="badge">解压即用</span>
-    <span class="badge">无安全警告</span>
-    <span class="badge">自动更新</span>
+  <div class="changelog">
+    <h2 class="section-title">更新日志</h2>
+    <div class="changelog-item">
+      <div class="changelog-version">
+        <span class="version-badge">v2.0.0</span>
+        <span class="version-date">最新版本</span>
+      </div>
+      <ul class="changelog-list">
+        <li class="new">新增：用户登录/注册，与主站账号互通</li>
+        <li class="new">新增：积分定价系统，四级会员体系（免费/月度/年度/终身版）</li>
+        <li class="new">新增：终身版限量发售，500个名额逐批涨价</li>
+        <li class="new">新增：会员中心，积分概览/套餐选择/充值/统计/交易记录</li>
+        <li class="new">新增：技能市场，6个预置技能包，支持导入导出</li>
+        <li class="new">新增：Agent市场，6个预置团队模板，一键搭建团队</li>
+        <li class="new">新增：工作流模板市场，6个预置工作流模板</li>
+        <li class="new">新增：统一市场中心，技能/Agent/工作流一站式管理</li>
+        <li class="improve">安全：全面修复XSS注入风险，25处HTML渲染全部转义</li>
+        <li class="improve">安全：工作流代码节点改用vm沙箱隔离，阻止危险API访问</li>
+        <li class="improve">安全：文件导入增加路径遍历防护和数据Schema验证</li>
+        <li class="improve">优化：国产模型利润率80-85%，比市面便宜约1/3</li>
+      </ul>
+    </div>
   </div>
 
-  <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05);font-size:12px;color:#6b5b95">
-    <a href="/app/" style="color:#8b7cf5;text-decoration:none">← 返回 TriGen 控制台</a>
-    <span style="margin:0 8px">|</span>
-    <a href="/" style="color:#8b7cf5;text-decoration:none">🏠 首页</a>
+  <div class="faq">
+    <h2 class="section-title">常见问题</h2>
+    <div class="faq-item">
+      <h3>Q: Y·NEX Desktop 和 Y·NEX 本地AI 有什么区别？</h3>
+      <p>A: 是同一个产品。Y·NEX Desktop 是桌面客户端，安装后自动包含 Y·NEX 本地AI 核心。</p>
+    </div>
+    <div class="faq-item">
+      <h3>Q: 安装版和便携版有什么区别？</h3>
+      <p>A: 安装版（.exe）会创建桌面快捷方式，适合常用电脑；便携版（.zip）解压后即可运行，无需安装，适合临时使用或放在 U 盘携带。两者都内置本地 AI 核心。</p>
+    </div>
+    <div class="faq-item">
+      <h3>Q: 安装后打不开怎么办？</h3>
+      <p>A: 请检查是否被杀毒软件拦截，可将 Y·NEX Desktop 添加到信任列表。如仍有问题，请重新下载安装。</p>
+    </div>
+    <div class="faq-item">
+      <h3>Q: 本地 AI 需要联网吗？</h3>
+      <p>A: 首次下载和模型加载需要联网。配置完成后，本地对话和数据处理可在离线环境下运行。</p>
+    </div>
+    <div class="faq-item">
+      <h3>Q: 我的电脑配置要求是什么？</h3>
+      <p>A: 推荐 Windows 10/11 系统，8GB 以上内存。如需本地 GPU 加速，建议 8GB 以上显存。</p>
+    </div>
   </div>
 </div>
+
+<footer class="footer">
+  <div class="container">
+    <div>© 2026 Y·NEX · 亿界网络科技工作室 · 亿界互联·无界未来</div>
+    <div style="margin-top:8px;font-size:0.78rem;opacity:0.85">
+      <a href="https://beian.miit.gov.cn" target="_blank" rel="noreferrer" style="color:var(--text-secondary);text-decoration:none">蜀ICP备2026030046号</a>
+      <span style="margin:0 10px">|</span>
+      <a href="https://beian.mps.gov.cn/#/query/webSearch?code=51110202002408" rel="noreferrer" target="_blank" style="color:var(--text-secondary);text-decoration:none">川公网安备51110202002408号</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function downloadApp(type){
+  const files = {
+    setup: { url: '/download/YNEX-Desktop-Setup-2.0.0.exe', name: 'YNEX-Desktop-Setup-2.0.0.exe' },
+    portable: { url: '/download/YNEX-Desktop-Portable.exe', name: 'YNEX-Desktop-Portable.exe' }
+  };
+  const file = files[type] || files.setup;
+  const a = document.createElement('a');
+  a.href = file.url;
+  a.download = file.name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+</script>
+
 </body>
 </html>

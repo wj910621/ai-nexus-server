@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./mobile-manifest.json">
+<link rel="apple-touch-icon" href="./icon.svg">
+<title>Y·NEXAI · 移动端遥控</title>
+<style>
+  :root {
+    --bg: #0a0a1a;
+    --surface: #0d1525;
+    --border: #00ffff22;
+    --accent: #00ffff;
+    --accent2: #00aacc;
+    --text: #e0e0ff;
+    --text2: #88aacc;
+    --danger: #ff4444;
+    --success: #00ff88;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* 顶部状态栏 */
+  .appbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    padding-top: max(12px, env(safe-area-inset-top));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .appbar h1 { font-size: 16px; letter-spacing: 2px; color: var(--accent); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+  .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+
+  /* 标签页 */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 4px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text2);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* 内容区 */
+  .content { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* 卡片 */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .card h3 { font-size: 13px; color: var(--text2); margin-bottom: 10px; letter-spacing: 1px; }
+
+  /* 遥控按钮网格 */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .btn {
+    padding: 14px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #00ffff0a;
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn:active { transform: scale(0.96); background: #00ffff18; }
+  .btn .icon { font-size: 20px; }
+  .btn.danger { border-color: #ff444455; background: #ff44440a; }
+  .btn.danger:active { background: #ff444418; }
+
+  /* 聊天 */
+  .chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .chat-msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .chat-msg.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #006688, #0088aa);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-msg.assistant {
+    align-self: flex-start;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .chat-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .chat-input-row textarea {
+    flex: 1;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    resize: none;
+  }
+  .chat-input-row textarea:focus { outline: none; border-color: var(--accent); }
+  .chat-input-row button {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent2);
+    color: #fff;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* 设备列表 */
+  .device-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .device-item:last-child { border-bottom: none; }
+  .device-name { font-size: 14px; }
+  .device-meta { font-size: 11px; color: var(--text2); }
+  .badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: #00ffff22;
+    color: var(--accent);
+  }
+  .badge.offline { background: #ff444422; color: var(--danger); }
+
+  /* 日志 */
+  .logs {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--text2);
+    max-height: 160px;
+    overflow-y: auto;
+  }
+  .log-line { margin-bottom: 4px; }
+
+  /* 安装提示 */
+  #install-prompt {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+  }
+  #install-prompt button {
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <h1>Y·NEXAI · 遥控</h1>
+  <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)">
+    <span id="status-text">离线</span>
+    <div class="status-dot" id="status-dot"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('remote')">遥控</button>
+  <button class="tab" onclick="switchTab('chat')">对话</button>
+  <button class="tab" onclick="switchTab('devices')">设备</button>
+</div>
+
+<div class="content">
+
+  <!-- 遥控面板 -->
+  <div class="panel active" id="panel-remote">
+    <div class="card">
+      <h3>电脑电源</h3>
+      <div class="grid-3">
+        <button class="btn" onclick="pcAction('lock')"><span class="icon">🔒</span>锁屏</button>
+        <button class="btn" onclick="pcAction('sleep')"><span class="icon">💤</span>睡眠</button>
+        <button class="btn danger" onclick="pcAction('shutdown')"><span class="icon">⏻</span>关机</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>媒体与截图</h3>
+      <div class="grid-3">
+        <button class="btn" onclick="pcAction('volume_up')"><span class="icon">🔊</span>音量+</button>
+        <button class="btn" onclick="pcAction('volume_down')"><span class="icon">🔉</span>音量-</button>
+        <button class="btn" onclick="pcAction('volume_mute')"><span class="icon">🔇</span>静音</button>
+        <button class="btn" onclick="pcAction('screenshot');setTimeout(viewLastScreenshot,1500)"><span class="icon">📸</span>截图</button>
+        <button class="btn" onclick="viewLastScreenshot()"><span class="icon">🖼️</span>查看截图</button>
+        <button class="btn" onclick="speakText()"><span class="icon">🔊</span>播报</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>AI 技能</h3>
+      <div class="grid-3">
+        <button class="btn" onclick="callSkill('get_weather',{city:'北京'})"><span class="icon">🌤️</span>天气</button>
+        <button class="btn" onclick="callSkill('system_info',{})"><span class="icon">💻</span>系统</button>
+        <button class="btn" onclick="callSkill('list_files',{path:'.'})"><span class="icon">📁</span>文件</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>日志</h3>
+      <div class="logs" id="remote-logs"></div>
+    </div>
+  </div>
+
+  <!-- 对话面板 -->
+  <div class="panel" id="panel-chat">
+    <div class="card" style="display:flex;flex-direction:column;height:calc(100vh - 210px)">
+      <div class="chat-messages" id="chat-messages" style="flex:1;overflow-y:auto"></div>
+      <div class="chat-input-row">
+        <textarea id="chat-input" placeholder="输入消息..." rows="1"></textarea>
+        <button onclick="sendChat()">➤</button>
+        <button onclick="startVoice()">🎤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设备面板 -->
+  <div class="panel" id="panel-devices">
+    <div class="card">
+      <h3>已注册设备</h3>
+      <div id="device-list"><div class="device-item"><span class="device-meta">加载中...</span></div></div>
+    </div>
+    <div class="card">
+      <h3>本机信息</h3>
+      <div class="device-meta" id="this-device"></div>
+    </div>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="registerThisDevice()">注册本机</button>
+  </div>
+
+</div>
+
+<div id="install-prompt">
+  <span>添加到主屏幕，像 App 一样使用</span>
+  <button onclick="installPwa()">安装</button>
+  <button onclick="dismissInstall()" style="background:transparent;color:var(--text2)">关闭</button>
+</div>
+
+<script src="./ynex-client.js"></script>
+<script>
+const SERVER = localStorage.getItem('ynex-server') || (location.hostname === 'localhost' ? 'http://localhost:7777' : '');
+if (!SERVER) {
+  const input = prompt('请输入Y·NEXAI服务地址（例如 http://192.168.1.5:7777）：');
+  if (input) {
+    localStorage.setItem('ynex-server', input);
+    location.reload();
+  }
+}
+const ynex = new YnexClient(SERVER);
+
+function log(msg, panel = 'remote') {
+  const el = document.getElementById(panel + '-logs');
+  if (!el) return;
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.textContent = new Date().toLocaleTimeString() + ' ' + msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+async function checkStatus() {
+  try {
+    const online = await ynex.isOnline();
+    document.getElementById('status-text').textContent = online ? '在线' : '离线';
+    document.getElementById('status-dot').className = 'status-dot ' + (online ? 'online' : '');
+  } catch (e) {
+    document.getElementById('status-text').textContent = '离线';
+    document.getElementById('status-dot').className = 'status-dot';
+  }
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'devices') loadDevices();
+}
+
+async function pcAction(action) {
+  log('执行: ' + action);
+  try {
+    const result = await ynex.request('/api/mobile/pc/action', {
+      method: 'POST',
+      body: { action, params: {} }
+    });
+    log((result.ok ? '成功' : '失败') + ': ' + (result.message || result.error));
+  } catch (e) {
+    log('错误: ' + e.message);
+  }
+}
+
+async function viewLastScreenshot() {
+  try {
+    const files = await ynex.request('/api/mobile/files');
+    const img = files.files.find(f => f.name.startsWith('remote_'));
+    if (img) {
+      window.open(SERVER + '/api/mobile/download/' + encodeURIComponent(img.name), '_blank');
+    } else {
+      log('暂无远程截图');
+    }
+  } catch (e) {
+    log('获取截图失败: ' + e.message);
+  }
+}
+
+async function speakText() {
+  const text = prompt('输入要播报的文字：', '你好，Y·NEXAI移动端测试。');
+  if (!text) return;
+  try {
+    await ynex.voiceSpeak(text);
+    log('播报已发送');
+  } catch (e) {
+    log('播报失败: ' + e.message);
+  }
+}
+
+async function callSkill(skill, params) {
+  log('调用技能: ' + skill);
+  try {
+    const data = await ynex.callSkill(skill, params);
+    addChatMessage('assistant', data.result || JSON.stringify(data));
+    switchTab('chat');
+  } catch (e) {
+    log('技能失败: ' + e.message);
+  }
+}
+
+function addChatMessage(role, text) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  div.textContent = text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  addChatMessage('user', text);
+  input.value = '';
+
+  const reply = document.createElement('div');
+  reply.className = 'chat-msg assistant';
+  reply.textContent = '';
+  document.getElementById('chat-messages').appendChild(reply);
+
+  try {
+    await ynex.chatStream(text, (chunk) => {
+      reply.textContent += chunk;
+      document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+    }, { useMock: false });
+  } catch (e) {
+    reply.textContent = '错误: ' + e.message;
+  }
+}
+
+function startVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('当前浏览器不支持语音输入');
+    return;
+  }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'zh-CN';
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    document.getElementById('chat-input').value = text;
+    sendChat();
+  };
+  recognition.start();
+}
+
+async function loadDevices() {
+  try {
+    const data = await ynex.request('/api/mobile/devices');
+    const list = document.getElementById('device-list');
+    if (!data.devices || !data.devices.length) {
+      list.innerHTML = '<div class="device-item"><span class="device-meta">暂无设备</span></div>';
+      return;
+    }
+    list.innerHTML = data.devices.map(d => `
+      <div class="device-item">
+        <div>
+          <div class="device-name">${d.name || d.id}</div>
+          <div class="device-meta">${d.platform || 'unknown'} · ${new Date(d.last_seen * 1000).toLocaleString()}</div>
+        </div>
+        <span class="badge ${d.status === 'online' ? '' : 'offline'}">${d.status || 'offline'}</span>
+      </div>
+    `).join('');
+  } catch (e) {
+    document.getElementById('device-list').innerHTML = '<div class="device-item"><span class="device-meta">加载失败</span></div>';
+  }
+}
+
+async function registerThisDevice() {
+  const id = 'mobile_' + Math.random().toString(36).slice(2, 8);
+  try {
+    await ynex.request('/api/mobile/register', {
+      method: 'POST',
+      body: {
+        device_id: id,
+        platform: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'ios' : 'android',
+        name: '移动端 ' + id.slice(-4),
+      }
+    });
+    localStorage.setItem('ynex-device-id', id);
+    log('本机已注册: ' + id);
+    loadDevices();
+  } catch (e) {
+    log('注册失败: ' + e.message);
+  }
+}
+
+document.getElementById('this-device').textContent = navigator.userAgent;
+
+// PWA 安装提示
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-prompt').style.display = 'flex';
+});
+function installPwa() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; dismissInstall(); });
+  }
+}
+function dismissInstall() {
+  document.getElementById('install-prompt').style.display = 'none';
+}
+
+// 注册 Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./mobile-sw.js').catch(() => {});
+}
+
+checkStatus();
+setInterval(checkStatus, 10000);
+</script>
+</body>
+</html>

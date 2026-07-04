@@ -8,7 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="TriGen">
+<meta name="apple-mobile-web-app-title" content="Y·NEX">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f8f7ff">
 <link rel="manifest" href="/manifest.json">
@@ -20,9 +20,9 @@
 // 强制注销所有旧 Service Worker，避免缓存干扰
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(s=>s.unregister()))}
 </script>
-<meta name="description" content="TriGen - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，30+顶尖模型免费体验。">
+<meta name="description" content="Y·NEX - 一站式AI大模型聚合平台。AI聊天、AI写小说、AI漫剧创作，30+顶尖模型免费体验。">
 <meta name="keywords" content="AI写作,AI写小说,AI漫画,大模型,AI聊天,DeepSeek,GPT-4,Claude,Midjourney,AI绘画">
-<title>TriGen - 智能创作平台</title>
+<title>Y·NEX - 智能创作平台</title>
 <style>
 :root{
   --bg:#f8f7ff;--bg-card:rgba(255,255,255,0.92);--bg-sidebar:#f0edff;--bg-input:#f0edff;
@@ -95,7 +95,7 @@ a{color:var(--accent);text-decoration:none}
 .conn-status{display:flex;align-items:center;gap:6px;font-size:0.73rem;color:var(--text-secondary);padding:4px 8px}
 
 /* App Layout */
-.app-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);position:relative;z-index:1}
+.app-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);position:relative;z-index:1;align-content:start;align-items:start}
 
 /* Sidebar */
 .sidebar{background:var(--bg-sidebar);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;position:sticky;top:56px;height:calc(100vh - 56px);z-index:10}
@@ -112,10 +112,13 @@ a{color:var(--accent);text-decoration:none}
 .sidebar-conn{display:flex;align-items:center;gap:6px;padding:6px 14px;font-size:0.75rem;color:var(--text-secondary)}
 
 /* Main Content */
-.main-content{overflow-y:auto;padding:0;padding-right:300px}
-.page{display:none;animation:fadeIn 0.35s cubic-bezier(0.4,0,0.2,1)}
-.page.active{display:block}
+.main-content{overflow-y:auto;padding:0;padding-right:300px;overflow-anchor:none;position:relative}
+.page{display:none}
+.page.active{display:block;animation:fadeIn 0.35s cubic-bezier(0.4,0,0.2,1)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 确保每个页面内容从顶部开始 */
+.page.active .section:first-child{padding-top:24px}
 
 /* Right Panel */
 .right-panel{background:var(--bg-sidebar);border-left:1px solid var(--border);padding:20px 16px;overflow-y:auto;position:fixed;right:0;top:56px;width:300px;height:calc(100vh - 56px);z-index:5}
@@ -708,13 +711,46 @@ a{color:var(--accent);text-decoration:none}
   input,textarea,select{font-size:16px}
 }
 
+
+/* 亿界本地AI 面板 */
+.yijie-page{padding:24px 32px;max-width:1400px;margin:0 auto}
+.yijie-hero{background:linear-gradient(135deg,var(--accent-light),var(--cyan-light));border:1px solid var(--glass-border);border-radius:16px;padding:24px 28px;margin-bottom:24px}
+.yijie-hero h1{font-size:1.6rem;font-weight:700;margin-bottom:8px}
+.yijie-hero p{color:var(--text-secondary);font-size:0.92rem;margin-bottom:16px}
+.yijie-status-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg-card);border-radius:12px;border:1px solid var(--border)}
+.yijie-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
+.yijie-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.yijie-card h3{font-size:1rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.yijie-chat-panel{flex-direction:column;height:420px;display:flex}
+.yijie-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;font-size:12px;color:var(--text-secondary)}
+.yijie-toolbar label{display:flex;align-items:center;gap:4px;cursor:pointer}
+.yijie-toolbar button{background:var(--accent-light);color:var(--accent);border:none;border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer}
+.yijie-messages{flex:1;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.yijie-msg{display:flex;gap:10px;align-items:flex-start}
+.yijie-msg.user{flex-direction:row-reverse}
+.yijie-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.yijie-msg.user .yijie-avatar{background:var(--cyan-light)}
+.yijie-bubble{max-width:calc(100% - 50px);padding:10px 14px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);font-size:0.9rem;line-height:1.5;white-space:pre-wrap}
+.yijie-msg.user .yijie-bubble{background:var(--accent);color:#fff;border-color:var(--accent)}
+.yijie-input-row{display:flex;gap:8px}
+.yijie-input-row textarea{flex:1;background:var(--bg-input);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.9rem;resize:none;outline:none;min-height:44px}
+.yijie-input-row textarea:focus{border-color:var(--accent)}
+.yijie-input-row input{flex:1;background:var(--bg-input);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-size:0.9rem;outline:none}
+.yijie-offline-tip{padding:20px;background:var(--bg);border-radius:12px;text-align:center;color:var(--text-secondary);font-size:0.9rem}
+.yijie-cloud-info .info-grid,.yijie-hardware-info .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info-item{background:var(--bg);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.info-item span{font-size:11px;color:var(--text-secondary)}
+.info-item b{font-size:14px;font-weight:600}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:#ef4444}
+.conn-dot.online{background:#10b981;box-shadow:0 0 8px #10b981}
+.conn-dot.checking{background:#f59e0b}
 </style>
 </head>
 <body>
 
 <!-- Top Bar -->
 <header class="top-bar">
-  <div class="top-logo"><div class="top-logo-icon" id="logoIcon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span>TriGen</span></div>
+  <div class="top-logo"><div class="top-logo-icon" id="logoIcon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span>Y·NEX</span></div>
   <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileMenu()" aria-label="菜单">☰</button>
   <div class="top-actions">
     <span class="top-credit" onclick="dailyCheckin()" title="每日签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> <span id="checkinBadge">签到</span></span>
@@ -750,7 +786,7 @@ a{color:var(--accent);text-decoration:none}
   <button class="sidebar-link" data-page="models"><span class="sidebar-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>模型目录</button>
   <div class="sidebar-divider"></div>
   <div style="padding:12px 16px">
-    <a href="https://github.com/wj910621/ai-nexus-server/releases/latest/download/TriGenClaw-Portable.zip" 
+    <a href="https://github.com/wj910621/ai-nexus-server/releases/latest/download/Y·NEX Desktop-Portable.zip" 
        style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border-radius:10px;font-size:12px;font-weight:600;text-decoration:none;transition:transform 0.2s"
        onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
       <span style="font-size:16px">💻</span> 下载桌面端<span style="margin-left:auto;font-size:10px;opacity:0.7">Win</span>
@@ -758,7 +794,9 @@ a{color:var(--accent);text-decoration:none}
   </div>
   <div class="sidebar-divider"></div>
   <button class="sidebar-link" data-page="admin" id="adminSidebarBtn" style="display:none"><span class="sidebar-icon" style="background:linear-gradient(135deg,#475569,#64748b)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>管理</button>
+  <button class="sidebar-link" data-page="profile" onclick="switchPage('profile');loadProfilePage()" title="个人中心"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#a855f7)">👤</span>个人中心</button>
   <button class="sidebar-link" data-page="apikeys"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#c084fc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>API Key</button>
+  <button class="sidebar-link primary" data-page="yijie"><span class="sidebar-icon" style="background:linear-gradient(135deg,#10b981,#06b6d4)">🌐</span>亿界本地AI</button>
   <button class="sidebar-link" data-page="pricing"><span class="sidebar-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>充值</button>
   <button class="sidebar-link" data-page="tools"><span class="sidebar-icon" style="background:linear-gradient(135deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>实用工具</button>
   <button class="sidebar-link" data-page="feedback"><span class="sidebar-icon" style="background:linear-gradient(135deg,#0284c7,#38bdf8)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>反馈</button>
@@ -787,7 +825,7 @@ a{color:var(--accent);text-decoration:none}
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
         </div>
-        <div class="hp-tag">TriGen · 模型星云</div>
+        <div class="hp-tag">Y·NEX · 模型星云</div>
       </div>
       <div class="hp-ring hp-ring-1" id="hpRing1"></div>
       <div class="hp-ring hp-ring-2" id="hpRing2"></div>
@@ -795,7 +833,7 @@ a{color:var(--accent);text-decoration:none}
     </div>
   </div>
   <section class="hero">
-    <h1>TriGen 智能创作平台</h1>
+    <h1>Y·NEX 智能创作平台</h1>
     <p>接入顶级AI模型，不需要学提示词，不需要搭智能体 —— 一个网站，全搞定。对话30+顶级模型、写小说变漫剧做品牌去营销、16个预制智能体一键使用。</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px">
       <button class="btn-send" onclick="switchPage('chat');showToast('首次聊天不扣积分，试试吧~')" style="font-size:1rem;padding:14px 36px">🚀 免费体验</button>
@@ -1368,7 +1406,7 @@ a{color:var(--accent);text-decoration:none}
           <button class="btn-sm" onclick="NOVEL_GOTO_STEP('2')">← 上一步</button>
           <div style="display:flex;gap:8px">
             <button class="btn-sm" onclick="NOVEL_STEP_2()">🔄 重新生成</button>
-            <button class="btn-send" onclick="NOVEL_STEP_4()">锁定框架 → 写大纲</button>
+            <button class="btn-send" onclick="NOVEL_STEP_4()">下一步：写大纲 →</button>
           </div>
         </div>
       </div>
@@ -1403,7 +1441,7 @@ a{color:var(--accent);text-decoration:none}
         <textarea id="wizOutlineLocked" rows="18" style="width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;font-family:inherit;line-height:1.8;resize:vertical"></textarea>
         <div style="display:flex;gap:10px;margin-top:16px;justify-content:space-between">
           <button class="btn-sm" onclick="NOVEL_GOTO_STEP('4')">← 上一步</button>
-          <button class="btn-send" onclick="NOVEL_STEP_6_GO()">确认大纲 → 开始写正文</button>
+          <button class="btn-send" onclick="NOVEL_STEP_6_GO()">下一步：写正文 →</button>
         </div>
       </div>
       <!-- Step 6: 写正文 -->
@@ -1766,7 +1804,7 @@ a{color:var(--accent);text-decoration:none}
 <!-- ===== API Key 管理 ===== -->
 <div class="page" id="page-apikeys"><section class="section">
 <h2 class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="vertical-align:middle;margin-right:6px"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> API Key 管理</h2>
-<p class="section-desc" style="font-size:0.85rem">生成你自己的 API Key，接入你的网站或应用中，直接调用 TriGen 的 500+ 模型</p>
+<p class="section-desc" style="font-size:0.85rem">生成你自己的 API Key，接入你的网站或应用中，直接调用 Y·NEX 的 500+ 模型</p>
 
 <div class="feature-card" style="margin-bottom:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;text-align:center">
 <div><div style="font-size:1.5rem">🔌</div><div style="font-weight:600;font-size:0.82rem">OpenAI 兼容</div><div style="font-size:0.7rem;color:var(--text-secondary)">和 GPT API 一模一样<br>改一行URL就能用</div></div>
@@ -1788,7 +1826,7 @@ a{color:var(--accent);text-decoration:none}
 <h4 style="margin-bottom:8px">📖 使用说明</h4>
 <pre style="background:var(--bg-input);padding:12px;border-radius:8px;font-size:0.72rem;overflow-x:auto">
 # 和 OpenAI 完全兼容，只需改 URL
-curl https://j3trisheng.com/v1/chat/completions \
+curl https://ynexai.cn/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer 你的API_Key" \
   -d '{
@@ -1800,7 +1838,7 @@ curl https://j3trisheng.com/v1/chat/completions \
 from openai import OpenAI
 client = OpenAI(
     api_key="你的API_Key",
-    base_url="https://j3trisheng.com/v1"
+    base_url="https://ynexai.cn/v1"
 )
 response = client.chat.completions.create(
     model="deepseekv3",
@@ -2542,7 +2580,7 @@ response = client.chat.completions.create(
 
     <!-- 竞争对手对比 -->
     <div class="feature-card" style="margin-top:20px">
-      <h4 style="text-align:center;margin-bottom:16px">💰 为什么选 TriGen？</h4>
+      <h4 style="text-align:center;margin-bottom:16px">💰 为什么选 Y·NEX？</h4>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:0.82rem">
           <thead><tr style="border-bottom:2px solid var(--accent)"><th style="padding:10px;text-align:left">服务</th><th style="padding:10px;text-align:center">月费</th><th style="padding:10px;text-align:center">模型数</th><th style="padding:10px;text-align:center">多模型对比</th><th style="padding:10px;text-align:center">写小说</th><th style="padding:10px;text-align:center">绘画工具</th></tr></thead>
@@ -2552,12 +2590,12 @@ response = client.chat.completions.create(
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px">Midjourney</td><td style="text-align:center">¥220</td><td style="text-align:center">-</td><td style="text-align:center">-</td><td style="text-align:center">-</td><td style="text-align:center">✅</td></tr>
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px">Poe 订阅</td><td style="text-align:center">¥145</td><td style="text-align:center">10+</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px;color:var(--text-secondary)">各平台合计</td><td style="text-align:center;text-decoration:line-through;color:var(--text-secondary)">¥655</td><td style="text-align:center">3+</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
-            <tr style="background:var(--accent-soft)"><td style="padding:10px;font-weight:700;color:var(--accent)">⚡ TriGen 月度</td><td style="text-align:center;font-weight:800;color:var(--accent)">¥39</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
-            <tr style="background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(99,102,241,0.04))"><td style="padding:10px;font-weight:700;color:#7c3aed">💎 TriGen 年度</td><td style="text-align:center;font-weight:800;color:#7c3aed">¥31</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+            <tr style="background:var(--accent-soft)"><td style="padding:10px;font-weight:700;color:var(--accent)">⚡ Y·NEX 月度</td><td style="text-align:center;font-weight:800;color:var(--accent)">¥39</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+            <tr style="background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(99,102,241,0.04))"><td style="padding:10px;font-weight:700;color:#7c3aed">💎 Y·NEX 年度</td><td style="text-align:center;font-weight:800;color:#7c3aed">¥31</td><td style="text-align:center;font-weight:700">500+</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="text-align:center;font-size:0.78rem;color:var(--green);margin-top:12px">🎯 一个 TriGen = 500+ 模型 · 按用量付费 · 不用不花钱 · 永远比单买划算</p>
+      <p style="text-align:center;font-size:0.78rem;color:var(--green);margin-top:12px">🎯 一个 Y·NEX = 500+ 模型 · 按用量付费 · 不用不花钱 · 永远比单买划算</p>
     </div>
   </section>
 </div>
@@ -2656,6 +2694,109 @@ response = client.chat.completions.create(
 </div>
 </div>
 
+<!-- 个人中心 -->
+<div class="page" id="page-profile">
+  <div style="max-width:800px;margin:0 auto;padding:20px">
+    <h2 style="font-size:24px;margin-bottom:24px">👤 个人中心</h2>
+
+    <!-- 账号信息卡片 -->
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px">
+      <h3 style="font-size:16px;margin-bottom:16px">📋 账号信息</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="color:var(--text-secondary);font-size:13px;margin-bottom:4px">用户名</div>
+          <div id="profileUsername" style="font-size:16px;font-weight:600">-</div>
+        </div>
+        <div>
+          <div style="color:var(--text-secondary);font-size:13px;margin-bottom:4px">邮箱</div>
+          <div id="profileEmail" style="font-size:16px;font-weight:600">-</div>
+        </div>
+        <div>
+          <div style="color:var(--text-secondary);font-size:13px;margin-bottom:4px">手机号</div>
+          <div id="profilePhone" style="font-size:16px;font-weight:600">-</div>
+        </div>
+        <div>
+          <div style="color:var(--text-secondary);font-size:13px;margin-bottom:4px">推荐码</div>
+          <div id="profileRefCode" style="font-size:16px;font-weight:600;color:var(--accent)">-</div>
+        </div>
+        <div>
+          <div style="color:var(--text-secondary);font-size:13px;margin-bottom:4px">账户角色</div>
+          <div id="profileRole" style="font-size:16px;font-weight:600">-</div>
+        </div>
+        <div>
+          <div style="color:var(--text-secondary);font-size:13px;margin-bottom:4px">注册时间</div>
+          <div id="profileCreatedAt" style="font-size:16px;font-weight:600">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 积分信息卡片 -->
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px">
+      <h3 style="font-size:16px;margin-bottom:16px">💰 积分信息</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+        <div style="text-align:center;padding:16px;background:var(--bg);border-radius:12px">
+          <div style="font-size:28px;font-weight:700;color:var(--accent)" id="profileCredits">0</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">当前积分</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:var(--bg);border-radius:12px">
+          <div style="font-size:28px;font-weight:700;color:#00aa55" id="profileCheckinStreak">0</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">连续签到</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:var(--bg);border-radius:12px">
+          <div style="font-size:28px;font-weight:700;color:#ff6a00" id="profileTotalUsed">0</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">累计消耗</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;text-align:center">
+        <button class="btn-send" onclick="dailyCheckin()" id="profileCheckinBtn" style="padding:10px 30px">📅 每日签到 +5</button>
+      </div>
+    </div>
+
+    <!-- API Key 管理 -->
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px">
+      <h3 style="font-size:16px;margin-bottom:16px">🔑 API Key 管理</h3>
+      <div id="profileApiKeys" style="margin-bottom:12px"></div>
+      <button class="btn-sm" onclick="createProfileApiKey()">➕ 创建新 Key</button>
+    </div>
+
+    <!-- 消费记录 -->
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px">
+      <h3 style="font-size:16px;margin-bottom:16px">📊 消费记录</h3>
+      <div id="profileCreditLog" style="max-height:300px;overflow-y:auto"></div>
+    </div>
+
+    <!-- 修改资料 -->
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px">
+      <h3 style="font-size:16px;margin-bottom:16px">⚙️ 账号设置</h3>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px">修改邮箱</label>
+        <input id="profileNewEmail" placeholder="新邮箱地址" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px">
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px">旧密码（验证身份）</label>
+        <input id="profileOldPwd" type="password" placeholder="输入当前密码" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px">
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px">新密码（留空则不修改）</label>
+        <input id="profileNewPwd" type="password" placeholder="输入新密码（至少6位）" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px">
+      </div>
+      <button class="btn-send" onclick="saveProfileSettings()" style="padding:10px 30px">💾 保存设置</button>
+    </div>
+
+    <!-- 桌面端下载 -->
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px">
+      <h3 style="font-size:16px;margin-bottom:16px">💻 桌面端下载</h3>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="flex:1">
+          <div style="font-weight:600;margin-bottom:4px">Y·NEX Desktop v2.0.0</div>
+          <div style="font-size:13px;color:var(--text-secondary)">Windows 桌面客户端，支持本地AI对话、语音交互、3D可视化</div>
+        </div>
+        <a href="/download/YNEX-Desktop-Setup-2.0.0.exe" download style="padding:10px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:14px">⬇️ 下载</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Terms of Service -->
 <div class="page" id="page-terms">
   <section class="section" style="max-width:800px;margin:0 auto">
@@ -2664,7 +2805,7 @@ response = client.chat.completions.create(
       <p style="color:var(--text-secondary);margin-bottom:16px"><b>生效日期：</b>2026年5月28日<br><b>最后更新：</b>2026年5月28日</p>
 
       <h3>一、总则</h3>
-      <p>1.1 欢迎使用TriGen智能创作平台（以下简称"本平台"）。本协议由您与本平台运营主体（以下简称"我们"）共同缔结。</p>
+      <p>1.1 欢迎使用Y·NEX智能创作平台（以下简称"本平台"）。本协议由您与本平台运营主体（以下简称"我们"）共同缔结。</p>
       <p>1.2 您在注册、登录或使用本平台服务前，请仔细阅读本协议。点击"同意"或实际使用本平台，即表示您已阅读并同意接受本协议全部条款。</p>
 
       <h3>二、账号管理</h3>
@@ -2780,7 +2921,7 @@ response = client.chat.completions.create(
           📱 微信：j3trisheng（注明来意）<br>
           📧 邮箱：j3trisheng@163.com<br>
           🐧 QQ：350353280<br>
-          🌐 官网：j3trisheng.com
+          🌐 官网：ynexai.cn
         </p>
       </div>
     </div>
@@ -2932,7 +3073,72 @@ response = client.chat.completions.create(
   <div style="margin-top:14px"><button class="btn-sm" onclick="closeCheckin()">关闭</button></div>
 </div></div>
 
+
+<!-- 亿界本地AI 页面 -->
+<div class="page" id="page-yijie">
+  <div class="yijie-page">
+    <div class="yijie-hero">
+      <h1>🌐 亿界本地AI</h1>
+      <p>你的私人AI管家。运行在本地电脑，支持语音、设备控制、本地LLM和Agent任务。</p>
+      <div class="yijie-status-bar">
+        <span id="yijieStatusDot" class="conn-dot checking"></span>
+        <span id="yijieStatusText">检测本机亿界服务...</span>
+        <button id="yijieCheckBtn" class="btn-sm" style="margin-left:auto">刷新状态</button>
+      </div>
+    </div>
+
+    <div class="yijie-grid">
+      <div class="yijie-card">
+        <h3>💬 本机对话</h3>
+        <div id="yijieChatPanel" class="yijie-chat-panel" style="display:none">
+          <div class="yijie-toolbar">
+            <label><input type="checkbox" id="yijieUseLocal"> 本地LLM</label>
+            <label><input type="checkbox" id="yijieUseMock"> Mock测试</label>
+            <button class="btn-sm" id="yijieSkill_get_weather">天气</button>
+            <button class="btn-sm" id="yijieSkill_get_system_info">系统信息</button>
+            <button class="btn-sm" id="yijieSkill_list_reminders">提醒</button>
+          </div>
+          <div id="yijieMessages" class="yijie-messages"></div>
+          <div class="yijie-input-row">
+            <textarea id="yijieInput" rows="1" placeholder="输入消息，Enter 发送..."></textarea>
+            <button id="yijieSendBtn" class="btn-send">➤</button>
+          </div>
+        </div>
+        <div id="yijieOfflineTip" class="yijie-offline-tip" style="display:none">
+          本机亿界未运行，请下载并打开 <a href="https://github.com/wj910621/ai-nexus-server/releases/latest/download/Y·NEX Desktop-Portable.zip">Y·NEX Desktop 桌面端</a>。
+        </div>
+      </div>
+
+      <div class="yijie-card">
+        <h3>☁️ 云端权益</h3>
+        <div id="yijieCloudInfo" class="yijie-cloud-info">
+          <div style="color:var(--text-secondary)">加载中...</div>
+        </div>
+        <button class="btn-send" style="width:100%;margin-top:12px" onclick="switchPage('pricing')">升级会员</button>
+      </div>
+
+      <div class="yijie-card">
+        <h3>🖥️ 本机硬件</h3>
+        <div id="yijieHardwareInfo">
+          <div style="color:var(--text-secondary)">等待本机服务连接...</div>
+        </div>
+      </div>
+
+      <div class="yijie-card">
+        <h3>📡 远程指令</h3>
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">给已登录的本地设备发送任务（需开通会员）。</p>
+        <div class="yijie-input-row">
+          <input type="text" id="yijieRemoteInput" placeholder="例如：帮我查明天北京的天气">
+          <button id="yijieRemoteSendBtn" class="btn-send">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
+
+<script src="/js/yijie-panel.js"></script>
 
 <!-- Right Panel -->
 <aside class="right-panel" id="rightPanel">
@@ -2955,6 +3161,7 @@ response = client.chat.completions.create(
   <button class="sidebar-link" data-page="studio" onclick="switchPage('studio');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#8b5cf6,#d946ef)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>创作工场</button>
   <button class="sidebar-link" data-page="prompts" onclick="switchPage('prompts');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></span>提示词库</button>
   <button class="sidebar-link" data-page="models" onclick="switchPage('models');toggleMobileMenu()"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#a855f7)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg></span>模型目录</button>
+  <button class="sidebar-link" data-page="profile" onclick="switchPage('profile');loadProfilePage();toggleMobileMenu()" title="个人中心"><span class="sidebar-icon" style="background:linear-gradient(135deg,#6366f1,#a855f7)">👤</span>个人中心</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2963,7 +3170,7 @@ response = client.chat.completions.create(
 <div id="knowledgeManager" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:600;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px)">
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:700px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.6)">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)">
-      <h3 style="margin:0;font-size:1rem">📚 TriGen 知识库</h3>
+      <h3 style="margin:0;font-size:1rem">📚 Y·NEX 知识库</h3>
       <div style="display:flex;gap:8px">
         <button onclick="knowledgeAddNew()" style="font-size:0.8rem;padding:6px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:600">+ 新建</button>
         <button onclick="document.getElementById('knowledgeManager').style.display='none'" style="font-size:0.8rem;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer">关闭</button>
@@ -3001,7 +3208,7 @@ response = client.chat.completions.create(
   <div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px">本次操作需要 <span style="color:var(--accent);font-weight:700">0</span> 积分</div>
   <div style="color:var(--text-secondary);font-size:0.78rem;margin-bottom:12px">当前余额 <span id="creditLowBal" style="font-weight:700">0</span></div>
   <div style="background:rgba(16,185,129,0.08);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:0.72rem;color:var(--green)">
-    ⚡ GPT-4o 官方 ¥145/月 → TriGen 仅 ¥39/月 · 700+ 模型随便用
+    ⚡ GPT-4o 官方 ¥145/月 → Y·NEX 仅 ¥39/月 · 700+ 模型随便用
   </div>
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
     <button class="btn-send" style="background:linear-gradient(135deg,#f59e0b,#d97706);font-size:0.82rem" onclick="closeCreditLow();switchPage('pricing')">💎 立即充值</button>
@@ -3068,7 +3275,7 @@ response = client.chat.completions.create(
 <div id="pwaToast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--bg-card);border:1px solid var(--accent-glow);border-radius:16px;padding:14px 20px;box-shadow:0 8px 40px rgba(0,0,0,0.4);align-items:center;gap:12px;animation:fadeIn 0.3s ease">
   <span style="font-size:1.4rem">📱</span>
   <div>
-    <div style="font-size:0.85rem;font-weight:600;color:var(--text)">将 TriGen 添加到桌面</div>
+    <div style="font-size:0.85rem;font-weight:600;color:var(--text)">将 Y·NEX 添加到桌面</div>
     <div style="font-size:0.72rem;color:var(--text-secondary)">一键打开，无需输入网址</div>
   </div>
   <button id="pwaInstallBtn" style="padding:6px 16px;border-radius:20px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:0.78rem;font-weight:600;white-space:nowrap">立即添加</button>
@@ -3120,6 +3327,8 @@ document.getElementById('pwaInstallBtn').addEventListener('click',installPWA);
 
 // === Nav (with sidebar + right panel updates) ===
 function switchPage(name){
+  if(name==='yijie' && typeof initYijiePanel==='function'){initYijiePanel();}
+  if(name==='profile')loadProfilePage();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
   const pg=document.getElementById('page-'+name);if(pg)pg.classList.add('active');
@@ -3144,8 +3353,19 @@ function switchPage(name){
   if(name==='market')setTimeout(()=>{},100);
   if(name==='code'){updateRightPanel('code');setTimeout(()=>{initCodeChatModels();if(codeChatHistory.length===0)document.getElementById('codeChatQuickStart').style.display='flex'},200)}
   if(name==='apikeys')setTimeout(loadApiKeys,200);
-  // 重置所有滚动位置
-  setTimeout(()=>{window.scrollTo(0,0);const mc=document.querySelector('.main-content');if(mc)mc.scrollTop=0},50);
+  // 重置所有滚动位置 - 立即 + 延迟多重保险
+  const resetScroll = () => {
+    window.scrollTo(0,0);
+    const mc = document.querySelector('.main-content');
+    if(mc) {
+      mc.scrollTop = 0;
+      mc.scrollTo(0,0);
+    }
+  };
+  resetScroll();
+  setTimeout(resetScroll, 50);
+  setTimeout(resetScroll, 300);
+  setTimeout(resetScroll, 600);
   // Force CDN refresh v2
   // 隐私政策更新检测
   if(name==='privacy')markPolicyRead();
@@ -3190,6 +3410,91 @@ async function syncUserData(){
 }
 async function syncChatHistory(){if(authToken){const h=JSON.parse(localStorage.getItem('chathist')||'[]');apiFetch('/api/user/history',{method:'POST',body:JSON.stringify({history:h})})}}
 async function syncCredits(){if(authToken){apiFetch('/api/user/credits',{method:'POST',body:JSON.stringify({credits:userCredits,tokens:usedTokensCount,images:usedImagesCount})})}}
+
+// 个人中心
+async function loadProfilePage(){
+  if(!userToken){openAuth();return;}
+  try{
+    // 加载用户数据
+    const r=await fetch(API_BASE+'/api/user/data',{headers:{'Authorization':'Bearer '+userToken}});
+    const d=await r.json();
+    if(d.ok){
+      document.getElementById('profileUsername').textContent=d.user.username||'-';
+      document.getElementById('profileEmail').textContent=d.user.email||'-';
+      document.getElementById('profilePhone').textContent=d.user.phone||'未绑定';
+      document.getElementById('profileRefCode').textContent=d.user.ref_code||'-';
+      document.getElementById('profileRole').textContent=d.user.role==='admin'?'管理员':'普通用户';
+      document.getElementById('profileCreatedAt').textContent=d.user.created_at?new Date(d.user.created_at*1000).toLocaleDateString():'-';
+      document.getElementById('profileCredits').textContent=d.user.credits||0;
+    }
+    // 签到状态
+    const cr=await fetch(API_BASE+'/api/user/checkin-status',{headers:{'Authorization':'Bearer '+userToken}});
+    const cd=await cr.json();
+    if(cd.ok){
+      document.getElementById('profileCheckinStreak').textContent=cd.streak||0;
+      document.getElementById('profileCheckinBtn').textContent=cd.checkedIn?'✅ 今日已签到':'📅 每日签到 +5';
+      document.getElementById('profileCheckinBtn').disabled=cd.checkedIn;
+    }
+    // API Keys
+    const kr=await fetch(API_BASE+'/api/keys',{headers:{'Authorization':'Bearer '+userToken}});
+    const kd=await kr.json();
+    if(kd.ok&&kd.keys){
+      document.getElementById('profileApiKeys').innerHTML=kd.keys.map(k=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:8px">
+          <code style="flex:1;font-size:13px;word-break:break-all">${k.api_key}</code>
+          <button class="btn-sm" onclick="navigator.clipboard.writeText('${k.api_key}');showToast('已复制')">📋</button>
+          <button class="btn-sm danger" onclick="deleteProfileKey(${k.id})">删除</button>
+        </div>`).join('');
+    }
+    // 消费记录
+    const lr=await fetch(API_BASE+'/api/admin/recharge-log',{headers:{'Authorization':'Bearer '+userToken}});
+    const ld=await lr.json();
+    if(ld.ok&&ld.logs){
+      const myLogs=ld.logs.filter(l=>l.username===d.user.username).slice(0,20);
+      document.getElementById('profileCreditLog').innerHTML=myLogs.length?myLogs.map(l=>`
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span>${l.reason}</span>
+          <span style="color:${l.amount>0?'#00aa55':'#aa3333'}">${l.amount>0?'+':''}${l.amount}</span>
+          <span style="color:var(--text-secondary);font-size:12px">${l.created_at||''}</span>
+        </div>`).join(''):'<div style="color:#888;text-align:center;padding:20px">暂无记录</div>';
+    }
+  }catch(e){showToast('加载失败: '+e.message);}
+}
+
+async function saveProfileSettings(){
+  const email=document.getElementById('profileNewEmail').value.trim();
+  const oldPwd=document.getElementById('profileOldPwd').value;
+  const newPwd=document.getElementById('profileNewPwd').value;
+  if(!oldPwd){showToast('请输入旧密码验证身份');return;}
+  try{
+    const r=await fetch(API_BASE+'/api/user/update-profile',{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+userToken},
+      body:JSON.stringify({email,oldPassword:btoa(oldPwd),newPassword:newPwd?btoa(newPwd):null})
+    });
+    const d=await r.json();
+    if(d.ok){showToast('保存成功');document.getElementById('profileOldPwd').value='';document.getElementById('profileNewPwd').value='';loadProfilePage();}
+    else{showToast(d.error||'保存失败');}
+  }catch(e){showToast('网络错误');}
+}
+
+async function createProfileApiKey(){
+  try{
+    const r=await fetch(API_BASE+'/api/keys/create',{method:'POST',headers:{'Authorization':'Bearer '+userToken,'Content-Type':'application/json'},body:JSON.stringify({keyName:'Key-'+Date.now()})});
+    const d=await r.json();
+    if(d.ok){showToast('创建成功');loadProfilePage();}
+    else{showToast(d.error||'创建失败');}
+  }catch(e){showToast('网络错误');}
+}
+
+async function deleteProfileKey(id){
+  if(!confirm('确认删除此Key？'))return;
+  try{
+    const r=await fetch(API_BASE+'/api/keys/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+userToken}});
+    const d=await r.json();
+    if(d.ok){showToast('已删除');loadProfilePage();}
+    else{showToast(d.error||'删除失败');}
+  }catch(e){showToast('网络错误');}
+}
 
 function getPolicyReadVersion(){return localStorage.getItem(POLICY_STORAGE_KEY)||''}
 function setPolicyReadVersion(v){localStorage.setItem(POLICY_STORAGE_KEY,v)}
@@ -3425,114 +3730,20 @@ let apiOnline=false;
 
 // === Models ===
 const models=[
-  {id:'gpt4o',name:'GPT-4o',provider:'OpenAI',desc:'最新旗舰多模态模型，文本/图像/音频全通。',avatar:'#10a37f',tags:['多模态','推理','编程','海外'],context:'128K',inputPrice:'$2.5/M',outputPrice:'$10/M',featured:true,free:false},
-  {id:'claude4',name:'Claude 4 Sonnet',provider:'Anthropic',desc:'Claude最新旗舰，编程和深度推理业界顶尖。',avatar:'#d97706',tags:['推理','编程','长文本','海外'],context:'200K',inputPrice:'$3/M',outputPrice:'$15/M',featured:true,free:false},
-  {id:'gemini25pro',name:'Gemini 2.5 Pro',provider:'Google',desc:'Google最新旗舰，原生多模态。',avatar:'#4285f4',tags:['多模态','长文本','推理','海外'],context:'2M',inputPrice:'$1.25/M',outputPrice:'$5/M',featured:true,free:false,backup:'nx_gemini_pro'},
-  {id:'deepseekv3',name:'DeepSeek-V3 (0324)',provider:'DeepSeek',desc:'国产最强大模型，671B MoE。',avatar:'#4f46e5',tags:['开源','推理','编程','写作','国内'],context:'128K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:true,free:false},
-  {id:'deepseekr1',name:'DeepSeek-R1',provider:'DeepSeek',desc:'深度推理专家，思维链超强。',avatar:'#4f46e5',tags:['推理','数学','开源','国内'],context:'128K',inputPrice:'¥4/M',outputPrice:'¥16/M',featured:true,free:false},
-  {id:'qwen3',name:'通义千问 3.0',provider:'阿里云',desc:'阿里最新旗舰，中文能力顶尖。',avatar:'#ff6a00',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥2/M',outputPrice:'¥8/M',featured:true,free:false},
-  {id:'kimi2',name:'Kimi K2',provider:'月之暗面',desc:'超长上下文200万字。',avatar:'#6c5ce7',tags:['长文本','中文优化','国内'],context:'2M',inputPrice:'¥12/M',outputPrice:'¥12/M',featured:true,free:false},
-  {id:'gpt4omini',name:'GPT-4o Mini',provider:'OpenAI',desc:'轻量高效版，性价比极高。',avatar:'#10a37f',tags:['快速','编程','海外'],context:'128K',inputPrice:'$0.15/M',outputPrice:'$0.6/M',featured:false,free:false},
-  {id:'glm4plus',name:'GLM-4 Plus',provider:'智谱AI',desc:'All-Tools智能体，中英双强。',avatar:'#3859ff',tags:['智能体','中文优化','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥0.5/M',featured:false,free:false},
-  {id:'hunyuan',name:'混元 TurboS',provider:'腾讯',desc:'腾讯最快大模型。',avatar:'#00a4ff',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥1/M',outputPrice:'¥2/M',featured:false,free:false},
-  {id:'llama4',name:'Llama 4 Scout',provider:'Meta',desc:'最新开源，109B参数。',avatar:'#0668e1',tags:['开源','通用','海外','免费'],context:'10M',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  // 硅基流动免费模型
-  {id:'sf_qwen3_8b',name:'Qwen3-8B',provider:'通义千问',desc:'8B轻量级，快速响应。',avatar:'#ff6a00',tags:['中文优化','轻量','国内'],context:'32K',inputPrice:'¥0.5/M',outputPrice:'¥2/M',featured:false,free:false},
-  {id:'sf_deepseek_v3_free',name:'DeepSeek-V3',provider:'DeepSeek',desc:'昇腾部署版，高性价比。',avatar:'#4f46e5',tags:['推理','编程','国内'],context:'128K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:true,free:false},
-  {id:'mistral-large2',name:'Mistral Large 2',provider:'Mistral AI',desc:'欧洲最强开源。',avatar:'#ff6b35',tags:['开源','多语言','推理','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$6/M',featured:false,free:false},
-  {id:'grok3',name:'Grok-3',provider:'xAI',desc:'马斯克xAI实时推理。',avatar:'#1d9bf0',tags:['推理','实时信息','海外'],context:'256K',inputPrice:'$2/M',outputPrice:'$8/M',featured:false,free:false},
-  {id:'spark4',name:'讯飞星火 4.0',provider:'科大讯飞',desc:'语音识别领先。',avatar:'#2563eb',tags:['语音','多模态','国内'],context:'128K',inputPrice:'¥30/M',outputPrice:'¥30/M',featured:false,free:false},
-  {id:'sf_glm5',name:'GLM-5',provider:'智谱',desc:'智谱最新旗舰，多模态全能。',avatar:'#3859ff',tags:['多模态','推理','国内'],context:'128K',inputPrice:'¥6/M',outputPrice:'¥28/M',featured:false,free:false},
-  {id:'sf_qwen35_397b',name:'Qwen3.5-397B',provider:'通义千问',desc:'397B MoE巨无霸，推理能力极强。',avatar:'#ff6a00',tags:['推理','编程','国内'],context:'128K',inputPrice:'¥2/M',outputPrice:'¥8/M',featured:false,free:false},
-  {id:'sf_qwq_32b',name:'QwQ-32B',provider:'通义千问',desc:'千问推理专家，思维链超强。',avatar:'#e17055',tags:['推理','数学','开源','国内'],context:'128K',inputPrice:'¥2/M',outputPrice:'¥6/M',featured:true,free:false},
-  {id:'sf_hunyuan_a13b',name:'混元A13B',provider:'腾讯',desc:'腾讯混元开源版，支持thinking。',avatar:'#00a4ff',tags:['开源','推理','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥0.5/M',featured:false,free:false},
-  // === 阿里云百炼 ===
-  {id:'ali_qwen37_max',name:'Qwen3.7 Max',provider:'阿里云',desc:'阿里最新旗舰，中文能力登顶。',avatar:'#ff6a00',tags:['多模态','中文优化','国内'],context:'256K',inputPrice:'¥20/M',outputPrice:'¥80/M',featured:true,free:false},
-  {id:'ali_qwen36_plus',name:'Qwen3.6 Plus',provider:'阿里云',desc:'均衡性能，性价比之选。',avatar:'#ff6a00',tags:['中文优化','编程','国内'],context:'256K',inputPrice:'¥4/M',outputPrice:'¥12/M',featured:false,free:false},
-  {id:'ali_qwen36_flash',name:'Qwen3.6 Flash',provider:'阿里云',desc:'极速轻量版，秒级响应。',avatar:'#ff6a00',tags:['快速','中文优化','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥2/M',featured:false,free:false},
-  {id:'ali_glm51',name:'GLM-5.1',provider:'阿里云',desc:'智谱最新，百炼平台直连。',avatar:'#3859ff',tags:['推理','智能体','国内'],context:'128K',inputPrice:'¥6/M',outputPrice:'¥28/M',featured:false,free:false},
+  {id:'deepseekv3',name:'DeepSeek-V3',provider:'DeepSeek',desc:'国产最强大模型，671B MoE，推理编程顶尖。',avatar:'#4f46e5',tags:['开源','推理','编程','写作','国内'],context:'128K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:true,free:false},
+  {id:'deepseekr1',name:'DeepSeek-R1',provider:'DeepSeek',desc:'深度推理专家，思维链超强，数学顶尖。',avatar:'#4f46e5',tags:['推理','数学','开源','国内'],context:'128K',inputPrice:'¥4/M',outputPrice:'¥16/M',featured:true,free:false},
+  {id:'glm4plus',name:'GLM-4 Plus',provider:'智谱AI',desc:'All-Tools智能体，中英双强。',avatar:'#3859ff',tags:['智能体','中文优化','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥0.5/M',featured:true,free:false},
+  {id:'glm4',name:'GLM-4',provider:'智谱AI',desc:'智谱GLM-4，通用对话能力强。',avatar:'#3859ff',tags:['对话','中文优化','国内'],context:'128K',inputPrice:'¥0.5/M',outputPrice:'¥0.5/M',featured:false,free:false},
+  {id:'kimi',name:'Kimi (月之暗面)',provider:'月之暗面',desc:'超长上下文，中文优化。',avatar:'#6c5ce7',tags:['长文本','中文优化','国内'],context:'8K',inputPrice:'¥12/M',outputPrice:'¥12/M',featured:true,free:false},
+  {id:'ali_qwen36_plus',name:'Qwen3.6 Plus',provider:'阿里云',desc:'均衡性能，性价比之选。',avatar:'#ff6a00',tags:['中文优化','编程','国内'],context:'256K',inputPrice:'¥4/M',outputPrice:'¥12/M',featured:true,free:false},
   {id:'ali_kimi_k26',name:'Kimi-K2.6',provider:'阿里云',desc:'月之暗面最新，超长上下文。',avatar:'#6c5ce7',tags:['长文本','中文优化','国内'],context:'2M',inputPrice:'¥12/M',outputPrice:'¥12/M',featured:false,free:false},
-  // === DMXAPI ===
-  {id:'dmx_minimax_m27_free',name:'MiniMax-M2.7',provider:'MiniMax',desc:'万亿MoE多模态免费版。',avatar:'#fd79a8',tags:['多模态','对话','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'dmx_minimax_m25_free',name:'MiniMax-M2.5',provider:'MiniMax',desc:'MiniMax轻量版免费使用。',avatar:'#fdcb6e',tags:['对话','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'dmx_glm_47_free',name:'GLM-4.7',provider:'智谱',desc:'智谱GLM-4.7免费版。',avatar:'#6c5ce7',tags:['对话','中文优化','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_glm_47_flash',name:'GLM-4.7 Flash',provider:'智谱',desc:'智谱GLM-4.7闪速版。',avatar:'#a29bfe',tags:['对话','快速','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_glm_5_free',name:'GLM-5',provider:'智谱',desc:'智谱GLM-5免费版。',avatar:'#6c5ce7',tags:['推理','中文优化','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_glm_51_free',name:'GLM-5.1',provider:'智谱',desc:'智谱GLM-5.1免费版。',avatar:'#6c5ce7',tags:['推理','中文优化','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_glm_5_turbo_free',name:'GLM-5 Turbo',provider:'智谱',desc:'智谱GLM-5涡轮加速版。',avatar:'#8b5cf6',tags:['推理','快速','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_glm_45_flash',name:'GLM-4.5 Flash',provider:'智谱',desc:'智谱GLM-4.5闪速版。',avatar:'#a29bfe',tags:['对话','快速','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_glm_4_9b',name:'GLM-4 9B',provider:'智谱',desc:'智谱GLM-4 9B开源版。',avatar:'#7c3aed',tags:['对话','轻量','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_hunyuan_lite',name:'混元 Lite',provider:'腾讯',desc:'腾讯混元轻量免费版。',avatar:'#00b894',tags:['对话','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_qwen3_8b_free',name:'Qwen3-8B',provider:'通义千问',desc:'通义千问3-8B免费版。',avatar:'#0984e3',tags:['推理','中文优化','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'dmx_qwen_flash_free',name:'Qwen Flash',provider:'通义千问',desc:'通义千问闪速免费版。',avatar:'#74b9ff',tags:['对话','快速','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_qwen3_5_plus_free',name:'Qwen3-5 Plus',provider:'通义千问',desc:'通义千问3-5增强免费版。',avatar:'#0984e3',tags:['推理','中文优化','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_qwen35_plus_free',name:'Qwen3.5 Plus',provider:'通义千问',desc:'通义千问3.5增强免费版。',avatar:'#0984e3',tags:['推理','中文优化','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_qwen3_coder_plus_free',name:'Qwen3-Coder Plus',provider:'通义千问',desc:'通义千问编程增强免费版。',avatar:'#00cec9',tags:['编程','代码','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_qwen3_coder_next_free',name:'Qwen3-Coder Next',provider:'通义千问',desc:'通义千问下一代编程免费版。',avatar:'#00cec9',tags:['编程','代码','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_qwen35_2b_free',name:'Qwen3.5-2B',provider:'通义千问',desc:'通义千问3.5轻量版，快速入门。',avatar:'#74b9ff',tags:['对话','轻量','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:true},
-  {id:'dmx_qwen35_35b_free',name:'Qwen3.5-35B',provider:'通义千问',desc:'通义千问3.5-35B免费版。',avatar:'#0984e3',tags:['推理','中文优化','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_qwen3_17b_free',name:'Qwen3-1.7B',provider:'通义千问',desc:'通义千问迷你版，入门首选。',avatar:'#74b9ff',tags:['对话','轻量','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:true},
-  {id:'dmx_qwen3_max_free',name:'Qwen3-Max',provider:'通义千问',desc:'通义千问3旗舰免费版。',avatar:'#0652DD',tags:['推理','中文优化','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'dmx_qwen25_coder_7b',name:'Qwen2.5-Coder-7B',provider:'通义千问',desc:'通义千问编程7B开源版。',avatar:'#00cec9',tags:['编程','代码','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_kimi_k25_free',name:'Kimi-K2.5',provider:'Kimi',desc:'月之暗面K2.5免费版。',avatar:'#6c5ce7',tags:['长文本','中文优化','国内'],context:'2M',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'dmx_kimi_k26_free',name:'Kimi-K2.6',provider:'Kimi',desc:'月之暗面K2.6免费版。',avatar:'#a29bfe',tags:['长文本','中文优化','国内'],context:'2M',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_mimo_v2_pro_free',name:'MIMO-V2 Pro',provider:'MIMO',desc:'MIMO创意模型免费版。',avatar:'#d63031',tags:['创意','对话','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_mimo_v25_free',name:'MIMO-V2.5',provider:'MIMO',desc:'MIMO最新创意免费版。',avatar:'#e17055',tags:['创意','对话','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_code_free',name:'编程模型',provider:'合作伙伴',desc:'通用编程免费版。',avatar:'#00cec9',tags:['编程','代码','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_codex_free',name:'编程模型 Plus',provider:'合作伙伴',desc:'增强编程免费版。',avatar:'#00cec9',tags:['编程','代码','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_kat_coder_free',name:'KAT-Coder V2',provider:'KAT',desc:'KAT编程模型免费版。',avatar:'#636e72',tags:['编程','代码','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'dmx_qwen36_plus_free',name:'Qwen3.6 Plus',provider:'通义千问',desc:'通义千问3.6增强免费版。',avatar:'#0984e3',tags:['推理','中文优化','国内'],context:'256K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'dmx_code_free_x',name:'编程模型 Pro',provider:'合作伙伴',desc:'高级编程加速版。',avatar:'#00cec9',tags:['编程','代码','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  // 百度千帆 ERNIE 已下线（配额不足），使用 DMXAPI/Ark 替代
-  // === 火山引擎 Ark（全免费接入） ===
-  {id:'ark_dsv4p',name:'DeepSeek-V4 Pro',provider:'DeepSeek',desc:'DeepSeek最新旗舰，火山直连免费。',avatar:'#4f46e5',tags:['推理','编程','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'ark_dsv4f',name:'DeepSeek-V4 Flash',provider:'DeepSeek',desc:'轻量极速版，火山直连免费。',avatar:'#4f46e5',tags:['快速','编程','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'ark_dsv32',name:'DeepSeek-V3.2',provider:'DeepSeek',desc:'671B MoE，火山直连免费。',avatar:'#4f46e5',tags:['开源','推理','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'ark_dbs2_pro',name:'豆包Seed 2.0 Pro',provider:'字节跳动',desc:'字节旗舰，火山直连免费。',avatar:'#e17055',tags:['多模态','中文优化','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'ark_dbs2_lite',name:'豆包Seed 2.0 Lite',provider:'字节跳动',desc:'轻量版，火山直连免费。',avatar:'#fab1a0',tags:['快速','中文优化','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'ark_dbs2_mini',name:'豆包Seed 2.0 Mini',provider:'字节跳动',desc:'迷你版，极速免费。',avatar:'#dfe6e9',tags:['快速','轻量','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'ark_dbs_code',name:'豆包Seed Code',provider:'字节跳动',desc:'编程专用，火山直连免费。',avatar:'#00cec9',tags:['编程','代码','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'ark_dbs1_8',name:'豆包Seed 1.8',provider:'字节跳动',desc:'豆包1.8版，火山直连免费。',avatar:'#e8426e',tags:['中文优化','对话','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'ark_dbs1_6',name:'豆包Seed 1.6',provider:'字节跳动',desc:'豆包1.6版，火山直连免费。',avatar:'#e8426e',tags:['对话','中文优化','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'ark_dbp15p',name:'豆包1.5 Pro',provider:'字节跳动',desc:'豆包1.5旗舰，火山直连免费。',avatar:'#e8426e',tags:['中文优化','内容创作','免费','国内'],context:'32K',inputPrice:'免费',outputPrice:'免费',featured:true,free:false},
-  {id:'ark_dbp15l',name:'豆包1.5 Lite',provider:'字节跳动',desc:'豆包1.5轻量，极速免费。',avatar:'#fab1a0',tags:['快速','中文优化','免费','国内'],context:'32K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'ark_glm47',name:'GLM-4.7',provider:'智谱',desc:'智谱GLM-4.7，火山直连免费。',avatar:'#3859ff',tags:['推理','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  {id:'ark_dbs_char',name:'豆包角色扮演',provider:'字节跳动',desc:'角色扮演专用，火山直连免费。',avatar:'#a29bfe',tags:['角色扮演','创意','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:false},
-  // === 百川智能 ===
+  {id:'ali_deepseek_v4_flash',name:'DeepSeek-V3 Flash',provider:'阿里云',desc:'DeepSeek V3阿里云版，极速响应。',avatar:'#4f46e5',tags:['推理','快速','国内'],context:'128K',inputPrice:'¥1/M',outputPrice:'¥4/M',featured:true,free:false},
+  {id:'ali_deepseek_v4_pro',name:'DeepSeek-R1 Pro',provider:'阿里云',desc:'DeepSeek R1阿里云版，深度推理。',avatar:'#4f46e5',tags:['推理','编程','国内'],context:'128K',inputPrice:'¥4/M',outputPrice:'¥16/M',featured:false,free:false},
+  {id:'sf_deepseek_v3_free',name:'DeepSeek-V3 (免费)',provider:'DeepSeek',desc:'硅基流动部署版，免费使用。',avatar:'#4f46e5',tags:['推理','编程','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:true,free:true},
+  {id:'sf_qwen3_8b',name:'Qwen3-8B (免费)',provider:'通义千问',desc:'8B轻量级，快速响应，免费。',avatar:'#ff6a00',tags:['中文优化','轻量','免费','国内'],context:'32K',inputPrice:'免费',outputPrice:'免费',featured:true,free:true},
+  {id:'sf_hunyuan_a13b',name:'混元A13B (免费)',provider:'腾讯',desc:'腾讯混元开源版，支持thinking，免费。',avatar:'#00a4ff',tags:['开源','推理','免费','国内'],context:'128K',inputPrice:'免费',outputPrice:'免费',featured:false,free:true},
   {id:'bc_baichuan4',name:'百川4',provider:'百川智能',desc:'国产大模型，中文能力强劲。',avatar:'#f97316',tags:['中文优化','推理','国内'],context:'32K',inputPrice:'¥4/M',outputPrice:'¥4/M',featured:true,free:false},
   {id:'bc_baichuan3',name:'百川3 Turbo',provider:'百川智能',desc:'高性价比对话模型。',avatar:'#f97316',tags:['中文优化','快速','国内'],context:'32K',inputPrice:'¥1/M',outputPrice:'¥2/M',featured:false,free:false},
-  // === 3D 生成 ===
-  {id:'meshy_text',name:'Meshy 文本→3D',provider:'Meshy',desc:'AI文本描述转3D模型，高质量PBR材质。',avatar:'#8b5cf6',tags:['3d','文本生成','PBR材质'],context:'N/A',inputPrice:'¥12/次',outputPrice:'¥12/次',featured:true,free:false},
-  {id:'meshy_image',name:'Meshy 图片→3D',provider:'Meshy',desc:'上传图片生成3D模型，精准还原。',avatar:'#7c3aed',tags:['3d','图生3D','精准'],context:'N/A',inputPrice:'¥12/次',outputPrice:'¥12/次',featured:false,free:false},
-  // === 海外模型 ===
-  {id:'or_gpt4o',name:'GPT-4o',provider:'OpenAI',desc:'OpenAI旗舰，多模态全能。',avatar:'#10a37f',tags:['多模态','推理','编程'],context:'128K',inputPrice:'$2.5/M',outputPrice:'$10/M',featured:true,free:false},
-  {id:'or_llama3_70b',name:'Llama 3 70B',provider:'Meta',desc:'Meta开源旗舰。',avatar:'#0668e1',tags:['开源','通用'],context:'8K',inputPrice:'$0.23/M',outputPrice:'$0.4/M',featured:false,free:false},
-  {id:'or_mistral_large',name:'Mistral Large 2',provider:'Mistral',desc:'欧洲最强开源模型。',avatar:'#ff6b35',tags:['开源','多语言'],context:'256K',inputPrice:'$2/M',outputPrice:'$6/M',featured:false,free:false},
-  {id:'or_perplexity',name:'Perplexity Online',provider:'Perplexity',desc:'联网搜索增强，实时信息。',avatar:'#6366f1',tags:['搜索','实时','推理'],context:'128K',inputPrice:'$1/M',outputPrice:'$1/M',featured:false,free:false},
-  {id:'or_codeqwen',name:'Qwen 2.5 Coder',provider:'通义千问',desc:'代码生成专家。',avatar:'#06b6d4',tags:['编程','开源'],context:'128K',inputPrice:'$0.18/M',outputPrice:'$0.18/M',featured:false,free:false},
-  // === API Nexus 海外旗舰（国内直连） ===
-  {id:'nx_claude_sonnet',name:'Claude Sonnet 4.6',provider:'Anthropic',desc:'Claude最佳平衡，编程推理顶尖，国内直连。',avatar:'#d97706',tags:['推理','编程','海外'],context:'200K',inputPrice:'¥3/M',outputPrice:'¥15/M',featured:true,free:false},
-  {id:'nx_claude_opus',name:'Claude Opus 4.7',provider:'Anthropic',desc:'最强深度分析，国内直连。',avatar:'#d97706',tags:['深度分析','推理','海外'],context:'200K',inputPrice:'¥5/M',outputPrice:'¥25/M',featured:true,free:false},
-  {id:'nx_claude_haiku',name:'Claude Haiku 4.5',provider:'Anthropic',desc:'Claude轻量版，极速响应。',avatar:'#f59e0b',tags:['快速','编程','海外'],context:'200K',inputPrice:'¥0.5/M',outputPrice:'¥2/M',featured:false,free:false},
-  {id:'nx_gpt5',name:'GPT-5 Pro',provider:'OpenAI',desc:'OpenAI最新旗舰，国内直连。',avatar:'#10a37f',tags:['多模态','推理','编程','海外'],context:'256K',inputPrice:'¥180/M',outputPrice:'¥1080/M',featured:true,free:false},
-  {id:'nx_gpt5mini',name:'GPT-5 Mini',provider:'OpenAI',desc:'GPT-5轻量，极低价高性价比。',avatar:'#10a37f',tags:['快速','编程','海外'],context:'256K',inputPrice:'¥0.15/M',outputPrice:'¥1.2/M',featured:true,free:false},
-  {id:'nx_gpt5chat',name:'GPT-5 Chat',provider:'OpenAI',desc:'GPT-5通用对话版，性价比之选。',avatar:'#20c997',tags:['对话','通用','海外'],context:'256K',inputPrice:'¥50/M',outputPrice:'¥300/M',featured:false,free:false},
-  {id:'nx_gpt5nano',name:'GPT-5 Nano',provider:'OpenAI',desc:'GPT-5超轻量，极速响应。',avatar:'#63e6be',tags:['极速','轻量','海外'],context:'256K',inputPrice:'¥0.05/M',outputPrice:'¥0.3/M',featured:false,free:false},
-  {id:'nx_gpt51chat',name:'GPT-5.1 Chat',provider:'OpenAI',desc:'GPT-5.1对话版，推理增强。',avatar:'#10a37f',tags:['推理','对话','海外'],context:'256K',inputPrice:'¥80/M',outputPrice:'¥500/M',featured:false,free:false},
-  {id:'nx_gpt51codex',name:'GPT-5.1 Codex',provider:'OpenAI',desc:'GPT-5.1编程专用，代码能力顶尖。',avatar:'#0d9488',tags:['编程','代码','海外'],context:'256K',inputPrice:'¥100/M',outputPrice:'¥600/M',featured:true,free:false},
-  {id:'nx_gpt51codexmax',name:'GPT-5.1 Codex Max',provider:'OpenAI',desc:'GPT-5.1最强编程版，超大上下文。',avatar:'#0f766e',tags:['编程','旗舰','海外'],context:'256K',inputPrice:'¥150/M',outputPrice:'¥900/M',featured:false,free:false},
-  {id:'nx_gpt52chat',name:'GPT-5.2 Chat',provider:'OpenAI',desc:'GPT-5.2对话版，上下文理解增强。',avatar:'#10a37f',tags:['对话','推理','海外'],context:'256K',inputPrice:'¥100/M',outputPrice:'¥600/M',featured:false,free:false},
-  {id:'nx_gpt52pro',name:'GPT-5.2 Pro',provider:'OpenAI',desc:'GPT-5.2旗舰版，多模态+推理。',avatar:'#0d9488',tags:['多模态','推理','旗舰','海外'],context:'256K',inputPrice:'¥150/M',outputPrice:'¥900/M',featured:true,free:false},
-  {id:'nx_gpt53chat',name:'GPT-5.3 Chat',provider:'OpenAI',desc:'GPT-5.3最新对话版。',avatar:'#10a37f',tags:['对话','推理','海外'],context:'256K',inputPrice:'¥130/M',outputPrice:'¥800/M',featured:false,free:false},
-  {id:'nx_gpt53codex',name:'GPT-5.3 Codex',provider:'OpenAI',desc:'GPT-5.3编程版，编码能力跃升。',avatar:'#14b8a6',tags:['编程','代码','旗舰','海外'],context:'256K',inputPrice:'¥180/M',outputPrice:'¥1080/M',featured:true,free:false},
-  {id:'nx_gpt54pro',name:'GPT-5.4 Pro',provider:'OpenAI',desc:'GPT-5.4旗舰版，推理+编程大幅提升。',avatar:'#0d9488',tags:['多模态','推理','编程','海外'],context:'256K',inputPrice:'¥220/M',outputPrice:'¥1300/M',featured:true,free:false},
-  {id:'nx_gpt54mini',name:'GPT-5.4 Mini',provider:'OpenAI',desc:'GPT-5.4轻量，新版高效率。',avatar:'#14b8a6',tags:['快速','编程','海外'],context:'256K',inputPrice:'¥0.2/M',outputPrice:'¥1.5/M',featured:false,free:false},
-  {id:'nx_gpt54nano',name:'GPT-5.4 Nano',provider:'OpenAI',desc:'GPT-5.4超轻量，极速响应。',avatar:'#5eead4',tags:['极速','轻量','海外'],context:'256K',inputPrice:'¥0.1/M',outputPrice:'¥0.8/M',featured:false,free:false},
-  {id:'nx_gpt55pro',name:'GPT-5.5 Pro',provider:'OpenAI',desc:'OpenAI最新旗舰，推理能力登顶。',avatar:'#0f766e',tags:['多模态','推理','编程','旗舰','海外'],context:'256K',inputPrice:'¥280/M',outputPrice:'¥1500/M',featured:true,free:false},
-  {id:'nx_gemini_pro',name:'Gemini 2.5 Pro（国内）',provider:'Google',desc:'Google旗舰，国内直连版。',avatar:'#4285f4',tags:['多模态','长文本','海外'],context:'1M',inputPrice:'¥3/M',outputPrice:'¥18/M',featured:true,free:false},
-  {id:'nx_o3mini',name:'O3 Mini',provider:'OpenAI',desc:'OpenAI推理模型，国内直连。',avatar:'#10a37f',tags:['推理','数学','海外'],context:'200K',inputPrice:'¥2/M',outputPrice:'¥8/M',featured:false,free:false},
-  {id:'nx_grok3',name:'Grok 3',provider:'xAI',desc:'马斯克xAI最强模型，国内直连。',avatar:'#1d9bf0',tags:['推理','编程','海外'],context:'256K',inputPrice:'¥5/M',outputPrice:'¥20/M',featured:false,free:false},
-  {id:'nx_flux',name:'Flux Pro',provider:'图片',desc:'开源最强文生图，国内直连。',avatar:'#8b5cf6',tags:['图片生成','创意','海外'],context:'N/A',inputPrice:'¥0.1/次',outputPrice:'¥0.1/次',featured:false,free:false},
 ];
 
 // === Provider Icons (厂商图标) ===
@@ -3794,9 +4005,9 @@ let RAG_ENABLED = localStorage.getItem('ragEnabled')!=='false'; // 默认开启
 
 // 平台级 system prompt — 每次对话自动注入
 const PLATFORM_SYSTEM_PROMPT = [
-  '你是 TriGen 平台的 AI 助手。TriGen 是一个智能创作平台，聚合全球顶尖大语言模型，提供聊天、写作、绘图、视频、3D、音乐等全方位 AI 创作服务。',
+  '你是 Y·NEX 平台的 AI 助手。Y·NEX 是一个智能创作平台，聚合全球顶尖大语言模型，提供聊天、写作、绘图、视频、3D、音乐等全方位 AI 创作服务。',
   '',
-  '【TriGen 核心能力】',
+  '【Y·NEX 核心能力】',
   '- 多模型聊天：同时对话多个模型，直观对比回答',
   '- AI 小说：六步创作流程，支持百万字长篇不崩人设',
   '- AI 漫剧：小说转漫画分镜脚本',
@@ -3835,7 +4046,7 @@ async function buildRAGSystemPrompt(userQuery){
         '【知识片段'+(i+1)+'】'+item.title+'\n'+item.content
       ).join('\n\n');
 
-      sysPrompt += '\n\n【TriGen 知识库】（优先参考以下信息回答）\n' + ragContext;
+      sysPrompt += '\n\n【Y·NEX 知识库】（优先参考以下信息回答）\n' + ragContext;
 
       const st = document.getElementById('ragStatus');
       if(st){ st.style.display='inline'; st.textContent = '已匹配 '+data.matched+' 条知识'; }
@@ -4513,7 +4724,7 @@ function showRechargePopup(needed){
   const html=`<div id="rechargePopup" style="position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center" onclick="event.target===this&&this.remove()">
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
       <div style="font-size:2.5rem;margin-bottom:8px">⚡</div>
-      <h3 style="margin-bottom:8px">积分不足</h3>
+      <h3 style="margin-bottom:8px">积��不足</h3>
       <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:8px">本次需要 <b style="color:var(--accent)">${needed}</b> 积分</p>
       <p style="font-size:0.75rem;color:#ef4444;margin-bottom:16px">当前余额：${userCredits} 积分</p>
       <button class="btn-send" style="width:100%;padding:10px;background:linear-gradient(135deg,#f59e0b,#d97706);font-size:0.9rem;margin-bottom:8px" onclick="document.getElementById('rechargePopup').remove();switchPage('pricing')">💳 立即充值</button>
@@ -4900,7 +5111,7 @@ function showRefCode(){
   if(!currentUser)return;
   const users=getUsers();const u=users.find(x=>x.username===currentUser.username);
   const code=u?u.refCode:genRefCode(currentUser.username);
-  prompt('你的推荐码（复制发给朋友）：\n\n'+(u?u.refCode:code)+'\n\n推荐链接：https://j3trisheng.com\n双方各得5积分！');}
+  prompt('你的推荐码（复制发给朋友）：\n\n'+(u?u.refCode:code)+'\n\n推荐链接：https://ynexai.cn\n双方各得5积分！');}
 function openAuth(){document.getElementById('authModal').classList.add('show');showLogin()}
 // === 新认证系统 ===
 function switchAuthTab(tab){
@@ -5001,7 +5212,7 @@ function doRegisterNew(){
       if(d.user&&d.user.credits!==undefined){userCredits=d.user.credits;localStorage.setItem('cr',userCredits)}
       if(d.apiKey)localStorage.setItem('user_api_key',d.apiKey);
       closeAuth();renderUserNav();updateCreditDisplay();updateCheckinBtn();
-      switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 TriGen')},500);
+      switchPage('chat');setTimeout(()=>{document.getElementById('chatInput').focus();showToast('🎉 注册成功！欢迎来到 Y·NEX')},500);
       syncUserData();
     }else{
       // 后端不可用时降级到本地注册
@@ -5131,7 +5342,7 @@ async function runAiMarket(){
 }
 
 // === AI 编程助手（对话式） ===
-const CODE_SYS_PROMPT = `你是 TriGen 平台的 AI 编程助手。你是一个专业、耐心、善于引导的全栈开发专家。
+const CODE_SYS_PROMPT = `你是 Y·NEX 平台的 AI 编程助手。你是一个专业、耐心、善于引导的全栈开发专家。
 
 【核心原则】
 1. 先理解，再动手：首先要充分理解用户想做什么，目标用户是谁，有什么具体需求
@@ -5632,6 +5843,7 @@ function doCheckin(){
       showToast(d.already?'今天已签到':d.error);if(btn)btn.disabled=false
     }
   }).catch(e=>{showToast('网络错误');if(btn)btn.disabled=false})
+}
 
 // === Chat History ===
 function saveChatToHistory(msg,replies){

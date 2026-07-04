@@ -1,0 +1,18 @@
+{
+  "name": "Y·NEX · 移动端遥控",
+  "short_name": "Y·NEX遥控",
+  "description": "通过手机远程控制Y·NEX电脑核心",
+  "start_url": "./mobile.html",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#0a0a1a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

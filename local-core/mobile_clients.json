@@ -1,0 +1,64 @@
+{
+  "iOS_shortcuts": {
+    "name": "Y·NEX AI 管家",
+    "description": "通过 iOS 快捷指令随时唤醒Y·NEX，支持语音输入和文字输入",
+    "shortcuts": [
+      {
+        "name": "与Y·NEX对话",
+        "icon": "💬",
+        "trigger": "Siri + 主屏幕图标",
+        "actions": [
+          {"type": "AskForInput", "prompt": "想对Y·NEX说什么？", "type_speech": true},
+          {"type": "URL", "url": "http://<你的域名>:7788/chat", "method": "POST", "headers": {"X-API-Key": "<API_KEY>", "Content-Type": "application/json"}, "body": {"text": "${askForInput}"}},
+          {"type": "ShowResult", "text": "${urlResult}"}
+        ]
+      },
+      {
+        "name": "Y·NEX远程唤醒",
+        "icon": "🔔",
+        "trigger": "Siri 语音或主屏幕",
+        "actions": [
+          {"type": "URL", "url": "http://<你的域名>:7788/wake", "method": "POST", "headers": {"X-API-Key": "<API_KEY>", "Content-Type": "application/json"}, "body": {"message": "先生，我被远程唤醒了。"}},
+          {"type": "SpeakText", "text": "已唤醒Y·NEX"}
+        ]
+      },
+      {
+        "name": "Y·NEX状态",
+        "icon": "📊",
+        "trigger": "主屏幕图标",
+        "actions": [
+          {"type": "URL", "url": "http://<你的域名>:7788/status", "method": "GET", "headers": {"X-API-Key": "<API_KEY>"}},
+          {"type": "ShowResult", "text": "${urlResult}"}
+        ]
+      },
+      {
+        "name": "Y·NEX执行设备控制",
+        "icon": "🎛️",
+        "trigger": "Siri 语音",
+        "actions": [
+          {"type": "AskForInput", "prompt": "要执行什么设备指令？例如：打开客厅灯", "type_speech": false},
+          {"type": "URL", "url": "http://<你的域名>:7788/command", "method": "POST", "headers": {"X-API-Key": "<API_KEY>", "Content-Type": "application/json"}, "body": {"command": "${askForInput}"}},
+          {"type": "ShowResult", "text": "${urlResult}"}
+        ]
+      }
+    ],
+    "setup_instructions": [
+      "1. 在『快捷指令』App 中，点击右上角 + 创建新快捷指令",
+      "2. 添加『URL』操作，填入你的Y·NEX 服务器地址",
+      "3. 添加『获取 URL 内容』，方法选 POST",
+      "4. 在『获取 URL 内容』中添加 Header：X-API-Key / <你的API Key>",
+      "5. 添加『请求体』：JSON 格式 {\"text\": \"${待发送文本}\"}",
+      "6. 可选：添加『显示结果』或『朗读文本』展示回复",
+      "7. 保存后添加到 Siri 或主屏幕"
+    ]
+  },
+  "android_widget": {
+    "description": "Android 主屏幕小部件（通过 Tasker 或 KWGT）",
+    "tasker_profile": [
+      "触发器：时钟 → 每天",
+      "任务1：HTTP POST → URL: http://<域名>:7788/chat",
+      "任务2：变量设置 → %WOLSTAT = %HTTPDATA",
+      "任务3：Flash → 显示 %WOLSTAT"
+    ]
+  }
+}

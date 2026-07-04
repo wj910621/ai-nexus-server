@@ -1,0 +1,7 @@
+
+
+# ---- 域名与跨域配置（ynexai.cn 为主域名）----
+# ynexai.cn 备案完成后作为主域名，j3trisheng.com 保留并 301 重定向
+DOMAIN=https://ynexai.cn
+ALLOWED_ORIGINS=https://ynexai.cn,https://www.ynexai.cn,https://j3trisheng.com,https://www.j3trisheng.com,http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001
+TRUSTED_PROXY=1

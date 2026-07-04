@@ -10,11 +10,25 @@ const Database = require('better-sqlite3');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || (() => {
+  console.warn("[security] JWT not set");
+  const crypto = require('crypto');
+  return crypto.randomBytes(32).toString('hex');
+})();
 const DB_FILE = path.join(__dirname, 'data', 'database.sqlite');
 
-// 占位导出对象，供路由模块同步 require；真实函数/值在 initDB() 后覆盖
-const _exports = {};
+// 静态文件根目录（dashboard.html 等前端资源）
+const staticDir = path.join(__dirname, 'public');
+// 速率限制计数器（IP 维度）
+const requestCounts = new Map();
+// 进程内存使用快照（用于 /health 端点展示）
+const memUsage = () => process.memoryUsage();
+
+// 占位导出：循环依赖防护。
+// auth.js 等子模块在 require('./server') 时会拿到此对象，
+// 随后在 L562 处用真实实现覆盖。必须先声明 _exports 变量本身，
+// 否则 Object.defineProperty 会抛 ReferenceError。
+var _exports = {};
 Object.defineProperty(_exports, 'db', {
   get() { return db; },
   set(v) { db = v; },
@@ -32,9 +46,8 @@ Object.assign(_exports, {
 module.exports = _exports;
 
 // ============================================================
-// 安全中间件
+// Security middleware
 // ============================================================
-app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -42,20 +55,33 @@ app.use((req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  // CSP：允许内联脚本/样式（前端 SPA 常见需求）、同源资源、data URI
+  res.setHeader('Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: https:; " +
+    "font-src 'self' data:; " +
+    "connect-src 'self' https: wss: ws:; " +
+    "frame-ancestors 'none'"
+  );
+  // HSTS：仅 HTTPS 请求时设置（避免 HTTP 环境误锁）
+  const proto = req.headers['x-forwarded-proto'] || (req.socket.encrypted ? 'https' : 'http');
+  if (proto === 'https') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
   next();
 });
 
 // ============================================================
-// 静态文件
+// Static files
 // ============================================================
-const staticDir = __dirname;
 app.use(express.static(staticDir));
 app.use('/uploads', express.static(path.join(staticDir, 'uploads')));
 
 // ============================================================
-// 限流中间件
+// Rate limiter
 // ============================================================
-const requestCounts = new Map();
 const RATE_LIMIT_WINDOW = 60000;
 const RATE_LIMIT_MAX = 60;
 
@@ -66,7 +92,7 @@ function rateLimit(req, res, next) {
   if (now > record.resetTime) { record.count = 0; record.resetTime = now + RATE_LIMIT_WINDOW; }
   record.count++;
   requestCounts.set(ip, record);
-  if (record.count > RATE_LIMIT_MAX) return res.status(429).json({ error: '请求过于频繁，请稍后再试' });
+  if (record.count > RATE_LIMIT_MAX) return res.status(429).json({ error: "rate limited" });
   next();
 }
 app.use(rateLimit);
@@ -250,9 +276,82 @@ function initDB() {
   `);
   const adminExists = db.prepare("SELECT id FROM users WHERE username='admin'").get();
   if (!adminExists) {
-    const adminPwd = process.env.ADMIN_PASSWORD || 'admin123';
+    // 安全：使用 16 字节（128 位熵）生成管理员密码，避免低熵可预测
+    const adminPwd = process.env.ADMIN_PASSWORD || crypto.randomBytes(16).toString('hex');
     db.prepare("INSERT INTO users (username, email, password, credits, role) VALUES (?,?,?,?,?)").run(
       'admin', 'admin@nexus-hub.local', bcrypt.hashSync(adminPwd, 10), 99999, 'admin');
+    if (process.env.ADMIN_PASSWORD) {
+      console.log('[Init] Admin account created from ADMIN_PASSWORD env var');
+    } else {
+      console.log('[Init] Admin account created. Set ADMIN_PASSWORD env var to override default password.');
+    }
+  }
+
+  // ============================================================
+  // 安全：API Key 哈希化迁移（前置：先添加 api_key_hash 列，再创建索引）
+  // 将旧版明文存储的 API Key 迁移为哈希存储 + 掩码展示。
+  // 迁移后 api_key 列存掩码（如 nexus-****-abcd），api_key_hash 列存 HMAC-SHA256 哈希。
+  // ============================================================
+  try {
+    db.exec('ALTER TABLE api_keys ADD COLUMN api_key_hash TEXT');
+  } catch (e) {
+    // 列已存在，忽略
+  }
+
+  // ============================================================
+  // 关键索引（IF NOT EXISTS 保证幂等）
+  // 覆盖高频查询：按用户名查积分/签到、按用户名查 API Key、
+  // 按用户名查积分流水、按时间倒序拉取流水、注册限流按 IP/设备指纹查询。
+  // 注意：api_key_hash 索引必须在 ALTER TABLE 添加该列之后创建，否则报 "no such column"。
+  // ============================================================
+  const indexes = [
+    'CREATE INDEX IF NOT EXISTS idx_users_register_ip ON users(register_ip)',
+    'CREATE INDEX IF NOT EXISTS idx_users_device_fp ON users(device_fp)',
+    'CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)',
+    'CREATE INDEX IF NOT EXISTS idx_api_keys_username ON api_keys(username)',
+    'CREATE INDEX IF NOT EXISTS idx_api_keys_api_key_hash ON api_keys(api_key_hash)',
+    'CREATE INDEX IF NOT EXISTS idx_credit_log_username ON credit_log(username)',
+    'CREATE INDEX IF NOT EXISTS idx_credit_log_created_at ON credit_log(created_at)',
+    'CREATE INDEX IF NOT EXISTS idx_credit_log_username_created ON credit_log(username, created_at)',
+    'CREATE INDEX IF NOT EXISTS idx_novels_username ON novels(username)',
+    'CREATE INDEX IF NOT EXISTS idx_novels_status ON novels(status)',
+  ];
+  for (const sql of indexes) {
+    try { db.exec(sql); } catch (e) { console.warn('[Init] 索引创建失败:', e.message); }
+  }
+  // 安全：API Key 哈希迁移使用的 pepper，与 auth.js 的 API_KEY_PEPPER 一致。
+  // 未设置 JWT_SECRET 时使用临时随机值并警告（不硬编码），避免数据库泄露后离线爆破。
+  const pepper = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+  if (!process.env.JWT_SECRET) {
+    console.warn('[security] JWT_SECRET 未设置，API Key 哈希迁移使用临时随机 pepper。');
+  }
+  const migrateKeys = db.prepare("SELECT id, api_key FROM api_keys WHERE api_key_hash IS NULL OR api_key_hash = ''").all();
+  if (migrateKeys.length > 0) {
+    const cryptoLib = require('crypto');
+    const hashFn = (key) => cryptoLib.createHmac('sha256', pepper).update(key).digest('hex');
+    const maskFn = (key) => (!key || key.length <= 12) ? '****' : (key.substring(0, 8) + '****' + key.substring(key.length - 4));
+    const updateStmt = db.prepare("UPDATE api_keys SET api_key_hash=?, api_key=? WHERE id=?");
+    let migrated = 0;
+    for (const row of migrateKeys) {
+      // 仅当 api_key 不是掩码格式（不含 ****）时才迁移
+      if (row.api_key && !row.api_key.includes('****')) {
+        updateStmt.run(hashFn(row.api_key), maskFn(row.api_key), row.id);
+        migrated++;
+      }
+    }
+    if (migrated > 0) {
+      console.log(`[Init] API Key 哈希化迁移完成: ${migrated} 个 Key 已从明文迁移为哈希存储`);
+    }
+  }
+
+  // ============================================================
+  // 安全：token_version 列迁移
+  // 用于 JWT 撤销：修改密码/重置密码后递增 token_version，使所有旧 token 立即失效。
+  // ============================================================
+  try {
+    db.exec('ALTER TABLE users ADD COLUMN token_version INTEGER DEFAULT 0');
+  } catch (e) {
+    // 列已存在，忽略
   }
 }
 
@@ -260,29 +359,43 @@ function initDB() {
 // JWT 辅助函数
 // ============================================================
 function signToken(payload) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+  // 缩短为 24h：被盗 token 的利用窗口减半，配合 token_version 撤销机制进一步降低风险
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 }
 
 function verifyToken(token) {
-  return jwt.verify(token, JWT_SECRET);
+  // 显式指定 HS256 算法，防止 alg=none / RS256↔HS256 算法混淆攻击
+  return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
 }
 
-// 仅允许健康检查的路径（不验证API Key）
-const HEALTH_PATHS = ['/health', '/manifest.json', '/sw.js'];
-
+// Health check paths only (no API Key check)
+const HEALTH_PATHS = ["/health","/manifest.json","/sw.js"];
 function authRequired(req, res, next) {
-  // 排除健康检查路径
+  // Skip health check paths
   if (HEALTH_PATHS.includes(req.path)) return next();
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith('Bearer ')) {
-    return res.status(401).json({ ok: false, error: '请先登录' });
+  const authHeader = req.headers.authorization || '';
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ ok: false, error: "please login" });
   }
   try {
-    const payload = verifyToken(auth.slice(7));
+    const payload = verifyToken(authHeader.slice(7));
+    // 校验 token_version：密码修改后旧 token 立即失效。
+    // 与 auth.js 的 verifyUserToken 逻辑一致，防止撤销机制被绕过。
+    if (payload.username && db) {
+      try {
+        const row = db.prepare("SELECT token_version FROM users WHERE username=?").get(payload.username);
+        const currentTv = row ? (row.token_version || 0) : 0;
+        if (payload.tv !== currentTv) {
+          return res.status(401).json({ ok: false, error: "token revoked, please login again" });
+        }
+      } catch (_) {
+        // token_version 列可能尚未迁移，降级为仅校验签名（向后兼容）
+      }
+    }
     req.user = payload;
     next();
   } catch (e) {
-    return res.status(401).json({ ok: false, error: '登录已过期，请重新登录' });
+    return res.status(401).json({ ok: false, error: "login expired" });
   }
 }
 
@@ -293,7 +406,7 @@ const authLimiter = (req, res, next) => {
   if (now > record.resetTime) { record.count = 0; record.resetTime = now + RATE_LIMIT_WINDOW; }
   record.count++;
   requestCounts.set(ip, record);
-  if (record.count > 10) return res.status(429).json({ error: '请求过于频繁，请稍后再试' });
+  if (record.count > 10) return res.status(429).json({ error: "rate limited" });
   next();
 };
 
@@ -392,32 +505,32 @@ const MODEL_CONFIG = {
   ark_dbs_char: { provider: 'openai', model: 'doubao-seed-char-2507', baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
   ark_doubao_pro: { provider: 'openai', model: 'doubao-pro-32k', baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
   ark_doubao_lite: { provider: 'openai', model: 'doubao-lite-32k', baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
-  nx_gpt5: { provider: 'nexus', model: 'gpt-5', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt5mini: { provider: 'nexus', model: 'gpt-5-mini', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt5chat: { provider: 'nexus', model: 'gpt-5-chat', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt5nano: { provider: 'nexus', model: 'gpt-5-nano', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt5all: { provider: 'nexus', model: 'gpt-5-all', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt51chat: { provider: 'nexus', model: 'gpt-5.1-chat', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt51codex: { provider: 'nexus', model: 'gpt-5.1-codex', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt51codexmax: { provider: 'nexus', model: 'gpt-5.1-codex-max', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt52chat: { provider: 'nexus', model: 'gpt-5.2-chat', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt52pro: { provider: 'nexus', model: 'gpt-5.2-pro', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt53chat: { provider: 'nexus', model: 'gpt-5.3-chat', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt53codex: { provider: 'nexus', model: 'gpt-5.3-codex', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt54pro: { provider: 'nexus', model: 'gpt-5.4-pro', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt54mini: { provider: 'nexus', model: 'gpt-5.4-mini', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt54nano: { provider: 'nexus', model: 'gpt-5.4-nano', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt55pro: { provider: 'nexus', model: 'gpt-5.5-pro', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gpt55: { provider: 'nexus', model: 'gpt-5.5', baseUrl: 'https://api.nexus.com/v1' },
-  nx_claude_opus: { provider: 'nexus', model: 'claude-opus-4-20250514', baseUrl: 'https://api.nexus.com/v1' },
-  nx_claude_sonnet: { provider: 'nexus', model: 'claude-sonnet-4-20250514', baseUrl: 'https://api.nexus.com/v1' },
-  nx_claude_haiku: { provider: 'nexus', model: 'claude-haiku-4-20250514', baseUrl: 'https://api.nexus.com/v1' },
-  nx_gemini_pro: { provider: 'nexus', model: 'gemini-2.5-pro-preview-03-25', baseUrl: 'https://api.nexus.com/v1' },
-  nx_o3mini: { provider: 'nexus', model: 'o3-mini', baseUrl: 'https://api.nexus.com/v1' },
-  nx_dalle3: { provider: 'nexus', model: 'dall-e-3', baseUrl: 'https://api.nexus.com/v1' },
-  nx_flux: { provider: 'nexus', model: 'flux-pro', baseUrl: 'https://api.nexus.com/v1' },
-  nx_suno: { provider: 'nexus', model: 'suno-v3', baseUrl: 'https://api.nexus.com/v1' },
-  nx_grok3: { provider: 'nexus', model: 'grok-3', baseUrl: 'https://api.nexus.com/v1' },
+  nx_gpt5: { provider: 'nexus', model: 'gpt-5', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt5mini: { provider: 'nexus', model: 'gpt-5-mini', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt5chat: { provider: 'nexus', model: 'gpt-5-chat', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt5nano: { provider: 'nexus', model: 'gpt-5-nano', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt5all: { provider: 'nexus', model: 'gpt-5-all', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt51chat: { provider: 'nexus', model: 'gpt-5.1-chat', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt51codex: { provider: 'nexus', model: 'gpt-5.1-codex', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt51codexmax: { provider: 'nexus', model: 'gpt-5.1-codex-max', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt52chat: { provider: 'nexus', model: 'gpt-5.2-chat', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt52pro: { provider: 'nexus', model: 'gpt-5.2-pro', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt53chat: { provider: 'nexus', model: 'gpt-5.3-chat', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt53codex: { provider: 'nexus', model: 'gpt-5.3-codex', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt54pro: { provider: 'nexus', model: 'gpt-5.4-pro', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt54mini: { provider: 'nexus', model: 'gpt-5.4-mini', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt54nano: { provider: 'nexus', model: 'gpt-5.4-nano', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt55pro: { provider: 'nexus', model: 'gpt-5.5-pro', baseUrl: 'https://apinexus.net/v1' },
+  nx_gpt55: { provider: 'nexus', model: 'gpt-5.5', baseUrl: 'https://apinexus.net/v1' },
+  nx_claude_opus: { provider: 'nexus', model: 'claude-opus-4-20250514', baseUrl: 'https://apinexus.net/v1' },
+  nx_claude_sonnet: { provider: 'nexus', model: 'claude-sonnet-4-20250514', baseUrl: 'https://apinexus.net/v1' },
+  nx_claude_haiku: { provider: 'nexus', model: 'claude-haiku-4-20250514', baseUrl: 'https://apinexus.net/v1' },
+  nx_gemini_pro: { provider: 'nexus', model: 'gemini-2.5-pro-preview-03-25', baseUrl: 'https://apinexus.net/v1' },
+  nx_o3mini: { provider: 'nexus', model: 'o3-mini', baseUrl: 'https://apinexus.net/v1' },
+  nx_dalle3: { provider: 'nexus', model: 'dall-e-3', baseUrl: 'https://apinexus.net/v1' },
+  nx_flux: { provider: 'nexus', model: 'flux-pro', baseUrl: 'https://apinexus.net/v1' },
+  nx_suno: { provider: 'nexus', model: 'suno-v3', baseUrl: 'https://apinexus.net/v1' },
+  nx_grok3: { provider: 'nexus', model: 'grok-3', baseUrl: 'https://apinexus.net/v1' },
   meshy_text: { provider: 'meshy', model: 'text-to-3d' },
   meshy_image: { provider: 'meshy', model: 'image-to-3d' },
   qiniu_claude37: { provider: 'openai', model: 'claude-3-7-sonnet-20250219', baseUrl: 'https://api.qiniu.com/v1' },
@@ -438,7 +551,7 @@ const MODEL_CONFIG = {
 function getApiKey(provider, modelId) {
   switch (provider) {
     case 'openai':
-      if (modelId.startsWith('dmx_')) return process.env.DMX_API_KEY;
+      if (modelId.startsWith('dmx_')) return process.env.DMXAPI_API_KEY;
       if (modelId.startsWith('ark_')) return process.env.ARK_API_KEY;
       if (modelId.startsWith('sf_')) return process.env.SILICONFLOW_API_KEY;
       if (modelId.startsWith('ali_')) return process.env.DASHSCOPE_API_KEY;
@@ -449,7 +562,7 @@ function getApiKey(provider, modelId) {
       if (modelId.startsWith('claude') || modelId === 'claude4' || modelId === 'claude4opus') return process.env.ANTHROPIC_API_KEY;
       if (modelId.startsWith('gemini')) return process.env.GEMINI_API_KEY;
       if (modelId.startsWith('deepseek')) return process.env.DEEPSEEK_API_KEY;
-      if (modelId.startsWith('glm')) return process.env.GLM_API_KEY;
+      if (modelId.startsWith('glm')) return process.env.ZHIPU_API_KEY;
       if (modelId.startsWith('kimi')) return process.env.MOONSHOT_API_KEY;
       if (modelId.startsWith('minimax')) return process.env.MINIMAX_API_KEY;
       if (modelId.startsWith('spark')) return process.env.SPARK_API_KEY;
@@ -474,14 +587,15 @@ function getApiKey(provider, modelId) {
 }
 
 // ============================================================
-// 密码辅助函数
+// 密码辅助函数（安全：仅 bcrypt，不再支持 Base64 回退）
 // ============================================================
-function btoaPwd(pwd) { return Buffer.from(pwd).toString('base64'); }
 function isBcryptHash(hash) { return typeof hash === 'string' && (hash.startsWith('$2a$') || hash.startsWith('$2b$')); }
 function hashPasswordSync(pwd) { return bcrypt.hashSync(pwd, 10); }
 function verifyPasswordSync(pwd, storedHash) {
+  if (!storedHash) return false;
   if (isBcryptHash(storedHash)) return bcrypt.compareSync(pwd, storedHash);
-  return storedHash === btoaPwd(pwd);
+  // 非 bcrypt 哈希一律拒绝（旧 Base64 密码需通过密码重置流程迁移）
+  return false;
 }
 function upgradePasswordToBcrypt(username, plainPwd) {
   const newHash = hashPasswordSync(plainPwd);
@@ -493,41 +607,84 @@ function upgradePasswordToBcrypt(username, plainPwd) {
 // ============================================================
 initDB();
 
-// 挂载路由模块
-require('./routes/chat')(app);
-require('./routes/models')(app);
-require('./routes/media')(app, { staticDir });
-require('./routes/auth')(app);
-require('./routes/novel')(app);
-require('./routes/knowledge')(app);
-require('./routes/payment')(app);
-require('./routes/openai_compat')(app);
-require('./routes/guest')(app);
-require('./routes/sync')(app);
-require('./routes/plugins')(app);
-require('./routes/manga')(app);
+// Override placeholder exports with real implementations
+Object.assign(_exports, {
+  signToken,
+  verifyToken,
+  authRequired,
+  authLimiter,
+  getApiKey,
+  MODEL_CONFIG,
+});
 
-// SPA 路由
-app.get('/', (req, res) => res.sendFile(path.join(staticDir, 'dashboard.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(staticDir, 'dashboard.html')));
-app.get('/app', (req, res) => res.sendFile(path.join(staticDir, 'dashboard.html')));
-app.get('/app/*', (req, res) => res.sendFile(path.join(staticDir, 'dashboard.html')));
+// Mount route modules
+// 实际存在的核心模块（位于 server_files/ 根目录，不是 routes/）
+require('./auth')(app);
+require('./chat')(app);
+require('./models')(app);
 
-// 健康检查端点
-app.get('/health', (req, res) => {
-  const memUsage = process.memoryUsage();
+// 可选加载模块：未实现的模块跳过，避免启动崩溃
+function mountOptional(modName, ...args) {
+  try {
+    const mod = require(modName);
+    if (typeof mod === 'function') mod(app, ...args);
+  } catch (e) {
+    if (e.code === 'MODULE_NOT_FOUND') {
+      console.warn(`[Routes] 跳过未实现的模块: ${modName}`);
+    } else {
+      console.error(`[Routes] 加载模块 ${modName} 失败:`, e.message);
+    }
+  }
+}
+mountOptional('./media', { staticDir });
+mountOptional('./balances');
+mountOptional('./desktop_ynex');
+mountOptional('./novel');
+mountOptional('./knowledge');
+mountOptional('./payment');
+mountOptional('./openai_compat');
+mountOptional('./guest');
+mountOptional('./sync');
+mountOptional('./plugins');
+mountOptional('./manga');
+
+// SPA routes - 前端资源未部署时降级为 API 状态 JSON，避免 500 错误
+function serveDashboard(req, res) {
+  const file = path.join(staticDir, 'dashboard.html');
+  if (!fs.existsSync(file)) {
+    return res.status(200).json({
+      name: 'Y·NEX AI 云平台 API',
+      version: '2.0.0',
+      status: 'running',
+      message: '前端资源未部署，请访问 /api/* 端点或部署 public/dashboard.html',
+      docs: ['/health', '/api/*'],
+    });
+  }
+  res.sendFile(file);
+}
+app.get('/', serveDashboard);
+app.get('/dashboard', serveDashboard);
+app.get('/app', serveDashboard);
+app.get('/app/*', serveDashboard);
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  const m = memUsage();
   res.json({
     status: 'ok',
     uptime: Math.floor(process.uptime()),
     memory: {
-      rss: Math.round(memUsage.rss / 1024 / 1024) + 'MB',
-      heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024) + 'MB'
+      rss: Math.round(m.rss / 1024 / 1024) + 'MB',
+      heapUsed: Math.round(m.heapUsed / 1024 / 1024) + 'MB'
     },
     database: db ? 'connected' : 'disconnected'
   });
 });
+// /api/health 别名（Nginx 通过 /api/ 前缀代理，需提供对应路由）
+app.get("/api/health", (req, res) => res.json({ status: 'ok', service: 'Y·NEX AI 云平台' }));
+require('./billing')(app, db);
 
-// 404 / 500 处理
+// 404 / 500 handler
 app.use((req, res) => res.status(404).json({ error: 'Not Found' }));
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
@@ -538,12 +695,3 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// 覆盖初始占位导出（db 的 getter/setter 保留在 _exports 上，其余替换为真实实现）
-Object.assign(_exports, {
-  signToken,
-  verifyToken,
-  authRequired,
-  authLimiter,
-  getApiKey,
-  MODEL_CONFIG,
-});

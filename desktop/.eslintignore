@@ -1,0 +1,9 @@
+node_modules/
+dist*/
+dist-*/
+.electron-cache/
+*.log
+assets/
+renderer/vendor/
+renderer/lib/
+preload.js

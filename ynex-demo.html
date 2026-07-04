@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Y·NEX 本地AI核心服务 - 演示客户端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Microsoft YaHei',sans-serif;background:#0a0a1a;color:#e0e0ff;min-height:100vh;display:flex;flex-direction:column}
+.header{background:#0d1525;border-bottom:1px solid #00ffff22;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;letter-spacing:4px;color:#00ffff}
+.status{padding:6px 12px;border-radius:20px;font-size:12px;background:#ff444433;color:#ff8888;border:1px solid #ff444455}
+.status.online{background:#00ff8833;color:#66ffaa;border:1px solid #00ff8855}
+.main{flex:1;display:grid;grid-template-columns:260px 1fr;max-width:1400px;width:100%;margin:0 auto;padding:20px;gap:20px}
+.sidebar{background:#0d1525;border:1px solid #00ffff22;border-radius:12px;padding:16px;overflow-y:auto}
+.sidebar h3{font-size:13px;color:#88aacc;margin-bottom:12px;letter-spacing:1px}
+.skill-btn{width:100%;padding:10px;margin-bottom:8px;background:#00ffff0a;border:1px solid #00ffff22;border-radius:8px;color:#00aacc;font-size:12px;cursor:pointer;transition:all .2s;text-align:left}
+.skill-btn:hover{background:#00ffff18;border-color:#00ffff66}
+.chat-area{background:#0d1525;border:1px solid #00ffff22;border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+.messages{flex:1;padding:20px;overflow-y:auto;min-height:400px}
+.msg{margin-bottom:16px;max-width:80%;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{margin-left:auto;text-align:right}
+.msg .bubble{display:inline-block;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.6;white-space:pre-wrap}
+.msg.assistant .bubble{background:#0a0a12;border:1px solid #00ffff22;color:#d0e0ff}
+.msg.user .bubble{background:linear-gradient(135deg,#006688,#0088aa);color:#fff}
+.msg .meta{font-size:11px;color:#557799;margin-top:4px}
+.input-area{padding:16px;border-top:1px solid #00ffff11;display:flex;gap:10px;align-items:flex-end}
+.input-area textarea{flex:1;padding:12px;background:#0a0a12;border:1px solid #00ffff22;border-radius:10px;color:#e0f0ff;font-size:14px;resize:none;min-height:50px;max-height:120px}
+.input-area textarea:focus{outline:none;border-color:#00ffff}
+.input-area button{padding:12px 20px;background:linear-gradient(135deg,#006688,#00aacc);border:none;border-radius:10px;color:#fff;cursor:pointer;font-size:14px;transition:all .2s}
+.input-area button:hover{box-shadow:0 0 15px #00ffff44}
+.input-area button:disabled{opacity:.5;cursor:not-allowed}
+.logs{background:#0a0a12;border-radius:8px;padding:12px;margin-top:16px;font-family:monospace;font-size:11px;color:#6688aa;max-height:150px;overflow-y:auto;border:1px solid #00ffff11}
+.log-line{margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>Y·NEXAI · 演示客户端</h1>
+<div class="status" id="status">检测服务中...</div>
+</div>
+
+<div class="main">
+<div class="sidebar">
+<h3>🛠️ 快速测试</h3>
+<button class="skill-btn" onclick="testHealth()">健康检查</button>
+<button class="skill-btn" onclick="testSystemInfo()">系统信息</button>
+<button class="skill-btn" onclick="testLocalLlm()">本地LLM状态</button>
+<button class="skill-btn" onclick="testVoiceSpeak()">语音播报测试</button>
+<button class="skill-btn" onclick="testAgent()">超级Agent任务</button>
+<button class="skill-btn" onclick="testSkillWeather()">天气查询</button>
+<button class="skill-btn" onclick="testSkillFiles()">列出当前目录</button>
+<button class="skill-btn" onclick="clearChat()">清空对话</button>
+
+<div class="logs" id="logs"></div>
+</div>
+
+<div class="chat-area">
+<div class="messages" id="messages">
+<div class="msg assistant">
+<div class="bubble">你好！我是Y·NEXAI本地服务演示客户端。\n\n请先确保本地服务已启动：\n<code>python ynex_server.py --port 7777</code></div>
+<div class="meta">Y·NEXAI</div>
+</div>
+</div>
+<div class="input-area">
+<textarea id="input" placeholder="输入消息... (Ctrl+Enter发送)" rows="2"></textarea>
+<button id="sendBtn" onclick="sendMessage()">发送</button>
+</div>
+</div>
+</div>
+
+<script src="./ynex-client.js"></script>
+<script>
+const ynex = new YnexClient('http://localhost:7777');
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('sendBtn');
+const statusEl = document.getElementById('status');
+const logsEl = document.getElementById('logs');
+
+function log(msg) {
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.textContent = `${new Date().toLocaleTimeString()} ${msg}`;
+  logsEl.appendChild(line);
+  logsEl.scrollTop = logsEl.scrollHeight;
+}
+
+function addMessage(role, text, meta = '') {
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="bubble">${escapeHtml(text)}</div>
+    ${meta ? `<div class="meta">${meta}</div>` : ''}
+  `;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/\n/g, '<br>');
+}
+
+async function checkStatus() {
+  const online = await ynex.isOnline();
+  statusEl.textContent = online ? '服务在线' : '服务离线';
+  statusEl.className = `status ${online ? 'online' : ''}`;
+  log(online ? '检测到Y·NEX 服务在线' : '未检测到Y·NEX 服务');
+}
+
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  addMessage('user', text);
+  inputEl.value = '';
+  sendBtn.disabled = true;
+
+  let replyDiv = null;
+  let replyBubble = null;
+
+  try {
+    replyDiv = document.createElement('div');
+    replyDiv.className = 'msg assistant';
+    replyBubble = document.createElement('div');
+    replyBubble.className = 'bubble';
+    replyBubble.textContent = '';
+    replyDiv.appendChild(replyBubble);
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = 'Y·NEXAI · 思考中...';
+    replyDiv.appendChild(meta);
+    messagesEl.appendChild(replyDiv);
+
+    await ynex.chatStream(text, (chunk) => {
+      replyBubble.textContent += chunk;
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }, { useMock: false });
+
+    meta.textContent = 'Y·NEXAI · 流式完成';
+  } catch (e) {
+    addMessage('assistant', '错误：' + e.message);
+    log('错误：' + e.message);
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+async function testHealth() {
+  try {
+    const data = await ynex.health();
+    addMessage('assistant', '健康状态：' + JSON.stringify(data, null, 2));
+    log('健康检查完成');
+  } catch (e) {
+    log('健康检查失败：' + e.message);
+  }
+}
+
+async function testSystemInfo() {
+  try {
+    const data = await ynex.systemInfo();
+    addMessage('assistant', data.info);
+    log('系统信息获取完成');
+  } catch (e) {
+    log('系统信息失败：' + e.message);
+  }
+}
+
+async function testLocalLlm() {
+  try {
+    const data = await ynex.localLlmModels();
+    const recs = data.recommended.map(m => `${m.name} (${m.vram_needed}GB VRAM)`).join('\n');
+    addMessage('assistant', `推荐模型：\n${recs}`);
+    log('本地LLM状态获取完成');
+  } catch (e) {
+    log('本地LLM状态失败：' + e.message);
+  }
+}
+
+async function testVoiceSpeak() {
+  try {
+    await ynex.voiceSpeak('你好，我是Y·NEXAI，语音播报测试成功。');
+    addMessage('assistant', '已发送语音播报指令');
+    log('语音播报测试完成');
+  } catch (e) {
+    log('语音播报失败：' + e.message);
+  }
+}
+
+async function testAgent() {
+  try {
+    addMessage('assistant', '超级Agent正在执行任务，请稍候...');
+    const data = await ynex.runTask('帮我计算1到100的和');
+    addMessage('assistant', data.result);
+    log('超级Agent任务完成');
+  } catch (e) {
+    log('超级Agent任务失败：' + e.message);
+  }
+}
+
+async function testSkillWeather() {
+  try {
+    const data = await ynex.callSkill('get_weather', { city: '北京' });
+    addMessage('assistant', data.result);
+    log('天气查询完成');
+  } catch (e) {
+    log('天气查询失败：' + e.message);
+  }
+}
+
+async function testSkillFiles() {
+  try {
+    const data = await ynex.listFiles('.');
+    addMessage('assistant', data.result);
+    log('目录列出完成');
+  } catch (e) {
+    log('目录列出失败：' + e.message);
+  }
+}
+
+function clearChat() {
+  messagesEl.innerHTML = '';
+  ynex.clearHistory();
+  log('已清空对话');
+}
+
+inputEl.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.key === 'Enter') {
+    sendMessage();
+  }
+});
+
+// 页面加载后检测服务状态
+checkStatus();
+setInterval(checkStatus, 10000);
+</script>
+</body>
+</html>

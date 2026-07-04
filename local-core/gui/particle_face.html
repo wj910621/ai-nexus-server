@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Y·NEX - 3D 粒子界面</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000000;
+    color: #00ffff;
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  #canvas-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+  }
+  #overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .title {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 12px;
+    color: #00ffff;
+    text-shadow: 0 0 20px #00ffff, 0 0 40px #0088ff;
+    opacity: 0.8;
+  }
+  .subtitle {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: #00aaff;
+    opacity: 0.6;
+  }
+  .status-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 30px;
+    font-size: 11px;
+    color: #00aaff;
+    opacity: 0.7;
+    letter-spacing: 2px;
+  }
+  .status-bar .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 8px #00ff88;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .control-panel {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: auto;
+  }
+  .ctrl-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    background: rgba(0, 30, 50, 0.4);
+    color: #00ffff;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+  }
+  .ctrl-btn:hover {
+    background: rgba(0, 255, 255, 0.15);
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    transform: scale(1.1);
+  }
+  .ctrl-btn .icon { font-size: 20px; margin-bottom: 2px; }
+  .ctrl-btn .label { font-size: 9px; letter-spacing: 1px; }
+  .shape-panel {
+    position: fixed;
+    left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+  }
+  .shape-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    background: rgba(0, 30, 50, 0.4);
+    color: #00aacc;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 4px;
+    letter-spacing: 2px;
+    backdrop-filter: blur(10px);
+    text-align: center;
+    min-width: 100px;
+  }
+  .shape-btn:hover, .shape-btn.active {
+    color: #00ffff;
+    border-color: #00ffff;
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  }
+  .chat-bubble {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 60%;
+    padding: 15px 25px;
+    background: rgba(0, 30, 50, 0.6);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+    color: #aaffff;
+    font-size: 14px;
+    line-height: 1.6;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.5s;
+    text-align: center;
+    pointer-events: none;
+  }
+  .chat-bubble.show { opacity: 1; }
+  .input-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    max-width: 80%;
+    pointer-events: auto;
+    display: none;
+  }
+  .input-bar input {
+    width: 100%;
+    padding: 12px 20px;
+    background: rgba(0, 30, 50, 0.6);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 30px;
+    color: #00ffff;
+    font-size: 14px;
+    outline: none;
+    backdrop-filter: blur(10px);
+  }
+  .input-bar input:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  }
+  .input-bar input::placeholder { color: rgba(0, 170, 200, 0.5); }
+  .color-picker {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    display: flex;
+    gap: 8px;
+    pointer-events: auto;
+  }
+  .color-dot {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.1);
+    transition: transform 0.2s;
+  }
+  .color-dot:hover { transform: scale(1.2); }
+  .color-dot.active { border-color: white; transform: scale(1.2); }
+  .hud-circle {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 400px; height: 400px;
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hud-circle::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px;
+    width: 100%; height: 100%;
+    border: 2px solid transparent;
+    border-top-color: rgba(0, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: rotate 10s linear infinite;
+  }
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="overlay">
+  <div class="title">亿  界</div>
+  <div class="subtitle">Y I J I E &nbsp; AI &nbsp; A S S I S T A N T</div>
+
+  <div class="hud-circle"></div>
+
+  <!-- 左侧：形态切换 -->
+  <div class="shape-panel">
+    <div class="shape-btn active" onclick="changeShape('face')">人脸 FACE</div>
+    <div class="shape-btn" onclick="changeShape('sphere')">球体 SPHERE</div>
+    <div class="shape-btn" onclick="changeShape('torus')">圆环 TORUS</div>
+    <div class="shape-btn" onclick="changeShape('nebula')">星云 NEBULA</div>
+    <div class="shape-btn" onclick="changeShape('heart')">心形 HEART</div>
+    <div class="shape-btn" onclick="changeShape('wave')">波形 WAVE</div>
+    <div class="shape-btn" onclick="changeShape('dna')">DNA DNA</div>
+  </div>
+
+  <!-- 右侧：功能按钮 -->
+  <div class="control-panel">
+    <div class="ctrl-btn" onclick="toggleTalk()">
+      <div class="icon">🎤</div>
+      <div class="label">对话</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('weather')">
+      <div class="icon">🌤️</div>
+      <div class="label">天气</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('light')">
+      <div class="icon">💡</div>
+      <div class="label">灯光</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('music')">
+      <div class="icon">🎵</div>
+      <div class="label">音乐</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('system')">
+      <div class="icon">⚙️</div>
+      <div class="label">系统</div>
+    </div>
+    <div class="ctrl-btn" onclick="quickAction('camera')">
+      <div class="icon">📷</div>
+      <div class="label">视觉</div>
+    </div>
+    <div class="ctrl-btn" onclick="toggleMorph()">
+      <div class="icon">✨</div>
+      <div class="label">变换</div>
+    </div>
+  </div>
+
+  <!-- 底部状态 -->
+  <div class="status-bar">
+    <span><span class="dot"></span>在线</span>
+    <span>CPU 12%</span>
+    <span>内存 4.2G</span>
+    <span id="clock">--:--</span>
+  </div>
+
+  <!-- 对话气泡 -->
+  <div class="chat-bubble" id="chatBubble">我是Y·NEX，随时待命，先生。</div>
+
+  <!-- 输入框 -->
+  <div class="input-bar" id="inputBar">
+    <input type="text" id="chatInput" placeholder="有什么吩咐，先生？" onkeydown="handleInput(event)">
+  </div>
+
+  <!-- 颜色切换 -->
+  <div class="color-picker">
+    <div class="color-dot active" style="background:#00ffff;box-shadow:0 0 10px #00ffff" onclick="setColor('#00ffff', this)"></div>
+    <div class="color-dot" style="background:#ff00ff;box-shadow:0 0 10px #ff00ff" onclick="setColor('#ff00ff', this)"></div>
+    <div class="color-dot" style="background:#00ff88;box-shadow:0 0 10px #00ff88" onclick="setColor('#00ff88', this)"></div>
+    <div class="color-dot" style="background:#ffaa00;box-shadow:0 0 10px #ffaa00" onclick="setColor('#ffaa00', this)"></div>
+    <div class="color-dot" style="background:#ff4466;box-shadow:0 0 10px #ff4466" onclick="setColor('#ff4466', this)"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+// ============================================================
+// Three.js 3D 粒子系统
+// ============================================================
+let scene, camera, renderer, particles, particleSystem;
+let targetPositions = [];
+let currentPositions = [];
+let morphProgress = 1;
+let morphing = false;
+let autoMorph = false;
+let currentShape = 'face';
+let particleColor = new THREE.Color(0x00ffff);
+let clock = new THREE.Clock();
+let mouseX = 0, mouseY = 0;
+
+const PARTICLE_COUNT = 8000;
+
+function init() {
+  const container = document.getElementById('canvas-container');
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(
+    60, window.innerWidth / window.innerHeight, 0.1, 1000
+  );
+  camera.position.z = 5;
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  // 粒子几何
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(PARTICLE_COUNT * 3);
+  const colors = new Float32Array(PARTICLE_COUNT * 3);
+  const sizes = new Float32Array(PARTICLE_COUNT);
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 4;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 4;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+
+    colors[i * 3] = 0;
+    colors[i * 3 + 1] = 1;
+    colors[i * 3 + 2] = 1;
+
+    sizes[i] = Math.random() * 2 + 1;
+  }
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  // 粒子材质（发光点）
+  const material = new THREE.PointsMaterial({
+    size: 0.03,
+    vertexColors: true,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    opacity: 0.8,
+    sizeAttenuation: true,
+  });
+
+  particleSystem = new THREE.Points(geometry, material);
+  scene.add(particleSystem);
+
+  // 初始形态
+  targetPositions = generateFaceShape();
+  currentPositions = Array.from(positions);
+
+  // 鼠标移动
+  document.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('resize', onResize);
+
+  animate();
+}
+
+function onMouseMove(e) {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ============================================================
+// 形态生成器
+// ============================================================
+
+function generateFaceShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    // 球形基底（人脸近似）
+    let phi = Math.acos(2 * Math.random() - 1);
+    let theta = 2 * Math.PI * Math.random();
+    let r = 1.4 + Math.random() * 0.1;
+
+    // 纵向压缩成人脸比例
+    let x = r * Math.sin(phi) * Math.cos(theta) * 1.0;
+    let y = r * Math.cos(phi) * 1.2;
+    let z = r * Math.sin(phi) * Math.sin(theta) * 0.8;
+
+    // 眼睛凹陷
+    const eyeLeftDist = Math.sqrt((x + 0.45) ** 2 + (y - 0.3) ** 2 + z ** 2);
+    const eyeRightDist = Math.sqrt((x - 0.45) ** 2 + (y - 0.3) ** 2 + z ** 2);
+    if (eyeLeftDist < 0.25) { z -= 0.3; }
+    if (eyeRightDist < 0.25) { z -= 0.3; }
+
+    // 鼻子凸起
+    const noseDist = Math.sqrt(x ** 2 + (y + 0.1) ** 2);
+    if (noseDist < 0.15 && y < 0.2 && y > -0.3) { z += 0.2; }
+
+    // 嘴巴凹陷
+    const mouthDist = Math.sqrt((x * 2) ** 2 + (y + 0.55) ** 2);
+    if (mouthDist < 0.3 && y < -0.3) { z -= 0.15; }
+
+    // 下巴尖一点
+    if (y < -0.8) {
+      x *= 1 - (y + 0.8) * 0.5;
+      z *= 1 - (y + 0.8) * 0.3;
+    }
+
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = y;
+    pos[i * 3 + 2] = z;
+  }
+  return pos;
+}
+
+function generateSphereShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const phi = Math.acos(2 * Math.random() - 1);
+    const theta = 2 * Math.PI * Math.random();
+    const r = 1.5 + Math.random() * 0.1;
+    pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    pos[i * 3 + 2] = r * Math.cos(phi);
+  }
+  return pos;
+}
+
+function generateTorusShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  const R = 1.2;
+  const r = 0.4;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const u = Math.random() * Math.PI * 2;
+    const v = Math.random() * Math.PI * 2;
+    const rr = r + (Math.random() - 0.5) * 0.1;
+    pos[i * 3] = (R + rr * Math.cos(v)) * Math.cos(u);
+    pos[i * 3 + 1] = rr * Math.sin(v);
+    pos[i * 3 + 2] = (R + rr * Math.cos(v)) * Math.sin(u);
+  }
+  return pos;
+}
+
+function generateNebulaShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    // 螺旋星云
+    const arm = Math.floor(Math.random() * 3);
+    const angle = arm * (Math.PI * 2 / 3) + Math.random() * 0.8;
+    const dist = Math.random() * 2;
+    const spread = dist * 0.3;
+    pos[i * 3] = Math.cos(angle) * dist + (Math.random() - 0.5) * spread;
+    pos[i * 3 + 1] = (Math.random() - 0.5) * 0.5;
+    pos[i * 3 + 2] = Math.sin(angle) * dist + (Math.random() - 0.5) * spread;
+  }
+  return pos;
+}
+
+function generateHeartShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const t = Math.random() * Math.PI * 2;
+    const r = Math.random() * 0.8 + 0.2;
+    const x = 16 * Math.pow(Math.sin(t), 3) * r / 16 * 1.2;
+    const y = (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * r / 16 * 1.2;
+    const z = (Math.random() - 0.5) * 0.4;
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = y;
+    pos[i * 3 + 2] = z;
+  }
+  return pos;
+}
+
+function generateWaveShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const x = (Math.random() - 0.5) * 4;
+    const z = (Math.random() - 0.5) * 3;
+    const y = Math.sin(x * 2) * Math.cos(z * 2) * 0.5 + (Math.random() - 0.5) * 0.1;
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = y;
+    pos[i * 3 + 2] = z;
+  }
+  return pos;
+}
+
+function generateDnaShape() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const t = (Math.random() - 0.5) * 3;
+    const strand = Math.random() < 0.5 ? 0 : Math.PI;
+    const r = 0.8;
+    const x = Math.cos(t * 3 + strand) * r + (Math.random() - 0.5) * 0.1;
+    const y = t;
+    const z = Math.sin(t * 3 + strand) * r + (Math.random() - 0.5) * 0.1;
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = y;
+    pos[i * 3 + 2] = z;
+  }
+  return pos;
+}
+
+// ============================================================
+// 形态切换
+// ============================================================
+
+const shapeGenerators = {
+  face: generateFaceShape,
+  sphere: generateSphereShape,
+  torus: generateTorusShape,
+  nebula: generateNebulaShape,
+  heart: generateHeartShape,
+  wave: generateWaveShape,
+  dna: generateDnaShape,
+};
+
+function changeShape(shapeName) {
+  if (shapeName === currentShape && morphProgress >= 1) return;
+
+  currentShape = shapeName;
+  targetPositions = shapeGenerators[shapeName]();
+  morphProgress = 0;
+  morphing = true;
+
+  // 更新按钮状态
+  document.querySelectorAll('.shape-btn').forEach(btn => btn.classList.remove('active'));
+  event && event.target && event.target.classList.add('active');
+}
+
+function toggleMorph() {
+  autoMorph = !autoMorph;
+  showMessage(autoMorph ? '自动变换已开启' : '自动变换已关闭');
+}
+
+const shapeOrder = ['face', 'sphere', 'torus', 'nebula', 'heart', 'wave', 'dna'];
+let autoMorphIndex = 0;
+let autoMorphTimer = 0;
+
+// ============================================================
+// 动画循环
+// ============================================================
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  const elapsed = clock.getElapsedTime();
+
+  const positions = particleSystem.geometry.attributes.position.array;
+  const colors = particleSystem.geometry.attributes.color.array;
+
+  // 形态插值
+  if (morphing && morphProgress < 1) {
+    morphProgress += delta * 1.5;
+    if (morphProgress >= 1) {
+      morphProgress = 1;
+      morphing = false;
+    }
+    const t = easeOutCubic(morphProgress);
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const idx = i * 3;
+      positions[idx] = currentPositions[idx] + (targetPositions[idx] - currentPositions[idx]) * t;
+      positions[idx + 1] = currentPositions[idx + 1] + (targetPositions[idx + 1] - currentPositions[idx + 1]) * t;
+      positions[idx + 2] = currentPositions[idx + 2] + (targetPositions[idx + 2] - currentPositions[idx + 2]) * t;
+    }
+  }
+
+  if (morphProgress >= 1 && !morphing) {
+    // 保存当前位置作为下次变换起点
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      currentPositions[i * 3] = positions[i * 3];
+      currentPositions[i * 3 + 1] = positions[i * 3 + 1];
+      currentPositions[i * 3 + 2] = positions[i * 3 + 2];
+    }
+  }
+
+  // 呼吸动画 + 微扰动
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const idx = i * 3;
+    const breath = 1 + Math.sin(elapsed * 1.5 + i * 0.01) * 0.02;
+    positions[idx] *= breath;
+    positions[idx + 1] *= breath;
+    positions[idx + 2] *= breath;
+
+    // 微抖动
+    positions[idx] += Math.sin(elapsed * 2 + i * 0.05) * 0.005;
+    positions[idx + 1] += Math.cos(elapsed * 1.8 + i * 0.03) * 0.005;
+  }
+
+  // 自动变换
+  if (autoMorph) {
+    autoMorphTimer += delta;
+    if (autoMorphTimer > 5 && !morphing) {
+      autoMorphTimer = 0;
+      autoMorphIndex = (autoMorphIndex + 1) % shapeOrder.length;
+      const nextShape = shapeOrder[autoMorphIndex];
+      targetPositions = shapeGenerators[nextShape]();
+      morphProgress = 0;
+      morphing = true;
+      currentShape = nextShape;
+      document.querySelectorAll('.shape-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', shapeOrder[i] === nextShape);
+      });
+    }
+  }
+
+  // 鼠标跟随旋转
+  particleSystem.rotation.y = mouseX * 0.3;
+  particleSystem.rotation.x = mouseY * 0.2;
+
+  // 整体缓慢自转
+  if (!morphing) {
+    particleSystem.rotation.y += delta * 0.1;
+  }
+
+  particleSystem.geometry.attributes.position.needsUpdate = true;
+  particleSystem.geometry.attributes.color.needsUpdate = true;
+
+  // 时钟更新
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${hh}:${mm}:${ss}`;
+
+  renderer.render(scene, camera);
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+// ============================================================
+// 颜色切换
+// ============================================================
+
+function setColor(color, el) {
+  particleColor = new THREE.Color(color);
+  const colors = particleSystem.geometry.attributes.color.array;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const idx = i * 3;
+    colors[idx] = particleColor.r;
+    colors[idx + 1] = particleColor.g;
+    colors[idx + 2] = particleColor.b;
+  }
+  particleSystem.geometry.attributes.color.needsUpdate = true;
+
+  // 更新UI颜色
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+
+  document.querySelector('.title').style.color = color;
+  document.querySelector('.title').style.textShadow = `0 0 20px ${color}, 0 0 40px ${color}88`;
+}
+
+// ============================================================
+// 对话与交互
+// ============================================================
+
+let isTalking = false;
+
+function toggleTalk() {
+  const inputBar = document.getElementById('inputBar');
+  if (inputBar.style.display === 'block') {
+    inputBar.style.display = 'none';
+  } else {
+    inputBar.style.display = 'block';
+    document.getElementById('chatInput').focus();
+  }
+}
+
+function handleInput(e) {
+  if (e.key === 'Enter') {
+    const text = e.target.value.trim();
+    if (text) {
+      sendMessage(text);
+      e.target.value = '';
+    }
+  }
+}
+
+function sendMessage(text) {
+  showMessage('正在思考...');
+  if (window.bridge && window.bridge.sendToPython) {
+    window.bridge.sendToPython(text);
+  } else {
+    setTimeout(() => {
+      showMessage('收到：' + text + '（演示模式）');
+    }, 800);
+  }
+}
+
+function showMessage(text) {
+  const bubble = document.getElementById('chatBubble');
+  bubble.textContent = text;
+  bubble.classList.add('show');
+  clearTimeout(showMessage._timer);
+  showMessage._timer = setTimeout(() => {
+    bubble.classList.remove('show');
+  }, 5000);
+}
+
+// 暴露给 Python 调用
+window.pyShowMessage = showMessage;
+window.pyChangeShape = changeShape;
+window.pySetColor = (color) => {
+  const dots = document.querySelectorAll('.color-dot');
+  for (let dot of dots) {
+    if (dot.style.background.includes(color.replace('#',''))) {
+      setColor(color, dot);
+      return;
+    }
+  }
+  setColor(color, document.querySelector('.color-dot'));
+};
+
+function quickAction(type) {
+  const actions = {
+    weather: '查询天气',
+    light: '控制灯光',
+    music: '播放音乐',
+    system: '系统状态',
+    camera: '视觉检测',
+  };
+  if (window.bridge && window.bridge.sendToPython) {
+    window.bridge.sendToPython(actions[type] || type);
+  } else {
+    showMessage(actions[type] + '（演示模式）');
+  }
+}
+
+// 启动
+init();
+showMessage('Y·NEX系统已启动，随时待命，先生。');
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+# Y·NEX Python 项目配置（ruff + black 兼容）
+[tool.ruff]
+# 目标 Python 版本
+target-version = "py311"
+# 行长度（与 black 默认一致）
+line-length = 100
+# 排除的目录/文件
+extend-exclude = [
+    "TriGenClaw",          # Electron 桌面端
+    "server_files",        # Node.js 服务
+    "node_modules",
+    "__pycache__",
+    ".electron-cache",
+    "dist",
+    "build",
+    "data",
+    "resources",
+    ".venv",
+    "venv",
+]
+
+[tool.ruff.lint]
+# 启用的规则集
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes (未使用导入/变量等)
+    "I",    # isort (导入排序)
+    "B",    # flake8-bugbear (常见陷阱)
+    "C4",   # flake8-comprehensions (推导式优化)
+    "UP",   # pyupgrade (现代化语法)
+    "S",    # flake8-bandit (安全)
+    "T20",  # flake8-print (禁止 print)
+    "RET",  # flake8-return
+    "SIM",  # flake8-simplify
+]
+# 忽略的规则（项目特殊情况）
+ignore = [
+    "E501",   # 行太长（由 format 处理）
+    "S101",   # 使用 assert（测试代码需要）
+    "S104",   # 绑定所有网络接口（API 服务器需要）
+    "S108",   # /tmp 路径使用
+    "B008",   # 函数调用作为默认参数（Flask 常见模式）
+    "UP007",  # Optional[X] 与 X | None（保持兼容性）
+    "UP045",  # Optional[X] 与 X | None
+    "SIM117", # 嵌套 with 语句合并（可读性）
+]
+
+[tool.ruff.lint.per-file-ignores]
+# 测试文件允许 assert、print、魔术字
+"test_*.py" = ["S101", "T20", "S106", "S311"]
+"setup.py" = ["S101"]
+"ingest_docs.py" = ["T20"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "logger", "auth", "billing", "memory", "brain", "speech"]
+
+[tool.ruff.format]
+# 与 black 兼容的格式化
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
