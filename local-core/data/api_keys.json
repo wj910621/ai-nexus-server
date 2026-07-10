@@ -1,0 +1,1 @@
+{"keys": [{"key_hash": "25f9f9aa1a81ad68d3b1e5dc561545983b4982593453d0ecbb958943a658ec4a", "key_id": "c222303b", "role": "family", "name": "test-user", "created_at": 1783692995.39371, "last_used": 0, "allowed_tools": null, "quota_used": 0, "quota_limit": 100000}], "trusted_ips": {}}
