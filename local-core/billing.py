@@ -404,13 +404,23 @@ def deduct_quota(user_id: str, tokens: int, cost: float, charged: float):
     """
     conn = _get_db()
     c = conn.cursor()
-    c.execute("""
-        UPDATE users
-        SET quota_used = quota_used + ?
-        WHERE id = ?
-    """, (tokens, user_id))
-    conn.commit()
-    conn.close()
+    try:
+        c.execute("BEGIN IMMEDIATE")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        c.execute("""
+            UPDATE users
+            SET quota_used = quota_used + ?
+            WHERE id = ?
+        """, (tokens, user_id))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        from logger import logger
+        logger.error(f"[billing] deduct_quota 失败: {e}")
+    finally:
+        conn.close()
 
 
 def get_user_usage(user_id: str, days: int = 30) -> List[dict]:

@@ -14,12 +14,12 @@ from logger import logger
 
 
 # 默认允许文件操作的基础目录（可通过配置扩展）
+# 安全：不默认允许用户主目录访问，防止路径遍历攻击
 ALLOWED_BASE_DIRS: List[str] = [
     os.getcwd(),
     os.path.join(os.getcwd(), "data"),
     os.path.join(os.getcwd(), "plugins"),
     os.path.join(os.getcwd(), "knowledge"),
-    os.path.expanduser("~"),
 ]
 
 # 敏感路径绝对禁止访问

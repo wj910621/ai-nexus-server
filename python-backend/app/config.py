@@ -5,7 +5,7 @@ import os
 class Settings(BaseSettings):
     database_url: str = 'sqlite+aiosqlite:///./nexus.db'
     redis_url: str = 'redis://localhost:6379/0'
-    jwt_secret: str = 'nexus-ai-studio-secret-change-in-production'
+    jwt_secret: str = ''
     jwt_algorithm: str = 'HS256'
     jwt_expire_minutes: int = 1440
     openai_api_key: str = ''

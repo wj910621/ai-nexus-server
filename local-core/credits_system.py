@@ -506,19 +506,29 @@ def add_credits(user_id: str, amount: int, description: str = "充值",
     uc = _ensure_user(user_id)
     conn = _get_db()
     c = conn.cursor()
+    try:
+        c.execute("BEGIN IMMEDIATE")
+    except Exception:
+        pass
+    try:
+        c.execute("UPDATE user_credits SET credits = credits + ? WHERE user_id = ?",
+                  (amount, user_id))
 
-    c.execute("UPDATE user_credits SET credits = credits + ? WHERE user_id = ?",
-              (amount, user_id))
+        tx_id = str(uuid.uuid4())
+        c.execute("""
+            INSERT INTO credit_transactions (id, user_id, type, amount, description, model, cost_price, created_at)
+            VALUES (?, ?, ?, ?, ?, NULL, NULL, ?)
+        """, (tx_id, user_id, tx_type, amount, description, time.time()))
 
-    tx_id = str(uuid.uuid4())
-    c.execute("""
-        INSERT INTO credit_transactions (id, user_id, type, amount, description, model, cost_price, created_at)
-        VALUES (?, ?, ?, ?, ?, NULL, NULL, ?)
-    """, (tx_id, user_id, tx_type, amount, description, time.time()))
-
-    conn.commit()
-    conn.close()
-    return True
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        from logger import logger
+        logger.error(f"[credits] add_credits 失败: {e}")
+        return False
+    finally:
+        conn.close()
 
 
 def calculate_credit_cost(model_id: str, input_tokens: int = 0, output_tokens: int = 0) -> int:

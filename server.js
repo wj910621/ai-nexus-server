@@ -11,9 +11,9 @@ const Database = require('better-sqlite3');
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || (() => {
-  console.warn("[security] JWT not set");
-  const crypto = require('crypto');
-  return crypto.randomBytes(32).toString('hex');
+  console.error("[security] JWT_SECRET is not set in environment variables!");
+  console.error("[security] Server will exit to prevent insecure operation.");
+  process.exit(1);
 })();
 const DB_FILE = path.join(__dirname, 'data', 'database.sqlite');
 
