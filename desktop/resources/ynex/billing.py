@@ -64,6 +64,7 @@ class User:
     quota_used: int  # 本月使用量（tokens）
     quota_limit: int  # 本月额度限制
     api_key: Optional[str]  # 用户的 API Key（存储为哈希值，非明文）
+    api_key_prefix: Optional[str]  # API Key 前缀（用于展示）
     referrer_id: Optional[str]  # 推荐人 ID
     created_at: float
     is_active: bool
@@ -471,8 +472,8 @@ def subscribe_tier(user_id: str, tier_id: str, paid_order_amount: float = None) 
         return False, "不存在的套餐"
 
     tier = TIERS[tier_id]
-    fee_yuan = tier["monthly"]
-    fee_cents = int(fee_yuan * 100)
+    fee_cents = tier["monthly"]  # TIERS 中 monthly 单位为分
+    fee_yuan = fee_cents / 100.0
 
     conn = _get_db()
     c = conn.cursor()
@@ -526,7 +527,8 @@ def get_user_info(user_id: str) -> Optional[dict]:
     c = conn.cursor()
     c.execute("""
         SELECT id, username, email, role, balance, quota_used, quota_limit, created_at,
-               api_key_prefix, (CASE WHEN api_key IS NOT NULL AND api_key != '' THEN 1 ELSE 0 END) as key_exists
+               api_key_prefix, referrer_id, is_active,
+               (CASE WHEN api_key IS NOT NULL AND api_key != '' THEN 1 ELSE 0 END) as key_exists
         FROM users WHERE id = ?
     """, (user_id,))
     row = c.fetchone()
