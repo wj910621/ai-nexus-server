@@ -70,6 +70,14 @@ def is_path_safe(path: str, allowed_bases: Optional[List[str]] = None) -> bool:
     2. 必须在允许的基目录内
     3. 规范化后不能包含 .. 穿越
     """
+    if not path or not isinstance(path, str):
+        return False
+
+    # 在非 Windows 平台拒绝 Windows 风格绝对路径，避免被 os.path.abspath 拼接到当前目录绕过
+    if os.name != "nt" and len(path) >= 3 and path[1] == ":" and path[2] in {"\\", "/"}:
+        logger.warning(f"Windows 风格绝对路径被拒绝: {path}")
+        return False
+
     real_path = normalize_path(path)
     if real_path is None:
         return False

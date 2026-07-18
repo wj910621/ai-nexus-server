@@ -211,6 +211,7 @@ def check_tool_access(role: UserRole, tool_name: str, allowed_tools: Optional[Li
     perms = ROLE_PERMISSIONS.get(role, set())
     # 从权限名推断可用的工具
     tool_perm_map = {
+        "chat": ["chat", "send_message", "read_message"],
         "device_control": ["control_pc", "device_command", "list_device_domains"],
         "ha_control": ["control_ha_device", "list_ha_entities", "get_ha_entity_state",
                        "list_ha_scenes", "activate_ha_scene", "list_ha_areas", "get_ha_sensor"],
