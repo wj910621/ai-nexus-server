@@ -17,6 +17,7 @@ import hashlib
 import base64
 import os
 import hmac
+import threading
 from typing import Optional, Dict, Tuple
 from dataclasses import dataclass
 from pathlib import Path
@@ -75,16 +76,40 @@ class PaymentOrder:
 
 PAYMENT_DB_PATH = Path("data/payments.db")
 
+_connection_pool = []
+_pool_lock = threading.Lock()
+_MAX_CONNECTIONS = 10
+
 
 def _get_db():
     import sqlite3
     PAYMENT_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(PAYMENT_DB_PATH), check_same_thread=False, timeout=30)
-    conn.row_factory = sqlite3.Row
-    # 启用 WAL 模式提升并发读写性能；busy_timeout 防止写锁冲突立即失败。
-    conn.execute("PRAGMA journal_mode = WAL")
-    conn.execute("PRAGMA busy_timeout = 30000")
-    return conn
+    with _pool_lock:
+        if _connection_pool:
+            conn = _connection_pool.pop()
+            try:
+                conn.execute("SELECT 1")
+                return conn
+            except Exception:
+                pass
+        if len(_connection_pool) < _MAX_CONNECTIONS:
+            conn = sqlite3.connect(str(PAYMENT_DB_PATH), check_same_thread=False, timeout=30)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA journal_mode = WAL")
+            conn.execute("PRAGMA busy_timeout = 30000")
+            return conn
+    return sqlite3.connect(str(PAYMENT_DB_PATH), check_same_thread=False, timeout=30)
+
+
+def _return_db(conn):
+    with _pool_lock:
+        if len(_connection_pool) < _MAX_CONNECTIONS:
+            _connection_pool.append(conn)
+        else:
+            try:
+                _return_db(conn)
+            except Exception:
+                pass
 
 
 def init_payment_db():
@@ -137,7 +162,7 @@ def init_payment_db():
     """)
 
     conn.commit()
-    conn.close()
+    _return_db(conn)
     logger.info("支付数据库初始化完成")
 
 
@@ -162,7 +187,7 @@ def create_order(user_id: str, amount: float, method: str,
         VALUES (?, ?, ?, ?, 'pending', ?, ?, ?)
     """, (order_id, user_id, amount, method, product_type, product_id, now))
     conn.commit()
-    conn.close()
+    _return_db(conn)
 
     logger.info(f"创建支付订单: {order_id} | 用户: {user_id} | 金额: {amount}元 | 方式: {method}")
     return PaymentOrder(
@@ -178,7 +203,7 @@ def get_order(order_id: str) -> Optional[PaymentOrder]:
     c = conn.cursor()
     c.execute("SELECT * FROM payment_orders WHERE id = ?", (order_id,))
     row = c.fetchone()
-    conn.close()
+    _return_db(conn)
     if row:
         d = dict(row)
         return PaymentOrder(
@@ -221,7 +246,7 @@ def update_order_status(order_id: str, status: str, transaction_id: str = None,
 
     success = c.rowcount > 0
     conn.commit()
-    conn.close()
+    _return_db(conn)
 
     if success:
         logger.info(f"订单状态更新: {order_id} -> {status}")
@@ -238,7 +263,7 @@ def list_user_orders(user_id: str, limit: int = 20) -> list:
         ORDER BY created_at DESC LIMIT ?
     """, (user_id, limit))
     rows = c.fetchall()
-    conn.close()
+    _return_db(conn)
     return [dict(r) for r in rows]
 
 
@@ -468,7 +493,7 @@ def get_agent_settings(agent_id: str) -> dict:
     c = conn.cursor()
     c.execute("SELECT * FROM agent_settings WHERE agent_id = ?", (agent_id,))
     row = c.fetchone()
-    conn.close()
+    _return_db(conn)
     if row:
         return dict(row)
     default = {
@@ -516,7 +541,7 @@ def update_agent_settings(agent_id: str, commission_rate: float = None,
               bank_info or "", now, now))
 
     conn.commit()
-    conn.close()
+    _return_db(conn)
     return True
 
 
@@ -551,7 +576,7 @@ def create_commission(agent_id: str, order: PaymentOrder):
         VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)
     """, (comm_id, agent_id, order.id, order.user_id, commission_amount, rate, now))
     conn.commit()
-    conn.close()
+    _return_db(conn)
 
     logger.info(f"创建佣金记录: {comm_id} | 分销商: {agent_id} | 金额: {commission_amount}元")
 
@@ -567,7 +592,7 @@ def settle_commission(commission_id: str) -> bool:
     row = c.fetchone()
 
     if not row:
-        conn.close()
+        _return_db(conn)
         return False
 
     d = dict(row)
@@ -583,7 +608,7 @@ def settle_commission(commission_id: str) -> bool:
         conn.commit()
         logger.info(f"佣金结算完成: {commission_id} | 金额: {amount}元")
 
-    conn.close()
+    _return_db(conn)
     return ok
 
 
@@ -604,7 +629,7 @@ def get_agent_commissions(agent_id: str, status: str = None) -> list:
         """, (agent_id,))
 
     rows = c.fetchall()
-    conn.close()
+    _return_db(conn)
     return [dict(r) for r in rows]
 
 
@@ -620,7 +645,7 @@ def get_agent_commission_summary(agent_id: str) -> dict:
         FROM commissions WHERE agent_id = ?
     """, (agent_id,))
     row = c.fetchone()
-    conn.close()
+    _return_db(conn)
     return dict(row) if row else {"total_count": 0, "total_settled": 0, "total_pending": 0}
 
 
@@ -744,7 +769,7 @@ def confirm_payment(order_id: str, transaction_id: str = None,
         transitioned = c.rowcount == 1
         if not transitioned:
             conn.rollback()
-            conn.close()
+            _return_db(conn)
             # 并发竞争落败，或订单状态已被改变；返回当前状态
             cur = get_order(order_id)
             if cur and cur.status == "success":
@@ -753,12 +778,12 @@ def confirm_payment(order_id: str, transaction_id: str = None,
         conn.commit()
     except Exception as e:
         conn.rollback()
-        conn.close()
+        _return_db(conn)
         logger.error(f"订单状态原子转换失败: {e}")
         return False, f"订单状态转换异常: {e}"
     finally:
         try:
-            conn.close()
+            _return_db(conn)
         except Exception:
             pass
 

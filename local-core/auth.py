@@ -47,9 +47,10 @@ ROLE_PERMISSIONS: Dict[UserRole, set] = {
     },
 }
 
-# 信任域白名单（不验证 API Key 的来源）
 _TRUSTED_IPS: Dict[str, str] = {}  # ip -> role
 _api_keys: Dict[str, "ApiKey"] = {}
+
+_TRUSTED_IPS_ENABLED = os.environ.get("AUTH_TRUSTED_IPS_ENABLED", "false").lower() == "true"
 
 # API Key 哈希盐：防止彩虹表攻击。
 # 安全要求：必须在 .env 中设置 AUTH_API_KEY_PEPPER，否则启动时给出警告。
@@ -180,8 +181,8 @@ def verify_request(api_key: Optional[str], client_ip: str) -> tuple[bool, UserRo
     验证请求是否合法。
     返回 (是否通过, 用户角色, 错误信息, API Key 对象)
     """
-    # 信任 IP 直通（本地网络）
-    if client_ip in _TRUSTED_IPS:
+    # 信任 IP 直通（本地网络）- 默认关闭，需显式启用
+    if _TRUSTED_IPS_ENABLED and client_ip in _TRUSTED_IPS:
         role = UserRole(_TRUSTED_IPS[client_ip])
         return True, role, None, None
 

@@ -21,13 +21,15 @@ from logger import logger
 
 
 class _MemoryCache:
-    """线程安全的内存缓存"""
+    """线程安全的内存缓存，带LRU淘汰策略"""
 
-    def __init__(self):
+    def __init__(self, max_size: int = 10000):
         self._store: dict = {}
         self._lock = threading.RLock()
         self._hits = 0
         self._misses = 0
+        self._max_size = max_size
+        self._access_order: list = []
 
     def get(self, key: str) -> Optional[Any]:
         with self._lock:
@@ -38,23 +40,40 @@ class _MemoryCache:
             expiry, value = item
             if expiry > 0 and time.time() > expiry:
                 del self._store[key]
+                if key in self._access_order:
+                    self._access_order.remove(key)
                 self._misses += 1
                 return None
             self._hits += 1
+            if key in self._access_order:
+                self._access_order.remove(key)
+            self._access_order.append(key)
             return value
 
     def set(self, key: str, value: Any, ttl: int = 300):
         with self._lock:
             expiry = time.time() + ttl if ttl > 0 else 0
+            if key in self._store:
+                if key in self._access_order:
+                    self._access_order.remove(key)
+            else:
+                if len(self._store) >= self._max_size:
+                    if self._access_order:
+                        oldest = self._access_order.pop(0)
+                        del self._store[oldest]
             self._store[key] = (expiry, value)
+            self._access_order.append(key)
 
     def delete(self, key: str):
         with self._lock:
             self._store.pop(key, None)
+            if key in self._access_order:
+                self._access_order.remove(key)
 
     def clear(self):
         with self._lock:
             self._store.clear()
+            self._access_order.clear()
 
     def stats(self) -> dict:
         with self._lock:
@@ -64,6 +83,7 @@ class _MemoryCache:
                 "misses": self._misses,
                 "hit_rate": round(self._hits / total, 4) if total else 0.0,
                 "size": len(self._store),
+                "max_size": self._max_size,
             }
 
 
