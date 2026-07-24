@@ -1,12 +1,15 @@
 const { db, signToken, verifyToken, authRequired, authLimiter } = require('../server');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
-function btoaPwd(pwd) { return Buffer.from(pwd).toString('base64'); }
+// 安全：仅使用 bcrypt 哈希，不再回退到 Base64 编码
 function isBcryptHash(hash) { return typeof hash === 'string' && (hash.startsWith('$2a$') || hash.startsWith('$2b$')); }
 function hashPasswordSync(pwd) { return bcrypt.hashSync(pwd, 10); }
 function verifyPasswordSync(pwd, storedHash) {
+  if (!storedHash) return false;
   if (isBcryptHash(storedHash)) return bcrypt.compareSync(pwd, storedHash);
-  return storedHash === btoaPwd(pwd);
+  // 非 bcrypt 哈希一律拒绝（旧 Base64 密码需通过密码重置流程迁移）
+  return false;
 }
 function upgradePasswordToBcrypt(username, plainPwd) {
   const newHash = hashPasswordSync(plainPwd);
@@ -103,14 +106,20 @@ module.exports = function(app) {
     try {
       const payload = verifyToken(token);
       const username = payload.username;
-      const user = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
-      if (!user) return res.json({ ok: false, error: '用户不存在' });
-      const current = user.credits;
-      if (current < amount) return res.json({ ok: false, error: '积分不足' });
-      db.prepare("UPDATE users SET credits=credits-? WHERE username=?").run(amount, username);
-      db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(username, -amount, '消费');
-      const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
-      res.json({ ok: true, credits: newCredits.credits });
+      // 原子事务：UPDATE + INSERT 在同一事务内，且用条件 UPDATE 消除 TOCTOU
+      const spendTxn = db.transaction(() => {
+        const result = db.prepare(
+          "UPDATE users SET credits = credits - ? WHERE username = ? AND credits >= ?"
+        ).run(amount, username, amount);
+        if (result.changes !== 1) {
+          return { ok: false, error: '积分不足或用户不存在' };
+        }
+        db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(username, -amount, '消费');
+        const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        return { ok: true, credits: newCredits.credits };
+      });
+      const r = spendTxn();
+      res.json(r);
     } catch(e) { res.json({ ok: false, error: e.message }); }
   });
 
@@ -132,19 +141,25 @@ module.exports = function(app) {
       const payload = verifyToken(token);
       const username = payload.username;
       const today = new Date().toISOString().slice(0, 10);
-      const existing = db.prepare("SELECT checkin_date, checkin_streak FROM users WHERE username=?").get(username);
-      let lastCheckin = existing && existing.checkin_date ? existing.checkin_date : '';
-      if (lastCheckin === today) return res.json({ ok: false, error: '今天已经签到过了', already: true });
       const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-      let streak = existing && existing.checkin_streak ? existing.checkin_streak : 0;
-      if (lastCheckin === yesterday) streak += 1; else streak = 1;
-      let bonus = 5;
-      if (streak % 7 === 0) bonus += 5;
-      if (streak % 30 === 0) bonus += 20;
-      db.prepare("UPDATE users SET credits=credits+?, checkin_date=?, checkin_streak=? WHERE username=?").run(bonus, today, streak, username);
-      db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(username, bonus, '每日签到');
-      const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
-      res.json({ ok: true, bonus, streak, credits: newCredits.credits });
+      // 事务：UPDATE + INSERT 原子化，避免部分成功
+      const checkinTxn = db.transaction(() => {
+        const existing = db.prepare("SELECT checkin_date, checkin_streak FROM users WHERE username=?").get(username);
+        if (!existing) return { ok: false, error: '用户不存在' };
+        let lastCheckin = existing.checkin_date || '';
+        if (lastCheckin === today) return { ok: false, error: '今天已经签到过了', already: true };
+        let streak = existing.checkin_streak || 0;
+        if (lastCheckin === yesterday) streak += 1; else streak = 1;
+        let bonus = 5;
+        if (streak % 7 === 0) bonus += 5;
+        if (streak % 30 === 0) bonus += 20;
+        db.prepare("UPDATE users SET credits=credits+?, checkin_date=?, checkin_streak=? WHERE username=?").run(bonus, today, streak, username);
+        db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(username, bonus, '每日签到');
+        const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        return { ok: true, bonus, streak, credits: newCredits.credits };
+      });
+      const r = checkinTxn();
+      res.json(r);
     } catch(e) { res.json({ ok: false, error: e.message }); }
   });
 
@@ -165,20 +180,8 @@ module.exports = function(app) {
     } catch(e) { res.json({ ok: false, error: e.message }); }
   });
 
-  app.post('/api/user/refund', (req, res) => {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) return res.json({ ok: false, error: '未登录' });
-    const { amount } = req.body;
-    if (!amount || amount <= 0) return res.json({ ok: false, error: '金额无效' });
-    try {
-      const payload = verifyToken(token);
-      const username = payload.username;
-      db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(amount, username);
-      db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(username, amount, '退款-API失败');
-      const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
-      res.json({ ok: true, credits: newCredits.credits });
-    } catch(e) { res.json({ ok: false, error: e.message }); }
-  });
+  // 安全：删除用户自助退款接口，防止用户自行增加积分
+  // 退款操作必须由管理员执行（通过 /api/admin/refund）
 
   app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
@@ -213,16 +216,41 @@ module.exports = function(app) {
     } catch(e) { res.json({ ok: false, error: e.message }); }
   });
 
+  // 管理员审核退款（替换原来的用户自助退款，防止任意积分自增）
+  app.post('/api/admin/refund', requireAdmin, (req, res) => {
+    const { username, amount, reason } = req.body;
+    if (!username || !amount || amount <= 0) return res.json({ ok: false, error: '参数无效' });
+    if (amount > 10000) return res.json({ ok: false, error: '单笔退款不能超过10000积分' });
+    try {
+      // 事务：UPDATE + INSERT 原子化
+      const refundTxn = db.transaction(() => {
+        const user = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        if (!user) return { ok: false, error: '用户不存在' };
+        db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(amount, username);
+        db.prepare("INSERT INTO credit_log (username, amount, reason, admin) VALUES (?,?,?,?)").run(username, amount, reason || '管理员退款', req.adminUser);
+        const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        return { ok: true, message: '退款成功', username, credits: newCredits.credits };
+      });
+      const r = refundTxn();
+      res.json(r);
+    } catch(e) { res.json({ ok: false, error: e.message }); }
+  });
+
   app.post('/api/admin/recharge', requireAdmin, (req, res) => {
     const { username, amount, reason } = req.body;
     if (!username || !amount || amount <= 0) return res.json({ ok: false, error: '请填写正确的用户名和金额' });
     try {
-      const user = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
-      if (!user) return res.json({ ok: false, error: '用户不存在' });
-      db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(amount, username);
-      db.prepare("INSERT INTO credit_log (username, amount, reason, admin) VALUES (?,?,?,?)").run(username, amount, reason || '手动充值', req.adminUser);
-      const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
-      res.json({ ok: true, username, added: amount, credits: newCredits.credits });
+      // 事务：UPDATE + INSERT 原子化
+      const rechargeTxn = db.transaction(() => {
+        const user = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        if (!user) return { ok: false, error: '用户不存在' };
+        db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(amount, username);
+        db.prepare("INSERT INTO credit_log (username, amount, reason, admin) VALUES (?,?,?,?)").run(username, amount, reason || '手动充值', req.adminUser);
+        const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
+        return { ok: true, username, added: amount, credits: newCredits.credits };
+      });
+      const r = rechargeTxn();
+      res.json(r);
     } catch(e) { res.json({ ok: false, error: '充值失败: ' + e.message }); }
   });
 
@@ -237,7 +265,7 @@ module.exports = function(app) {
     const auth = req.headers.authorization;
     if (!auth || !auth.startsWith('Bearer ')) return res.json({ ok: false, error: '未登录' });
     try {
-      const payload = JSON.parse(Buffer.from(auth.slice(7), 'base64').toString());
+      const payload = verifyToken(auth.slice(7));
       const user = db.prepare("SELECT username, email, credits, role, ref_code FROM users WHERE username=?").get(payload.username);
       if (!user) return res.json({ ok: false, error: '用户不存在' });
       res.json({ ok: true, data: { username: user.username, email: user.email, credits: user.credits, role: user.role, refCode: user.ref_code } });
@@ -267,6 +295,28 @@ module.exports = function(app) {
     } catch(e) { res.json({ ok: false, error: e.message }); }
   });
 
+  // 安全：API Key 哈希化存储
+  const API_KEY_PEPPER = process.env.JWT_SECRET || (() => {
+    console.warn('[security] JWT_SECRET 未设置，API Key 哈希使用临时随机 pepper');
+    return crypto.randomBytes(32).toString('hex');
+  })();
+
+  function hashApiKey(key) {
+    return crypto.createHmac('sha256', API_KEY_PEPPER).update(key).digest('hex');
+  }
+
+  function generateSecureApiKey(prefix, username) {
+    // 使用 crypto.randomBytes（CSPRNG）替代 Math.random（PRNG）
+    const userPart = (username || 'user').substring(0, 4).toLowerCase();
+    const randomPart = crypto.randomBytes(16).toString('hex');
+    return prefix + userPart + '-' + randomPart;
+  }
+
+  function maskApiKey(key) {
+    if (!key || key.length <= 12) return '****';
+    return key.substring(0, 8) + '****' + key.substring(key.length - 4);
+  }
+
   app.post('/api/keys/create', (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.json({ ok: false, error: '未登录' });
@@ -274,9 +324,12 @@ module.exports = function(app) {
       const payload = verifyToken(token);
       const username = payload.username;
       const keyName = (req.body.name || '').trim() || '默认 Key';
-      const apiKey = 'ai-' + username.substring(0, 3) + '-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
-      db.prepare("INSERT INTO api_keys (username, key_name, api_key, quota) VALUES (?,?,?,?)").run(username, keyName, apiKey, 0);
-      res.json({ ok: true, apiKey, name: keyName });
+      // 安全：使用 crypto.randomBytes（CSPRNG）
+      const apiKey = generateSecureApiKey('ai-', username);
+      // 存储：api_key 列存掩码，api_key_hash 列存 HMAC 哈希用于验证
+      db.prepare("INSERT INTO api_keys (username, key_name, api_key, api_key_hash, quota) VALUES (?,?,?,?,?)").run(username, keyName, maskApiKey(apiKey), hashApiKey(apiKey), 0);
+      // 明文 Key 仅在创建时返回一次
+      res.json({ ok: true, apiKey, name: keyName, warning: '请立即保存 Key，之后无法再次查看' });
     } catch(e) { res.json({ ok: false, error: '创建失败: ' + e.message }); }
   });
 
@@ -285,8 +338,9 @@ module.exports = function(app) {
     if (!token) return res.json({ ok: false, error: '未登录' });
     try {
       const payload = verifyToken(token);
-      const keys = db.prepare("SELECT id, key_name, api_key, quota, used, active, created_at FROM api_keys WHERE username=? ORDER BY id DESC").all(payload.username);
-      res.json({ ok: true, keys: keys.map(v => ({ id: v.id, name: v.key_name, key: v.api_key, quota: v.quota, used: v.used, active: v.active, created: v.created_at })) });
+      const keys = db.prepare("SELECT id, key_name, api_key, api_key_hash, quota, used, active, created_at FROM api_keys WHERE username=? ORDER BY id DESC").all(payload.username);
+      // 安全：列表统一返回掩码，不返回明文
+      res.json({ ok: true, keys: keys.map(v => ({ id: v.id, name: v.key_name, key: maskApiKey(v.api_key), quota: v.quota, used: v.used, active: v.active, created: v.created_at })) });
     } catch(e) { res.json({ ok: false, error: e.message }); }
   });
 
@@ -363,12 +417,23 @@ module.exports = function(app) {
     res.json({ ok: true, balances: results, updated: new Date().toISOString() });
   });
 
+  // 安全：管理员认证统一走 JWT signToken，不再使用可逆 base64 token
   app.post('/api/admin/auth', authLimiter, (req, res) => {
     const { password } = req.body || {};
-    if (password === process.env.ADMIN_PASSWORD) {
-      res.json({ ok: true, token: Buffer.from(password + ':' + Date.now()).toString('base64') });
-    } else {
-      res.json({ ok: false, error: '密码错误' });
+    // 防御 undefined === undefined 绕过：必须显式设置 ADMIN_PASSWORD 且密码非空
+    if (!process.env.ADMIN_PASSWORD) {
+      return res.status(503).json({ ok: false, error: '管理员密码未配置，请设置 ADMIN_PASSWORD 环境变量' });
     }
+    if (!password) {
+      return res.json({ ok: false, error: '密码错误' });
+    }
+    // 恒定时间比较防时序攻击
+    const a = Buffer.from(String(password));
+    const b = Buffer.from(process.env.ADMIN_PASSWORD);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      return res.json({ ok: false, error: '密码错误' });
+    }
+    const token = signToken({ username: 'admin', role: 'admin', ts: Date.now() });
+    res.json({ ok: true, token });
   });
 };
