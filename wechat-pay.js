@@ -107,7 +107,15 @@ async function queryOrder(outTradeNo) {
   return await requestWxPay('GET', `/v3/pay/transactions/out-trade-no/${outTradeNo}?mchid=${CFG.mchid}`);
 }
 
-// 验证微信回调签名
+function _safeCompare(a, b) {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 function verifyNotify(headers, body) {
   const { 'wechatpay-signature': signature, 'wechatpay-timestamp': timestamp,
     'wechatpay-nonce': nonce, 'wechatpay-serial': serial } = headers;
@@ -116,19 +124,34 @@ function verifyNotify(headers, body) {
     return { ok: false, error: '缺少签名头' };
   }
 
-  // 验证证书序列号
-  if (serial !== CFG.serialNo) {
-    // 正式环境可能需要动态拉取平台证书，这里简化处理
-    console.warn('[WX Pay] 证书序列号不匹配:', serial, 'vs', CFG.serialNo);
+  const apiV3Key = process.env.WX_API_V3_KEY || CFG.apiV3Key;
+  const serialNo = process.env.WX_SERIAL_NO || CFG.serialNo;
+
+  if (serial !== serialNo) {
+    console.warn('[WX Pay] 证书序列号不匹配:', serial, 'vs', serialNo);
+    return { ok: false, error: '证书序列号不匹配' };
+  }
+
+  if (!apiV3Key) {
+    return { ok: false, error: '未配置 API V3 Key' };
   }
 
   const signStr = `${timestamp}\n${nonce}\n${body}\n`;
-  const pkey = getPrivateKey();
-  if (!pkey) return { ok: false, error: '私钥加载失败' };
 
-  // 注意：验证需要使用微信平台公钥，不是商户私钥
-  // 简化处理：使用平台证书同步
-  // 这里直接返回通过，将验证交给解密步骤
+  try {
+    const expectedSign = crypto.createHmac('sha256', apiV3Key)
+      .update(signStr)
+      .digest('base64');
+    
+    if (!_safeCompare(signature, expectedSign)) {
+      console.warn('[WX Pay] 签名验证失败');
+      return { ok: false, error: '签名验证失败' };
+    }
+  } catch (e) {
+    console.error('[WX Pay] 签名验证异常:', e.message);
+    return { ok: false, error: '签名验证异常' };
+  }
+
   return { ok: true };
 }
 
