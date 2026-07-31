@@ -60,9 +60,12 @@ async def delete_document(doc_id: int, user=Depends(get_current_user), db=Depend
 
 @router.get('/documents/search', response_model=list[SearchResult])
 async def search_documents(q: str = Query('', min_length=1), user=Depends(get_current_user), db=Depends(get_db)):
+    # 使用参数化查询，转义特殊字符防止SQL注入
+    # SQLAlchemy 的 ilike 会自动处理参数化，但需确保用户输入不包含 % 或 _
+    escaped_q = q.replace('%', r'\%').replace('_', r'\_')
     query = select(Document).where(
         Document.user_id == user.id,
-        or_(Document.title.ilike(f'%{q}%'), Document.content.ilike(f'%{q}%'))
+        or_(Document.title.ilike(f'%{escaped_q}%'), Document.content.ilike(f'%{escaped_q}%'))
     ).order_by(Document.updated_at.desc())
     r = await db.execute(query)
     return [SearchResult(id=d.id, title=d.title, content=d.content[:120], score=1.0) for d in r.scalars()]
@@ -75,14 +78,16 @@ async def rag_search(q: str = Query(...), limit: int = Query(5), user=Depends(ge
     """Search knowledge base for RAG context (server-side)"""
     from app.models.document import Document
     from sqlalchemy import select, or_
-    
+
+    # 转义特殊字符防止SQL注入
+    escaped_q = q.replace('%', r'\%').replace('_', r'\_')
     query = select(Document).where(
         Document.user_id == user.id,
-        or_(Document.title.ilike(f'%{q}%'), Document.content.ilike(f'%{q}%'))
+        or_(Document.title.ilike(f'%{escaped_q}%'), Document.content.ilike(f'%{escaped_q}%'))
     ).order_by(Document.updated_at.desc()).limit(limit)
     r = await db.execute(query)
     docs = r.scalars().all()
-    
+
     results = []
     for d in docs:
         results.append({

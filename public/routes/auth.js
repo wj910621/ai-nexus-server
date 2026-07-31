@@ -1,12 +1,16 @@
 const { db, signToken, verifyToken, authRequired, authLimiter } = require('../server');
 const bcrypt = require('bcryptjs');
 
-function btoaPwd(pwd) { return Buffer.from(pwd).toString('base64'); }
 function isBcryptHash(hash) { return typeof hash === 'string' && (hash.startsWith('$2a$') || hash.startsWith('$2b$')); }
-function hashPasswordSync(pwd) { return bcrypt.hashSync(pwd, 10); }
+function hashPasswordSync(pwd) { return bcrypt.hashSync(pwd, 12); }  // 使用更强的轮数
 function verifyPasswordSync(pwd, storedHash) {
+  if (!storedHash) return false;
   if (isBcryptHash(storedHash)) return bcrypt.compareSync(pwd, storedHash);
-  return storedHash === btoaPwd(pwd);
+
+  // 兼容旧版Base64编码密码（仅限迁移期间）
+  // 登录成功后会自动升级到bcrypt
+  const legacyMatch = storedHash === Buffer.from(pwd).toString('base64');
+  return legacyMatch;
 }
 function upgradePasswordToBcrypt(username, plainPwd) {
   const newHash = hashPasswordSync(plainPwd);
@@ -233,12 +237,9 @@ module.exports = function(app) {
     } catch(e) { res.json({ ok: false, error: e.message }); }
   });
 
-  app.get('/api/user/data', (req, res) => {
-    const auth = req.headers.authorization;
-    if (!auth || !auth.startsWith('Bearer ')) return res.json({ ok: false, error: '未登录' });
+  app.get('/api/user/data', authRequired, (req, res) => {
     try {
-      const payload = JSON.parse(Buffer.from(auth.slice(7), 'base64').toString());
-      const user = db.prepare("SELECT username, email, credits, role, ref_code FROM users WHERE username=?").get(payload.username);
+      const user = db.prepare("SELECT username, email, credits, role, ref_code FROM users WHERE username=?").get(req.user.username);
       if (!user) return res.json({ ok: false, error: '用户不存在' });
       res.json({ ok: true, data: { username: user.username, email: user.email, credits: user.credits, role: user.role, refCode: user.ref_code } });
     } catch(e) { res.json({ ok: false, error: e.message }); }

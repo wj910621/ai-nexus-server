@@ -116,19 +116,42 @@ function verifyNotify(headers, body) {
     return { ok: false, error: '缺少签名头' };
   }
 
+  // 验证时间戳，防止重放攻击（5分钟内有效）
+  const ts = parseInt(timestamp, 10);
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - ts) > 300) {
+    return { ok: false, error: '签名已过期' };
+  }
+
   // 验证证书序列号
   if (serial !== CFG.serialNo) {
-    // 正式环境可能需要动态拉取平台证书，这里简化处理
+    // 正式环境需要从微信平台下载平台证书，此处简化处理
+    // 生产环境应实现平台证书缓存与更新机制
     console.warn('[WX Pay] 证书序列号不匹配:', serial, 'vs', CFG.serialNo);
+    // 不匹配时拒绝请求
+    return { ok: false, error: '证书序列号不匹配' };
   }
 
   const signStr = `${timestamp}\n${nonce}\n${body}\n`;
-  const pkey = getPrivateKey();
-  if (!pkey) return { ok: false, error: '私钥加载失败' };
 
-  // 注意：验证需要使用微信平台公钥，不是商户私钥
-  // 简化处理：使用平台证书同步
-  // 这里直接返回通过，将验证交给解密步骤
+  // 注意：验证签名需要使用微信平台公钥，不能使用商户私钥
+  // 生产环境必须实现平台证书下载与缓存：
+  // 1. GET https://api.mch.weixin.qq.com/v3/certificates 获取平台证书
+  // 2. 使用 API V3 密钥解密证书内容
+  // 3. 缓存证书并定期更新
+  // 4. 使用平台公钥验证签名
+
+  // 开发环境警告
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn('[WX Pay] 警告：签名验证未完全实现，仅限开发环境使用');
+  }
+
+  // 生产环境必须拒绝未验证的回调
+  if (process.env.NODE_ENV === 'production') {
+    return { ok: false, error: '签名验证未配置，请设置微信平台证书' };
+  }
+
+  // 非生产环境返回成功（仅用于开发测试）
   return { ok: true };
 }
 

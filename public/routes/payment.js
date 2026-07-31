@@ -83,29 +83,49 @@ module.exports = function(app) {
     try {
       const { orderId } = req.body;
       if (!orderId) return res.json({ ok: false, error: '缺少订单ID' });
-      const order = db.prepare("SELECT * FROM orders WHERE order_id=? AND username=?").get(orderId, req.user.username);
-      if (!order) return res.json({ ok: false, error: '订单不存在' });
-      if (order.status !== 'pending') return res.json({ ok: false, error: '订单状态异常', status: order.status });
-      const product = PAYMENT_PRODUCTS[order.product_id];
-      db.prepare("UPDATE orders SET status='completed', paid_at=? WHERE order_id=?").run(new Date().toISOString(), orderId);
-      if (product.type === 'credits') {
-        const credits = product.credits;
-        db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(credits, req.user.username);
-        db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(req.user.username, credits, '购买积分包: ' + product.name);
-      } else if (product.type === 'membership') {
-        const now = new Date();
-        const current = db.prepare("SELECT membership_expires FROM users WHERE username=?").get(req.user.username);
-        let baseDate = now;
-        if (current && current.membership_expires) {
-          const existing = new Date(current.membership_expires);
-          if (existing > now) baseDate = existing;
+
+      // 使用事务和原子状态更新防止竞态条件
+      const tx = db.transaction(() => {
+        // 原子更新：仅当状态为 pending 时才更新
+        const result = db.prepare(
+          "UPDATE orders SET status='completed', paid_at=? WHERE order_id=? AND username=? AND status='pending'"
+        ).run(new Date().toISOString(), orderId, req.user.username);
+
+        // rowcount === 0 表示订单不存在、不属于该用户或已被处理
+        if (result.changes === 0) {
+          const order = db.prepare("SELECT status FROM orders WHERE order_id=? AND username=?").get(orderId, req.user.username);
+          if (!order) return { ok: false, error: '订单不存在' };
+          if (order.status === 'completed') return { ok: true, status: 'completed', message: '订单已处理（并发重复请求）' };
+          return { ok: false, error: '订单状态异常', status: order.status };
         }
-        const expireDate = new Date(baseDate);
-        expireDate.setMonth(expireDate.getMonth() + (product.months || 1));
-        db.prepare("UPDATE users SET membership=?, membership_expires=?, credits=credits+? WHERE username=?").run(
-          product.tier, expireDate.toISOString(), product.creditsPerMonth || 0, req.user.username);
-      }
-      res.json({ ok: true, status: 'completed', message: '支付成功' });
+
+        // 状态更新成功后，执行积分/会员发放
+        const order = db.prepare("SELECT * FROM orders WHERE order_id=?").get(orderId);
+        const product = PAYMENT_PRODUCTS[order.product_id];
+
+        if (product.type === 'credits') {
+          const credits = product.credits;
+          db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(credits, req.user.username);
+          db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(req.user.username, credits, '购买积分包: ' + product.name);
+        } else if (product.type === 'membership') {
+          const now = new Date();
+          const current = db.prepare("SELECT membership_expires FROM users WHERE username=?").get(req.user.username);
+          let baseDate = now;
+          if (current && current.membership_expires) {
+            const existing = new Date(current.membership_expires);
+            if (existing > now) baseDate = existing;
+          }
+          const expireDate = new Date(baseDate);
+          expireDate.setMonth(expireDate.getMonth() + (product.months || 1));
+          db.prepare("UPDATE users SET membership=?, membership_expires=?, credits=credits+? WHERE username=?").run(
+            product.tier, expireDate.toISOString(), product.creditsPerMonth || 0, req.user.username);
+        }
+
+        return { ok: true, status: 'completed', message: '支付成功' };
+      });
+
+      const result = tx();
+      res.json(result);
     } catch (e) { res.json({ ok: false, error: e.message }); }
   });
 
@@ -156,16 +176,39 @@ module.exports = function(app) {
       const resource = req.body.resource;
       if (!resource) return res.status(400).json({ code: 'FAIL', message: '缺少resource' });
       const decrypted = wxpay.decryptResource(resource);
-      const { out_trade_no, trade_state } = decrypted;
+      const { out_trade_no, trade_state, amount: paidAmount } = decrypted;
+
       if (trade_state === 'SUCCESS') {
-        const order = db.prepare("SELECT username, product_id, credits, status FROM orders WHERE order_id=?").get(out_trade_no);
-        if (order && order.status === 'pending') {
+        // 使用事务和原子状态更新防止竞态条件
+        const tx = db.transaction(() => {
+          // 原子更新：仅当状态为 pending 时才更新
+          const result = db.prepare(
+            "UPDATE orders SET status='paid', paid_at=? WHERE order_id=? AND status='pending'"
+          ).run(new Date().toISOString(), out_trade_no);
+
+          if (result.changes === 0) {
+            // 订单已被处理或不存在
+            console.log(`[WX Pay] 订单已处理或不存在: ${out_trade_no}`);
+            return;
+          }
+
+          const order = db.prepare("SELECT username, credits, amount FROM orders WHERE order_id=?").get(out_trade_no);
+          if (!order) return;
+
+          // 验证支付金额（微信以分为单位）
+          if (paidAmount && Math.abs(paidAmount - order.amount * 100) > 1) {
+            console.error(`[WX Pay] 支付金额不匹配: 订单${order.amount}元，支付${paidAmount/100}元`);
+            // 不发货，但标记为已支付（需人工处理）
+            return;
+          }
+
           const username = order.username;
           const creditsToAdd = order.credits;
-          db.prepare("UPDATE orders SET status='paid', paid_at=? WHERE order_id=?").run(new Date().toISOString(), out_trade_no);
           db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(creditsToAdd, username);
           console.log(`[WX Pay] 支付成功: ${out_trade_no}, 用户: ${username}, 积分: +${creditsToAdd}`);
-        }
+        });
+
+        tx();
       }
       res.json({ code: 'SUCCESS', message: '成功' });
     } catch (e) {
