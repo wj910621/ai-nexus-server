@@ -1,12 +1,15 @@
 const { db, signToken, verifyToken, authRequired, authLimiter } = require('../server');
 const bcrypt = require('bcryptjs');
 
-function btoaPwd(pwd) { return Buffer.from(pwd).toString('base64'); }
 function isBcryptHash(hash) { return typeof hash === 'string' && (hash.startsWith('$2a$') || hash.startsWith('$2b$')); }
 function hashPasswordSync(pwd) { return bcrypt.hashSync(pwd, 10); }
+// 安全：仅使用 bcrypt 验证，不再回退到 Base64 编码比较。
+// Base64 不是哈希算法，攻击者可直接解码获取明文密码。
+// 旧 Base64 密码需通过密码重置流程迁移。
 function verifyPasswordSync(pwd, storedHash) {
+  if (!storedHash) return false;
   if (isBcryptHash(storedHash)) return bcrypt.compareSync(pwd, storedHash);
-  return storedHash === btoaPwd(pwd);
+  return false;
 }
 function upgradePasswordToBcrypt(username, plainPwd) {
   const newHash = hashPasswordSync(plainPwd);
@@ -165,20 +168,8 @@ module.exports = function(app) {
     } catch(e) { res.json({ ok: false, error: e.message }); }
   });
 
-  app.post('/api/user/refund', (req, res) => {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) return res.json({ ok: false, error: '未登录' });
-    const { amount } = req.body;
-    if (!amount || amount <= 0) return res.json({ ok: false, error: '金额无效' });
-    try {
-      const payload = verifyToken(token);
-      const username = payload.username;
-      db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(amount, username);
-      db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(username, amount, '退款-API失败');
-      const newCredits = db.prepare("SELECT credits FROM users WHERE username=?").get(username);
-      res.json({ ok: true, credits: newCredits.credits });
-    } catch(e) { res.json({ ok: false, error: e.message }); }
-  });
+  // 安全：用户自助退款已移除（原 /api/user/refund 可被任何登录用户
+  // 用于无限增加自身积分）。退款操作统一由管理员通过 /api/admin/refund 执行。
 
   app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
@@ -237,11 +228,13 @@ module.exports = function(app) {
     const auth = req.headers.authorization;
     if (!auth || !auth.startsWith('Bearer ')) return res.json({ ok: false, error: '未登录' });
     try {
-      const payload = JSON.parse(Buffer.from(auth.slice(7), 'base64').toString());
+      // 安全：使用 verifyToken 验证 JWT 签名，而非直接 Base64 解码。
+      // 原代码将 JWT 当作 Base64 解析，完全绕过了签名验证，攻击者可伪造任意用户身份。
+      const payload = verifyToken(auth.slice(7));
       const user = db.prepare("SELECT username, email, credits, role, ref_code FROM users WHERE username=?").get(payload.username);
       if (!user) return res.json({ ok: false, error: '用户不存在' });
       res.json({ ok: true, data: { username: user.username, email: user.email, credits: user.credits, role: user.role, refCode: user.ref_code } });
-    } catch(e) { res.json({ ok: false, error: e.message }); }
+    } catch(e) { res.json({ ok: false, error: '认证失败' }); }
   });
 
   app.get('/api/admin/keys', requireAdmin, (req, res) => {
@@ -365,10 +358,22 @@ module.exports = function(app) {
 
   app.post('/api/admin/auth', authLimiter, (req, res) => {
     const { password } = req.body || {};
-    if (password === process.env.ADMIN_PASSWORD) {
-      res.json({ ok: true, token: Buffer.from(password + ':' + Date.now()).toString('base64') });
-    } else {
-      res.json({ ok: false, error: '密码错误' });
+    // 安全：管理员认证必须使用 JWT token（与 server_files/auth.js 一致），
+    // 不再使用可逆 Base64 编码。必须配置 ADMIN_PASSWORD 环境变量。
+    if (!process.env.ADMIN_PASSWORD) {
+      return res.status(503).json({ ok: false, error: '管理员密码未配置，请设置 ADMIN_PASSWORD 环境变量' });
     }
+    if (!password) {
+      return res.json({ ok: false, error: '密码错误' });
+    }
+    // 恒定时间比较防时序攻击
+    const crypto = require('crypto');
+    const a = Buffer.from(String(password));
+    const b = Buffer.from(process.env.ADMIN_PASSWORD);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      return res.json({ ok: false, error: '密码错误' });
+    }
+    const token = signToken({ username: 'admin', role: 'admin', ts: Date.now() });
+    res.json({ ok: true, token });
   });
 };

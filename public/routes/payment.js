@@ -80,33 +80,10 @@ module.exports = function(app) {
   });
 
   app.post('/api/payments/confirm', authRequired, (req, res) => {
-    try {
-      const { orderId } = req.body;
-      if (!orderId) return res.json({ ok: false, error: '缺少订单ID' });
-      const order = db.prepare("SELECT * FROM orders WHERE order_id=? AND username=?").get(orderId, req.user.username);
-      if (!order) return res.json({ ok: false, error: '订单不存在' });
-      if (order.status !== 'pending') return res.json({ ok: false, error: '订单状态异常', status: order.status });
-      const product = PAYMENT_PRODUCTS[order.product_id];
-      db.prepare("UPDATE orders SET status='completed', paid_at=? WHERE order_id=?").run(new Date().toISOString(), orderId);
-      if (product.type === 'credits') {
-        const credits = product.credits;
-        db.prepare("UPDATE users SET credits=credits+? WHERE username=?").run(credits, req.user.username);
-        db.prepare("INSERT INTO credit_log (username, amount, reason) VALUES (?,?,?)").run(req.user.username, credits, '购买积分包: ' + product.name);
-      } else if (product.type === 'membership') {
-        const now = new Date();
-        const current = db.prepare("SELECT membership_expires FROM users WHERE username=?").get(req.user.username);
-        let baseDate = now;
-        if (current && current.membership_expires) {
-          const existing = new Date(current.membership_expires);
-          if (existing > now) baseDate = existing;
-        }
-        const expireDate = new Date(baseDate);
-        expireDate.setMonth(expireDate.getMonth() + (product.months || 1));
-        db.prepare("UPDATE users SET membership=?, membership_expires=?, credits=credits+? WHERE username=?").run(
-          product.tier, expireDate.toISOString(), product.creditsPerMonth || 0, req.user.username);
-      }
-      res.json({ ok: true, status: 'completed', message: '支付成功' });
-    } catch (e) { res.json({ ok: false, error: e.message }); }
+    // 安全：用户不能自行确认订单为已支付，必须通过支付回调或管理员操作。
+    // 原实现允许任何已认证用户直接将 pending 订单标记为 completed 并获得积分/会员，
+    // 无需任何实际支付，等同于无限积分漏洞。
+    res.json({ ok: false, error: '订单确认需通过支付回调或管理员操作' });
   });
 
   app.get('/api/payments/orders', authRequired, (req, res) => {

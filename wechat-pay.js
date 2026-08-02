@@ -5,12 +5,14 @@ const https = require('https');
 const crypto = require('crypto');
 
 // 加载环境变量或默认值
+// 安全：所有敏感配置必须从环境变量读取，不再硬编码默认值。
+// 缺少必需环境变量时将拒绝相关操作，而非使用泄露的默认值。
 const CFG = {
-  mchid: process.env.WX_MCHID || '1747381807',
-  serialNo: process.env.WX_SERIAL_NO || '17429AD9D638987B7AB90B6B269788E01CE9C29A',
-  apiV3Key: process.env.WX_API_V3_KEY || 'Wangjiezhanglitaowangjinrui91062',
-  notifyUrl: process.env.WX_NOTIFY_URL || 'https://j3trisheng.com/api/payments/wechat-notify',
-  keyPath: process.env.WX_KEY_PATH || '/home/admin/ai-nexus/wechat_key.pem',
+  mchid: process.env.WX_MCHID || '',
+  serialNo: process.env.WX_SERIAL_NO || '',
+  apiV3Key: process.env.WX_API_V3_KEY || '',
+  notifyUrl: process.env.WX_NOTIFY_URL || '',
+  keyPath: process.env.WX_KEY_PATH || '',
 };
 
 // 加载私钥
@@ -108,6 +110,8 @@ async function queryOrder(outTradeNo) {
 }
 
 // 验证微信回调签名
+// 安全要求：必须使用微信平台证书（公钥）验证签名，而非商户私钥。
+// 未配置平台证书时拒绝所有回调，防止伪造回调导致虚假充值。
 function verifyNotify(headers, body) {
   const { 'wechatpay-signature': signature, 'wechatpay-timestamp': timestamp,
     'wechatpay-nonce': nonce, 'wechatpay-serial': serial } = headers;
@@ -116,20 +120,40 @@ function verifyNotify(headers, body) {
     return { ok: false, error: '缺少签名头' };
   }
 
-  // 验证证书序列号
-  if (serial !== CFG.serialNo) {
-    // 正式环境可能需要动态拉取平台证书，这里简化处理
-    console.warn('[WX Pay] 证书序列号不匹配:', serial, 'vs', CFG.serialNo);
+  // 防重放：时间戳超过5分钟的回调拒绝
+  const now = Math.floor(Date.now() / 1000);
+  const cbTimestamp = parseInt(timestamp, 10);
+  if (isNaN(cbTimestamp) || Math.abs(now - cbTimestamp) > 300) {
+    console.error('[WX Pay] 回调时间戳过期或异常:', timestamp);
+    return { ok: false, error: '回调时间戳过期' };
   }
 
-  const signStr = `${timestamp}\n${nonce}\n${body}\n`;
-  const pkey = getPrivateKey();
-  if (!pkey) return { ok: false, error: '私钥加载失败' };
+  // 尝试加载微信平台证书进行签名验证
+  const certPath = process.env.WX_PLATFORM_CERT_PATH;
+  if (!certPath) {
+    console.error('[WX Pay] 未配置 WX_PLATFORM_CERT_PATH，无法验证回调签名。请在环境变量中设置微信平台证书路径。');
+    return { ok: false, error: '未配置平台证书，回调验证不可用' };
+  }
 
-  // 注意：验证需要使用微信平台公钥，不是商户私钥
-  // 简化处理：使用平台证书同步
-  // 这里直接返回通过，将验证交给解密步骤
-  return { ok: true };
+  try {
+    const fs = require('fs');
+    const certPem = fs.readFileSync(certPath, 'utf8');
+    const signStr = `${timestamp}\n${nonce}\n${body}\n`;
+
+    const verify = crypto.createVerify('RSA-SHA256');
+    verify.update(signStr);
+    const ok = verify.verify(certPem, signature, 'base64');
+
+    if (!ok) {
+      console.error('[WX Pay] 回调签名验证失败');
+      return { ok: false, error: '签名验证失败' };
+    }
+
+    return { ok: true };
+  } catch (e) {
+    console.error('[WX Pay] 平台证书加载或签名验证异常:', e.message);
+    return { ok: false, error: '签名验证异常: ' + e.message };
+  }
 }
 
 // 解密回调资源
