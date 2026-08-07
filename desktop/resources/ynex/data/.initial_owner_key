@@ -1,0 +1,6 @@
+Y·NEX 初始管理员 API Key
+Key ID: 6e4df82d
+API Key: Df6Hau34wQAWJISXz0s6b2xQLYsccmlE2_AA32JCksk
+
+使用方法：在请求 Header 中添加 X-API-Key: <your-api-key>
+安全提示：请妥善保存此文件，确认后建议删除。
