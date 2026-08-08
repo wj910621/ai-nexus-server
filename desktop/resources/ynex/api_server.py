@@ -112,16 +112,20 @@ def _create_flask_app():
         if not text:
             return _json_response({"error": "缺少 text 参数"}, 400)
 
-        # API Key 额度检查
-        from auth import check_api_key_quota, record_api_key_usage
+        # API Key 额度检查：使用原子扣减消除 TOCTOU 竞态
+        from auth import deduct_api_key_quota
         key_hash = getattr(request, "_key_hash", None)
-        allowed, reason = check_api_key_quota(key_hash, tokens_needed=len(text) + 1000)
+        allowed, reason = deduct_api_key_quota(key_hash, tokens_needed=len(text) + 1000)
         if not allowed:
             return _json_response({"error": reason}, 402)
 
         reply = get_ai_response(text, use_mock=use_mock)
+        # 补扣实际用量与预扣的差额
         tokens_used = len(text) + len(reply)
-        record_api_key_usage(key_hash, tokens_used)
+        extra = tokens_used - (len(text) + 1000)
+        if extra > 0:
+            from auth import record_api_key_usage
+            record_api_key_usage(key_hash, extra)
         return _json_response({
             "user": text,
             "reply": reply,

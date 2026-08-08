@@ -152,7 +152,7 @@ def list_api_keys() -> List[Dict]:
 
 
 def check_api_key_quota(key_hash: str, tokens_needed: int = 1000) -> tuple[bool, str]:
-    """检查 API Key 额度是否充足"""
+    """检查 API Key 额度是否充足（仅查询，不扣减。如需原子扣减请用 deduct_api_key_quota）"""
     api_key = _api_keys.get(key_hash)
     if not api_key:
         return False, "无效的 API Key"
@@ -161,8 +161,24 @@ def check_api_key_quota(key_hash: str, tokens_needed: int = 1000) -> tuple[bool,
     return True, ""
 
 
+def deduct_api_key_quota(key_hash: str, tokens_needed: int = 1000) -> tuple[bool, str]:
+    """
+    原子性检查并扣减 API Key 额度。
+    解决 check_api_key_quota + record_api_key_usage 两步操作间的 TOCTOU 竞态：
+    并发请求可能都通过额度检查后再各自扣减，导致额度超额使用。
+    """
+    api_key = _api_keys.get(key_hash)
+    if not api_key:
+        return False, "无效的 API Key"
+    if api_key.quota_used + tokens_needed > api_key.quota_limit:
+        return False, f"API Key 额度不足：已用 {api_key.quota_used} / {api_key.quota_limit}"
+    api_key.quota_used += tokens_needed
+    _save_keys()
+    return True, ""
+
+
 def record_api_key_usage(key_hash: str, tokens: int) -> bool:
-    """记录 API Key 用量"""
+    """记录 API Key 用量（向后兼容，新代码应使用 deduct_api_key_quota 进行原子扣减）"""
     api_key = _api_keys.get(key_hash)
     if not api_key:
         return False

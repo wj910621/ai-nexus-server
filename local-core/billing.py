@@ -453,7 +453,9 @@ def recharge_balance(user_id: str, amount: float, method: str = "manual") -> tup
 
     conn = _get_db()
     c = conn.cursor()
-    cents = int(amount * 100)
+    # 使用 round 避免浮点精度导致 int() 截断丢分
+    # 例：9.9 * 100 = 989.999... → int() = 989（丢1分），round() = 990
+    cents = round(amount * 100)
 
     c.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (cents, user_id))
     c.execute("""
