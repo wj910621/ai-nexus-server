@@ -1,0 +1,1 @@
+{"keys": [{"key_hash": "e92c782b92d4d55bd6abb9886cfb1d9259d8d2a60f935615c6bf692de5aeb6be", "key_id": "c916579e", "role": "guest", "name": "用户<script>alert(1)</script>", "created_at": 1786543837.3655393, "last_used": 0, "allowed_tools": null, "quota_used": 0, "quota_limit": 100000}], "trusted_ips": {}}
