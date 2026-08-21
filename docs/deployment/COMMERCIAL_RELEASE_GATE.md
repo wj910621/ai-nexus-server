@@ -1,6 +1,6 @@
 # Y·NEX Story Studio 商业发布门禁
 
-更新时间：2026-07-30（Asia/Shanghai）
+更新时间：2026-08（本机复核记录）｜原始评审定稿：2026-07-30（Asia/Shanghai）
 
 ## 当前结论
 
@@ -109,10 +109,21 @@ Y·NEX/Jarvis 后台管理员人工录入并发布至少一个可售价格版本
   2026-08-31 自动失效；届时必须升级或重新评估。
 - kubeconform 跳过 3 个 Prometheus Operator CRD，生产集群需用实际 CRD
   server-side 校验。
-- 当前本地目录不能作为有效 Git 发布来源验证；正式发布必须来自受保护分支、可追溯
-  commit、CI 产物和不可变镜像摘要。
+- ~~当前本地目录不能作为有效 Git 发布来源~~：**已解决**——已初始化 Git 仓库（`main`，15 个提交，649 跟踪文件，无高熵密钥/真实 .env），正式发布仍须来自受保护分支、可追溯 commit、CI 产物和不可变镜像摘要。
 - 按用户此前决定，桌面安装包正式代码签名、远程哈希/下载验证和既有泄露凭据轮换
   暂不纳入本轮完成项；这些豁免必须在发布审批记录中明确，不能误写成已完成。
+
+## 本机复核记录（2026-08，放行结论未变更：仍为 NO-GO）
+
+在原始评审之后，本机（无生产凭证）已完成如下**代码级**复核与修复，状态**仍为 NO-GO**（10 项真实环境验收未执行）：
+
+- 后端全量测试 1076 passed（10 个 e2e_packaged 因本机 Windows 应用控制策略拦截冻结 exe 启动而 deselected；CI 上无该 exe 时应 skip）；前端 63 / 桌面 75 passed；Ruff 全过；mypy 关键链路 clean、全量债务 193≤194；Helm 结构 82 / CI 配置 29 / 安全·可观测 64 passed。
+- 修复：YAML/文件读取 GBK 可移植性（test_helm_chart / test_desktop_installer）；CharacterCard 商业化门控测试；**release.yml build-desktop 改用 `build-variant.js`**（原 `packaging/build.py --variant` 会导致 CI 必然失败）；商业化开关注入生产构建（frontend Dockerfile + release.yml）。
+- 运维模板补齐：`backend/.env.example` 覆盖全部 151 个 config 字段；`frontend/.env.example` 覆盖全部 5 个 VITE 变量；`vite-env.d.ts` 补声明 `VITE_COMMERCIAL_OPERATIONS_ENABLED`。
+- 已初始化 Git 仓库（`main`，15 提交，无机密），并生成 `docs/deployment/PRODUCTION_LAUNCH_RUNBOOK.md`（10 项验收的可执行命令与凭证清单）。
+- 文档一致性：API 域名统一为 `ynexai.cn`、桌面打包指南/README 同步变体构建、主文档品牌统一为 Y·NEX Story Studio。
+
+**结论不变**：上述均为代码/文档层面工作，不等同于完成 10 项真实生产验收；放行仍须满足下列判定。
 
 ## 放行判定
 
