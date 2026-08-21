@@ -117,6 +117,10 @@ frontend/src/config/commercialOperations.ts 的 commercialOperationsEnabled 是*
   - `.gitignore` 增加 vendored 依赖/缓存排除（backend/.deps、.artifacts、*.cache 等），提交集从 8707 精简到 649 源文件；已扫描确认无高熵密钥/私钥/真实 .env。
 - 说明：发布流程（git tag v* 触发 release → deploy）此前因**没有 Git 仓库**而无法工作；现已就绪，可直接进入受保护分支 + 版本标签发布流程。
 - **修复桌面安装包构建（release.yml build-desktop）**：原 job 错误调用 `python packaging/build.py --variant <v>`（该脚本不支持 --variant，且只构建后端 exe 而非 Electron 安装包），会导致 CI 桌面构建必然失败。已改为正确调用 `node desktop/scripts/build-variant.js --target nsis-gpu|nsis-cpu|appimage-gpu|appimage-cpu`，矩阵 variant 同步为 Electron 目标，并加装核心依赖后构建，上传 desktop/release/*；`test_cicd.py` 新增回归断言（须出现 build-variant.js 与合法 Electron 目标、不得出现 packaging/build.py --variant）。桌面 .gitignore 增加生成的 `.electron-builder.*.yml`。
+- **依赖安全加固（npm audit → 0 漏洞）**：
+  - 前端：`react-router-dom 7.18.1→7.18.2`（清除 RSC 公告 GHSA-qwww-vcr4-c8h2，移除 2026-08-31 时限例外）；`package.json` 新增 overrides：brace-expansion 5.0.9、nanoid 3.3.18（postcss 依赖）、undici 7.29.0（jsdom 依赖）；postcss 直接依赖提升至 ^8.5.26。`npm audit`：6 漏洞 → **0**；`npm run audit:production` 门禁改为零容忍。
+  - 桌面：`package.json` overrides：brace-expansion 5.0.8→5.0.9、nanoid 3.3.18、postcss 8.5.26、fast-uri 3.1.5、js-yaml 5.3.0（均已验证：js-yaml 5 能解析 electron-builder.yml、typecheck/75 测试/构建通过）。`npm audit`：4 漏洞 → **0**。
+  - 已验证前端 63 测试、桌面 75 测试、双端构建均无回归。
 - **品牌一致性**：清除主文档中残留的旧产品名 `ComicStudio AI`（`docs/architecture/01-overall-architecture.md`、`docs/deployment/commercialization.md`、`backend/docs/api/billing-and-subscriptions.md`），统一为现行品牌 **Y·NEX Story Studio**（后端包名 `comic-studio-backend` 等技术标识保持不变）。
 - **`docs/deployment/desktop-packaging.md` 同步 GPU/CPU 变体打包**：手动打包章节补充 `build-variant.js --target nsis-gpu/cpu|appimage-gpu/cpu`；CI 示例由过时的 `npm run package:win` 修正为 `node scripts/build-variant.js --target nsis-gpu`（与 `release.yml` build-desktop 一致）。
 - **文档域名/部署模型一致性**：`docs/api/rest-api.md` 与 `websocket-api.md` 的旧域名 `api.comicstudio.ai` 改为生产共享域名 `ynexai.cn/story-api` 与 `ynexai.cn/story-ws`（注明本地地址）；`docs/deployment/cloud-deployment.md` 顶部加横幅：其描述的是早期自建独立部署（`comicstudio.ai`）历史参考，当前生产路径为 K8s+Helm+共享域名 `ynexai.cn`（`BILLING_MODE=jarvis`）。

@@ -105,8 +105,7 @@ Y·NEX/Jarvis 后台管理员人工录入并发布至少一个可售价格版本
 ## 明确的已知风险
 
 - 全量 mypy 仍有 194 项旧式 SQLAlchemy/可选引擎类型债务；关键商业链路必须始终 0 error。
-- React Router 的 RSC 公告对当前 BrowserRouter SPA 不可达，例外到
-  2026-08-31 自动失效；届时必须升级或重新评估。
+- ~~React Router RSC 公告例外 2026-08-31 失效~~：**已解决**——`react-router-dom` 已升级到修补版 **7.18.2**，`npm audit` 现报 **0 vulnerabilities**，`security-audit.mjs` 已改为零容忍策略并移除时限例外。
 - kubeconform 跳过 3 个 Prometheus Operator CRD，生产集群需用实际 CRD
   server-side 校验。
 - ~~当前本地目录不能作为有效 Git 发布来源~~：**已解决**——已初始化 Git 仓库（`main`，15 个提交，649 跟踪文件，无高熵密钥/真实 .env），正式发布仍须来自受保护分支、可追溯 commit、CI 产物和不可变镜像摘要。

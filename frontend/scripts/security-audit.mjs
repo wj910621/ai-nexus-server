@@ -2,18 +2,16 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
-const allowedAdvisories = new Set(['https://github.com/advisories/GHSA-qwww-vcr4-c8h2'])
-const reviewDeadline = new Date('2026-08-31T00:00:00Z')
+// Policy: the frontend is a client-only BrowserRouter SPA and must ship with
+// ZERO known npm vulnerabilities. The previous time-bound RSC-advisory exception
+// (GHSA-qwww-vcr4-c8h2) is removed because react-router-dom was upgraded to the
+// patched 7.18.x. Any npm vulnerability now fails the release gate.
 
 function sourceFiles(directory) {
   return readdirSync(directory).flatMap((name) => {
     const path = join(directory, name)
     return statSync(path).isDirectory() ? sourceFiles(path) : [path]
   })
-}
-
-if (new Date() >= reviewDeadline) {
-  throw new Error('React Router RSC advisory exception expired; review and upgrade dependency')
 }
 
 const npmCli = process.env.npm_execpath
@@ -40,15 +38,8 @@ function validateVulnerability(name) {
   if (!vulnerability) {
     throw new Error(`npm audit referenced missing vulnerability: ${name}`)
   }
-  for (const via of vulnerability.via ?? []) {
-    if (typeof via === 'string') {
-      validateVulnerability(via)
-      continue
-    }
-    if (!allowedAdvisories.has(via.url)) {
-      throw new Error(`Unapproved ${via.severity} advisory: ${via.url} (${name})`)
-    }
-  }
+  // Zero-tolerance: any advisory fails the gate.
+  throw new Error(`Blocked npm advisory: ${name} (${vulnerability.severity})`)
 }
 
 for (const name of Object.keys(vulnerabilities)) {
@@ -72,13 +63,13 @@ for (const file of sourceFiles(join(process.cwd(), 'src'))) {
 
 const appSource = readFileSync(join(process.cwd(), 'src', 'App.tsx'), 'utf8')
 if (!appSource.includes('BrowserRouter')) {
-  throw new Error('Advisory exception requires the BrowserRouter-only SPA architecture')
+  throw new Error('Release gate requires the BrowserRouter-only SPA architecture')
 }
 
 if (Object.keys(vulnerabilities).length === 0) {
   console.log('npm audit: no known vulnerabilities')
 } else {
-  console.log(
-    'npm audit: only GHSA-qwww-vcr4-c8h2 remains; time-bound BrowserRouter SPA exception verified',
-  )
+  // validateVulnerability() above already threw; this is defensive.
+  console.error('npm audit: vulnerabilities detected; failing release gate')
+  process.exit(1)
 }
