@@ -87,6 +87,19 @@ $env:VITE_API_BASE_URL = "https://api.comicstudio.ai"
 
 ## 打包
 
+> **生产/CI 变体构建**：发布管线与 CI 使用 `build-variant.js` 按 GPU/CPU 目标分别产
+> 出安装包（`electron-builder.yml` 中对应 `nsis-gpu/nsis-cpu/appimage-gpu/appimage-cpu` 块）。
+>
+> ```bash
+> node scripts/build-variant.js --target nsis-gpu        # Win GPU（捆绑 torch ~2.5GB）
+> node scripts/build-variant.js --target nsis-cpu        # Win CPU（ONNX ~600MB）
+> node scripts/build-variant.js --target appimage-gpu    # Linux GPU
+> node scripts/build-variant.js --target appimage-cpu    # Linux CPU
+> # 等价 npm 快捷：npm run build:win-gpu / build:win-cpu / build:linux-gpu / build:linux-cpu
+> ```
+>
+> 产物输出到 `release/`；GitHub 变量 `VITE_COMMERCIAL_OPERATIONS_ENABLED` 决定前端是否启用商业化收费。
+
 ### Windows (NSIS 安装包)
 
 ```bash
