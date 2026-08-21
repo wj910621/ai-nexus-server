@@ -105,6 +105,11 @@ frontend/src/config/commercialOperations.ts 的 commercialOperationsEnabled 是*
 - frontend/tests/components/CharacterCard.test.tsx：ready 分支断言与商业化门控 UI 一致（默认禁用态按钮）。
 - frontend/Dockerfile：新增商业化开关 ARG/ENV。
 - .github/workflows/release.yml：前端构建注入商业化开关变量。
+- 初始化 Git 仓库并建立可追溯基线（main 分支，649 跟踪文件）：
+  - `f38a99f` chore: production readiness baseline（CI/CD, release gate, docs）
+  - `69a4a02` chore: add .gitattributes（跨平台行尾一致，CI 在 Linux 运行用）
+  - `.gitignore` 增加 vendored 依赖/缓存排除（backend/.deps、.artifacts、*.cache 等），提交集从 8707 精简到 649 源文件；已扫描确认无高熵密钥/私钥/真实 .env。
+- 说明：发布流程（git tag v* 触发 release → deploy）此前因**没有 Git 仓库**而无法工作；现已就绪，可直接进入受保护分支 + 版本标签发布流程。
 
 ---
 
