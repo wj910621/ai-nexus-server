@@ -1,5 +1,9 @@
 # 云端部署指南
 
+> **注意（现状）**：本文档描述的是早期**自建独立部署**（自管 Nginx/CloudFlare/certbot，`comicstudio.ai` 域名）的备选方案。
+> **当前生产路径已切换为 K8s + Helm + 共享域名 `ynexai.cn`**（前端 `/story/`、API `/story-api/`、WebSocket `/story-ws/`，`BILLING_MODE=jarvis` 复用主站统一账本）。
+> 生产上线请以 `docs/deployment/PRODUCTION_LAUNCH_RUNBOOK.md` 与 `deploy/helm/comic-platform` 为准；本文档仅作为自建独立部署的历史参考。
+
 > 本文档说明生产环境的云端部署方案，支持SaaS化运营。
 
 ---

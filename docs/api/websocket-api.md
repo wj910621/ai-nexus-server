@@ -8,7 +8,7 @@
 
 ### 1.1 连接地址
 ```
-wss://api.comicstudio.ai/ws?token=<jwt_token>
+wss://ynexai.cn/story-ws?token=<jwt_token>  # 生产共享域名；本地开发为 ws://localhost:8000/ws
 ```
 
 ### 1.2 消息格式

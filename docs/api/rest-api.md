@@ -7,7 +7,7 @@
 ## 一、API总览
 
 ### 1.1 基础信息
-- **Base URL**: `https://api.comicstudio.ai/api/v1`
+- **Base URL**: 由部署决定。本地开发 `http://localhost:8000/api`；生产共享域名（`ynexai.cn`）为 `https://ynexai.cn/story-api`（后端监听 `/api/` 前缀，经 nginx `/story-api/` 反代）。详见 `docs/deployment/PRODUCTION_LAUNCH_RUNBOOK.md`。
 - **认证方式**: Bearer Token (JWT)
 - **请求格式**: `application/json`（文件上传使用`multipart/form-data`）
 - **响应格式**: 统一JSON格式
