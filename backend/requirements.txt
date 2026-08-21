@@ -73,9 +73,9 @@ sentry-sdk[fastapi]==2.66.1
 
 # Config validation (Task 8)
 pyyaml==6.0.2  # For docker-compose validation tests
-cryptography==49.0.0  # Encrypted production backups
+cryptography==50.0.0  # Encrypted production backups (GHSA-g6cj-pr64-35w5 / PYSEC-2026-3552 fixed)
 replicate==1.0.7
 
 # Phase 8 P3: LoRA 训练
 peft==0.10.0          # LoRA 训练核心
-datasets==2.18.0      # 训练数据集加载
+datasets==2.18.0      # 训练数据集加载（dev/training only；PYSEC-2026-3716 暂无修复版且未进生产镜像，见 ci.yml pip-audit 备注）
