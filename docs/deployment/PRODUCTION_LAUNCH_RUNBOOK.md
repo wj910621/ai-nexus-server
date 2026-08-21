@@ -32,8 +32,14 @@
 > 以下每项必须保存**时间戳、命令、退出码、脱敏输出**，可留存于 .artifacts/launch/ 下作为证据。
 
 ### ① 真实 PostgreSQL：备份 / 迁移 / 回滚演练
-- 在托管 PostgreSQL 上执行备份；DATABASE_URL=<prod-url> alembic upgrade head；执行回滚与恢复演练（deploy/scripts/rollback.sh）。
-- 交付：托管快照/备份证据 ID + UTC 完成时间（供 deploy.yml 的 backup_evidence_id/utc 门禁）。
+- **迁移**：K8s 通过 Helm hook Job 执行（`python -m alembic upgrade head`，Hook=post-install / pre-upgrade，见 `deploy/helm/comic-platform/templates/migration-job.yaml`，DB URL 来自 Secret `comic-platform`）；也可在 backend 目录手动执行：
+  ```bash
+  cd backend
+  DATABASE_URL='postgresql+asyncpg://<user>:<pass>@<pg-host>:5432/comic_studio' APP_ENV=production \
+    python -m alembic upgrade head        # 得到 001 → 013 逐条 upgrade 输出
+  python -m alembic current               # 应显示 013 (head)
+  ```
+- **备份/回滚/恢复演练**：在托管 PostgreSQL 上先做快照（保存 provider 证据 ID + UTC 时间），执行 `deploy/scripts/rollback.sh` 回滚演练，再恢复到 head，验证无数据丢失。deliver 备份证据 ID + UTC 完成时间（供 deploy.yml 的 backup_evidence_id/utc 门禁）。
 
 ### ② 真实 Redis 限流在多副本下原子生效
 - 确认生产限流/缓存 Redis 初始化失败时应用启动**终止**（fail-closed），不得静默绕过或回退单 Pod 内存；Redis 故障时生产请求返回 503。
