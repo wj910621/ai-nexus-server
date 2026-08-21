@@ -135,8 +135,18 @@ npm run build       # 构建 main/preload/renderer
 npm run package:win # Windows 打包（或 package:mac / package:linux）
 ```
 
+> **GPU/CPU 变体构建（生产/CI 使用，推荐）**：按目标分别产出安装包：
+> ```bash
+> node scripts/build-variant.js --target nsis-gpu       # Win GPU (捆绑 torch ~2.5GB)
+> node scripts/build-variant.js --target nsis-cpu       # Win CPU (ONNX ~600MB)
+> node scripts/build-variant.js --target appimage-gpu   # Linux GPU
+> node scripts/build-variant.js --target appimage-cpu   # Linux CPU
+> # 等价 npm 快捷：npm run build:win-gpu / build:win-cpu / build:linux-gpu / build:linux-cpu
+> ```
+
 产物位于 `desktop/release/`：
-- Windows: `comicstudio-setup-0.1.0.exe` (NSIS 安装包)
+- Windows GPU: `release/YNEX-Story-Studio-Setup-<version>-GPU.exe` (NSIS)
+- Windows CPU: `release/YNEX-Story-Studio-Setup-<version>-CPU.exe` (NSIS)
 
 `electron-builder.yml` 中的 `extraResources` 配置会自动将后端打包到 Electron 应用的 `resources/comicstudio-backend/` 目录。
 
@@ -303,8 +313,8 @@ jobs:
       - name: Install desktop deps
         run: cd desktop && npm ci
 
-      - name: Build desktop installer
-        run: cd desktop && npm run package:win
+      - name: Build desktop installer (GPU/CPU variant)
+        run: cd desktop && node scripts/build-variant.js --target nsis-gpu
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
