@@ -26,10 +26,10 @@ Kubernetes、PostgreSQL、Redis、对象存储、DNS/TLS、Y·NEX 生产密钥�
 | 后端 Ruff | 全部通过 |
 | 关键商业链路 mypy | 鉴权、配置、限流、Y·NEX 计费、Jarvis 网关 5 个模块 0 error |
 | 全量类型债务防回退 | 194/194，新增错误即阻断；后续迁移 SQLAlchemy 2 `Mapped` |
-| Python 依赖漏洞 | `pip-audit --strict`：No known vulnerabilities |
+| Python 依赖漏洞 | `cryptography` 已升至 50.0.0；OSV 复查生产镜像依赖集 `requirements.production.txt`（34 包）**0 漏洞**；`pip-audit -r requirements.production.txt --strict` 为 CI 阻断门禁；dev/training 依赖（`datasets`，无修复版、不进生产镜像）为非阻断告警 |
 | 前端 | lint、typecheck、63 tests、production build 通过 |
 | 桌面端 | typecheck、75 tests、build 通过 |
-| Node 依赖 | 桌面端 0 vulnerability；前端仅保留有时限且不适用 RSC 的例外 |
+| Node 依赖 | 前端与桌面端均 **0 vulnerability**（react-router-dom 已升至 7.18.2，移除 RSC 时限例外；overrides 清除 brace-expansion/nanoid/postcss/fast-uri/undici/js-yaml）；`security-audit.mjs` 改为零容忍策略 |
 | Helm | default/prod lint 通过，production 30 resources 渲染成功 |
 | Kubernetes schema | kubeconform：33 resources，29 valid、0 invalid/error、4 个 Prometheus Operator CRD schema skipped |
 | 数据库迁移静态链 | Alembic 001 → 013 单 head、连续 |
