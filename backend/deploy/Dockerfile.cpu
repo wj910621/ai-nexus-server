@@ -1,0 +1,16 @@
+# NumPy 1.26.x (pinned by requirements) ships wheels for Python 3.11, while
+# Python 3.13 would force a source build in the production image.
+FROM docker.m.daocloud.io/library/python:3.11-slim
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1 \
+    PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg libpq5 && rm -rf /var/lib/apt/lists/* \
+    && useradd -m -u 1000 story
+COPY requirements.production.txt ./
+RUN pip install --no-cache-dir -r requirements.production.txt
+COPY --chown=story:story app ./app
+COPY --chown=story:story alembic.ini ./
+COPY --chown=story:story alembic ./alembic
+USER story
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

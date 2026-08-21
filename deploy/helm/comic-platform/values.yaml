@@ -1,0 +1,235 @@
+# 默认配置文件 (development 环境)
+# Phase 8 P4 K8s 容器化 - 漫剧软件平台
+
+# 全局配置
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+  # CI/CD sets one immutable release tag for every component.
+  imageTag: ""
+
+app:
+  billingMode: standalone
+  jarvisBillingPortalUrl: "https://ynexai.cn/"
+  jarvisGatewayEnabled: false
+  jarvisGatewayBaseUrl: ""
+  jarvisGatewayDefaultModel: ""
+  ynexSsoIssuer: "ynexai.cn"
+  ynexSsoAudience: "story-studio"
+  ynexBillingBaseUrl: ""
+
+migrations:
+  enabled: true
+  backoffLimit: 1
+  activeDeadlineSeconds: 600
+
+# Phase 8 P7: 安全加固
+# Pod 级别安全上下文 (适用于所有非特权 Pod)
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+# 容器级别安全上下文 (Web API 等普通服务)
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+
+# Worker (GPU) 特殊安全上下文
+# GPU 工作负载通常需要 root 权限访问设备
+workerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop: ["ALL"]
+  runAsNonRoot: false
+  runAsUser: 0
+
+# Frontend (nginx-unprivileged) 安全上下文
+# nginx-unprivileged 镜像以 101 用户运行
+frontendSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop: ["ALL"]
+  runAsNonRoot: true
+  runAsUser: 101
+
+# ServiceAccount 配置
+serviceAccount:
+  create: true
+  automount: false
+  annotations: {}
+
+# cert-manager 证书管理集成
+certManager:
+  enabled: false  # 默认关闭，生产环境启用
+  issuerType: cluster-issuer  # cluster-issuer | issuer
+  issuerName: letsencrypt-prod
+
+# 命名空间配置
+namespace:
+  create: true
+  name: comic-dev
+
+# 后端服务配置
+backend:
+  # Web API 服务
+  web:
+    replicas: 2
+    image:
+      registry: ""
+      repository: comic-backend-web
+      tag: latest
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+  # Worker 异步任务服务
+  worker:
+    replicas: 1
+    gpu:
+      enabled: false
+    image:
+      registry: ""
+      repository: comic-backend-worker
+      tag: latest
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+
+# 前端服务配置
+frontend:
+  replicas: 2
+  image:
+    registry: ""
+    repository: comic-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+# Ingress 入口配置
+ingress:
+  enabled: false
+  className: nginx
+  host: comic.example.com
+  paths:
+    frontend: /story/
+    api: /story-api/
+    websocket: /story-ws/
+  tls:
+    enabled: false
+    secretName: comic-tls
+  # 速率限制 (生产环境按需启用)
+  rateLimit:
+    enabled: false
+    rps: 10
+    burst: 20
+
+# PostgreSQL 数据库配置
+postgresql:
+  enabled: true
+  external: false
+  host: ""
+  port: 5432
+  database: comic
+  username: comic
+  password: ""
+  persistence:
+    size: 10Gi
+
+# Redis 缓存配置
+redis:
+  enabled: true
+  external: false
+  host: ""
+  port: 6379
+  password: "change-me-in-production"  # P7: 强制设置非空默认密码
+  persistence:
+    size: 5Gi
+
+# 对象存储 OSS 配置
+oss:
+  enabled: false
+  bucket: ""
+  endpoint: ""
+  accessKeyId: ""
+  accessKeySecret: ""
+
+# 持久化存储配置
+persistence:
+  enabled: false
+  storageClass: ""
+  uploads:
+    size: 20Gi
+  models:
+    size: 100Gi
+
+# 水平自动伸缩 HPA
+hpa:
+  web:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    cpuTarget: 70
+  worker:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 8
+    queueLengthTarget: 10
+
+# PodDisruptionBudget 中断预算
+pdb:
+  enabled: false
+  web:
+    minAvailable: 1
+  worker:
+    minAvailable: 1
+
+# NetworkPolicy 网络策略
+networkPolicy:
+  enabled: false
+
+# 外部密钥管理 (Vault/Sealed Secrets 等)
+externalSecrets:
+  enabled: false
+
+# JWT 认证配置
+jwt:
+  secret: ""
+
+# 应用环境标识
+env: development
+
+# Phase 8 P6: 监控可观测性
+monitoring:
+  enabled: false              # 是否启用监控（需先安装 kube-prometheus-stack）
+  namespace: monitoring       # 监控组件所在 namespace
+  grafana:
+    adminPassword: ""         # Grafana admin 密码
+  alerting:
+    feishuWebhookUrl: ""      # 飞书机器人 webhook URL

@@ -1,0 +1,26 @@
+{{/*
+NetworkPolicy - PostgreSQL 入站限制 (Phase 8 P7)
+仅允许同命名空间内应用 Pod 访问 PostgreSQL 5432 端口
+*/}}
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "comic.fullname" . }}-pg
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: postgresql
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "comic.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 5432
+{{- end }}

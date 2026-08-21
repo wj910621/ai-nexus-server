@@ -1,0 +1,83 @@
+# =============================================================================
+# 后端 Web 服务镜像 (CPU-only)
+# Phase 8 P4 K8s 容器化 - 多阶段构建
+# 基础镜像：python:3.13-slim（与 CI 最高测试版本一致）
+# =============================================================================
+# 构建命令：docker build -f Dockerfile.web -t backend-web:latest .
+# 运行命令：docker run -p 8000:8000 backend-web:latest
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 阶段 1：builder - 安装 Python 依赖
+# -----------------------------------------------------------------------------
+FROM python:3.13-slim AS builder
+
+# 设置环境变量，确保 pip 安装到用户目录 /root/.local
+ENV PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# 设置工作目录
+WORKDIR /build
+
+# 复制依赖清单文件（优先复制以利用 Docker 缓存）
+COPY requirements.txt .
+
+# 安装依赖到 /root/.local（用户级别安装，便于后续阶段复制）
+# 使用 --user 参数确保依赖安装到 /root/.local 而非系统目录
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# -----------------------------------------------------------------------------
+# 阶段 2：runtime - 最终运行镜像
+# -----------------------------------------------------------------------------
+FROM python:3.13-slim AS runtime
+
+# 维护者信息
+LABEL maintainer="漫剧软件项目组" \
+      description="后端 Web 服务 (FastAPI + Uvicorn), CPU-only" \
+      stage="phase8-p4-k8s"
+
+# 设置环境变量
+# PYTHONPATH: 包含 /app 主代码目录与 /app/.deps 依赖目录
+# PYTHONUNBUFFERED: 禁用输出缓冲，确保日志实时输出（容器化最佳实践）
+ENV PYTHONPATH=/app:/app/.deps/lib/python3.13/site-packages \
+    PATH=/app/.deps/bin:$PATH \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+# 创建工作目录
+WORKDIR /app
+
+# 创建非 root 用户
+# Phase 8 P7 安全加固：以非 root 身份运行容器，降低提权风险
+# 同时创建 uploads/logs 目录并调整 /tmp 权限，确保应用日志与临时文件可写
+RUN useradd -m -u 1000 appuser \
+    && mkdir -p /app/uploads /app/logs \
+    && chown -R appuser:appuser /app \
+    && chmod 1777 /tmp
+
+# 从 builder 阶段复制已安装的 Python 依赖到 /app/.deps
+# 这样保持依赖与代码分离，便于缓存层管理
+COPY --from=builder --chown=appuser:appuser /root/.local /app/.deps
+
+# 复制后端应用代码
+# 注意：.dockerignore 会排除 __pycache__、tests、.venv 等无关文件
+COPY --chown=appuser:appuser . /app
+
+# 暴露 FastAPI/Uvicorn 服务端口
+EXPOSE 8000
+
+# 切换到非 root 用户运行（HEALTHCHECK 与 CMD 均以 appuser 身份执行）
+USER appuser
+
+# 健康检查：使用 Python 内置 urllib 访问 /health 端点
+# 间隔 30s，超时 5s，启动等待 10s，重试 3 次
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()" || exit 1
+
+# 启动命令：使用 uvicorn 启动 FastAPI 应用
+# --host 0.0.0.0 监听所有网络接口（容器必需）
+# --port 8000 对应 EXPOSE 端口
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

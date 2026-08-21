@@ -1,0 +1,87 @@
+{{/*
+PrometheusRule - 漫剧软件平台报警规则
+Phase 8 P6 监控可观测性 - 报警规则定义 (Prometheus Operator CRD)
+*/}}
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "comic.fullname" . }}-rules
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: monitoring
+spec:
+  groups:
+    - name: comic-platform.rules
+      rules:
+        # Pod CrashLoop 告警
+        - alert: ComicPodCrashLooping
+          expr: kube_pod_container_status_restarts_total > 5
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{`{{ $labels.pod }}`}} 频繁重启"
+            description: "Pod {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} 在过去 15 分钟内重启次数超过 5 次 (当前: {{`{{ $value }}`}})，可能存在 CrashLoopBackOff。"
+            runbook_url: "https://wiki.example.com/runbooks/comic-platform/pod-crash-looping"
+        # 数据库连接失败告警
+        - alert: ComicDBConnectionFailure
+          expr: up{job="backend-web"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "backend-web 服务不可达"
+            description: "backend-web 任务已连续 2 分钟无法被抓取 (up=0)，可能是数据库连接失败或服务宕机。"
+            runbook_url: "https://wiki.example.com/runbooks/comic-platform/db-connection-failure"
+        # 磁盘使用率告警
+        - alert: ComicDiskUsageHigh
+          expr: kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.9
+          labels:
+            severity: critical
+          annotations:
+            summary: "PVC {{`{{ $labels.persistentvolumeclaim }}`}} 使用率过高"
+            description: "PVC {{`{{ $labels.namespace }}`}}/{{`{{ $labels.persistentvolumeclaim }}`}} 使用率超过 90% (当前: {{`{{ $value | humanizePercentage }}`}})，请立即扩容或清理。"
+            runbook_url: "https://wiki.example.com/runbooks/comic-platform/disk-usage-high"
+        # CPU 使用率告警
+        - alert: ComicHighCPUUsage
+          expr: rate(container_cpu_usage_seconds_total[5m]) / container_spec_cpu_quota > 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "容器 {{`{{ $labels.container }}`}} CPU 使用率过高"
+            description: "容器 {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}}/{{`{{ $labels.container }}`}} CPU 使用率超过限额的 80% 持续 5 分钟 (当前: {{`{{ $value | humanizePercentage }}`}})。"
+            runbook_url: "https://wiki.example.com/runbooks/comic-platform/high-cpu-usage"
+        # 内存使用率告警
+        - alert: ComicHighMemoryUsage
+          expr: container_memory_usage_bytes / container_spec_memory_limit_bytes > 0.85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "容器 {{`{{ $labels.container }}`}} 内存使用率过高"
+            description: "容器 {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}}/{{`{{ $labels.container }}`}} 内存使用率超过限额的 85% 持续 5 分钟 (当前: {{`{{ $value | humanizePercentage }}`}})，存在 OOM 风险。"
+            runbook_url: "https://wiki.example.com/runbooks/comic-platform/high-memory-usage"
+        # Celery 队列积压告警
+        - alert: ComicCeleryQueueBacklog
+          expr: celery_queue_length > 100
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Celery 队列 {{`{{ $labels.queue }}`}} 积压"
+            description: "Celery 队列 {{`{{ $labels.queue }}`}} 长度超过 100 持续 5 分钟 (当前: {{`{{ $value }}`}})，请考虑扩容 worker。"
+            runbook_url: "https://wiki.example.com/runbooks/comic-platform/celery-queue-backlog"
+        # HTTP 5xx 错误率告警
+        - alert: ComicHTTP5xxErrorRate
+          expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "HTTP 5xx 错误率过高"
+            description: "HTTP 5xx 错误率超过 5% 持续 5 分钟 (当前: {{`{{ $value | humanizePercentage }}`}})，请检查应用日志和上游依赖。"
+            runbook_url: "https://wiki.example.com/runbooks/comic-platform/http-5xx-error-rate"
+{{- end }}

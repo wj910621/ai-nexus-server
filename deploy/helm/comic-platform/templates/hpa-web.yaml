@@ -1,0 +1,29 @@
+{{/*
+HorizontalPodAutoscaler - backend-web
+基于 CPU 使用率自动伸缩 Web API 服务
+生产环境推荐启用以应对流量高峰
+*/}}
+{{- if .Values.hpa.web.enabled -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "comic.fullname" . }}-web
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend-web
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "comic.fullname" . }}-web
+  minReplicas: {{ .Values.hpa.web.minReplicas }}
+  maxReplicas: {{ .Values.hpa.web.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.web.cpuTarget }}
+{{- end -}}

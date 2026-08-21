@@ -1,0 +1,38 @@
+{{/*
+PodDisruptionBudget - 中断预算
+保证在节点维护或自动伸缩过程中保持最小可用副本数
+生产环境推荐启用
+*/}}
+{{- if .Values.pdb.enabled -}}
+# Web API 中断预算
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "comic.fullname" . }}-web
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend-web
+spec:
+  minAvailable: {{ .Values.pdb.web.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "comic.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend-web
+---
+# Worker 中断预算
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "comic.fullname" . }}-worker
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend-worker
+spec:
+  minAvailable: {{ .Values.pdb.worker.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "comic.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend-worker
+{{- end -}}

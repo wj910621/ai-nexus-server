@@ -1,0 +1,221 @@
+name: Deploy
+
+concurrency:
+  group: comic-platform-${{ inputs.environment || 'staging' }}
+  cancel-in-progress: false
+
+on:
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+    branches: ["v*"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment (staging|production)"
+        required: true
+        default: "staging"
+      image_tag:
+        description: "Image tag to deploy (e.g. v0.8.0)"
+        required: true
+      backup_evidence_id:
+        description: "Production only: managed PostgreSQL snapshot/backup evidence ID"
+        required: false
+      backup_evidence_utc:
+        description: "Production only: backup completion time in UTC (ISO-8601)"
+        required: false
+      pricing_evidence_id:
+        description: "Production only: Y.NEX admin-approved pricing release evidence ID"
+        required: false
+      pricing_approved_utc:
+        description: "Production only: pricing approval time in UTC (ISO-8601)"
+        required: false
+
+jobs:
+  deploy-staging:
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.environment == 'staging' || inputs.environment == 'production')) ||
+      (github.event_name == 'workflow_run' && contains(github.event.workflow_run.head_branch, 'rc'))
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > /tmp/kubeconfig
+          export KUBECONFIG=/tmp/kubeconfig
+      - name: Deploy to staging
+        env:
+          IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag || github.event.workflow_run.head_branch }}
+          IMAGE_REGISTRY: ghcr.io/${{ github.repository }}/
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+          bash deploy/scripts/deploy.sh staging "${IMAGE_TAG}"
+      - name: Smoke test
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+          kubectl rollout status deployment -n comic-staging -l app.kubernetes.io/component=backend-web --timeout=300s
+          kubectl port-forward -n comic-staging svc/comic-platform-web 8000:8000 &
+          port_forward_pid=$!
+          trap 'kill "${port_forward_pid}" 2>/dev/null || true' EXIT
+          sleep 10
+          curl --fail --show-error --retry 5 --retry-connrefused \
+            http://localhost:8000/ready
+          helm test comic-platform -n comic-staging --logs
+
+  deploy-production:
+    # Stable releases are promoted manually after staging evidence is reviewed.
+    # The protected GitHub "production" environment supplies the human approval.
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'production'
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate recent database backup evidence
+        env:
+          BACKUP_EVIDENCE_ID: ${{ inputs.backup_evidence_id }}
+          BACKUP_EVIDENCE_UTC: ${{ inputs.backup_evidence_utc }}
+        run: |
+          if [[ ! "${BACKUP_EVIDENCE_ID}" =~ ^[A-Za-z0-9._:/-]{8,200}$ ]]; then
+            echo "A traceable managed PostgreSQL snapshot/backup evidence ID is required."
+            exit 1
+          fi
+          backup_epoch="$(date -u -d "${BACKUP_EVIDENCE_UTC}" +%s 2>/dev/null || true)"
+          now_epoch="$(date -u +%s)"
+          if [ -z "${backup_epoch}" ]; then
+            echo "backup_evidence_utc must be a valid ISO-8601 UTC timestamp."
+            exit 1
+          fi
+          age_seconds=$((now_epoch - backup_epoch))
+          if [ "${age_seconds}" -lt 0 ] || [ "${age_seconds}" -gt 3600 ]; then
+            echo "Production backup evidence must be no more than 60 minutes old."
+            exit 1
+          fi
+          {
+            echo "### Production database backup gate"
+            echo "- Evidence ID: \`${BACKUP_EVIDENCE_ID}\`"
+            echo "- Completed (UTC): \`${BACKUP_EVIDENCE_UTC}\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
+      - name: Validate manual Y.NEX pricing approval
+        env:
+          PRICING_EVIDENCE_ID: ${{ inputs.pricing_evidence_id }}
+          PRICING_APPROVED_UTC: ${{ inputs.pricing_approved_utc }}
+        run: |
+          if [[ ! "${PRICING_EVIDENCE_ID}" =~ ^[A-Za-z0-9._:/-]{8,200}$ ]]; then
+            echo "A traceable Y.NEX admin pricing release evidence ID is required."
+            exit 1
+          fi
+          approved_epoch="$(date -u -d "${PRICING_APPROVED_UTC}" +%s 2>/dev/null || true)"
+          now_epoch="$(date -u +%s)"
+          if [ -z "${approved_epoch}" ]; then
+            echo "pricing_approved_utc must be a valid ISO-8601 UTC timestamp."
+            exit 1
+          fi
+          age_seconds=$((now_epoch - approved_epoch))
+          if [ "${age_seconds}" -lt 0 ] || [ "${age_seconds}" -gt 86400 ]; then
+            echo "Pricing approval must be no more than 24 hours old."
+            exit 1
+          fi
+          {
+            echo "### Y.NEX manual pricing approval"
+            echo "- Evidence ID: \`${PRICING_EVIDENCE_ID}\`"
+            echo "- Approved (UTC): \`${PRICING_APPROVED_UTC}\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > /tmp/kubeconfig
+          export KUBECONFIG=/tmp/kubeconfig
+      - name: Validate production secret contract
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+          if ! kubectl get secret comic-platform -n comic-production &>/dev/null; then
+            echo "Production Secret is missing; provision it through the secret manager."
+            exit 1
+          fi
+          required_keys=(
+            APP_SECRET_KEY JWT_SECRET_KEY DATABASE_URL REDIS_URL
+            RATE_LIMIT_REDIS_URL CELERY_BROKER_URL CELERY_RESULT_BACKEND
+            JARVIS_GATEWAY_SERVICE_TOKEN YNEX_SSO_SECRET
+            YNEX_BILLING_SERVICE_TOKEN ALERTING_WEBHOOK_URL
+          )
+          for key in "${required_keys[@]}"; do
+            value="$(kubectl get secret comic-platform -n comic-production \
+              -o "jsonpath={.data.${key}}")"
+            if [ -z "${value}" ]; then
+              echo "Production Secret is missing required key: ${key}"
+              exit 1
+            fi
+          done
+      - name: Run production infrastructure preflight
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          IMAGE_REGISTRY: ghcr.io/${{ github.repository }}/
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+          bash deploy/scripts/pre-deploy-check.sh \
+            comic-production comic-platform ynexai.cn
+      - name: Deploy to production
+        env:
+          IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag || github.event.workflow_run.head_branch }}
+          IMAGE_REGISTRY: ghcr.io/${{ github.repository }}/
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+          bash deploy/scripts/deploy.sh production "${IMAGE_TAG}"
+      - name: Smoke test
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+          kubectl rollout status deployment -n comic-production -l app.kubernetes.io/component=backend-web --timeout=600s
+          kubectl port-forward -n comic-production svc/comic-platform-web 8000:8000 &
+          port_forward_pid=$!
+          trap 'kill "${port_forward_pid}" 2>/dev/null || true' EXIT
+          sleep 10
+          curl --fail --show-error --retry 5 --retry-connrefused \
+            http://localhost:8000/ready
+          helm test comic-platform -n comic-production --logs
+      - name: Public shared-domain acceptance
+        run: |
+          frontend_headers="$(mktemp)"
+          api_headers="$(mktemp)"
+          trap 'rm -f "${frontend_headers}" "${api_headers}"' EXIT
+
+          curl --fail --show-error --location --retry 5 \
+            --dump-header "${frontend_headers}" --output /dev/null \
+            https://ynexai.cn/story/
+          curl --fail --show-error --retry 5 \
+            --dump-header "${api_headers}" \
+            https://ynexai.cn/story-api/ready \
+            | jq -e '.data.status == "ready"'
+
+          for header in strict-transport-security x-content-type-options x-frame-options; do
+            grep -qi "^${header}:" "${frontend_headers}"
+            grep -qi "^${header}:" "${api_headers}"
+          done
+
+          ws_status="$(curl --silent --show-error --http1.1 \
+            --header 'Connection: Upgrade' \
+            --header 'Upgrade: websocket' \
+            --header 'Sec-WebSocket-Version: 13' \
+            --header 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
+            --output /dev/null --write-out '%{http_code}' \
+            https://ynexai.cn/story-ws/)"
+          case "${ws_status}" in
+            400|401|403|426) ;;
+            *)
+              echo "Unexpected public WebSocket handshake status: ${ws_status}"
+              exit 1
+              ;;
+          esac
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+          bash deploy/scripts/rollback.sh production

@@ -1,0 +1,27 @@
+{{- if eq .Values.env "production" -}}
+{{- if not .Values.externalSecrets.enabled -}}
+{{- fail "production requires externalSecrets.enabled=true and a pre-provisioned comic-platform Secret" -}}
+{{- end -}}
+{{- if ne .Values.app.billingMode "jarvis" -}}
+{{- fail "production requires app.billingMode=jarvis (the Y.NEX ledger is authoritative)" -}}
+{{- end -}}
+{{- if or (not .Values.app.jarvisGatewayEnabled) (not (hasPrefix "https://" .Values.app.jarvisGatewayBaseUrl)) -}}
+{{- fail "production requires the HTTPS Jarvis gateway" -}}
+{{- end -}}
+{{- if not (hasPrefix "https://" .Values.app.ynexBillingBaseUrl) -}}
+{{- fail "production requires the HTTPS Y.NEX billing bridge" -}}
+{{- end -}}
+{{- if or (not .Values.ingress.enabled) (not .Values.ingress.tls.enabled) -}}
+{{- fail "production requires ingress and TLS" -}}
+{{- end -}}
+{{- if or (not .Values.ingress.host) (eq .Values.ingress.host "comic.example.com") -}}
+{{- fail "production requires a real ingress.host" -}}
+{{- end -}}
+{{- $releaseTag := default .Values.backend.web.image.tag .Values.global.imageTag -}}
+{{- if or (not $releaseTag) (eq $releaseTag "latest") -}}
+{{- fail "production image tag must be immutable, not latest" -}}
+{{- end -}}
+{{- if or (not .Values.global.imageRegistry) (not (hasSuffix "/" .Values.global.imageRegistry)) -}}
+{{- fail "production requires global.imageRegistry ending with /" -}}
+{{- end -}}
+{{- end -}}

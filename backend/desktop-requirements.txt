@@ -1,0 +1,36 @@
+# ===========================================
+# ComicStudio AI - Desktop-only dependencies
+# ===========================================
+# These are NOT required for cloud SaaS deployment.
+# Install only when building the desktop app for local AI inference:
+#   pip install -r desktop-requirements.txt
+#
+# Combined with the base requirements.txt, this enables:
+# - GPU image generation via diffusers + xFormers (SDXL, ≤3s/image)
+# - CPU image generation via ONNX Runtime INT8 (≤15s/image)
+# - Local LLM via llama.cpp (GGUF, CPU+GPU offload)
+# - Local TTS via Piper (VITS, ≤1s/MB)
+
+# Image generation (GPU)
+torch>=2.1.0
+diffusers>=0.27.0
+transformers>=4.40.0
+xformers>=0.0.23; sys_platform == "win32" or sys_platform == "linux"
+accelerate>=0.28.0
+safetensors>=0.4.0
+
+# Image generation (CPU ONNX)
+onnxruntime>=1.17.0
+optimum>=1.18.0
+
+# LLM (llama.cpp)
+llama-cpp-python>=0.2.60
+
+# TTS (Piper)
+piper-tts>=1.2.0
+
+# Model management
+huggingface_hub>=0.22.0
+
+# System info
+psutil>=5.9.0  # Already in main requirements but listed for clarity

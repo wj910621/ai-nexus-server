@@ -1,0 +1,44 @@
+{{/*
+PersistentVolumeClaim - 持久化存储卷声明
+用于持久化上传文件和 AI 模型权重
+仅在 persistence.enabled=true 时创建
+*/}}
+{{- if .Values.persistence.enabled -}}
+# 上传文件存储卷
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "comic.fullname" . }}-uploads
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage-uploads
+spec:
+  accessModes:
+    - ReadWriteMany
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.uploads.size }}
+---
+# 模型权重存储卷 (LoRA 模型文件)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "comic.fullname" . }}-models
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage-models
+spec:
+  accessModes:
+    - ReadWriteMany
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.models.size }}
+{{- end -}}

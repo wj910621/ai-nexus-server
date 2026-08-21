@@ -1,0 +1,13 @@
+apiVersion: v2
+name: comic-platform
+description: 漫剧软件平台 Helm Chart - Phase 8 P4 K8s 容器化
+type: application
+version: 0.1.0
+appVersion: "0.8.0"
+keywords:
+  - comic
+  - ai
+  - lora
+  - k8s
+maintainers:
+  - name: Comic Platform Team

@@ -1,0 +1,133 @@
+groups:
+  - name: comicstudio.rules
+    interval: 30s
+    rules:
+      # --- Availability ---
+      - alert: ServiceDown
+        expr: up{job="comicstudio-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend service is down"
+          description: "Backend has been down for more than 2 minutes."
+
+      - alert: DatabaseConnectionFailure
+        expr: comicstudio_db_connections_failed_total > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection failures detected"
+
+      - alert: RedisConnectionFailure
+        expr: comicstudio_redis_connections_failed_total > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis connection failures detected"
+
+      # --- Performance ---
+      - alert: HighP99Latency
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P99 latency > 2s for 5 minutes"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "5xx error rate > 5% for 5 minutes"
+
+      - alert: LowCacheHitRate
+        expr: rate(result_cache_hits_total[10m]) / (rate(result_cache_hits_total[10m]) + rate(result_cache_misses_total[10m])) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Cache hit rate < 50% for 10 minutes"
+
+      # --- Engine health ---
+      - alert: EngineCircuitOpen
+        expr: provider_circuit_state == 2
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "AI provider circuit breaker is OPEN ({{ $labels.provider }})"
+
+      # --- Resource usage ---
+      - alert: HighMemoryUsage
+        expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memory usage > 90% for 5 minutes"
+
+      - alert: HighDiskUsage
+        expr: (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk usage > 85% for 10 minutes"
+
+      # --- SSL / cert ---
+      - alert: SSLExpiringSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 14
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "SSL certificate expiring in <14 days"
+
+      # --- Task queue ---
+      - alert: TaskQueueBacklog
+        expr: comicstudio_tasks_pending > 50
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Task queue backlog > 50 for 10 minutes"
+
+      - alert: TaskFailureRate
+        expr: rate(comicstudio_tasks_failed_total[10m]) / rate(comicstudio_tasks_completed_total[10m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Task failure rate > 10%"
+
+      # --- Billing ---
+      - alert: CreditSystemAnomaly
+        expr: rate(credits_consumed_total[1h]) > 10000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Abnormal credit consumption rate"
+
+      # --- Backup ---
+      - alert: BackupStale
+        expr: time() - comicstudio_last_backup_timestamp > 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No backup in last 24 hours"
+
+      # --- SLA breach ---
+      - alert: SLABreach
+        expr: comicstudio_sla_uptime_30d < 99.5
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SLA breach: 30-day uptime < 99.5%"

@@ -1,0 +1,200 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build-backend-web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository }}/comic-backend-web
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+      - uses: docker/build-push-action@v5
+        with:
+          context: backend
+          file: backend/Dockerfile.web
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository }}/comic-backend-web:${{ steps.meta.outputs.version }}
+          format: spdx-json
+          output-file: sbom-backend-web.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-backend-web
+          path: sbom-backend-web.json
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/comic-backend-web:${{ steps.meta.outputs.version }}
+          format: sarif
+          output: trivy-backend-web.sarif
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+  build-backend-worker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository }}/comic-backend-worker
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+      - uses: docker/build-push-action@v5
+        with:
+          context: backend
+          file: backend/Dockerfile.worker
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository }}/comic-backend-worker:${{ steps.meta.outputs.version }}
+          format: spdx-json
+          output-file: sbom-backend-worker.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-backend-worker
+          path: sbom-backend-worker.json
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/comic-backend-worker:${{ steps.meta.outputs.version }}
+          format: sarif
+          output: trivy-backend-worker.sarif
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository }}/comic-frontend
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+      - uses: docker/build-push-action@v5
+        with:
+          context: frontend
+          file: frontend/Dockerfile
+          build-args: |
+            VITE_BASE_PATH=/story/
+            VITE_ROUTER_BASE=/story
+            VITE_API_BASE_URL=/story-api
+            VITE_WS_BASE_URL=/story-ws
+            # 商业化开关：默认 false。仅当运营方已通过生产发布门禁并完成真实支付/计费对接后，
+            # 将仓库/组织变量 VITE_COMMERCIAL_OPERATIONS_ENABLED 置为 true 再触发 release。
+            VITE_COMMERCIAL_OPERATIONS_ENABLED=${{ vars.VITE_COMMERCIAL_OPERATIONS_ENABLED || 'false' }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository }}/comic-frontend:${{ steps.meta.outputs.version }}
+          format: spdx-json
+          output-file: sbom-frontend.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-frontend
+          path: sbom-frontend.json
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/comic-frontend:${{ steps.meta.outputs.version }}
+          format: sarif
+          output: trivy-frontend.sarif
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+  build-desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: comicstudio-windows-gpu
+            variant: win-gpu
+          - os: windows-latest
+            artifact: comicstudio-windows-cpu
+            variant: win-cpu
+          - os: ubuntu-latest
+            artifact: comicstudio-linux-gpu
+            variant: linux-gpu
+          - os: ubuntu-latest
+            artifact: comicstudio-linux-cpu
+            variant: linux-cpu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build desktop variant
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+          python packaging/build.py --variant ${{ matrix.variant }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            backend/dist/*
+            backend/build/*
+          if-no-files-found: ignore

@@ -1,0 +1,83 @@
+{{/*
+NetworkPolicy - 网络策略
+生产环境启用,限制 Pod 间网络通信
+- default-deny: 默认拒绝所有入站和出站流量
+- allow-internal: 允许同命名空间内 Pod 互访
+- allow-egress: 允许出站到 Kube-DNS、外部 HTTPS (443) 端口
+Phase 8 P7: 移除 80 端口出站规则，仅保留 443 (HTTPS)
+*/}}
+{{- if .Values.networkPolicy.enabled -}}
+# 默认拒绝所有入站和出站流量
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "comic.fullname" . }}-default-deny
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# 允许同命名空间内 Pod 之间互相通信
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "comic.fullname" . }}-allow-internal
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector: {}
+  egress:
+    - to:
+        - podSelector: {}
+---
+# 允许出站访问 Kube-DNS 和外部 HTTPS 服务
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "comic.fullname" . }}-allow-egress
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # 允许出站到所有 Pod (集群内部通信)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 169.254.169.254/32
+    # 允许访问 Kube-DNS (UDP/TCP 53)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # P7: 仅允许外部 HTTPS (443)，移除 HTTP (80) 出站
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+{{- end -}}

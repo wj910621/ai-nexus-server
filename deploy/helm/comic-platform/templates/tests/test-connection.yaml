@@ -1,0 +1,42 @@
+{{/*
+Helm Test Pod - 连接测试
+执行 helm test 时创建临时 Pod 验证服务连通性
+测试完成后自动清理
+*/}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "comic.fullname" . }}-test-connection"
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test-connection
+      image: busybox@sha256:9532d8c39891ca2ecde4d30d7710e01fb739c87a8b9299685c63704296b16028
+      command: ['sh', '-c']
+      args:
+        - |
+          echo "开始测试 backend-web 服务连通性..."
+          wget --spider --timeout=10 {{ include "comic.fullname" . }}-web:8000/ready
+          if [ $? -eq 0 ]; then
+            echo "✓ backend-web 服务健康检查通过"
+          else
+            echo "✗ backend-web 服务健康检查失败"
+            exit 1
+          fi
+
+          echo "开始测试 frontend 服务连通性..."
+          wget --spider --timeout=10 {{ include "comic.fullname" . }}-frontend:80/
+          if [ $? -eq 0 ]; then
+            echo "✓ frontend 服务健康检查通过"
+          else
+            echo "✗ frontend 服务健康检查失败"
+            exit 1
+          fi
+
+          echo "所有服务连通性测试通过!"

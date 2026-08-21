@@ -1,0 +1,192 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: comic_user
+          POSTGRES_PASSWORD: comic_password
+          POSTGRES_DB: comic_studio_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+      - name: Lint with ruff
+        working-directory: backend
+        run: ruff check app/
+      - name: Type check with mypy
+        working-directory: backend
+        run: python scripts/type_gate.py
+      - name: Run tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://comic_user:comic_password@localhost:5432/comic_studio_test
+          REDIS_URL: redis://localhost:6379/0
+          JWT_SECRET_KEY: test-secret-not-for-prod-but-long-enough-for-validation-32chars
+          APP_ENV: test
+          BILLING_MODE: standalone
+        run: pytest -v --cov=app --cov-report=xml --cov-report=term
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.13'
+        with:
+          file: backend/coverage.xml
+
+  frontend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Type check
+        working-directory: frontend
+        run: npx tsc --noEmit
+      - name: Test
+        working-directory: frontend
+        run: npx vitest run
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+
+  desktop-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            desktop/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci
+      - name: Type check
+        working-directory: desktop
+        run: npm run typecheck
+      - name: Test
+        working-directory: desktop
+        run: npm test
+      - name: Build
+        working-directory: desktop
+        run: npm run build
+
+  helm-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+      - name: Lint Helm Chart
+        run: |
+          helm lint deploy/helm/comic-platform
+          helm lint deploy/helm/comic-platform \
+            -f deploy/helm/comic-platform/values-prod.yaml \
+            --set externalSecrets.enabled=true \
+            --set ingress.enabled=true \
+            --set ingress.tls.enabled=true \
+            --set ingress.host=story.example.invalid \
+            --set global.imageRegistry=ghcr.io/example/comic/ \
+            --set global.imageTag=ci-${{ github.sha }}
+      - name: Template render
+        run: |
+          mkdir -p .artifacts
+          helm template deploy/helm/comic-platform \
+            -f deploy/helm/comic-platform/values.yaml \
+            > .artifacts/rendered-default.yaml
+          helm template deploy/helm/comic-platform \
+            -f deploy/helm/comic-platform/values-prod.yaml \
+            --set externalSecrets.enabled=true \
+            --set ingress.enabled=true \
+            --set ingress.tls.enabled=true \
+            --set ingress.host=story.example.invalid \
+            --set global.imageRegistry=ghcr.io/example/comic/ \
+            --set global.imageTag=ci-${{ github.sha }} \
+            > .artifacts/rendered-production.yaml
+      - name: Validate manifests
+        uses: docker://ghcr.io/yannh/kubeconform:v0.7.0
+        with:
+          args: "-strict -ignore-missing-schemas -kubernetes-version 1.29.0 -summary .artifacts/rendered-default.yaml .artifacts/rendered-production.yaml"
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: pip-audit (backend dependencies)
+        working-directory: backend
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt --strict
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            desktop/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci
+      - name: npm audit (frontend)
+        working-directory: frontend
+        run: npm run audit:production
+      - name: npm audit (desktop)
+        working-directory: desktop
+        run: npm audit --audit-level=high
+      - name: gitleaks (secret scanning)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

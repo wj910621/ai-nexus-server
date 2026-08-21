@@ -1,0 +1,85 @@
+{{/*
+Deployment - backend-worker (异步任务服务)
+Celery Worker 处理异步任务,如 AI 模型推理、图像处理
+可选启用 GPU 加速(LoRA 训练/推理)
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "comic.fullname" . }}-worker
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend-worker
+spec:
+  replicas: {{ .Values.backend.worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "comic.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend-worker
+  template:
+    metadata:
+      labels:
+        {{- include "comic.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend-worker
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      # P7: 使用独立 ServiceAccount，禁用 token 自动挂载
+      serviceAccountName: {{ include "comic.fullname" . }}-worker
+      automountServiceAccountToken: false
+      # P7: Pod 级别安全上下文
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      # GPU 节点选择器
+      {{- if .Values.backend.worker.gpu.enabled }}
+      nodeSelector:
+        accelerator: nvidia
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      {{- end }}
+      containers:
+        - name: worker
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.backend.worker.image.repository }}:{{ default .Values.backend.worker.image.tag .Values.global.imageTag }}"
+          imagePullPolicy: {{ .Values.backend.worker.image.pullPolicy }}
+          # P7: 容器级别安全上下文 (GPU 需 root)
+          securityContext:
+            {{- toYaml .Values.workerSecurityContext | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "comic.fullname" . }}
+            - secretRef:
+                name: {{ include "comic.fullname" . }}
+          {{- with .Values.backend.worker.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: uploads
+              mountPath: /data/uploads
+            - name: models
+              mountPath: /data/models
+      volumes:
+        # P7: /tmp 可写卷
+        - name: tmp
+          emptyDir: {}
+        - name: uploads
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "comic.fullname" . }}-uploads
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: models
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "comic.fullname" . }}-models
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

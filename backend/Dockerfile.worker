@@ -1,0 +1,99 @@
+# =============================================================================
+# 后端 Celery Worker 镜像 (GPU)
+# Phase 8 P4 K8s 容器化 - 多阶段构建
+# 基础镜像：nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
+# =============================================================================
+# 构建命令：docker build -f Dockerfile.worker -t backend-worker:latest .
+# 运行命令：docker run --gpus all backend-worker:latest
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 阶段 1：builder - 安装 Python 依赖与 PyTorch (CUDA 12.4)
+# -----------------------------------------------------------------------------
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04 AS builder
+
+# 设置非交互模式，避免 apt 安装过程中卡住
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# 安装系统依赖：Python 3.13、pip、基础工具（与 CI 最高测试版本一致）
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        gnupg \
+        software-properties-common \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        python3.13 \
+        python3.13-venv \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.13
+
+# 设置工作目录
+WORKDIR /build
+
+# 复制依赖清单文件（优先复制以利用 Docker 缓存）
+COPY requirements.txt .
+
+# 安装 Python 依赖到 /root/.local
+RUN python3.13 -m pip install --user --no-cache-dir -r requirements.txt
+
+# 安装 PyTorch (CUDA 12.4 wheel)
+# 使用 PyTorch 官方 CUDA 12.4 索引安装 GPU 版本
+RUN python3.13 -m pip install --user --no-cache-dir \
+    torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+
+# -----------------------------------------------------------------------------
+# 阶段 2：runtime - 最终运行镜像
+# -----------------------------------------------------------------------------
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04 AS runtime
+
+# 维护者信息
+LABEL maintainer="漫剧软件项目组" \
+      description="后端 Celery Worker (GPU 推理任务), CUDA 12.4.1" \
+      stage="phase8-p4-k8s"
+
+# 设置环境变量
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONPATH=/app:/app/.deps/lib/python3.13/site-packages \
+    PATH=/app/.deps/bin:$PATH \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+# 安装 Python 3.13 与 pip（runtime 阶段需独立安装）
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        gnupg \
+        software-properties-common \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        python3.13 \
+        python3.13-venv \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.13
+
+# 创建工作目录
+WORKDIR /app
+
+# 从 builder 阶段复制已安装的 Python 依赖（含 PyTorch GPU wheel）到 /app/.deps
+COPY --from=builder /root/.local /app/.deps
+
+# 复制后端应用代码
+COPY . /app
+
+# GPU 容器需 root 访问 NVIDIA 驱动，保持 root 用户
+# 确保应用目录可读（755），/tmp 可写（1777）以支持应用日志与临时文件
+RUN chmod -R 755 /app && chmod 1777 /tmp
+
+# 健康检查：使用 celery inspect ping 检测 Worker 活跃状态
+# 间隔 30s，超时 10s（Celery ping 可能较慢），启动等待 30s，重试 3 次
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD celery -A app.tasks.celery_app inspect ping -d celery@$$HOSTNAME || exit 1
+
+# 启动命令：启动 Celery Worker
+# --loglevel=info 输出 INFO 级别日志
+# --concurrency=1 单并发（GPU 任务通常串行处理，避免显存竞争）
+CMD ["celery", "-A", "app.tasks.celery_app", "worker", "--loglevel=info", "--concurrency=1"]

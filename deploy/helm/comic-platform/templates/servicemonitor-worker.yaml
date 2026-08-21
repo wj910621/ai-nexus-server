@@ -1,0 +1,26 @@
+{{/*
+ServiceMonitor - backend-worker (Prometheus Operator)
+Phase 8 P6 监控可观测性 - Celery Worker Prometheus 采集配置
+注：worker 未暴露 Service 端口，使用 Pod 的 8000 作为 metrics 端口
+*/}}
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "comic.fullname" . }}-worker
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend-worker
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: backend-worker
+  endpoints:
+    # worker 未暴露独立 Service 端口，使用 Pod 的 8000 作为 metrics 端口
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      targetPort: 8000
+{{- end }}

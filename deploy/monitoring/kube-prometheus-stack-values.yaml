@@ -1,0 +1,105 @@
+# kube-prometheus-stack Helm Chart 自定义 values
+# Phase 8 P6 监控可观测性 - Prometheus + Grafana + Alertmanager 安装配置
+# 用法: helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+#        --namespace monitoring --create-namespace -f kube-prometheus-stack-values.yaml
+
+# ---------------------------------------------------------------------------
+# Prometheus 配置
+# ---------------------------------------------------------------------------
+prometheus:
+  prometheusSpec:
+    # 匹配所有 ServiceMonitor (不限制 release 标签)
+    serviceMonitorSelectorNilUsesHelmValues: false
+    # 匹配所有 PrometheusRule
+    ruleSelectorNilUsesHelmValues: false
+    # 抓取间隔
+    scrapeInterval: 30s
+    # 评估间隔
+    evaluationInterval: 30s
+    # 数据保留时间
+    retention: 15d
+    # 资源限制
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+    # 持久化存储
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+# ---------------------------------------------------------------------------
+# Grafana 配置
+# ---------------------------------------------------------------------------
+grafana:
+  enabled: true
+  # 开发环境默认密码，生产环境通过 values-prod.yaml 覆盖
+  adminPassword: "admin"
+  # 资源限制
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  # Dashboard provider 配置 - 让 sidecar 自动加载 ConfigMap 中的 dashboard
+  dashboardProviders:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: 'file'
+      disableDeletion: false
+      updateIntervalSeconds: 30
+      options:
+        path: /var/lib/grafana/dashboards/default
+  # 持久化存储
+  persistence:
+    enabled: true
+    storageClassName: standard
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
+
+# ---------------------------------------------------------------------------
+# Alertmanager 配置
+# ---------------------------------------------------------------------------
+alertmanager:
+  enabled: true
+  # 使用 ConfigMap 而非 Secret 加载配置
+  # configFrom.secret.name 不设
+  service:
+    type: ClusterIP
+  # 资源限制
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  # 持久化存储 (静默规则)
+  persistence:
+    enabled: true
+    storageClassName: standard
+    accessModes: ["ReadWriteOnce"]
+    size: 5Gi
+
+# ---------------------------------------------------------------------------
+# Node Exporter (默认启用)
+# ---------------------------------------------------------------------------
+nodeExporter:
+  enabled: true
+
+# ---------------------------------------------------------------------------
+# kube-state-metrics (默认启用)
+# ---------------------------------------------------------------------------
+kubeStateMetrics:
+  enabled: true

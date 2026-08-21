@@ -1,0 +1,88 @@
+{{/*
+Deployment - backend-web (Web API 服务)
+FastAPI Web API,处理 HTTP 请求和 WebSocket 连接
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "comic.fullname" . }}-web
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend-web
+spec:
+  replicas: {{ .Values.backend.web.replicas }}
+  selector:
+    matchLabels:
+      {{- include "comic.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend-web
+  template:
+    metadata:
+      labels:
+        {{- include "comic.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend-web
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      # P7: 使用独立 ServiceAccount，禁用 token 自动挂载
+      serviceAccountName: {{ include "comic.fullname" . }}-web
+      automountServiceAccountToken: false
+      # P7: Pod 级别安全上下文
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: web
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.backend.web.image.repository }}:{{ default .Values.backend.web.image.tag .Values.global.imageTag }}"
+          imagePullPolicy: {{ .Values.backend.web.image.pullPolicy }}
+          # P7: 容器级别安全上下文
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "comic.fullname" . }}
+            - secretRef:
+                name: {{ include "comic.fullname" . }}
+          # 存活探针 - 检测应用是否运行
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # 就绪探针 - 检测应用是否可接收流量
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          {{- with .Values.backend.web.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: uploads
+              mountPath: /data/uploads
+      volumes:
+        # P7: /tmp 可写卷 (readOnlyRootFilesystem 兼容)
+        - name: tmp
+          emptyDir: {}
+        - name: uploads
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "comic.fullname" . }}-uploads
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

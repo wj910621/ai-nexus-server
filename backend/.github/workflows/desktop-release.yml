@@ -1,0 +1,62 @@
+name: Desktop Release
+
+# Used by Task 16 to build desktop installers (Windows/macOS/Linux)
+# Triggered manually or on version tags. Produces PyInstaller-bundled
+# desktop artifacts and attaches them to GitHub Releases.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Target platform (all|windows|macos|linux)"
+        required: false
+        default: "all"
+
+jobs:
+  build-desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: comicstudio-windows
+            spec_extra: ""
+          - os: macos-latest
+            artifact: comicstudio-macos
+            spec_extra: ""
+          - os: ubuntu-latest
+            artifact: comicstudio-linux
+            spec_extra: ""
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build desktop bundle
+        working-directory: backend
+        run: python packaging/build.py
+        continue-on-error: true  # Task 16 will finalize the spec
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            backend/dist/*
+            backend/build/*
+          if-no-files-found: ignore

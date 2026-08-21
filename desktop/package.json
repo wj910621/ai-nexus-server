@@ -1,0 +1,47 @@
+{
+  "name": "comic-studio-desktop",
+  "version": "0.1.0",
+  "description": "ComicStudio AI - 漫剧生成软件桌面端",
+  "main": "./out/main/index.js",
+  "author": "ComicStudio AI",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "package:win": "electron-vite build && electron-builder --win --config electron-builder.yml",
+    "package:mac": "electron-vite build && electron-builder --mac --config electron-builder.yml",
+    "package:linux": "electron-vite build && electron-builder --linux --config electron-builder.yml",
+    "package:dir": "electron-vite build && electron-builder --dir --config electron-builder.yml",
+    "build:variant": "node scripts/build-variant.js",
+    "build:win-gpu": "node scripts/build-variant.js --target nsis-gpu",
+    "build:win-cpu": "node scripts/build-variant.js --target nsis-cpu",
+    "build:linux-gpu": "node scripts/build-variant.js --target appimage-gpu",
+    "build:linux-cpu": "node scripts/build-variant.js --target appimage-cpu",
+    "icons": "tsx scripts/generate-icons.ts"
+  },
+  "dependencies": {
+    "electron-log": "^5.1.1",
+    "electron-store": "^11.0.2",
+    "electron-updater": "^6.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/sharp": "^0.31.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.3",
+    "tsx": "^4.23.1",
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8"
+  }
+}

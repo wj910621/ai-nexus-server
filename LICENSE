@@ -1,0 +1,116 @@
+ComicStudio AI Proprietary License
+
+Copyright (c) 2026 ComicStudio AI Project Author. All Rights Reserved.
+
+1. Definitions
+
+   1.1 "Software" means the ComicStudio AI software, including but not
+       limited to the backend Python source code, frontend TypeScript/React
+       source code, Electron desktop application code, configuration files,
+       build scripts, and accompanying documentation.
+
+   1.2 "Binary Distribution" means the compiled or packaged form of the
+       Software, including but not limited to PyInstaller executables,
+       Electron asar bundles, Docker images, and any other executable form
+       distributed to end users.
+
+   1.3 "Source Code" means the human-readable form of the Software,
+       including all Python (.py), TypeScript (.ts/.tsx), JavaScript (.js),
+       and configuration files.
+
+   1.4 "Licensor" means the copyright holder of the Software.
+
+   1.5 "Licensee" means any person or entity that obtains a copy of the
+       Software under this License.
+
+2. Grant of Rights
+
+   2.1 Binary Distribution Rights. The Licensor grants the Licensee a
+       non-exclusive, non-transferable, royalty-free, worldwide license to
+       download, install, and use the Binary Distribution of the Software
+       for personal or internal business purposes, subject to the
+       limitations set forth in this License.
+
+   2.2 Subscription Tiers. Certain features of the Software (including but
+       not limited to local AI inference, multi-provider routing, semantic
+       caching, and high-tier model access) require an active paid
+       subscription (Pro or Enterprise tier). The Licensee must maintain a
+       valid subscription to access such features.
+
+3. Restrictions
+
+   3.1 No Source Code Redistribution. The Licensee shall NOT copy, reproduce,
+       distribute, sublicense, publish, or otherwise make available the
+       Source Code of the Software to any third party, in whole or in part,
+       without the prior written consent of the Licensor.
+
+   3.2 No Modification. The Licensee shall NOT modify, adapt, translate, or
+       create derivative works based on the Source Code of the Software,
+       except for personal configuration changes that are not redistributed.
+
+   3.3 No Reverse Engineering. The Licensee shall NOT reverse engineer,
+       decompile, disassemble, or otherwise attempt to derive the Source
+       Code from the Binary Distribution, except to the extent permitted by
+       applicable law.
+
+   3.4 No Removal of Notices. The Licensee shall NOT remove, alter, or
+       obscure any copyright, trademark, or other proprietary rights notices
+       displayed by the Software.
+
+   3.5 No Commercial Resale. The Licensee shall NOT sell, rent, lease, or
+       otherwise commercially exploit the Software or any part of it without
+       the prior written consent of the Licensor.
+
+4. Model Weights
+
+   4.1 Third-Party Models. The Software may invoke or download AI model
+       weights from third-party sources (including but not limited to
+       HuggingFace, Volcano Engine, Kuaishou, and ZhipuAI). Such model
+       weights are subject to their respective licenses and are NOT covered
+       by this License.
+
+   4.2 No Model Distribution. The Licensor does NOT distribute AI model
+       weights. Licensees are responsible for obtaining model weights from
+       their official sources and complying with the applicable licenses.
+
+5. Disclaimer of Warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+   IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE,
+   ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+   OTHER DEALINGS IN THE SOFTWARE.
+
+6. Limitation of Liability
+
+   IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY INDIRECT, INCIDENTAL,
+   SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED
+   TO LOSS OF PROFITS, DATA, OR BUSINESS INTERRUPTION, ARISING OUT OF OR
+   IN CONNECTION WITH THE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+   SUCH DAMAGES.
+
+7. Termination
+
+   This License terminates automatically if the Licensee breaches any of
+   its terms. Upon termination, the Licensee must immediately cease all use
+   of the Software and destroy all copies in their possession.
+
+8. Governing Law
+
+   This License shall be governed by and construed in accordance with the
+   laws of the People's Republic of China, without regard to its conflict
+   of law provisions.
+
+9. Entire Agreement
+
+   This License constitutes the entire agreement between the Licensor and
+   the Licensee with respect to the Software and supersedes all prior or
+   contemporaneous understandings.
+
+For inquiries regarding licensing, redistribution, or commercial use,
+please contact the project author.
+
+Version: 1.0
+Date: 2026-07-20

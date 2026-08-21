@@ -1,0 +1,14 @@
+{
+  "brand": "Y·NEX",
+  "productName": "Y·NEX Story Studio",
+  "productNameZh": "Y·NEX 漫剧工坊",
+  "shortNameZh": "漫剧工坊",
+  "descriptionZh": "从剧本、角色到分镜、配音和成片的一站式 AI 漫剧创作工具。",
+  "webEntry": "/story/",
+  "downloadEntry": "/download/story/",
+  "apiPrefix": "/story-api/",
+  "websocketPrefix": "/story-ws/",
+  "accountOwner": "Y·NEX 主站",
+  "billingOwner": "Y·NEX 主站",
+  "refundOwner": "Y·NEX 主站订单售后"
+}

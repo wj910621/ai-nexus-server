@@ -1,0 +1,173 @@
+{{/*
+ConfigMap - Grafana Dashboards
+Phase 8 P6 监控可观测性 - 3 个预置 dashboard (API / Celery / Infrastructure)
+label grafana_dashboard: "1" 让 kube-prometheus-stack 自动加载
+*/}}
+{{- if .Values.monitoring.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "comic.fullname" . }}-grafana-dashboards
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: monitoring
+    grafana_dashboard: "1"
+data:
+  api-overview.json: |
+    {
+      "annotations": {"list": []},
+      "title": "API Overview",
+      "uid": "comic-api-overview",
+      "schemaVersion": 27,
+      "version": 1,
+      "refresh": "30s",
+      "time": {"from": "now-1h", "to": "now"},
+      "panels": [
+        {
+          "id": 1,
+          "title": "QPS",
+          "type": "stat",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "sum(rate(http_requests_total[1m]))", "legendFormat": "QPS"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+        },
+        {
+          "id": 2,
+          "title": "P95 延迟",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+        },
+        {
+          "id": 3,
+          "title": "错误率",
+          "type": "stat",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))", "legendFormat": "error rate"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+        },
+        {
+          "id": 4,
+          "title": "状态码分布",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "sum(rate(http_requests_total[5m])) by (status)", "legendFormat": "{{`{{status}}`}}"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+        }
+      ]
+    }
+  celery-worker.json: |
+    {
+      "annotations": {"list": []},
+      "title": "Celery Worker",
+      "uid": "comic-celery-worker",
+      "schemaVersion": 27,
+      "version": 1,
+      "refresh": "30s",
+      "time": {"from": "now-1h", "to": "now"},
+      "panels": [
+        {
+          "id": 1,
+          "title": "队列长度",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "celery_queue_length", "legendFormat": "{{`{{queue}}`}}"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+        },
+        {
+          "id": 2,
+          "title": "活跃 worker",
+          "type": "stat",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "celery_active_workers", "legendFormat": "active"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+        },
+        {
+          "id": 3,
+          "title": "任务时长",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "histogram_quantile(0.95, sum(rate(celery_task_duration_seconds_bucket[5m])) by (le, task))", "legendFormat": "{{`{{task}}`}} p95"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+        },
+        {
+          "id": 4,
+          "title": "失败率",
+          "type": "stat",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "sum(rate(celery_task_total{status=\"failure\"}[5m])) / sum(rate(celery_task_total[5m]))", "legendFormat": "failure rate"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+        }
+      ]
+    }
+  infrastructure.json: |
+    {
+      "annotations": {"list": []},
+      "title": "Infrastructure",
+      "uid": "comic-infrastructure",
+      "schemaVersion": 27,
+      "version": 1,
+      "refresh": "30s",
+      "time": {"from": "now-1h", "to": "now"},
+      "panels": [
+        {
+          "id": 1,
+          "title": "Pod CPU",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\"}[5m])) by (pod)", "legendFormat": "{{`{{pod}}`}}"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+        },
+        {
+          "id": 2,
+          "title": "Pod Memory",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "sum(container_memory_usage_bytes{container!=\"\"}) by (pod)", "legendFormat": "{{`{{pod}}`}}"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+        },
+        {
+          "id": 3,
+          "title": "PVC 使用率",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes", "legendFormat": "{{`{{persistentvolumeclaim}}`}}"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+        },
+        {
+          "id": 4,
+          "title": "Pod 重启次数",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "targets": [
+            {"expr": "kube_pod_container_status_restarts_total", "legendFormat": "{{`{{pod}}`}}/{{`{{container}}`}}"}
+          ],
+          "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+        }
+      ]
+    }
+{{- end }}

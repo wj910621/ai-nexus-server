@@ -1,0 +1,31 @@
+{{/*
+HorizontalPodAutoscaler - backend-worker
+基于 Celery 队列长度自动伸缩 Worker 服务
+当任务积压时自动增加 Worker 副本处理
+*/}}
+{{- if .Values.hpa.worker.enabled -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "comic.fullname" . }}-worker
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend-worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "comic.fullname" . }}-worker
+  minReplicas: {{ .Values.hpa.worker.minReplicas }}
+  maxReplicas: {{ .Values.hpa.worker.maxReplicas }}
+  metrics:
+    # 基于 Pods 自定义指标 (celery_queue_length)
+    - type: Pods
+      pods:
+        metric:
+          name: celery_queue_length
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.hpa.worker.queueLengthTarget | quote }}
+{{- end -}}

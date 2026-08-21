@@ -1,0 +1,23 @@
+{{/*
+ServiceMonitor - backend-web (Prometheus Operator)
+Phase 8 P6 监控可观测性 - Web API Prometheus 采集配置
+*/}}
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "comic.fullname" . }}-web
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "comic.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend-web
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: backend-web
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+{{- end }}

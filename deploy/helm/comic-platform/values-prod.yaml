@@ -1,0 +1,126 @@
+# 生产环境覆盖配置 (production)
+# Phase 8 P4 K8s 容器化 - 漫剧软件平台
+
+# 命名空间 - 生产环境独立命名空间
+namespace:
+  name: comic-production
+
+# 后端服务配置
+backend:
+  # Web API - 3 副本保证高可用
+  web:
+    replicas: 3
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 2Gi
+  # Worker - 2 副本,启用 GPU 加速推理
+  worker:
+    replicas: 2
+    gpu:
+      enabled: true
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+        nvidia.com/gpu: 1
+
+# 前端 - 3 副本
+frontend:
+  replicas: 3
+
+# Ingress 入口 - 生产启用,带 TLS
+ingress:
+  enabled: true
+  className: nginx
+  host: ynexai.cn
+  tls:
+    enabled: true
+    secretName: comic-tls
+
+# PostgreSQL - 生产使用外部托管实例
+postgresql:
+  external: true
+  host: pg-prod.internal
+  port: 5432
+  database: comic
+  username: comic
+
+# Redis - 默认使用外部托管实例
+redis:
+  external: true
+  host: redis-prod.internal
+  port: 6379
+
+# 对象存储 - 生产环境启用阿里云 OSS
+oss:
+  enabled: true
+  bucket: comic-prod-oss
+  endpoint: oss-cn-hangzhou.aliyuncs.com
+
+# 持久化存储 - 生产启用,使用阿里云 ESSD
+persistence:
+  enabled: true
+  storageClass: alicloud-disk-essd
+  uploads:
+    size: 20Gi
+  models:
+    size: 100Gi
+
+# HPA 自动伸缩 - 生产启用
+hpa:
+  web:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    cpuTarget: 70
+  worker:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    queueLengthTarget: 10
+
+# PDB 中断预算 - 生产启用
+pdb:
+  enabled: true
+  web:
+    minAvailable: 2
+  worker:
+    minAvailable: 1
+
+# NetworkPolicy 网络策略 - 生产启用
+networkPolicy:
+  enabled: true
+
+# 应用环境标识
+env: production
+
+app:
+  billingMode: jarvis
+  jarvisBillingPortalUrl: "https://ynexai.cn/"
+  jarvisGatewayEnabled: true
+  jarvisGatewayBaseUrl: "https://ynexai.cn"
+  jarvisGatewayDefaultModel: "nx_gpt5mini"
+  ynexSsoIssuer: "ynexai.cn"
+  ynexSsoAudience: "story-studio"
+  ynexBillingBaseUrl: "https://ynexai.cn"
+
+# Phase 8 P6: 监控可观测性 - 生产启用
+monitoring:
+  enabled: true
+  namespace: monitoring
+  grafana:
+    adminPassword: ""
+  alerting:
+    feishuWebhookUrl: ""
+
+# Production secrets must be provisioned before deployment as a Secret named
+# "comic-platform". Never generate rotating credentials during Helm upgrades.
+externalSecrets:
+  enabled: true

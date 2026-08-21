@@ -1,0 +1,140 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.venv-test/
+.tools/
+.artifacts/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node.js
+node_modules/
+dist/
+dist-ssr/
+*.local
+.npm
+.yarn-integrity
+.pnpm-store/
+
+# Frontend build
+frontend/dist/
+frontend/build/
+
+# Testing
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# AI models (大文件)
+ai-models/*.safetensors
+ai-models/*.bin
+ai-models/*.ckpt
+ai-models/*.pt
+ai-models/*.pth
+ai-models/*.onnx
+
+# Generated content
+generated/
+exports/
+uploads/
+
+# Docker
+docker/data/
+
+# Alembic
+backend/alembic/versions/__pycache__/
+
+# Electron
+desktop/dist/
+desktop/out/
+desktop/release/
+
+# Temp files
+*.tmp
+*.temp
+.cache/
+
+# Vendored dependencies (backend pip mirror) - never commit
+backend/.deps/
+
+# Python tool caches
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.uv-cache/
+backend/.venv-test/
+backend/.pytest_cache/
+.ruff_cache/
+
+# Review / render artifacts (local evidence, not source)
+.artifacts/
+.agents/
+.tools/
+
+# Local packaged builds
+backend/dist/
+backend/build/
+backend/pyinstaller/__pycache__/
+
+# Node tooling local caches in project root
+.pnpm-store/
+

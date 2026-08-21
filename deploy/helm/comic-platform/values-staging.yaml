@@ -1,0 +1,30 @@
+# 预发环境覆盖配置 (staging)
+# Phase 8 P4 K8s 容器化 - 漫剧软件平台
+
+# 命名空间 - 预发环境独立命名空间
+namespace:
+  name: comic-staging
+
+# 后端服务配置 - 预发环境单副本,节省资源
+backend:
+  web:
+    replicas: 1
+  worker:
+    replicas: 1
+    gpu:
+      enabled: false
+
+# 前端 - 单副本
+frontend:
+  replicas: 1
+
+# Ingress 入口 - 预发启用,无 TLS
+ingress:
+  enabled: true
+  className: nginx
+  host: comic-staging.example.com
+  tls:
+    enabled: false
+
+# 应用环境标识
+env: staging

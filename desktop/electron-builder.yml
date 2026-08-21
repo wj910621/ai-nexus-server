@@ -1,0 +1,138 @@
+# electron-builder packaging configuration for Y·NEX Story Studio
+# Docs: https://www.electron.build/configuration
+
+appId: com.comicstudio.ai
+productName: Y·NEX Story Studio
+copyright: Copyright © 2026 Y·NEX
+
+# Directories
+directories:
+  output: release
+  buildResources: build
+
+# Files to include in the app bundle
+# 'out' is electron-vite's build output
+files:
+  - out/**/*
+  - resources/**/*
+  - package.json
+  - '!**/*.{ts,tsx,map,md}'
+  - '!**/.{git,vscode,idea}/**'
+  - '!**/{test,tests,__tests__}/**'
+  - '!**/*.{spec,test}.{ts,tsx,js,jsx}'
+
+# Variant blocks explicitly select any packaged local backend. Keeping this
+# empty by default prevents a CPU-labelled installer from inheriting the GPU
+# runtime by mistake.
+extraResources: []
+
+# App icon (electron-builder accepts PNG and auto-converts to ICO/ICNS)
+icon: resources/icons/icon.png
+
+# macOS-specific
+mac:
+  category: public.app-category.graphics-design
+  target:
+    - dmg
+    - zip
+  icon: resources/icons/icon.icns
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: null
+  entitlementsInherit: null
+
+# DMG (macOS disk image) configuration
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+# Windows-specific
+# Targets both NSIS installer and ZIP archive. Variant-specific naming
+# (GPU/CPU) is applied via the nsis-gpu / nsis-cpu override blocks below
+# and selected by the build:variant script (Phase 7 Task 16).
+win:
+  target:
+    - nsis
+  icon: resources/icons/icon.ico
+  # Code signing (configure via env vars in CI)
+  # certificateFile: ${env.CSC_LINK}
+  # certificatePassword: ${env.CSC_KEY_PASSWORD}
+
+# NSIS installer configuration
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  allowElevation: true
+  installerIcon: resources/icons/icon.ico
+  uninstallerIcon: resources/icons/icon.ico
+  installerHeaderIcon: resources/icons/icon.ico
+  installerSidebar: build/installer-sidebar.bmp
+  uninstallerSidebar: build/installer-sidebar.bmp
+  installerLanguages: [zh_CN, en_US]
+  language: 2052  # zh_CN LCID
+  include: build/installer.nsh
+  shortcutName: Y·NEX Story Studio
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  deleteAppDataOnUninstall: false
+
+# Linux-specific
+# Targets AppImage and deb. Variant-specific naming (GPU/CPU) is applied
+# via the appimage-gpu / appimage-cpu override blocks below and selected
+# by the build:variant script (Phase 7 Task 16).
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: resources/icons/icon.png
+  category: Graphics
+  maintainer: Y·NEX
+  vendor: Y·NEX
+  synopsis: Y·NEX AI story and comic production studio
+
+# AppImage configuration
+appImage:
+  artifactName: ${productName}-${version}-${arch}.AppImage
+
+# =============================================================================
+# Phase 7 Task 16 — Variant-specific build targets (4 installers)
+# =============================================================================
+# These blocks are NOT native electron-builder sections — they are consumed by
+# the desktop/scripts/build-variant.js helper which merges the matching block
+# into the active config before invoking electron-builder with --config.variant
+# (see backend/scripts/build_desktop.py).
+#
+# Variants:
+#   win-gpu     → nsis-gpu     (~2.5 GB, bundles torch + diffusers + xFormers)
+#   win-cpu     → nsis-cpu     (~600 MB, ONNX Runtime only)
+#   linux-gpu   → appimage-gpu (~2.5 GB, bundles torch + diffusers + xFormers)
+#   linux-cpu   → appimage-cpu (~600 MB, ONNX Runtime only)
+# =============================================================================
+nsis-gpu:
+  artifactName: "YNEX-Story-Studio-Setup-${version}-GPU.${ext}"
+  extraResources:
+    - from: ../backend/dist/comicstudio-backend-gpu
+      to: comicstudio-backend
+      filter: ["**/*"]
+nsis-cpu:
+  artifactName: "YNEX-Story-Studio-Setup-${version}-CPU.${ext}"
+  # CPU release is a cloud-API desktop client. No local model runtime,
+  # torch, diffusers or xformers is packaged.
+  extraResources: []
+appimage-gpu:
+  artifactName: "YNEX-Story-Studio-${version}-GPU.${ext}"
+appimage-cpu:
+  artifactName: "YNEX-Story-Studio-${version}-CPU.${ext}"
+
+# Publish configuration for auto-update
+publish:
+  provider: github
+  owner: comicstudio-ai
+  repo: comic-studio-releases
+  # Token is configured via GH_TOKEN env var in CI
