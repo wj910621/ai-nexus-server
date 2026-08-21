@@ -165,36 +165,36 @@ jobs:
         include:
           - os: windows-latest
             artifact: comicstudio-windows-gpu
-            variant: win-gpu
+            variant: nsis-gpu
           - os: windows-latest
             artifact: comicstudio-windows-cpu
-            variant: win-cpu
+            variant: nsis-cpu
           - os: ubuntu-latest
             artifact: comicstudio-linux-gpu
-            variant: linux-gpu
+            variant: appimage-gpu
           - os: ubuntu-latest
             artifact: comicstudio-linux-cpu
-            variant: linux-cpu
+            variant: appimage-cpu
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci
       - name: Build desktop variant
-        working-directory: backend
-        run: |
-          pip install -r requirements.txt
-          pip install pyinstaller
-          python packaging/build.py --variant ${{ matrix.variant }}
+        working-directory: desktop
+        run: node scripts/build-variant.js --target ${{ matrix.variant }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ${{ matrix.artifact }}
-          path: |
-            backend/dist/*
-            backend/build/*
-          if-no-files-found: ignore
+          path: desktop/release/*
+          if-no-files-found: error

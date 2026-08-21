@@ -82,6 +82,13 @@ class TestReleaseWorkflow:
     def test_release_yml_builds_desktop(self):
         content = (WORKFLOWS_DIR / "release.yml").read_text(encoding="utf-8")
         assert "build-desktop" in content
+        # The desktop variant builder is the Electron side (build-variant.js),
+        # not python packaging/build.py --variant (which has no --variant
+        # argument and builds the backend exe, not the desktop installer).
+        assert "build-variant.js" in content
+        assert "nsis-gpu" in content and "nsis-cpu" in content
+        assert "appimage-gpu" in content and "appimage-cpu" in content
+        assert "packaging/build.py --variant" not in content
 
 
 class TestDeployWorkflow:

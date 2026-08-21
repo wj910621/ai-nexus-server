@@ -110,6 +110,7 @@ frontend/src/config/commercialOperations.ts 的 commercialOperationsEnabled 是*
   - `69a4a02` chore: add .gitattributes（跨平台行尾一致，CI 在 Linux 运行用）
   - `.gitignore` 增加 vendored 依赖/缓存排除（backend/.deps、.artifacts、*.cache 等），提交集从 8707 精简到 649 源文件；已扫描确认无高熵密钥/私钥/真实 .env。
 - 说明：发布流程（git tag v* 触发 release → deploy）此前因**没有 Git 仓库**而无法工作；现已就绪，可直接进入受保护分支 + 版本标签发布流程。
+- **修复桌面安装包构建（release.yml build-desktop）**：原 job 错误调用 `python packaging/build.py --variant <v>`（该脚本不支持 --variant，且只构建后端 exe 而非 Electron 安装包），会导致 CI 桌面构建必然失败。已改为正确调用 `node desktop/scripts/build-variant.js --target nsis-gpu|nsis-cpu|appimage-gpu|appimage-cpu`，矩阵 variant 同步为 Electron 目标，并加装核心依赖后构建，上传 desktop/release/*；`test_cicd.py` 新增回归断言（须出现 build-variant.js 与合法 Electron 目标、不得出现 packaging/build.py --variant）。桌面 .gitignore 增加生成的 `.electron-builder.*.yml`。
 
 ---
 

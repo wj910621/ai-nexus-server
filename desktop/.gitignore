@@ -6,6 +6,8 @@ dist/
 .vitest/
 coverage/
 release/
+# Generated per-variant electron-builder config (created by build-variant.js)
+.electron-builder.*.yml
 *.local
 .env
 .env.local
