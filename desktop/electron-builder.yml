@@ -104,9 +104,9 @@ appImage:
 # Phase 7 Task 16 — Variant-specific build targets (4 installers)
 # =============================================================================
 # These blocks are NOT native electron-builder sections — they are consumed by
-# the desktop/scripts/build-variant.js helper which merges the matching block
-# into the active config before invoking electron-builder with --config.variant
-# (see backend/scripts/build_desktop.py).
+# desktop/scripts/build-variant.js, which filters the matching target block out
+# and passes it to electron-builder as --config (the production/CI path, e.g.
+# `node scripts/build-variant.js --target nsis-gpu`).
 #
 # Variants:
 #   win-gpu     → nsis-gpu     (~2.5 GB, bundles torch + diffusers + xFormers)
