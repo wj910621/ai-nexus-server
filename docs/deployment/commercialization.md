@@ -1,6 +1,6 @@
 # 商业化功能部署指南
 
-ComicStudio AI Phase 6 商业化功能模块部署与配置说明。
+Y·NEX Story Studio Phase 6 商业化功能模块部署与配置说明。
 
 ## 功能概览
 

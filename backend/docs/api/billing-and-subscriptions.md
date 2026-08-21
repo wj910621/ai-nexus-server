@@ -1,6 +1,6 @@
 # Billing & Subscriptions API
 
-ComicStudio AI Phase 6 introduces credit-based billing, subscription plans, payments, and audit logging.
+Y·NEX Story Studio Phase 6 introduces credit-based billing, subscription plans, payments, and audit logging.
 
 ## Authentication
 
