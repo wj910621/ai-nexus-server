@@ -29,24 +29,26 @@ class ProviderRouter:
     """智能路由器 - 按订阅层级 + 用户偏好 + 可用性选择 Provider"""
 
     # 默认优先级（按订阅层级 + 引擎类型）
+    # 商业化瘦身（2026-09-02）：provider 名与 ProviderRegistry 注册名严格对齐。
+    # 下线：image/kolors、llm/glm、llm/doubao、tts/volcano_tts、video 全部 4 个。
     PRIORITY: dict[str, dict[str, list[str]]] = {
         "free": {
-            "image": ["sdxl", "kolors"],
+            "image": ["pollinations"],
             "video": [],
             "llm": ["deepseek"],
-            "tts": ["edge"],
+            "tts": ["edge_tts"],
         },
         "pro": {
-            "image": ["seedream", "flux", "sdxl", "kolors"],
-            "video": ["seedance", "kling", "wan", "hunyuan"],
-            "llm": ["qwen-local", "deepseek", "glm", "doubao"],
-            "tts": ["volcano", "cosyvoice", "edge"],
+            "image": ["seedream", "pollinations"],
+            "video": [],
+            "llm": ["deepseek", "jarvis-gateway"],
+            "tts": ["edge_tts", "cosyvoice"],
         },
         "enterprise": {
-            "image": ["seedream", "flux", "sdxl", "kolors"],
-            "video": ["seedance", "kling", "wan", "hunyuan"],
-            "llm": ["qwen-local", "deepseek", "glm", "doubao"],
-            "tts": ["volcano", "cosyvoice", "edge"],
+            "image": ["seedream", "pollinations"],
+            "video": [],
+            "llm": ["deepseek", "jarvis-gateway"],
+            "tts": ["edge_tts", "cosyvoice"],
         },
     }
 

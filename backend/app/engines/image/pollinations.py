@@ -149,3 +149,10 @@ class PollinationsProvider(ImageGenProvider):
         info["available_models"] = self.AVAILABLE_MODELS
         info["default_model"] = "flux"
         return info
+
+
+# 商业化瘦身（2026-09-02）：默认图像引擎补注册进 ProviderRegistry，
+# 使 ProviderRouter / get_engine_routed 能路由到 pollinations（免费默认）。
+from app.engines.registry import provider_registry  # noqa: E402
+
+provider_registry.register("image", "pollinations", PollinationsProvider)

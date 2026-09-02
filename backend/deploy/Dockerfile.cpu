@@ -11,6 +11,9 @@ RUN pip install --no-cache-dir -r requirements.production.txt
 COPY --chown=story:story app ./app
 COPY --chown=story:story alembic.ini ./
 COPY --chown=story:story alembic ./alembic
+# uploads 必须预创建并归属 story，否则命名卷首次挂载时属主为 root，
+# 容器内所有文件生成（图片/TTS/视频）都会 PermissionError
+RUN mkdir -p /app/uploads && chown story:story /app/uploads
 USER story
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

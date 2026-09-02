@@ -147,24 +147,36 @@ async def test_consume_quota_after_generation(manager_with_registry, fake_provid
     await manager_with_registry.consume_quota(
         user_id=1,
         engine_type="llm",
-        tokens=10,
+        amount=10,
         is_local=False,
     )
     manager_with_registry._quota_guard.consume.assert_awaited_once()
     call_args = manager_with_registry._quota_guard.consume.call_args
-    assert call_args.kwargs["tokens"] == 10
+    assert call_args.kwargs["amount"] == 10
 
 
 @pytest.mark.asyncio
 async def test_subscription_guard_blocks_local_for_free_user(manager_with_registry, fake_providers):
-    """Free 用户使用本地 Provider 时被 SubscriptionGuard 拦截"""
+    """Free 用户使用本地 Provider 时被订阅层级校验拦截"""
     manager_with_registry._router.select = AsyncMock(return_value=fake_providers["qwen-local"])
-    manager_with_registry._subscription_guard.verify = AsyncMock(return_value=False)
     result = await manager_with_registry.get_engine_routed(
         engine_type="llm",
         user_id=1,
         subscription_tier="free",
         force_local=True,
     )
+    # qwen-local 要求 pro 层级，Free 用户应被拦截
     assert result is None
-    manager_with_registry._subscription_guard.verify.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_subscription_guard_allows_local_for_pro_user(manager_with_registry, fake_providers):
+    """Pro 用户使用本地 Provider 时放行"""
+    manager_with_registry._router.select = AsyncMock(return_value=fake_providers["qwen-local"])
+    result = await manager_with_registry.get_engine_routed(
+        engine_type="llm",
+        user_id=1,
+        subscription_tier="pro",
+        force_local=True,
+    )
+    assert result is fake_providers["qwen-local"]

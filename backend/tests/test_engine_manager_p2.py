@@ -95,9 +95,9 @@ async def test_llm_route_skips_qwen_local_when_intel(_reset_dm_singleton):
     deepseek = _FakeDeepSeek()
 
     mgr = EngineManager()
-    # 注入已实例化 Provider 清单
+    # 注入已实例化 Provider 清单（扁平结构，与 _instantiate_all_providers 一致）
     mgr._instantiated_providers = {
-        "llm": {"qwen_local": qwen, "llama_cpp": llama, "deepseek": deepseek},
+        "qwen_local": qwen, "llama_cpp": llama, "deepseek": deepseek,
     }
     # mock 路由组件
     mgr._router = MagicMock()
@@ -105,7 +105,6 @@ async def test_llm_route_skips_qwen_local_when_intel(_reset_dm_singleton):
     mgr._quota_guard = MagicMock()
     mgr._quota_guard.check = AsyncMock(return_value=True)
     mgr._subscription_guard = MagicMock()
-    mgr._subscription_guard.verify = AsyncMock(return_value=True)
 
     provider = await mgr.get_engine_routed(
         engine_type="llm",
@@ -133,14 +132,13 @@ async def test_llm_route_uses_qwen_local_when_nvidia(_reset_dm_singleton):
 
     mgr = EngineManager()
     mgr._instantiated_providers = {
-        "llm": {"qwen_local": qwen, "llama_cpp": llama, "deepseek": deepseek},
+        "qwen_local": qwen, "llama_cpp": llama, "deepseek": deepseek,
     }
     mgr._router = MagicMock()
     mgr._router.select = AsyncMock(side_effect=lambda ctx, providers: _select_for_test(ctx, providers))
     mgr._quota_guard = MagicMock()
     mgr._quota_guard.check = AsyncMock(return_value=True)
     mgr._subscription_guard = MagicMock()
-    mgr._subscription_guard.verify = AsyncMock(return_value=True)
 
     provider = await mgr.get_engine_routed(
         engine_type="llm",
@@ -168,14 +166,13 @@ async def test_llm_route_fallback_to_api_when_no_local_matches(_reset_dm_singlet
     mgr = EngineManager()
     # 未实例化 llama_cpp
     mgr._instantiated_providers = {
-        "llm": {"qwen_local": qwen, "deepseek": deepseek},
+        "qwen_local": qwen, "deepseek": deepseek,
     }
     mgr._router = MagicMock()
     mgr._router.select = AsyncMock(side_effect=lambda ctx, providers: _select_for_test(ctx, providers))
     mgr._quota_guard = MagicMock()
     mgr._quota_guard.check = AsyncMock(return_value=True)
     mgr._subscription_guard = MagicMock()
-    mgr._subscription_guard.verify = AsyncMock(return_value=True)
 
     provider = await mgr.get_engine_routed(
         engine_type="llm",
@@ -202,13 +199,12 @@ async def test_image_route_not_affected_by_llm_filter(_reset_dm_singleton):
     flux.is_local = True
 
     mgr = EngineManager()
-    mgr._instantiated_providers = {"image": {"flux": flux}}
+    mgr._instantiated_providers = {"flux": flux}
     mgr._router = MagicMock()
     mgr._router.select = AsyncMock(return_value=flux)
     mgr._quota_guard = MagicMock()
     mgr._quota_guard.check = AsyncMock(return_value=True)
     mgr._subscription_guard = MagicMock()
-    mgr._subscription_guard.verify = AsyncMock(return_value=True)
 
     provider = await mgr.get_engine_routed(
         engine_type="image",
@@ -220,10 +216,13 @@ async def test_image_route_not_affected_by_llm_filter(_reset_dm_singleton):
 
 
 def _select_for_test(ctx, providers):
-    """测试用 Router 替身：从 providers 中按候选顺序选第一个可用的"""
-    engine_type = ctx.engine_type
-    available = providers.get(engine_type, {})
-    if not available:
+    """测试用 Router 替身：从扁平 providers dict 中按候选顺序选第一个可用的"""
+    # _instantiated_providers 是扁平结构 {provider_name: instance}
+    # 兼容旧测试传 {engine_type: {name: instance}} 的嵌套结构
+    flat = providers
+    if any(isinstance(v, dict) for v in providers.values()):
+        flat = providers.get(ctx.engine_type, {})
+    if not flat:
         return None
     # 简单返回第一个（按插入序）
-    return next(iter(available.values()))
+    return next(iter(flat.values()))

@@ -117,6 +117,49 @@ def _require_engine(engine: Optional[object], engine_name: str):
     return engine
 
 
+def _user_tier(user: User) -> str:
+    """获取用户订阅层级（free/pro/enterprise），默认 free"""
+    return getattr(user, "plan", None) or getattr(user, "role", "free") or "free"
+
+
+async def _resolve_engine(
+    db: AsyncSession,
+    user: User,
+    engine_type: str,
+    engine_name: str,
+    fallback_getter=None,
+):
+    """按订阅层级路由引擎（配额/订阅防护）
+
+    商业化瘦身（2026-09-02）：将 API 层从"单默认引擎直调"升级为
+    get_engine_routed() 智能路由——本地 Provider 走订阅层级校验，
+    API Provider 走 QuotaGuard 配额检查。
+
+    兼容策略：路由组件（_router/_quota_guard）未初始化时（如测试环境、
+    路由组件初始化失败），回退到单默认引擎，保证向后兼容。
+    """
+    if engine_manager._router is None or engine_manager._quota_guard is None:
+        # 路由组件未就绪 → 单默认引擎（旧行为）
+        if fallback_getter is None:
+            fallback_getter = getattr(engine_manager, f"get_{engine_type}_engine", None)
+        engine = fallback_getter() if fallback_getter else None
+        return _require_engine(engine, engine_name)
+
+    tier = _user_tier(user)
+    engine = await engine_manager.get_engine_routed(
+        engine_type=engine_type,
+        user_id=int(user.id) if isinstance(user.id, int) else user.id,
+        subscription_tier=tier,
+        user_preference=(user.preferences or {}).get("provider", "") if getattr(user, "preferences", None) else "",
+    )
+    if engine is None:
+        raise HTTPException(
+            status_code=429,
+            detail=f"{engine_name} 配额不足或无可用的引擎，请升级订阅或稍后重试",
+        )
+    return engine
+
+
 # === Credit costs & helpers ===
 CREDIT_COSTS = {
     "text2img": 10,
@@ -286,7 +329,10 @@ async def text2img(
 
     # 2. 扣点 + 去重执行
     charge = await check_and_deduct_credits(db, current_user, "text2img")
-    image_engine = _require_engine(engine_manager.get_image_engine(), "image")
+    image_engine = await _resolve_engine(
+        db, current_user, "image", "image",
+        fallback_getter=engine_manager.get_image_engine,
+    )
 
     async def _do_generate():
         async with engine_concurrency.acquire("image"):
@@ -347,7 +393,10 @@ async def tts(
 
     # 2. 扣点 + 去重执行
     charge = await check_and_deduct_credits(db, current_user, "tts")
-    tts_engine = _require_engine(engine_manager.get_tts_engine(), "tts")
+    tts_engine = await _resolve_engine(
+        db, current_user, "tts", "tts",
+        fallback_getter=engine_manager.get_tts_engine,
+    )
 
     async def _do_synthesize():
         async with engine_concurrency.acquire("tts"):
@@ -433,7 +482,10 @@ async def chat(
             return ApiResponse.success(data=GenerationResponse(**cached))
 
         charge = await check_and_deduct_credits(db, current_user, "chat")
-        llm_engine = _require_engine(engine_manager.get_llm_engine(), "llm")
+        llm_engine = await _resolve_engine(
+            db, current_user, "llm", "llm",
+            fallback_getter=engine_manager.get_llm_engine,
+        )
         messages = [m.model_dump() for m in payload.messages]
 
         async def _do_chat():
@@ -477,7 +529,10 @@ async def chat(
     # 注：流式不查缓存、不去重（每个 token 都是实时增量），但仍扣点；
     # 异常 / 客户端断开时按未使用比例退款。
     charge = await check_and_deduct_credits(db, current_user, "chat")
-    llm_engine = _require_engine(engine_manager.get_llm_engine(), "llm")
+    llm_engine = await _resolve_engine(
+        db, current_user, "llm", "llm",
+        fallback_getter=engine_manager.get_llm_engine,
+    )
     messages = [m.model_dump() for m in payload.messages]
     estimated_tokens = payload.max_tokens or 1000
 
@@ -530,7 +585,10 @@ async def video_compose(
 ):
     """视频合成"""
     charge = await check_and_deduct_credits(db, current_user, "video_compose")
-    video_engine = _require_engine(engine_manager.get_video_engine(), "video")
+    video_engine = await _resolve_engine(
+        db, current_user, "video", "video",
+        fallback_getter=engine_manager.get_video_engine,
+    )
     # resolution 是 list[int]，引擎期望 tuple[int, int]
     resolution = (
         tuple(payload.resolution) if payload.resolution else (1920, 1080)
@@ -573,8 +631,9 @@ async def character_generate(
 ):
     """角色一致性生成"""
     charge = await check_and_deduct_credits(db, current_user, "character_generate")
-    character_engine = _require_engine(
-        engine_manager.get_character_engine(), "character"
+    character_engine = await _resolve_engine(
+        db, current_user, "character", "character",
+        fallback_getter=engine_manager.get_character_engine,
     )
     # reference_image 可能是 base64 或 URL，统一转为 bytes
     reference_bytes = _decode_reference_image(payload.reference_image)

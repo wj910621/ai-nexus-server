@@ -90,7 +90,11 @@ class VolcanoTTSProvider(TTSProvider):
 
         import json as _json
         payload = {
-            "app": {"appid": self.api_key, "token": "access_token", "cluster": "volcano_tts"},
+            "app": {
+                "appid": self.api_key,
+                "token": getattr(settings, "volcano_tts_app_token", "") or "",
+                "cluster": "volcano_tts",
+            },
             "user": {"uid": "comicstudio"},
             "audio": {
                 "voice_type": voice,

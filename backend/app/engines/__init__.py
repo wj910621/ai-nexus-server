@@ -48,25 +48,24 @@ def _ensure_providers_registered() -> bool:
     _registration_errors.clear()
 
     # 待注册的 (engine_type, module_path, provider_label) 三元组清单
+    # 商业化瘦身（2026-09-02）：仅保留真实可用且成本最优的 Provider。
+    # 下线：image/kolors、llm/glm、llm/doubao、tts/volcano_tts、video 全部 4 个
+    #       （kling/seedance/wan/hunyuan，无调用点死代码）。
+    # 补注册：pollinations（image 免费默认）、deepseek（llm 默认）、edge_tts（tts 默认）。
     _provider_modules: list[tuple[str, str, str]] = [
         # === IMAGE Providers ===
+        ("image", "app.engines.image.pollinations", "pollinations"),
         ("image", "app.engines.image.seedream", "seedream"),
-        ("image", "app.engines.image.flux", "flux"),
-        ("image", "app.engines.image.kolors", "kolors"),
-        # === VIDEO Providers ===
-        ("video", "app.engines.video.seedance", "seedance"),
-        ("video", "app.engines.video.kling", "kling"),
-        ("video", "app.engines.video.wan", "wan"),
-        ("video", "app.engines.video.hunyuan", "hunyuan"),
+        ("image", "app.engines.image.flux", "flux"),  # 本地 diffusers（桌面端用）
+        # === VIDEO Providers（ffmpeg 合成走 get_default_provider，非 Provider 注册）===
         # === LLM Providers ===
-        ("llm", "app.engines.llm.qwen_local", "qwen-local"),
-        ("llm", "app.engines.llm.glm", "glm"),
-        ("llm", "app.engines.llm.doubao", "doubao"),
+        ("llm", "app.engines.llm.deepseek", "deepseek"),
         ("llm", "app.engines.llm.jarvis_gateway", "jarvis-gateway"),
-        ("llm", "app.engines.llm.llama_cpp", "llama_cpp"),  # P2 Task 12 新增
+        ("llm", "app.engines.llm.qwen_local", "qwen_local"),  # 本地 vLLM（桌面端用）
+        ("llm", "app.engines.llm.llama_cpp", "llama_cpp"),  # 本地 llama.cpp（桌面端用）
         # === TTS Providers ===
-        ("tts", "app.engines.tts.volcano_tts", "volcano"),
-        ("tts", "app.engines.tts.cosyvoice", "cosyvoice"),
+        ("tts", "app.engines.tts.edge_tts", "edge_tts"),
+        ("tts", "app.engines.tts.cosyvoice", "cosyvoice"),  # 本地 CosyVoice（桌面端用）
     ]
 
     import importlib

@@ -82,9 +82,16 @@ def _make_mock_engine_manager() -> MagicMock:
     """构造 mock engine_manager，覆盖 5 个引擎的所有方法
 
     每个生成方法返回一个成功的 GenerationResult，便于断言。
+    商业化瘦身（2026-09-02）：mock 路由组件与 get_engine_routed。
+    默认 get_engine_routed 返回 None（路由未命中）→ _resolve_engine
+    回退到单例引擎，保持各端点行为不变。
     """
     manager = MagicMock()
     manager.ENGINE_TYPES = ["image", "tts", "llm", "video", "character"]
+    # 路由组件就绪（_resolve_engine 会走 get_engine_routed 分支）
+    manager._router = MagicMock()
+    manager._quota_guard = MagicMock()
+    # get_engine_routed 按 engine_type 返回对应引擎（定义见文件底部 fixture）
 
     # get_all_info - 5 个引擎信息
     manager.get_all_info = AsyncMock(return_value={
@@ -199,6 +206,20 @@ def _make_mock_engine_manager() -> MagicMock:
         )
     )
     manager.get_character_engine.return_value = character_engine
+
+    # get_engine_routed 按 engine_type 返回对应引擎（路由成功路径）
+    _engine_by_type = {
+        "image": image_engine,
+        "tts": tts_engine,
+        "llm": llm_engine,
+        "video": video_engine,
+        "character": character_engine,
+    }
+
+    async def _routed(engine_type, user_id, subscription_tier, user_preference="", force_local=False):
+        return _engine_by_type.get(engine_type)
+
+    manager.get_engine_routed = AsyncMock(side_effect=_routed)
 
     return manager
 

@@ -354,3 +354,10 @@ class DeepSeekProvider(LLMProvider):
         info["api_base"] = self.api_base
         info["api_key_configured"] = bool(self.api_key)
         return info
+
+
+# 商业化瘦身（2026-09-02）：默认 LLM 引擎补注册进 ProviderRegistry，
+# 使 ProviderRouter / get_engine_routed 能路由到 deepseek（低价主力）。
+from app.engines.registry import provider_registry  # noqa: E402
+
+provider_registry.register("llm", "deepseek", DeepSeekProvider)

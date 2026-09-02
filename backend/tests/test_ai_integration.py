@@ -156,6 +156,10 @@ def _make_mock_engine_manager() -> MagicMock:
     manager = MagicMock()
     manager.ENGINE_TYPES = ["image", "tts", "llm", "video", "character"]
 
+    # 路由组件就绪（_resolve_engine 会走 get_engine_routed 分支）
+    manager._router = MagicMock()
+    manager._quota_guard = MagicMock()
+
     # get_all_info - 5 个引擎信息
     manager.get_all_info = AsyncMock(return_value={
         "image": {
@@ -269,6 +273,20 @@ def _make_mock_engine_manager() -> MagicMock:
         )
     )
     manager.get_character_engine.return_value = character_engine
+
+    # get_engine_routed 按 engine_type 返回对应引擎（路由成功路径）
+    _engine_by_type = {
+        "image": image_engine,
+        "tts": tts_engine,
+        "llm": llm_engine,
+        "video": video_engine,
+        "character": character_engine,
+    }
+
+    async def _routed(engine_type, user_id, subscription_tier, user_preference="", force_local=False):
+        return _engine_by_type.get(engine_type)
+
+    manager.get_engine_routed = AsyncMock(side_effect=_routed)
 
     return manager
 

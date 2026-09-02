@@ -67,6 +67,10 @@ async def test_chat_stream_returns_event_stream(auth_bypass):
 
     mock_mgr = MagicMock()
     mock_mgr.get_llm_engine.return_value = mock_engine
+    # 路由组件就绪（_resolve_engine 会走 get_engine_routed 分支）
+    mock_mgr._router = MagicMock()
+    mock_mgr._quota_guard = MagicMock()
+    mock_mgr.get_engine_routed = AsyncMock(return_value=mock_engine)
 
     with patch("app.api.ai.engine_manager", mock_mgr):
         transport = ASGITransport(app=app)
@@ -103,6 +107,10 @@ async def test_chat_non_stream_returns_json(auth_bypass):
     )
     mock_mgr = MagicMock()
     mock_mgr.get_llm_engine.return_value = mock_engine
+    # 路由组件就绪（_resolve_engine 会走 get_engine_routed 分支）
+    mock_mgr._router = MagicMock()
+    mock_mgr._quota_guard = MagicMock()
+    mock_mgr.get_engine_routed = AsyncMock(return_value=mock_engine)
 
     with patch("app.api.ai.engine_manager", mock_mgr):
         transport = ASGITransport(app=app)

@@ -298,18 +298,23 @@ class EngineManager:
         if provider is None:
             return None
 
-        # 本地 Provider → 订阅验证
+        # 本地 Provider → 订阅层级校验（复用 Router.TIER_ORDER 层级表；
+        # 原代码调用不存在的 SubscriptionGuard.verify() 已修复）
         if provider.is_local:
-            if self._subscription_guard is not None:
-                ok = await self._subscription_guard.verify(user_id, subscription_tier)
-                if not ok:
-                    return None
+            from app.engines.router import ProviderRouter
+
+            required = getattr(provider, "subscription_required", "free")
+            user_level = ProviderRouter.TIER_ORDER.get(subscription_tier, 0)
+            required_level = ProviderRouter.TIER_ORDER.get(required, 0)
+            if user_level < required_level:
+                return None
             return provider
 
-        # API Provider → 配额检查
+        # API Provider → 配额检查（商业化瘦身 2026-09-02：补 subscription_tier 参数）
         ok = await self._quota_guard.check(
             user_id=user_id,
             engine_type=engine_type,
+            subscription_tier=subscription_tier,
         )
         if not ok:
             return None
@@ -325,6 +330,11 @@ class EngineManager:
         - llama_cpp → 保留 llama_cpp（移除 qwen_local）
         - 任何情况下保留所有 API Provider
 
+        商业化瘦身（2026-09-02）修复：_instantiated_providers 是
+        ``provider_name -> instance`` 的**扁平** dict，原先按
+        ``providers.get("llm", {})`` 嵌套取值永远为空（bug）。
+        现改为遍历扁平 dict，仅对本地 LLM 按推荐引擎过滤。
+
         若 DeviceManager 未初始化或不可用，原样返回（不破坏现有行为）。
         """
         try:
@@ -335,45 +345,40 @@ class EngineManager:
             # DeviceManager 不可用 → 不做过滤
             return providers
 
-        llm_pool = providers.get("llm", {})
-        if not llm_pool:
-            return providers
-
-        filtered_llm: dict = {}
-        for name, prov in llm_pool.items():
+        filtered: dict = {}
+        for name, prov in providers.items():
             is_local = getattr(prov, "is_local", False)
             if not is_local:
                 # API Provider 全部保留
-                filtered_llm[name] = prov
+                filtered[name] = prov
                 continue
 
-            # 本地 Provider 按推荐引擎过滤
-            if recommended == "llama_cpp":
-                # Intel/CPU：仅保留 llama_cpp，跳过 qwen_local（vLLM）
-                if name == "llama_cpp":
-                    filtered_llm[name] = prov
-                # 其他本地 LLM Provider（如未来扩展）暂保留，由 Router 决定
-                elif name not in ("qwen_local", "qwen-local"):
-                    filtered_llm[name] = prov
-            else:  # vllm
-                # NVIDIA/AMD：仅保留 qwen_local，跳过 llama_cpp
-                if name == "llama_cpp":
-                    continue
-                filtered_llm[name] = prov
+            # 仅过滤本地 LLM（qwen_local / llama_cpp）
+            if name not in ("qwen_local", "qwen-local", "llama_cpp"):
+                filtered[name] = prov
+                continue
 
-        # 浅拷贝其他 engine_type 不变
-        result = dict(providers)
-        result["llm"] = filtered_llm
-        return result
+            if recommended == "llama_cpp":
+                if name == "llama_cpp":
+                    filtered[name] = prov
+            else:  # vllm
+                if name == "qwen_local" or name == "qwen-local":
+                    filtered[name] = prov
+
+        return filtered
 
     async def consume_quota(
         self,
         user_id: int,
         engine_type: str,
-        tokens: int,
-        is_local: bool,
+        amount: int = 1,
+        is_local: bool = False,
     ) -> None:
-        """Task 24: 消费配额（本地 Provider 跳过）"""
+        """Task 24: 消费配额（本地 Provider 跳过）
+
+        商业化瘦身（2026-09-02）：参数名与 QuotaGuard.consume 对齐（amount），
+        默认 1 次调用；LLM 场景由调用方按 token 数折算后传入。
+        """
         if is_local:
             return
         if self._quota_guard is None:
@@ -381,7 +386,7 @@ class EngineManager:
         await self._quota_guard.consume(
             user_id=user_id,
             engine_type=engine_type,
-            tokens=tokens,
+            amount=amount,
         )
 
     def get_image_engine(self) -> Optional[BaseEngine]:

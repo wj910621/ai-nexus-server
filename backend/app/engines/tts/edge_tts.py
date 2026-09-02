@@ -169,3 +169,10 @@ class EdgeTTSProvider(TTSProvider):
         info["popular_voices"] = self.POPULAR_VOICES
         info["default_voice"] = "zh-CN-XiaoxiaoNeural"
         return info
+
+
+# 商业化瘦身（2026-09-02）：默认 TTS 引擎补注册进 ProviderRegistry，
+# 使 ProviderRouter / get_engine_routed 能路由到 edge_tts（免费默认）。
+from app.engines.registry import provider_registry  # noqa: E402
+
+provider_registry.register("tts", "edge_tts", EdgeTTSProvider)

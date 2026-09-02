@@ -163,20 +163,18 @@ async def test_intel_engine_manager_routes_to_llama_cpp(_intel_torch, _reset_dm_
 
         mgr = EngineManager()
         mgr._instantiated_providers = {
-            "llm": {"qwen_local": qwen, "llama_cpp": llama},
+            "qwen_local": qwen, "llama_cpp": llama,
         }
         mgr._router = MagicMock()
-        # 简化的 select：从过滤后的清单中选 llama_cpp（qwen_local 应被过滤掉）
+        # 简化的 select：从过滤后的扁平清单中选 llama_cpp（qwen_local 应被过滤掉）
         async def _select(ctx, providers):
-            llm_pool = providers.get("llm", {})
-            # 在 Intel 环境下，过滤后应只剩 llama_cpp
-            assert "qwen_local" not in llm_pool, "qwen_local should be filtered out in Intel env"
-            return llm_pool.get("llama_cpp")
+            # 扁平结构：qwen_local 应在 Intel 环境下被 _filter_llm_providers_by_engine 移除
+            assert "qwen_local" not in providers, "qwen_local should be filtered out in Intel env"
+            return providers.get("llama_cpp")
         mgr._router.select = _select
         mgr._quota_guard = MagicMock()
         mgr._quota_guard.check = AsyncMock(return_value=True)
         mgr._subscription_guard = MagicMock()
-        mgr._subscription_guard.verify = AsyncMock(return_value=True)
 
         provider = await mgr.get_engine_routed(
             engine_type="llm",
