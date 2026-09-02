@@ -46,6 +46,7 @@ class DeepSeekProvider(LLMProvider):
         self._initialized = False
         self.client: Optional[httpx.AsyncClient] = None
         self._cache = None  # 新增：SemanticCache 实例（可选）
+        self._extra_headers: dict = {}  # 子类可注入自定义请求头（如服务间 x-internal-token）
 
     def set_cache(self, cache) -> None:
         """注入 SemanticCache 实例（可选，由 EngineManager 调用）"""
@@ -146,6 +147,7 @@ class DeepSeekProvider(LLMProvider):
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
+        headers.update(self._extra_headers)
         payload = {
             "model": model,
             "messages": messages,
@@ -305,6 +307,7 @@ class DeepSeekProvider(LLMProvider):
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
+        headers.update(self._extra_headers)
         payload = {
             "model": model,
             "messages": messages,

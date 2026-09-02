@@ -63,8 +63,14 @@ def validate_production_settings(settings: Settings) -> None:
     if settings.run_migrations_on_startup:
         errors.append("run_migrations_on_startup must be false in production")
     if settings.jarvis_gateway_enabled:
-        if not settings.jarvis_gateway_base_url.startswith("https://"):
-            errors.append("jarvis_gateway_base_url must use HTTPS in production")
+        _gw = (settings.jarvis_gateway_base_url or "").lower()
+        _internal_hosts = ("host.docker.internal", "localhost", "127.0.0.1", "172.", "10.", "192.168.")
+        _is_internal = any(h in _gw for h in _internal_hosts)
+        if not (_gw.startswith("https://") or (_gw.startswith("http://") and _is_internal)):
+            errors.append(
+                "jarvis_gateway_base_url must use HTTPS in production "
+                "(internal/loopback HTTP allowed for sidecar services)"
+            )
         if len(settings.jarvis_gateway_service_token) < 32:
             errors.append(
                 "jarvis_gateway_service_token is required and must be at least 32 characters"

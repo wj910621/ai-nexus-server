@@ -19,6 +19,10 @@ class JarvisGatewayProvider(DeepSeekProvider):
             api_base=base_url,
             timeout=settings.jarvis_gateway_timeout_seconds,
         )
+        # 主站 /v1/chat/completions 服务间认证:必须携带 x-internal-token(本机/内网 IP 白名单)
+        self._extra_headers = {
+            "x-internal-token": settings.jarvis_gateway_service_token,
+        }
         self.DEFAULT_MODEL = settings.jarvis_gateway_default_model
         self.AVAILABLE_MODELS = [self.DEFAULT_MODEL] if self.DEFAULT_MODEL else []
 
