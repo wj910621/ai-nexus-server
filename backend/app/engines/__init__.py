@@ -6,11 +6,11 @@ Task 25: 在导入 engines 包时触发所有 Provider 模块的自动注册。
 
 P2 Task 12: 新增 llama_cpp Provider（Intel XPU / CPU LLM fallback）
 
-注册清单：
-- IMAGE: seedream / flux / kolors (3)
-- VIDEO: seedance / kling / wan / hunyuan (4)
-- LLM:   qwen_local / glm / doubao / llama_cpp (4)  # P2 新增 llama_cpp
-- TTS:   volcano_tts / cosyvoice (2)
+注册清单（商业化瘦身 2026-09-02）：
+- IMAGE: pollinations / seedream / flux(本地) (3)
+- VIDEO: 无（AI 引擎全下线，ffmpeg 本地合成保留）
+- LLM:   deepseek / jarvis-gateway / qwen_local(本地) / llama_cpp(本地) (4)
+- TTS:   edge_tts / cosyvoice(本地) (2)
 """
 from app.engines.base import (
     BaseEngine,

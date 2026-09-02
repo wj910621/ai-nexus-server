@@ -140,19 +140,6 @@ class Settings(BaseSettings):
     ynex_billing_base_url: str = ""
     ynex_billing_service_token: str = ""
 
-    # Doubao (火山引擎 Ark API) - Task 14
-    doubao_api_key: str = ""
-    doubao_api_base: str = "https://ark.cn-beijing.volces.com/api/v3"
-
-    # Volcano TTS (火山引擎语音合成) - Task 18
-    volcano_tts_api_key: str = ""
-    volcano_tts_api_secret: str = ""
-    volcano_tts_api_base: str = "https://openspeech.bytedance.com/api/v1"
-
-    # GLM (ZhipuAI)
-    glm_api_key: str = ""
-    glm_api_base: str = "https://open.bigmodel.cn/api/paas/v4"
-
     # CDN settings (cloud only; desktop uses local file storage)
     cdn_provider: str = "none"  # "r2" | "qiniu" | "none"
     cdn_r2_account_id: str = ""
@@ -187,20 +174,10 @@ class Settings(BaseSettings):
     local_tts_model: str = "en_US-lessac-medium"
 
     # 14 个 Provider 配置 (Task 20 / Phase 8 P1)
-    # 即梦 Volcano 通用（图像 / 视频）
+    # 即梦 Volcano 通用（图像）
     volcano_api_key: str = ""
     volcano_api_secret: str = ""
     volcano_api_base: str = "https://visual.volcengineapi.com"
-
-    # 快手可灵视频 / 可图图像（共用 key）
-    kling_api_key: str = ""
-    kling_api_secret: str = ""
-    kling_api_base: str = "https://api.kuaishou.com/kling"
-
-    # 快手可图 Kolors 图像
-    kolors_api_key: str = ""
-    kolors_api_secret: str = ""
-    kolors_api_base: str = "https://api.kuaishou.com/kolors"
 
     # 语义缓存 (Task 20 / Phase 8 P1)
     semantic_cache_enabled: bool = True
@@ -226,8 +203,6 @@ class Settings(BaseSettings):
 
     # 本地推理模型默认值 (Task 20 / Phase 8 P1)
     local_flux_model: str = "black-forest-labs/FLUX.1-dev"
-    local_wan_model: str = "Wan-AI/Wan2.1-T2V-1.3B"
-    local_hunyuan_model: str = "tencent/HunyuanVideo"
     local_cosyvoice_model: str = "FunAudioLLM/CosyVoice-300M"
     local_vllm_gpu_memory_utilization: float = 0.85
     local_vllm_max_model_len: int = 8192
