@@ -21,9 +21,10 @@ def test_auth():
     from auth import create_api_key, verify_request, check_permission, UserRole
 
     raw, kid = create_api_key("测试", UserRole.FAMILY)
-    ok, role, err = verify_request(raw, "127.0.0.1")
+    ok, role, err, api_key_obj = verify_request(raw, "127.0.0.1")
     assert ok, f"认证失败: {err}"
     assert role == UserRole.FAMILY
+    assert api_key_obj is not None
     assert check_permission(role, "chat")
     assert not check_permission(role, "admin_users")
     print("✅ 认证模块测试通过")
