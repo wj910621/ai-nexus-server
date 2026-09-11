@@ -1,18 +1,22 @@
 import { Card, Col, Row, Statistic, Typography } from 'antd'
-import { ProjectOutlined, TeamOutlined, FileTextOutlined, VideoCameraOutlined } from '@ant-design/icons'
+import { ProjectOutlined, RobotOutlined, AppstoreOutlined, VideoCameraOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { useAssetStore } from '@/stores/assetStore'
+import { useJobStore } from '@/stores/jobStore'
 import TaskProgressList from '@/components/dashboard/TaskProgressList'
 
 export default function DashboardPage() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
+  const assetCount = useAssetStore((s) => s.assets.length)
+  const jobCount = useJobStore((s) => s.jobs.length)
 
   const stats = [
     { title: '项目数', value: 0, icon: <ProjectOutlined />, color: '#3b82f6' },
-    { title: '角色数', value: 0, icon: <TeamOutlined />, color: '#8b5cf6' },
-    { title: '剧本数', value: 0, icon: <FileTextOutlined />, color: '#10b981' },
-    { title: '渲染任务', value: 0, icon: <VideoCameraOutlined />, color: '#f59e0b' },
+    { title: '脚本资产', value: assetCount, icon: <RobotOutlined />, color: '#8b5cf6' },
+    { title: '出片任务', value: jobCount, icon: <VideoCameraOutlined />, color: '#f59e0b' },
+    { title: '云端项目', value: 0, icon: <AppstoreOutlined />, color: '#10b981' },
   ]
 
   return (
@@ -40,7 +44,7 @@ export default function DashboardPage() {
         className="!bg-[#1e1e2e] !border-[#313244] mt-6"
       >
         <Row gutter={[16, 16]}>
-          <Col span={8}>
+          <Col xs={24} sm={8}>
             <Card
               hoverable
               className="!bg-[#2a2a3e] !border-[#313244] text-center"
@@ -50,16 +54,24 @@ export default function DashboardPage() {
               <Typography.Text className="!text-white block mt-2">新建项目</Typography.Text>
             </Card>
           </Col>
-          <Col span={8}>
-            <Card hoverable className="!bg-[#2a2a3e] !border-[#313244] text-center">
-              <TeamOutlined style={{ fontSize: 32, color: '#8b5cf6' }} />
-              <Typography.Text className="!text-white block mt-2">创建角色</Typography.Text>
+          <Col xs={24} sm={8}>
+            <Card
+              hoverable
+              className="!bg-[#2a2a3e] !border-[#313244] text-center"
+              onClick={() => navigate('/agent')}
+            >
+              <RobotOutlined style={{ fontSize: 32, color: '#8b5cf6' }} />
+              <Typography.Text className="!text-white block mt-2">创作智能 Agent</Typography.Text>
             </Card>
           </Col>
-          <Col span={8}>
-            <Card hoverable className="!bg-[#2a2a3e] !border-[#313244] text-center">
-              <FileTextOutlined style={{ fontSize: 32, color: '#10b981' }} />
-              <Typography.Text className="!text-white block mt-2">编写剧本</Typography.Text>
+          <Col xs={24} sm={8}>
+            <Card
+              hoverable
+              className="!bg-[#2a2a3e] !border-[#313244] text-center"
+              onClick={() => navigate('/templates')}
+            >
+              <AppstoreOutlined style={{ fontSize: 32, color: '#10b981' }} />
+              <Typography.Text className="!text-white block mt-2">漫剧模板 · 一键出片</Typography.Text>
             </Card>
           </Col>
         </Row>

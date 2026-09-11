@@ -18,7 +18,7 @@ export default function TopBar() {
   return (
     <header className="h-14 bg-[#1e1e2e] border-b border-[#313244] flex items-center justify-between px-6">
       <Typography.Title level={5} className="!text-white !mb-0">
-        Y·NEX Story Studio
+        Y·NEX Studio
       </Typography.Title>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <RealtimeStatus />

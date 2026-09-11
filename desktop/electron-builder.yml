@@ -6,9 +6,16 @@ productName: Y·NEX Story Studio
 copyright: Copyright © 2026 Y·NEX
 
 # Directories
+# ⚠️ 本机构建覆盖（非上游默认值）：
+#   output → C:/ynex-build  规避本机 release/ 目录的写入锁（表现为 NSIS
+#            "Can't open output file"，payload .7z 正常但最终 .exe 写不完）。
+#            CI/其他机器可改回 release。
+#   下述 electronDist   使用本地已解压的 electron 43.2.0，规避构建期联网
+#                       获取 electron 元数据超时。CI 请移除该行。
 directories:
-  output: release
+  output: C:/ynex-build
   buildResources: build
+electronDist: .electron-dist
 
 # Files to include in the app bundle
 # 'out' is electron-vite's build output
@@ -59,6 +66,7 @@ win:
   target:
     - nsis
   icon: resources/icons/icon.ico
+  signAndEditExecutable: false
   # Code signing (configure via env vars in CI)
   # certificateFile: ${env.CSC_LINK}
   # certificatePassword: ${env.CSC_KEY_PASSWORD}

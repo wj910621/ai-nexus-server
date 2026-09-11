@@ -5,6 +5,10 @@ import { registerWindowHandlers } from './window'
 import { registerShellHandlers } from './shell'
 import { registerUpdaterHandlers } from './updater'
 import { registerIntegrationHandlers } from './integration'
+import { registerAccountHandlers } from './account'
+import { registerAgentHandlers } from './agent'
+import { registerMemoryHandlers } from './memory'
+import { registerCloudHandlers } from './cloud'
 
 /**
  * Register all IPC handlers in the main process.
@@ -17,4 +21,8 @@ export function registerAllIpcHandlers(): void {
   registerShellHandlers()
   registerUpdaterHandlers()
   registerIntegrationHandlers()
+  registerAccountHandlers()
+  registerAgentHandlers()
+  registerMemoryHandlers()
+  registerCloudHandlers()
 }

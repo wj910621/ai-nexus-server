@@ -27,6 +27,29 @@ export const IPC_CHANNELS = {
   SHELL_OPEN_EXTERNAL: `${IPC_PREFIX}shell:openExternal`,
   SHELL_OPEN_PATH: `${IPC_PREFIX}shell:openPath`,
 
+  // Memory (R2 记忆系统)
+  MEMORY_APPEND: `${IPC_PREFIX}memory:append`,
+  MEMORY_SEARCH: `${IPC_PREFIX}memory:search`,
+  MEMORY_RECENT: `${IPC_PREFIX}memory:recent`,
+
+  // Agent (P3 创作智能层)
+  AGENT_CHAT: `${IPC_PREFIX}agent:chat`,
+  AGENT_COMIC_SCRIPT: `${IPC_PREFIX}agent:comicScript`,
+
+  // Account (P1 统一主站账号)
+  ACCOUNT_LOGIN: `${IPC_PREFIX}account:login`,
+  ACCOUNT_ME: `${IPC_PREFIX}account:me`,
+  ACCOUNT_LOGOUT: `${IPC_PREFIX}account:logout`,
+  ACCOUNT_STORY_TOKEN: `${IPC_PREFIX}account:storyToken`,
+
+  // Cloud (R3 模板市场 / 云资产同步 / 云渲染队列)
+  CLOUD_TEMPLATES: `${IPC_PREFIX}cloud:templates`,
+  CLOUD_ASSET_LIST: `${IPC_PREFIX}cloud:assetList`,
+  CLOUD_ASSET_SAVE: `${IPC_PREFIX}cloud:assetSave`,
+  CLOUD_ASSET_DELETE: `${IPC_PREFIX}cloud:assetDelete`,
+  CLOUD_JOB_ENQUEUE: `${IPC_PREFIX}cloud:jobEnqueue`,
+  CLOUD_JOB_LIST: `${IPC_PREFIX}cloud:jobList`,
+
   // Clipboard
   CLIPBOARD_READ_TEXT: `${IPC_PREFIX}clipboard:readText`,
   CLIPBOARD_WRITE_TEXT: `${IPC_PREFIX}clipboard:writeText`,

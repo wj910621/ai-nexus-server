@@ -1,5 +1,10 @@
-// Brand identity for Y·NEX Story Studio
+// Brand identity for Y·NEX Studio
 // Used by icon generator and UI theming
+//
+// ⚠️ 品牌收敛 B（代码/文案层）：此处 name 仅用于图标与 UI 主题资源生成；
+//    安装包/可执行文件元数据由 electron-builder.yml 的 productName 决定，
+//    为避免已发布客户端（appId com.comicstudio.ai）升级链断供，exe/productName
+//    改名随正式 B 发布轮一并切换，本阶段保持 productName 不变。
 
 export const BRAND = {
   // Primary brand colors (gradient-friendly)
@@ -16,8 +21,8 @@ export const BRAND = {
   glyphColor: '#ffffff',
 
   // App name (used in some installer resources)
-  name: 'Y·NEX Story Studio',
-  nameShort: 'Y·NEX Story',
+  name: 'Y·NEX Studio',
+  nameShort: 'Y·NEX',
 
   // Icon sizes (px) generated for various platforms
   sizes: {

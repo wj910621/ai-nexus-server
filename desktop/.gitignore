@@ -11,3 +11,6 @@ release/
 *.local
 .env
 .env.local
+
+# 本地离线构建用（electron 解压副本，勿提交）
+.electron-dist/

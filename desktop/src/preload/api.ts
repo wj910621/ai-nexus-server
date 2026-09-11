@@ -71,6 +71,34 @@ export const api: ElectronAPI = {
       }
     },
   },
+
+  // P1: 统一主站账号(login/me/logout), 由主进程 account IPC 实现
+  account: {
+    login: (username: string, password: string) => ipcRenderer.invoke(IPC_CHANNELS.ACCOUNT_LOGIN, { username, password }),
+    me: () => ipcRenderer.invoke(IPC_CHANNELS.ACCOUNT_ME),
+    logout: () => ipcRenderer.invoke(IPC_CHANNELS.ACCOUNT_LOGOUT),
+    storyToken: () => ipcRenderer.invoke(IPC_CHANNELS.ACCOUNT_STORY_TOKEN),
+  },
+  // R2: 记忆系统(跨会话记忆搜索)
+  memory: {
+    append: (sessionId, role, content) => ipcRenderer.invoke(IPC_CHANNELS.MEMORY_APPEND, { sessionId, role, content }),
+    search: (keyword, limit) => ipcRenderer.invoke(IPC_CHANNELS.MEMORY_SEARCH, { keyword, limit }),
+    recent: (limit) => ipcRenderer.invoke(IPC_CHANNELS.MEMORY_RECENT, { limit }),
+  },
+  // R3: 云服务(模板市场/云资产同步/云渲染队列)
+  cloud: {
+    templates: (genre?: string) => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_TEMPLATES, { genre }),
+    listAssets: (kind?: string) => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_ASSET_LIST, { kind }),
+    saveAsset: (asset) => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_ASSET_SAVE, asset),
+    deleteAsset: (id: number) => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_ASSET_DELETE, { id }),
+    enqueueJob: (job) => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_JOB_ENQUEUE, job),
+    listJobs: () => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_JOB_LIST),
+  },
+  // P3: 创作智能层 Agent（对话/漫剧脚本生成）
+  agent: {
+    chat: (messages, model) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_CHAT, { messages, model }),
+    createComicScript: (premise, genre) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_COMIC_SCRIPT, { premise, genre }),
+  },
   // Frontend integration APIs (added in Task 9).
   // Implementation defers to main-process IPC handlers to keep preload
   // free of main-only modules (e.g. BrowserWindow, dialog direct usage).

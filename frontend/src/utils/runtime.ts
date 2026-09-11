@@ -15,8 +15,43 @@ declare global {
       downloadModel?: (name: string) => Promise<void>
       onBackendUrlChange?: (cb: (url: string) => void) => () => void
       showNotification?: (n: unknown) => void
+      // P2 统一主站账号桥（desktop preload account IPC）
+      account?: {
+        login: (username: string, password: string) => Promise<unknown>
+        me: () => Promise<unknown>
+        logout: () => Promise<boolean>
+        storyToken?: () => Promise<{ ok?: boolean; token?: string; code?: string; message?: string }>
+      }
+      agent?: {
+        chat: (messages: unknown[], model: string) => Promise<unknown>
+        createComicScript: (premise?: string, genre?: string) => Promise<unknown>
+      }
+      // R2 记忆系统（跨会话检索）
+      memory?: {
+        append: (sessionId: string, role: string, content: string) => Promise<{ ok: boolean }>
+        search: (keyword: string, limit?: number) => Promise<{ records: MemoryRecord[]; total: number }>
+        recent: (limit?: number) => Promise<{ records: MemoryRecord[] }>
+      }
+      // R3 云服务（模板市场 / 云端资产同步 / 云渲染队列）
+      cloud?: {
+        templates: (genre?: string) => Promise<unknown>
+        listAssets: (kind?: string) => Promise<unknown>
+        saveAsset: (asset: unknown) => Promise<unknown>
+        deleteAsset: (id: number) => Promise<unknown>
+        enqueueJob: (job: unknown) => Promise<unknown>
+        listJobs: () => Promise<unknown>
+      }
     }
   }
+}
+
+/** R2 记忆记录（与 desktop MemoryService 输出一致） */
+export interface MemoryRecord {
+  ts?: number
+  username?: string
+  sessionId?: string
+  role?: string
+  content?: string
 }
 
 export interface RuntimeInfo {

@@ -1,6 +1,6 @@
 {
   "name": "comic-studio-desktop",
-  "version": "0.1.0",
+  "version": "0.3.4",
   "description": "ComicStudio AI - 漫剧生成软件桌面端",
   "main": "./out/main/index.js",
   "author": "ComicStudio AI",

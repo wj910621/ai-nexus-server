@@ -89,6 +89,32 @@ export interface ElectronAPI {
     onStateChange: (callback: (state: UpdaterState) => void) => () => void
   }
   // Frontend integration APIs (added in Task 9)
+  memory: {
+    append: (sessionId: string, role: string, content: string) => Promise<{ ok: boolean }>
+    search: (keyword: string, limit?: number) => Promise<{ records: unknown[]; total: number }>
+    recent: (limit?: number) => Promise<{ records: unknown[] }>
+  }
+  agent: {
+    chat: (messages: AgentMessage[], model: string) => Promise<AgentResult>
+    createComicScript: (premise?: string, genre?: string) => Promise<AgentResult>
+  }
+  account: {
+    login: (username: string, password: string) => Promise<AccountResult>
+    me: () => Promise<AccountResult>
+    logout: () => Promise<boolean>
+    storyToken: () => Promise<{ ok: boolean; token?: string; code?: string; message?: string }>
+  }
+  // R3 云服务（模板市场 / 云端资产同步 / 云渲染队列）
+  cloud: {
+    templates: (genre?: string) => Promise<CloudResult<CloudTemplate[]>>
+    listAssets: (kind?: string) => Promise<CloudResult<CloudAsset[]>>
+    saveAsset: (asset: CloudAssetInput) => Promise<CloudResult<{ id: number }>>
+    deleteAsset: (id: number) => Promise<CloudResult<boolean>>
+    enqueueJob: (job: { templateSlug: string; premise?: string; idempotency?: string }) => Promise<
+      CloudResult<{ jobId: number; duplicate: boolean }>
+    >
+    listJobs: () => Promise<CloudResult<CloudJob[]>>
+  }
   integration: {
     getBackendUrl: () => Promise<string>
     getRuntimeInfo: () => Promise<RuntimeInfo>
@@ -150,3 +176,75 @@ declare global {
 }
 
 export {}
+
+// ===== P1 统一主站账号 =====
+export interface AccountUser {
+  username: string
+  email?: string
+  credits: number
+  role?: string
+}
+
+export type AccountErrorCode = 'unauthorized' | 'network' | 'invalid' | 'storage'
+
+export type AccountResult<T = AccountUser | null> =
+  | { ok: true; data: T }
+  | { ok: false; code: AccountErrorCode; message: string }
+
+// ===== P3 创作智能层（Agent）=====
+export interface AgentMessage {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
+export type AgentResult =
+  | { ok: true; content: string; model: string }
+  | { ok: false; code: 'unauthorized' | 'network' | 'invalid' | 'quota'; message: string }
+
+// ===== R3 云服务（与 server/comic_cloud.js 契约一致）=====
+export interface CloudTemplate {
+  id: number
+  slug: string
+  title: string
+  genre: string
+  description: string
+  price_credits: number
+  shots: number
+  author?: string
+}
+
+export interface CloudAsset {
+  id: number
+  kind: string
+  title: string
+  genre: string
+  premise: string
+  content: string
+  created_at: number
+  updated_at: number
+}
+
+export interface CloudAssetInput {
+  kind?: string
+  title?: string
+  genre?: string
+  premise?: string
+  content: string
+}
+
+export interface CloudJob {
+  id: number
+  template_slug: string
+  template_title: string
+  genre: string
+  premise: string
+  status: 'queued' | 'rendering' | 'done' | 'failed'
+  asset_id?: number | null
+  error?: string | null
+  created_at: number
+  updated_at: number
+}
+
+export type CloudErrorCode = 'unauthorized' | 'network' | 'invalid'
+
+export type CloudResult<T> = { ok: true; data: T } | { ok: false; code: CloudErrorCode; message: string }
