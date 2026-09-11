@@ -5,6 +5,7 @@ from typing import Any, Optional
 
 from sqlalchemy import delete, select
 
+from app.core.metrics import result_cache_hits_total, result_cache_misses_total
 from app.models.base import utc_now
 from app.models.result_cache import ResultCacheEntry
 
@@ -45,10 +46,12 @@ class ResultCacheService:
             )
             entry = result.scalar_one_or_none()
             if entry is None:
+                result_cache_misses_total.labels(engine_type=engine_type).inc()
                 return None
 
             entry.hit_count += 1
             await db.commit()
+            result_cache_hits_total.labels(engine_type=engine_type).inc()
             return json.loads(entry.result_payload)
 
     async def set(

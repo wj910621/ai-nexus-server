@@ -21,6 +21,10 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
 
 from app.core.config import settings
+from app.core.metrics import (
+    websocket_connections_active,
+    websocket_messages_sent_total,
+)
 from app.core.security import decode_token, decode_ynex_story_token
 from app.core.ws_manager import ws_manager
 from app.models.background_task import BackgroundTask
@@ -162,6 +166,7 @@ async def handle_websocket(websocket: WebSocket) -> None:
     user_id = str(payload.get("sub") or "")
 
     await websocket.accept()
+    websocket_connections_active.inc()
     # Auto-subscribe user to their own channel
     subscribed = await ws_manager.subscribe(
         websocket,
@@ -171,6 +176,7 @@ async def handle_websocket(websocket: WebSocket) -> None:
         max_subscriptions=settings.ws_max_subscriptions_per_connection,
     )
     if not subscribed:
+        websocket_connections_active.dec()
         await websocket.close(code=4008, reason="WebSocket connection limit exceeded")
         return
 
@@ -245,10 +251,12 @@ async def handle_websocket(websocket: WebSocket) -> None:
                 })
     except WebSocketDisconnect:
         await ws_manager.unsubscribe(websocket)
+        websocket_connections_active.dec()
         logger.debug(f"WS disconnected user={user_id}")
     except Exception as exc:
         logger.warning(f"WS error: {exc}")
         await ws_manager.unsubscribe(websocket)
+        websocket_connections_active.dec()
 
 
 @router.websocket("/ws")

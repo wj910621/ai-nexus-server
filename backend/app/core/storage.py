@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from app.core.metrics import storage_operations_total
 from app.core.paths import get_uploads_dir
 
 
@@ -38,6 +39,7 @@ class FileStorage:
 
         file_path = target_dir / filename
         file_path.write_bytes(data)
+        storage_operations_total.labels(backend="local", operation="save", result="success").inc()
 
         # 返回相对路径作为 URL
         return f"/uploads/{subdir}/{date_dir}/{filename}".replace("//", "/")
@@ -57,6 +59,7 @@ class FileStorage:
         base = self.base_dir.resolve()
         if not full.is_relative_to(base):
             raise ValueError("Invalid path: escapes base_dir")
+        storage_operations_total.labels(backend="local", operation="get", result="success").inc()
         return full
 
     def exists(self, relative_path: str) -> bool:
@@ -68,6 +71,7 @@ class FileStorage:
         path = self.get_full_path(relative_path)
         if path.exists():
             path.unlink()
+            storage_operations_total.labels(backend="local", operation="delete", result="success").inc()
             return True
         return False
 

@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Union
 
+from app.core.metrics import storage_operations_total
 from app.core.paths import get_uploads_dir
 
 
@@ -48,9 +49,14 @@ class LocalStorage(StorageBackend):
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
     async def save(self, path: str, data: bytes) -> str:
-        full = self.base_dir / path
-        full.parent.mkdir(parents=True, exist_ok=True)
-        full.write_bytes(data)
+        try:
+            full = self.base_dir / path
+            full.parent.mkdir(parents=True, exist_ok=True)
+            full.write_bytes(data)
+            storage_operations_total.labels(backend="local", operation="save", result="success").inc()
+        except Exception:
+            storage_operations_total.labels(backend="local", operation="save", result="failure").inc()
+            raise
         # 返回相对 URL（与 FileStorage 风格一致）
         return f"/uploads/{path}".replace("//", "/")
 
@@ -64,11 +70,16 @@ class LocalStorage(StorageBackend):
             path = path[len("/uploads/"):]
         elif path.startswith("uploads/"):
             path = path[len("uploads/"):]
-        full = (self.base_dir / path).resolve()
-        base = self.base_dir.resolve()
-        if not full.is_relative_to(base):
-            raise ValueError("Invalid path: escapes base_dir")
-        return full
+        try:
+            full = (self.base_dir / path).resolve()
+            base = self.base_dir.resolve()
+            if not full.is_relative_to(base):
+                raise ValueError("Invalid path: escapes base_dir")
+            storage_operations_total.labels(backend="local", operation="get", result="success").inc()
+            return full
+        except Exception:
+            storage_operations_total.labels(backend="local", operation="get", result="failure").inc()
+            raise
 
     async def exists(self, path: str) -> bool:
         full = await self.get_full_path(path)
@@ -78,6 +89,7 @@ class LocalStorage(StorageBackend):
         full = await self.get_full_path(path)
         if full.exists():
             full.unlink()
+        storage_operations_total.labels(backend="local", operation="delete", result="success").inc()
 
 
 def get_storage() -> StorageBackend:

@@ -6,6 +6,7 @@
 依赖：oss2 (Aliyun OSS Python SDK)
 """
 
+from .metrics import storage_operations_total
 from .storage_async import StorageBackend
 
 try:
@@ -37,7 +38,12 @@ class OSSStorage(StorageBackend):
 
     async def save(self, path: str, data: bytes) -> str:
         """上传字节数据到 OSS，返回可公开访问的 URL。"""
-        self.bucket.put_object(path, data)
+        try:
+            self.bucket.put_object(path, data)
+            storage_operations_total.labels(backend="oss", operation="save", result="success").inc()
+        except Exception:
+            storage_operations_total.labels(backend="oss", operation="save", result="failure").inc()
+            raise
         return self._public_url(path)
 
     async def get_full_path(self, path: str) -> str:
@@ -47,6 +53,7 @@ class OSSStorage(StorageBackend):
             path = path[len("/uploads/"):]
         elif path.startswith("uploads/"):
             path = path[len("uploads/"):]
+        storage_operations_total.labels(backend="oss", operation="get", result="success").inc()
         return self._public_url(path)
 
     async def exists(self, path: str) -> bool:
@@ -63,7 +70,12 @@ class OSSStorage(StorageBackend):
             path = path[len("/uploads/"):]
         elif path.startswith("uploads/"):
             path = path[len("uploads/"):]
-        self.bucket.delete_object(path)
+        try:
+            self.bucket.delete_object(path)
+            storage_operations_total.labels(backend="oss", operation="delete", result="success").inc()
+        except Exception:
+            storage_operations_total.labels(backend="oss", operation="delete", result="failure").inc()
+            raise
 
     def _public_url(self, path: str) -> str:
         """构造公开访问 URL。"""

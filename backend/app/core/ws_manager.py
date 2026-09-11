@@ -16,6 +16,8 @@ from typing import Any, Optional
 
 from fastapi import WebSocket
 
+from app.core.metrics import websocket_messages_sent_total
+
 logger = logging.getLogger(__name__)
 
 
@@ -96,6 +98,7 @@ class WebSocketManager:
         for ws in subscribers:
             try:
                 await ws.send_json(message)
+                websocket_messages_sent_total.labels(type=message.get("type", "message")).inc()
             except Exception as exc:
                 logger.debug(f"WS publish failed on {channel}: {exc}")
                 dead.append(ws)
@@ -112,6 +115,7 @@ class WebSocketManager:
         for ws in conns:
             try:
                 await ws.send_json(message)
+                websocket_messages_sent_total.labels(type=message.get("type", "message")).inc()
             except Exception:
                 pass
 
@@ -123,6 +127,7 @@ class WebSocketManager:
         for ws in all_ws:
             try:
                 await ws.send_json(message)
+                websocket_messages_sent_total.labels(type=message.get("type", "message")).inc()
             except Exception:
                 pass
 

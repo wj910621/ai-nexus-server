@@ -12,6 +12,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.sse import calculate_refund, sse_done, sse_error, sse_format
 from app.core.deps import get_current_user, get_db
 from app.core.engine_concurrency import engine_concurrency
+from app.core.metrics import (
+    credits_consumed_total,
+    credits_refunded_total,
+    engine_concurrent_requests,
+    engine_requests_total,
+)
 from app.core.request_dedup import request_deduplicator
 from app.core.response import ApiResponse
 from app.engines.base import GenerationResult
@@ -198,7 +204,9 @@ async def check_and_deduct_credits(
         # operation endpoint as well would double-charge the user.
         if operation == "chat":
             return 0
-        return await ynex_billing_service.charge(user.external_subject, operation)
+        charge = await ynex_billing_service.charge(user.external_subject, operation)
+        credits_consumed_total.labels(operation=operation).inc()
+        return charge
 
     if getattr(user, "role", "user") == "admin":
         return user.credits or 0
@@ -215,6 +223,7 @@ async def check_and_deduct_credits(
 
     user.credits = (user.credits or 0) - cost
     await db.flush()
+    credits_consumed_total.labels(operation=operation).inc()
 
     from app.models.billing import CreditTransaction
     txn = CreditTransaction(
@@ -247,9 +256,11 @@ async def refund_credits(
         if charge is None:
             raise HTTPException(503, "Y·NEX billing receipt is missing")
         await ynex_billing_service.refund(charge, reason)
+        credits_refunded_total.labels(operation=reason.split("_")[0]).inc()
         return
     user.credits = (user.credits or 0) + amount
     await db.flush()
+    credits_refunded_total.labels(operation=reason.split("_")[0]).inc()
 
     from app.models.billing import CreditTransaction
     txn = CreditTransaction(
@@ -336,18 +347,24 @@ async def text2img(
 
     async def _do_generate():
         async with engine_concurrency.acquire("image"):
-            return await image_engine.text2img(
-                prompt=payload.prompt,
-                negative_prompt=payload.negative_prompt,
-                width=payload.width,
-                height=payload.height,
-                seed=payload.seed,
-                model=payload.model,
-            )
+            engine_concurrent_requests.labels(engine_type="image").inc()
+            try:
+                return await image_engine.text2img(
+                    prompt=payload.prompt,
+                    negative_prompt=payload.negative_prompt,
+                    width=payload.width,
+                    height=payload.height,
+                    seed=payload.seed,
+                    model=payload.model,
+                )
+            finally:
+                engine_concurrent_requests.labels(engine_type="image").dec()
 
     try:
         result = await request_deduplicator.deduplicate(_do_generate)
+        engine_requests_total.labels(engine_type="image", result="success").inc()
     except TimeoutError:
+        engine_requests_total.labels(engine_type="image", result="timeout").inc()
         await refund_credits(
             db, current_user, CREDIT_COSTS["text2img"], reason="text2img_concurrency_timeout",
             charge=charge if isinstance(charge, YnexCharge) else None,
@@ -357,6 +374,7 @@ async def text2img(
             detail="图像引擎忙碌，请稍后重试。",
         )
     except Exception:
+        engine_requests_total.labels(engine_type="image", result="failure").inc()
         await refund_credits(
             db, current_user, CREDIT_COSTS["text2img"], reason="text2img_failure",
             charge=charge if isinstance(charge, YnexCharge) else None,
@@ -400,16 +418,22 @@ async def tts(
 
     async def _do_synthesize():
         async with engine_concurrency.acquire("tts"):
-            return await tts_engine.synthesize(
-                text=payload.text,
-                voice=payload.voice,
-                rate=payload.rate,
-                pitch=payload.pitch,
-            )
+            engine_concurrent_requests.labels(engine_type="tts").inc()
+            try:
+                return await tts_engine.synthesize(
+                    text=payload.text,
+                    voice=payload.voice,
+                    rate=payload.rate,
+                    pitch=payload.pitch,
+                )
+            finally:
+                engine_concurrent_requests.labels(engine_type="tts").dec()
 
     try:
         result = await request_deduplicator.deduplicate(_do_synthesize)
+        engine_requests_total.labels(engine_type="tts", result="success").inc()
     except TimeoutError:
+        engine_requests_total.labels(engine_type="tts", result="timeout").inc()
         await refund_credits(
             db, current_user, CREDIT_COSTS["tts"], reason="tts_concurrency_timeout",
             charge=charge if isinstance(charge, YnexCharge) else None,
@@ -419,6 +443,7 @@ async def tts(
             detail="TTS 引擎忙碌，请稍后重试。",
         )
     except Exception:
+        engine_requests_total.labels(engine_type="tts", result="failure").inc()
         await refund_credits(
             db, current_user, CREDIT_COSTS["tts"], reason="tts_failure",
             charge=charge if isinstance(charge, YnexCharge) else None,
@@ -490,16 +515,22 @@ async def chat(
 
         async def _do_chat():
             async with engine_concurrency.acquire("llm"):
-                return await llm_engine.chat(
-                    messages=messages,
-                    model=payload.model,
-                    temperature=payload.temperature,
-                    max_tokens=payload.max_tokens,
-                )
+                engine_concurrent_requests.labels(engine_type="llm").inc()
+                try:
+                    return await llm_engine.chat(
+                        messages=messages,
+                        model=payload.model,
+                        temperature=payload.temperature,
+                        max_tokens=payload.max_tokens,
+                    )
+                finally:
+                    engine_concurrent_requests.labels(engine_type="llm").dec()
 
         try:
             result = await request_deduplicator.deduplicate(_do_chat)
+            engine_requests_total.labels(engine_type="llm", result="success").inc()
         except TimeoutError:
+            engine_requests_total.labels(engine_type="llm", result="timeout").inc()
             await refund_credits(
                 db, current_user, CREDIT_COSTS["chat"], reason="chat_concurrency_timeout",
                 charge=charge if isinstance(charge, YnexCharge) else None,
@@ -509,6 +540,7 @@ async def chat(
                 detail="LLM 引擎忙碌，请稍后重试。",
             )
         except Exception:
+            engine_requests_total.labels(engine_type="llm", result="failure").inc()
             await refund_credits(
                 db, current_user, CREDIT_COSTS["chat"], reason="chat_failure",
                 charge=charge if isinstance(charge, YnexCharge) else None,
@@ -593,16 +625,31 @@ async def video_compose(
     resolution = (
         tuple(payload.resolution) if payload.resolution else (1920, 1080)
     )
+    # 分辨率校验：宽高必须是正整数，且不超过 8K 上限（防御异常输入）
+    if len(resolution) != 2 or any(
+        (not isinstance(v, int)) or isinstance(v, bool) or v <= 0 or v > 7680
+        for v in resolution
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=f"resolution 必须为两个 1~7680 之间的正整数，收到: {list(resolution)}",
+        )
     try:
         async with engine_concurrency.acquire("video"):
-            result = await video_engine.compose(
-                frames=payload.frames,
-                audio=payload.audio,
-                output_path=payload.output_path,
-                fps=payload.fps,
-                resolution=resolution,
-            )
+            engine_concurrent_requests.labels(engine_type="video").inc()
+            try:
+                result = await video_engine.compose(
+                    frames=payload.frames,
+                    audio=payload.audio,
+                    output_path=payload.output_path,
+                    fps=payload.fps,
+                    resolution=resolution,
+                )
+            finally:
+                engine_concurrent_requests.labels(engine_type="video").dec()
+        engine_requests_total.labels(engine_type="video", result="success").inc()
     except TimeoutError:
+        engine_requests_total.labels(engine_type="video", result="timeout").inc()
         await refund_credits(
             db, current_user, CREDIT_COSTS["video_compose"], reason="video_compose_concurrency_timeout",
             charge=charge if isinstance(charge, YnexCharge) else None,
@@ -611,7 +658,10 @@ async def video_compose(
             status_code=503,
             detail="视频引擎忙碌，请稍后重试。",
         )
+    except HTTPException:
+        raise
     except Exception:
+        engine_requests_total.labels(engine_type="video", result="failure").inc()
         await refund_credits(
             db, current_user, CREDIT_COSTS["video_compose"], reason="video_compose_failure",
             charge=charge if isinstance(charge, YnexCharge) else None,
@@ -639,17 +689,23 @@ async def character_generate(
     reference_bytes = _decode_reference_image(payload.reference_image)
     try:
         async with engine_concurrency.acquire("character"):
-            result = await character_engine.generate_consistent(
-                prompt=payload.prompt,
-                reference_image=reference_bytes,
-                consistency_weight=payload.consistency_weight,
-                character_description=payload.character_description,
-                mood=payload.mood,
-                width=payload.width,
-                height=payload.height,
-                seed=payload.seed,
-            )
+            engine_concurrent_requests.labels(engine_type="character").inc()
+            try:
+                result = await character_engine.generate_consistent(
+                    prompt=payload.prompt,
+                    reference_image=reference_bytes,
+                    consistency_weight=payload.consistency_weight,
+                    character_description=payload.character_description,
+                    mood=payload.mood,
+                    width=payload.width,
+                    height=payload.height,
+                    seed=payload.seed,
+                )
+            finally:
+                engine_concurrent_requests.labels(engine_type="character").dec()
+        engine_requests_total.labels(engine_type="character", result="success").inc()
     except TimeoutError:
+        engine_requests_total.labels(engine_type="character", result="timeout").inc()
         await refund_credits(
             db, current_user, CREDIT_COSTS["character_generate"], reason="character_generate_concurrency_timeout",
             charge=charge if isinstance(charge, YnexCharge) else None,
@@ -659,6 +715,7 @@ async def character_generate(
             detail="角色生成引擎忙碌，请稍后重试。",
         )
     except Exception:
+        engine_requests_total.labels(engine_type="character", result="failure").inc()
         await refund_credits(
             db, current_user, CREDIT_COSTS["character_generate"], reason="character_generate_failure",
             charge=charge if isinstance(charge, YnexCharge) else None,

@@ -14,6 +14,7 @@ import httpx
 
 from app.core.config import settings
 from app.core.http_client import http_client_factory
+from app.core.metrics import llm_request_duration_seconds, llm_tokens_consumed_total
 from app.engines.base import GenerationResult, LLMProvider
 
 
@@ -188,6 +189,10 @@ class DeepSeekProvider(LLMProvider):
                             usage = chunk["usage"]
 
                 elapsed = time.time() - start_time
+                llm_request_duration_seconds.labels(provider=self.name, model=model).observe(elapsed)
+                llm_tokens_consumed_total.labels(provider=self.name, token_type="prompt").inc(usage.get("prompt_tokens", 0))
+                llm_tokens_consumed_total.labels(provider=self.name, token_type="completion").inc(usage.get("completion_tokens", 0))
+                llm_tokens_consumed_total.labels(provider=self.name, token_type="total").inc(usage.get("total_tokens", 0))
 
                 return GenerationResult(
                     success=True,
@@ -211,7 +216,6 @@ class DeepSeekProvider(LLMProvider):
                 data = resp.json()
 
                 elapsed = time.time() - start_time
-
                 choices = data.get("choices", [])
                 message = choices[0].get("message", {}) if choices else {}
                 content = message.get("content", "")
@@ -219,6 +223,10 @@ class DeepSeekProvider(LLMProvider):
                     choices[0].get("finish_reason") if choices else None
                 )
                 usage = data.get("usage", {})
+                llm_request_duration_seconds.labels(provider=self.name, model=model).observe(elapsed)
+                llm_tokens_consumed_total.labels(provider=self.name, token_type="prompt").inc(usage.get("prompt_tokens", 0))
+                llm_tokens_consumed_total.labels(provider=self.name, token_type="completion").inc(usage.get("completion_tokens", 0))
+                llm_tokens_consumed_total.labels(provider=self.name, token_type="total").inc(usage.get("total_tokens", 0))
 
                 result = GenerationResult(
                     success=True,

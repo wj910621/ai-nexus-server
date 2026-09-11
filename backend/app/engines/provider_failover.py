@@ -8,6 +8,8 @@ import logging
 import time
 from typing import Awaitable, Callable, Optional, TypeVar
 
+from app.core.metrics import provider_calls_total, provider_circuit_state
+
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
@@ -63,6 +65,7 @@ class ProviderFailover:
             # Check if reset timeout has elapsed
             if time.time() - self.last_failure_time >= self.reset_seconds:
                 self.state = CircuitState.HALF_OPEN
+                provider_circuit_state.labels(provider="unknown").set(1)  # half_open
                 logger.info("Circuit transitioning OPEN → HALF_OPEN")
                 return True
             return False
@@ -75,6 +78,7 @@ class ProviderFailover:
         self.failure_reason = ""  # P2: 清除失败原因
         if self.state in (CircuitState.OPEN, CircuitState.HALF_OPEN):
             self.state = CircuitState.CLOSED
+            provider_circuit_state.labels(provider="unknown").set(0)  # closed
             logger.info("Circuit closing (success recorded)")
 
     async def record_failure(self, reason: str = "") -> None:
@@ -101,9 +105,11 @@ class ProviderFailover:
 
         if self.state == CircuitState.HALF_OPEN:
             self.state = CircuitState.OPEN
+            provider_circuit_state.labels(provider="unknown").set(2)  # open
             logger.warning(f"Circuit re-opening (HALF_OPEN failure, reason={reason!r})")
         elif self.failure_count >= self.threshold:
             self.state = CircuitState.OPEN
+            provider_circuit_state.labels(provider="unknown").set(2)  # open
             logger.warning(
                 f"Circuit opening after {self.failure_count} consecutive failures "
                 f"(reason={reason!r}, cooldown={self.reset_seconds}s)"
@@ -120,17 +126,20 @@ class ProviderFailover:
         # If circuit is OPEN, skip primary entirely
         if not self.can_call() and secondary is not None:
             logger.info("Circuit OPEN — using secondary provider directly")
+            provider_calls_total.labels(provider="unknown", result="fallback").inc()
             return await secondary(*args, **kwargs)
 
         # Try primary
         try:
             result = await primary(*args, **kwargs)
             await self.record_success()
+            provider_calls_total.labels(provider="unknown", result="success").inc()
             return result
         except Exception as primary_exc:
             # P2: 根据异常类型识别 reason
             reason = _classify_exception(primary_exc)
             await self.record_failure(reason=reason)
+            provider_calls_total.labels(provider="unknown", result="failure").inc()
             logger.warning(f"Primary failed (reason={reason}): {primary_exc}")
             if secondary is None:
                 raise
