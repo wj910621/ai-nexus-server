@@ -40,6 +40,12 @@ declare global {
         deleteAsset: (id: number) => Promise<unknown>
         enqueueJob: (job: unknown) => Promise<unknown>
         listJobs: () => Promise<unknown>
+        tts?: (input: unknown) => Promise<unknown>
+      }
+      // R4b-1 本机 ComfyUI 渲染通道
+      render?: {
+        comfyProbe: () => Promise<unknown>
+        comfyRun: (input: unknown) => Promise<unknown>
       }
     }
   }

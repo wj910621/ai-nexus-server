@@ -93,6 +93,12 @@ export const api: ElectronAPI = {
     deleteAsset: (id: number) => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_ASSET_DELETE, { id }),
     enqueueJob: (job) => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_JOB_ENQUEUE, job),
     listJobs: () => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_JOB_LIST),
+    tts: (input) => ipcRenderer.invoke(IPC_CHANNELS.CLOUD_TTS, input),
+  },
+  // R4b-1: 本机 ComfyUI 渲染通道
+  render: {
+    comfyProbe: () => ipcRenderer.invoke(IPC_CHANNELS.RENDER_COMFY_PROBE),
+    comfyRun: (input) => ipcRenderer.invoke(IPC_CHANNELS.RENDER_COMFY_RUN, input),
   },
   // P3: 创作智能层 Agent（对话/漫剧脚本生成）
   agent: {

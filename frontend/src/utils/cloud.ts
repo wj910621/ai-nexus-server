@@ -120,6 +120,8 @@ export async function cloudEnqueueJob(job: {
   templateSlug: string
   premise?: string
   idempotency?: string
+  /** R4b-2 分镜：逐镜渲染；缺省则按 premise 单镜 */
+  shots?: { prompt: string }[]
 }): Promise<CloudResult<{ jobId: number; duplicate: boolean }>> {
   const api = desktopCloud()
   if (api) return (await api.enqueueJob(job)) as CloudResult<{ jobId: number; duplicate: boolean }>
@@ -137,6 +139,35 @@ export async function cloudListJobs(): Promise<CloudResult<CloudJob[]>> {
   try {
     const res = await apiClient.get<{ ok: boolean; items: CloudJob[] }>('/comic/jobs')
     return { ok: true, data: res.data?.items ?? [] }
+  } catch (err) {
+    return fail(err)
+  }
+}
+
+// ===== R4b-3 语音合成 =====
+export interface TtsAudio {
+  format: string
+  bytes: number
+  model: string
+  voice: string
+  chars: number
+  filePath?: string
+  dataUrl?: string
+}
+
+export async function cloudTts(input: {
+  text: string
+  voice?: string
+  speed?: number
+}): Promise<CloudResult<TtsAudio>> {
+  const api = desktopCloud()
+  if (api?.tts) return (await api.tts(input)) as CloudResult<TtsAudio>
+  try {
+    const res = await apiClient.post<{ ok: boolean } & TtsAudio & { audio_base64: string }>('/comic/tts', input)
+    const d = res.data
+    if (!d?.audio_base64) return { ok: false, code: 'invalid', message: '服务端未返回音频' }
+    const mime = d.format === 'mp3' ? 'mpeg' : d.format
+    return { ok: true, data: { ...d, dataUrl: `data:audio/${mime};base64,${d.audio_base64}` } }
   } catch (err) {
     return fail(err)
   }

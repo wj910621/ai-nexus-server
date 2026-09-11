@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CreditCardOutlined, DashboardOutlined, ProjectOutlined, SettingOutlined, TeamOutlined, RobotOutlined, AppstoreOutlined } from '@ant-design/icons'
+import { CreditCardOutlined, DashboardOutlined, ProjectOutlined, SettingOutlined, TeamOutlined, RobotOutlined, AppstoreOutlined, ApartmentOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
 
 const navItems = [
   { path: '/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
   { path: '/agent', icon: <RobotOutlined />, label: '创作智能' },
   { path: '/templates', icon: <AppstoreOutlined />, label: '漫剧模板' },
+  { path: '/workflow', icon: <ApartmentOutlined />, label: '节点工作流' },
   { path: '/projects', icon: <ProjectOutlined />, label: '项目' },
   { path: '/characters', icon: <TeamOutlined />, label: '角色库' },
   { path: '/billing', icon: <CreditCardOutlined />, label: '套餐与账单' },

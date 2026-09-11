@@ -49,6 +49,12 @@ export const IPC_CHANNELS = {
   CLOUD_ASSET_DELETE: `${IPC_PREFIX}cloud:assetDelete`,
   CLOUD_JOB_ENQUEUE: `${IPC_PREFIX}cloud:jobEnqueue`,
   CLOUD_JOB_LIST: `${IPC_PREFIX}cloud:jobList`,
+  // R4b-3 语音合成
+  CLOUD_TTS: `${IPC_PREFIX}cloud:tts`,
+
+  // Local render (R4b-1 本机 ComfyUI 渲染通道)
+  RENDER_COMFY_PROBE: `${IPC_PREFIX}render:comfyProbe`,
+  RENDER_COMFY_RUN: `${IPC_PREFIX}render:comfyRun`,
 
   // Clipboard
   CLIPBOARD_READ_TEXT: `${IPC_PREFIX}clipboard:readText`,

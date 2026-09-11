@@ -9,6 +9,7 @@ import { registerAccountHandlers } from './account'
 import { registerAgentHandlers } from './agent'
 import { registerMemoryHandlers } from './memory'
 import { registerCloudHandlers } from './cloud'
+import { registerRenderHandlers } from './render'
 
 /**
  * Register all IPC handlers in the main process.
@@ -25,4 +26,5 @@ export function registerAllIpcHandlers(): void {
   registerAgentHandlers()
   registerMemoryHandlers()
   registerCloudHandlers()
+  registerRenderHandlers()
 }

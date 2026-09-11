@@ -16,6 +16,7 @@ const BillingPage = lazy(() => import('@/pages/BillingPage'))
 const TermsPage = lazy(() => import('@/pages/TermsPage'))
 const AgentPage = lazy(() => import('@/pages/AgentPage'))
 const TemplatesPage = lazy(() => import('@/pages/TemplatesPage'))
+const WorkflowPage = lazy(() => import('@/pages/WorkflowPage'))
 
 const Loading = () => (
   <div className="flex items-center justify-center h-screen">
@@ -42,6 +43,7 @@ export default function AppRoutes() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/agent" element={<AgentPage />} />
           <Route path="/templates" element={<TemplatesPage />} />
+          <Route path="/workflow" element={<WorkflowPage />} />
           <Route path="/projects" element={<ProjectListPage />} />
           <Route path="/projects/:projectId" element={<ProjectEditorPage />} />
           <Route path="/characters/:id/train" element={<TrainingPage />} />

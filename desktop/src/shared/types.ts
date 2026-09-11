@@ -110,10 +110,16 @@ export interface ElectronAPI {
     listAssets: (kind?: string) => Promise<CloudResult<CloudAsset[]>>
     saveAsset: (asset: CloudAssetInput) => Promise<CloudResult<{ id: number }>>
     deleteAsset: (id: number) => Promise<CloudResult<boolean>>
-    enqueueJob: (job: { templateSlug: string; premise?: string; idempotency?: string }) => Promise<
-      CloudResult<{ jobId: number; duplicate: boolean }>
+    enqueueJob: (job: { templateSlug: string; premise?: string; idempotency?: string; shots?: { prompt: string }[] }) => Promise<
+      CloudResult<{ jobId: number; duplicate: boolean; shots?: number }>
     >
     listJobs: () => Promise<CloudResult<CloudJob[]>>
+    tts: (input: { text: string; voice?: string; speed?: number }) => Promise<CloudResult<TtsAudio>>
+  }
+  // R4b-1 本机 ComfyUI 渲染通道
+  render: {
+    comfyProbe: () => Promise<ComfyProbeResult>
+    comfyRun: (input: ComfyRenderInput) => Promise<ComfyRenderResult>
   }
   integration: {
     getBackendUrl: () => Promise<string>
@@ -248,3 +254,60 @@ export interface CloudJob {
 export type CloudErrorCode = 'unauthorized' | 'network' | 'invalid'
 
 export type CloudResult<T> = { ok: true; data: T } | { ok: false; code: CloudErrorCode; message: string }
+
+// ===== R4b-1 本机 ComfyUI 渲染通道 =====
+export interface ComfyDevice {
+  name: string
+  vramTotalMB: number
+  vramFreeMB: number
+}
+
+export interface ComfyProbeResult {
+  available: boolean
+  base: string
+  version?: string
+  devices: ComfyDevice[]
+  checkpoints: string[]
+  message?: string
+}
+
+export interface ComfyRenderInput {
+  prompt: string
+  negative?: string
+  width?: number
+  height?: number
+  steps?: number
+  cfg?: number
+  seed?: number
+  ckpt?: string
+  timeoutMs?: number
+}
+
+export interface ComfyImage {
+  filename: string
+  subfolder: string
+  type: string
+  filePath?: string
+  dataUrl?: string
+}
+
+export type ComfyErrorCode = 'offline' | 'no-model' | 'timeout' | 'invalid' | 'network'
+
+export type ComfyRenderResult =
+  | { ok: true; promptId: string; elapsedMs: number; images: ComfyImage[] }
+  | { ok: false; code: ComfyErrorCode; message: string }
+
+// ===== R4b-3 语音合成（TTS）=====
+export interface TtsAudio {
+  format: string
+  bytes: number
+  /** mp3 原始 base64（服务端返回） */
+  audioBase64: string
+  model: string
+  voice: string
+  chars: number
+  /** 主进程落盘路径（userData/audio/） */
+  filePath?: string
+  /** 可直接播放的 data URL */
+  dataUrl?: string
+}

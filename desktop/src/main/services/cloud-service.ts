@@ -168,22 +168,38 @@ export class CloudService {
     return { ok: true, data: !!r.data.ok }
   }
 
-  /** POST /api/comic/jobs（幂等：同 idempotency 返回 duplicate） */
-  async enqueueJob(input: { templateSlug: string; premise?: string; idempotency?: string }): Promise<
-    CloudResult<{ jobId: number; duplicate: boolean }>
-  > {
+  /** POST /api/comic/jobs（幂等：同 idempotency 返回 duplicate；R4b-2 支持分镜数组） */
+  async enqueueJob(input: {
+    templateSlug: string
+    premise?: string
+    idempotency?: string
+    shots?: { prompt: string }[]
+  }): Promise<CloudResult<{ jobId: number; duplicate: boolean; shots: number }>> {
     const slug = String(input.templateSlug || '').trim()
     if (!slug) return { ok: false, code: 'invalid', message: '缺少模板标识' }
+    const shots = Array.isArray(input.shots)
+      ? input.shots
+          .map((s) => ({ prompt: String(s?.prompt || '').trim().slice(0, 1200) }))
+          .filter((s) => s.prompt.length > 0)
+      : []
     const r = await this.raw('/api/comic/jobs', {
       method: 'POST',
       body: {
         templateSlug: slug,
         premise: String(input.premise || '').slice(0, 4000),
+        ...(shots.length ? { shots } : {}),
         ...(input.idempotency ? { idempotency: String(input.idempotency).slice(0, 120) } : {}),
       },
     })
     if (!r.ok) return r
-    return { ok: true, data: { jobId: Number(r.data.jobId) || 0, duplicate: !!r.data.duplicate } }
+    return {
+      ok: true,
+      data: {
+        jobId: Number(r.data.jobId) || 0,
+        duplicate: !!r.data.duplicate,
+        shots: Number(r.data.shots) || shots.length || 1,
+      },
+    }
   }
 
   /** GET /api/comic/jobs */
@@ -193,6 +209,43 @@ export class CloudService {
     const items = Array.isArray(r.data.items) ? (r.data.items as CloudJob[]) : []
     return { ok: true, data: items }
   }
+
+  /** R4b-3 POST /api/comic/tts —— 语音合成（返回 mp3 base64） */
+  async tts(input: { text: string; voice?: string; speed?: number }): Promise<CloudResult<TtsResult>> {
+    const text = String(input.text || '').trim()
+    if (!text) return { ok: false, code: 'invalid', message: '配音文本为空' }
+    const r = await this.raw('/api/comic/tts', {
+      method: 'POST',
+      body: {
+        text,
+        ...(input.voice ? { voice: String(input.voice) } : {}),
+        ...(Number.isFinite(input.speed) ? { speed: Number(input.speed) } : {}),
+      },
+    })
+    if (!r.ok) return r
+    const b64 = String(r.data.audio_base64 || '')
+    if (!b64) return { ok: false, code: 'invalid', message: '服务端未返回音频数据' }
+    return {
+      ok: true,
+      data: {
+        format: String(r.data.format || 'mp3'),
+        bytes: Number(r.data.bytes) || 0,
+        audioBase64: b64,
+        model: String(r.data.model || ''),
+        voice: String(r.data.voice || ''),
+        chars: Number(r.data.chars) || text.length,
+      },
+    }
+  }
+}
+
+export interface TtsResult {
+  format: string
+  bytes: number
+  audioBase64: string
+  model: string
+  voice: string
+  chars: number
 }
 
 /** electron 环境工厂：复用 electron-store 'account'（与 AccountService 同源 token） */

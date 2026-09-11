@@ -15,8 +15,9 @@ import { isDesktop } from '@/utils/mainAccount'
 import { useAgentStore } from '@/stores/agentStore'
 import type { AgentMessage } from '@/api/agent'
 import { useAssetStore, parseTitleFromScript } from '@/stores/assetStore'
-import { SaveOutlined, CopyOutlined, SearchOutlined, SyncOutlined, CloudOutlined } from '@ant-design/icons'
+import { SaveOutlined, CopyOutlined, SearchOutlined, SyncOutlined, CloudOutlined, AudioOutlined, DownloadOutlined } from '@ant-design/icons'
 import type { MemoryRecord } from '@/utils/runtime'
+import { cloudTts, type TtsAudio } from '@/utils/cloud'
 
 const MODELS = [
   { value: 'deepseek-chat', label: 'DeepSeek V3' },
@@ -50,6 +51,9 @@ export default function AgentPage() {
   const [memKeyword, setMemKeyword] = useState('')
   const [memResults, setMemResults] = useState<MemoryRecord[]>([])
   const [memBusy, setMemBusy] = useState(false)
+  // R4b-3 语音
+  const [ttsBusy, setTtsBusy] = useState(false)
+  const [ttsAudio, setTtsAudio] = useState<TtsAudio | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const { assets, addAsset } = useAssetStore()
   const syncStatus = useAssetStore((s) => s.syncStatus)
@@ -194,6 +198,42 @@ export default function AgentPage() {
     }
   }
 
+  /** R4b-3: 从脚本分镜提取对白（无对白则回退梗概/标题） */
+  const dialogueText = (): string => {
+    if (script) {
+      try {
+        const obj = JSON.parse(script) as { shots?: { dialogue?: string }[]; title?: string }
+        const lines = (obj.shots ?? []).map((s) => String(s?.dialogue || '').trim()).filter(Boolean)
+        if (lines.length) return lines.join('\n')
+        if (obj.title) return String(obj.title)
+      } catch {
+        /* 非 JSON：退回梗概 */
+      }
+    }
+    return premise.trim()
+  }
+
+  /** R4b-3: 生成配音（云端 TTS，复用平台既有语音引擎） */
+  const genVoice = async () => {
+    const text = dialogueText()
+    if (!text) {
+      void message.info('请先输入梗概或生成脚本（用于提取对白）')
+      return
+    }
+    setTtsBusy(true)
+    setTtsAudio(null)
+    try {
+      const r = await cloudTts({ text })
+      if (!r.ok) throw new Error(r.message)
+      setTtsAudio(r.data)
+      void message.success(`配音已生成（${(r.data.bytes / 1024).toFixed(0)} KB · ${r.data.chars} 字）`)
+    } catch (err) {
+      void message.error(`配音失败：${(err as Error).message}`)
+    } finally {
+      setTtsBusy(false)
+    }
+  }
+
   const pending = assets.filter((a) => !a.cloudId).length
 
   return (
@@ -298,6 +338,33 @@ export default function AgentPage() {
               {script}
             </pre>
           )}
+
+          {/* R4b-3: 语音配音（云端 TTS，复用平台既有语音引擎） */}
+          <div className="border-t border-[#313244] pt-2">
+            <div className="flex items-center gap-2">
+              <AudioOutlined style={{ color: '#6b7280', fontSize: 12 }} />
+              <span className="text-[11px] text-gray-500 flex-1">
+                语音配音（从脚本对白提取{script ? `，共 ${dialogueText().length} 字` : '，需先有梗概或脚本'}）
+              </span>
+              <Button size="small" icon={<AudioOutlined />} loading={ttsBusy} onClick={() => void genVoice()}>
+                生成配音
+              </Button>
+              {ttsAudio?.filePath && (
+                <Button
+                  size="small"
+                  type="text"
+                  icon={<DownloadOutlined />}
+                  className="!text-gray-400"
+                  onClick={() => void message.info(`已保存到：${ttsAudio.filePath}`)}
+                >
+                  已存盘
+                </Button>
+              )}
+            </div>
+            {ttsAudio?.dataUrl && (
+              <audio controls src={ttsAudio.dataUrl} className="w-full mt-1 h-8" style={{ filter: 'invert(0.9) hue-rotate(180deg)' }} />
+            )}
+          </div>
 
           {/* R2: 记忆检索 */}
           <div className="border-t border-[#313244] pt-2">

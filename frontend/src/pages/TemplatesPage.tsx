@@ -5,15 +5,29 @@
  *  - 任务卡：状态/复制脚本/删除
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Empty, Input, Select, Space, Spin, Tag, Tooltip, Typography, message } from 'antd'
+import { Button, Empty, Input, Segmented, Select, Space, Spin, Tag, Tooltip, Typography, message } from 'antd'
 import {
   PlayCircleOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined,
   CopyOutlined, DeleteOutlined, SyncOutlined, CloudOutlined, CloudDownloadOutlined, PictureOutlined,
+  DesktopOutlined, ThunderboltOutlined,
 } from '@ant-design/icons'
 import { isDesktop } from '@/utils/mainAccount'
 import { useJobStore, type RenderJob } from '@/stores/jobStore'
 import { useAssetStore, parseTitleFromScript } from '@/stores/assetStore'
 import { cloudTemplates, cloudEnqueueJob, cloudListAssets, type CloudTemplate, type CloudAsset } from '@/utils/cloud'
+import { hasLocalRender, probeComfy, runComfy, promptFromScript, shotsFromScript, type ComfyProbeResult, type ComfyImage } from '@/utils/localRender'
+
+type RenderChannel = 'cloud' | 'local'
+
+interface LocalRender {
+  id: string
+  title: string
+  prompt: string
+  dataUrl?: string
+  filePath?: string
+  elapsedMs: number
+  createdAt: number
+}
 
 interface SeedTemplate {
   slug: string
@@ -58,8 +72,31 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(false)
   const [renders, setRenders] = useState<CloudAsset[]>([])
   const [renderLoading, setRenderLoading] = useState(false)
+  // R4b-1 双通道渲染
+  const [channel, setChannel] = useState<RenderChannel>(() =>
+    (localStorage.getItem('yn.render.channel') as RenderChannel) === 'local' && hasLocalRender() ? 'local' : 'cloud',
+  )
+  const [comfy, setComfy] = useState<ComfyProbeResult | null>(null)
+  const [comfyBusy, setComfyBusy] = useState(false)
+  const [localRenders, setLocalRenders] = useState<LocalRender[]>([])
   const { jobs, createJob, updateJob, removeJob, syncFromCloud } = useJobStore()
   const addAsset = useAssetStore((s) => s.addAsset)
+
+  /** R4b-1: 探活本机 ComfyUI */
+  const checkComfy = useCallback(async () => {
+    if (!hasLocalRender()) return
+    setComfyBusy(true)
+    try {
+      setComfy(await probeComfy())
+    } finally {
+      setComfyBusy(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('yn.render.channel', channel)
+    if (channel === 'local') void checkComfy()
+  }, [channel, checkComfy])
 
   const loadTemplates = useCallback(async () => {
     setLoading(true)
@@ -156,14 +193,42 @@ export default function TemplatesPage() {
       const assetId = addAsset({ kind: 'comic-script', title, genre: tpl.genre, premise: text || '模板默认', content })
       updateJob(jobId, { status: 'scripted', assetId })
 
+      if (channel === 'local') {
+        // R4b-1: 本机 ComfyUI 出图（零云端算力）
+        const wfPrompt = promptFromScript(content)
+        const out = await runComfy({ prompt: `${wfPrompt}, ${tpl.genre}题材漫剧分镜`, width: 768, height: 432 })
+        if (out.ok) {
+          const shots: LocalRender[] = out.images.map((img: ComfyImage, i: number) => ({
+            id: `${jobId}_${i}`,
+            title: `${tpl.title} · 第 ${i + 1} 镜`,
+            prompt: wfPrompt,
+            dataUrl: img.dataUrl,
+            filePath: img.filePath,
+            elapsedMs: out.elapsedMs,
+            createdAt: Date.now(),
+          }))
+          setLocalRenders((prev) => [...shots, ...prev].slice(0, 60))
+          updateJob(jobId, { status: 'done' })
+          void message.success(`「${tpl.title}」本机出图完成：${out.images.length} 张（${(out.elapsedMs / 1000).toFixed(1)}s）`)
+        } else {
+          updateJob(jobId, { status: 'failed', error: `本机渲染失败：${out.message}` })
+          void message.error(`本机渲染失败：${out.message}`)
+          await checkComfy()
+        }
+        return
+      }
+
       // R3: 入云渲染队列（幂等键 = 本地任务 id，重试不会重复入队）
-      const enq = await cloudEnqueueJob({ templateSlug: tpl.slug, premise: text || '', idempotency: jobId })
+      // R4b-2: 携带分镜列表，由服务端逐镜渲染
+      const shots = shotsFromScript(content)
+      const enq = await cloudEnqueueJob({ templateSlug: tpl.slug, premise: text || '', idempotency: jobId, shots })
       if (enq.ok) {
         updateJob(jobId, { status: 'queued', cloudJobId: enq.data.jobId })
+        const shotNote = shots.length > 1 ? `（${shots.length} 镜）` : ''
         void message.success(
           enq.data.duplicate
             ? `「${tpl.title}」已在云端队列中（任务 #${enq.data.jobId}）`
-            : `「${tpl.title}」分镜脚本已生成并入资产库，已提交云端渲染队列（任务 #${enq.data.jobId}）`,
+            : `「${tpl.title}」分镜脚本已生成并入资产库，已提交云端渲染队列${shotNote}（任务 #${enq.data.jobId}）`,
         )
       } else {
         updateJob(jobId, { status: 'scripted', error: `云端入队失败：${enq.message}` })
@@ -212,6 +277,19 @@ export default function TemplatesPage() {
           </div>
         </div>
         <Space size={8}>
+          {hasLocalRender() && (
+            <Tooltip title="云端 = 服务端按张计费；本机 = 用你电脑的 GPU 出图，零算力成本">
+              <Segmented
+                size="small"
+                value={channel}
+                onChange={(v) => setChannel(v as RenderChannel)}
+                options={[
+                  { label: '云端渲染', value: 'cloud', icon: <CloudOutlined /> },
+                  { label: '本机 ComfyUI', value: 'local', icon: <DesktopOutlined /> },
+                ]}
+              />
+            </Tooltip>
+          )}
           <Button size="small" icon={<SyncOutlined spin={loading} />} onClick={() => void loadTemplates()} disabled={loading}>
             刷新
           </Button>
@@ -228,6 +306,29 @@ export default function TemplatesPage() {
           prefix={<PlayCircleOutlined style={{ color: '#6b7280' }} />}
         />
       </div>
+
+      {channel === 'local' && (
+        <div className="mb-3 rounded-lg bg-[#1e1e2e] border border-[#313244] px-3 py-2 flex items-center gap-3 text-[11px]">
+          <ThunderboltOutlined style={{ color: comfy?.available ? '#52c41a' : '#faad14' }} />
+          {comfyBusy ? (
+            <span className="text-gray-400">正在探测本机 ComfyUI…</span>
+          ) : comfy?.available ? (
+            <>
+              <Tag color="success" style={{ fontSize: 10, marginRight: 0 }}>已连通</Tag>
+              <span className="text-gray-400">
+                {comfy.version ? `ComfyUI ${comfy.version}` : 'ComfyUI'}
+                {comfy.devices[0] ? ` · ${comfy.devices[0].name} · 显存 ${comfy.devices[0].vramFreeMB}/${comfy.devices[0].vramTotalMB} MB` : ''}
+              </span>
+              <span className="text-gray-500">模型 {comfy.checkpoints.length} 个：{comfy.checkpoints.slice(0, 2).join('、') || '无'}</span>
+            </>
+          ) : (
+            <span className="text-amber-400">{comfy?.message || '未检测到本机 ComfyUI'}（请启动 ComfyUI，默认 127.0.0.1:8188）</span>
+          )}
+          <Button size="small" type="text" className="!text-gray-400 ml-auto" loading={comfyBusy} onClick={() => void checkComfy()}>
+            重新探测
+          </Button>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 xl:grid-cols-3 gap-3">
         {list.map((t) => (
@@ -294,6 +395,39 @@ export default function TemplatesPage() {
         </div>
       </div>
 
+      {/* R4b-1: 本机出图（ComfyUI 本地 GPU 通道） */}
+      {localRenders.length > 0 && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-2">
+            <Typography.Text className="!text-gray-300 !text-sm flex items-center gap-2">
+              <DesktopOutlined style={{ color: '#52c41a' }} /> 本机出图
+              <span className="text-[11px] text-gray-500">（{localRenders.length} 张 · 你电脑的 GPU 渲染）</span>
+            </Typography.Text>
+            <Button size="small" type="text" className="!text-gray-500" onClick={() => setLocalRenders([])}>
+              清空
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+            {localRenders.map((r) => (
+              <div key={r.id} className="rounded-lg bg-[#1e1e2e] border border-[#313244] p-2">
+                {r.dataUrl ? (
+                  <img src={r.dataUrl} alt={r.title} className="w-full aspect-video object-cover rounded border border-[#313244]" />
+                ) : (
+                  <div className="w-full aspect-video rounded bg-[#11111b] border border-[#313244] flex items-center justify-center text-[10px] text-gray-600">
+                    无预览
+                  </div>
+                )}
+                <div className="mt-1 text-[11px] text-gray-300 truncate">{r.title}</div>
+                <div className="text-[10px] text-gray-500 flex items-center justify-between">
+                  <span>{(r.elapsedMs / 1000).toFixed(1)}s</span>
+                  <span>{new Date(r.createdAt).toLocaleTimeString('zh-CN')}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* R3: 云端成片（服务端渲染 worker 产出，kind=comic-render） */}
       <div className="mt-6 pb-6">
         <div className="flex items-center justify-between mb-2">
@@ -313,10 +447,19 @@ export default function TemplatesPage() {
               const imgs = renderImages(a)
               return (
                 <div key={a.id} className="rounded-lg bg-[#1e1e2e] border border-[#313244] p-2">
-                  {imgs[0] ? (
-                    <a href={imgs[0]} target="_blank" rel="noreferrer">
-                      <img src={imgs[0]} alt={a.title} className="w-full aspect-video object-cover rounded border border-[#313244]" />
-                    </a>
+                  {imgs.length > 0 ? (
+                    <div className={`grid gap-1 ${imgs.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                      {imgs.slice(0, 4).map((url, i) => (
+                        <a key={i} href={url} target="_blank" rel="noreferrer" className="relative">
+                          <img src={url} alt={`${a.title} 第${i + 1}镜`} className="w-full aspect-video object-cover rounded border border-[#313244]" />
+                          {imgs.length > 1 && (
+                            <span className="absolute left-1 top-1 text-[9px] px-1 rounded bg-black/60 text-white">
+                              {i + 1}
+                            </span>
+                          )}
+                        </a>
+                      ))}
+                    </div>
                   ) : (
                     <div className="w-full aspect-video rounded bg-[#11111b] border border-[#313244] flex items-center justify-center text-[10px] text-gray-600">
                       无预览
@@ -324,7 +467,7 @@ export default function TemplatesPage() {
                   )}
                   <div className="mt-1 text-[11px] text-gray-300 truncate">{a.title}</div>
                   <div className="text-[10px] text-gray-500">
-                    {a.genre || '—'} · {new Date(a.created_at).toLocaleString('zh-CN')}
+                    {a.genre || '—'} · {imgs.length} 图{imgs.length > 4 ? '（示前 4）' : ''} · {new Date(a.created_at).toLocaleString('zh-CN')}
                   </div>
                 </div>
               )
