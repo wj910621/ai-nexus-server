@@ -87,33 +87,6 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-  desktop-test:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: |
-            frontend/package-lock.json
-            desktop/package-lock.json
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
-      - name: Install desktop dependencies
-        working-directory: desktop
-        run: npm ci
-      - name: Type check
-        working-directory: desktop
-        run: npm run typecheck
-      - name: Test
-        working-directory: desktop
-        run: npm test
-      - name: Build
-        working-directory: desktop
-        run: npm run build
-
   helm-lint:
     runs-on: ubuntu-latest
     steps:
@@ -177,21 +150,13 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: |
-            frontend/package-lock.json
-            desktop/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm ci
-      - name: Install desktop dependencies
-        working-directory: desktop
         run: npm ci
       - name: npm audit (frontend)
         working-directory: frontend
         run: npm run audit:production
-      - name: npm audit (desktop)
-        working-directory: desktop
-        run: npm audit --audit-level=high
       - name: gitleaks (secret scanning)
         uses: gitleaks/gitleaks-action@v2
         env:

@@ -148,10 +148,6 @@ comic-studio-ai/
 │   ├── public/                        # 静态资源
 │   ├── package.json                   # Node依赖
 │   └── vite.config.ts                 # Vite配置
-├── desktop/                           # Electron桌面端
-│   ├── main/                          # 主进程
-│   ├── preload/                       # 预加载脚本
-│   └── electron-builder.json          # 打包配置
 ├── ai-models/                         # AI模型仓库
 │   ├── checkpoints/                   # 基础模型
 │   ├── lora/                          # LoRA模型
